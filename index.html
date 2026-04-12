@@ -100,6 +100,14 @@
     lineCounter = 0;
   };
 
+
+  window.showTab = function(tab) {
+    document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('tab-login').className = tab === 'login' ? 'auth-tab active' : 'auth-tab';
+    document.getElementById('tab-register').className = tab === 'register' ? 'auth-tab active' : 'auth-tab';
+    document.getElementById('auth-error').textContent = '';
+  };
   window.toggleAuthMode = () => {
     const isLogin = document.getElementById('auth-login').style.display !== 'none';
     document.getElementById('auth-login').style.display = isLogin ? 'none' : 'block';
@@ -410,6 +418,9 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   .auth-btn.primary { background: var(--accent); color: white; }
   .auth-btn.primary:hover { background: #7a5c10; }
   .auth-error { font-size: 0.78rem; color: var(--red); margin-top: 10px; font-style: italic; min-height: 18px; }
+  .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--line); }
+  .auth-tab { flex: 1; padding: 10px; font-family: 'Courier Prime', monospace; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; border: none; background: transparent; color: var(--ink-faint); cursor: pointer; transition: all 0.15s; }
+  .auth-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); margin-bottom: -2px; }
   .auth-toggle { font-size: 0.78rem; color: var(--accent); cursor: pointer; text-align: center; margin-top: 16px; text-decoration: underline; background: none; border: none; width: 100%; padding: 8px; font-family: 'Courier Prime', monospace; }
   .auth-header { text-align: center; margin-bottom: 28px; }
   .auth-header h1 { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; }
@@ -533,17 +544,18 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
     <p>A script in progress — always to be continued</p>
   </div>
   <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="showTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="showTab('register')">Create Account</button>
+    </div>
     <div id="auth-login">
-      <div class="auth-title">Sign In</div>
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
       <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" /></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" /></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" /></div>
       <button class="auth-btn primary" onclick="doLogin()">Sign In</button>
       <div class="auth-error" id="auth-error"></div>
-      <button class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? Create one</button>
     </div>
     <div id="auth-register" style="display:none;">
-      <div class="auth-title">Create Account</div>
       <div class="auth-sub">Set up your private script space.</div>
       <div class="auth-field"><label>Your First Name</label><input type="text" id="auth-name" placeholder="e.g. Jordan" /></div>
       <div class="auth-field"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com" /></div>
@@ -554,7 +566,6 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
       </div>
       <button class="auth-btn primary" onclick="doRegister()">Create Account</button>
       <div class="auth-error" id="reg-error"></div>
-      <button class="auth-toggle" onclick="toggleAuthMode()">Already have an account? Sign in</button>
     </div>
   </div>
 </div>
