@@ -545,8 +545,8 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   </div>
   <div class="auth-card">
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="showTab('login')">Sign In</button>
-      <button class="auth-tab" id="tab-register" onclick="showTab('register')">Create Account</button>
+      <button class="auth-tab active" id="tab-login">Sign In</button>
+      <button class="auth-tab" id="tab-register">Create Account</button>
     </div>
     <div id="auth-login">
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
@@ -683,6 +683,30 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
     document.getElementById('toggleA').className = who === 'A' ? 'active-a' : '';
     document.getElementById('toggleB').className = who === 'B' ? 'active-b' : '';
   }
+</script>
+
+<script>
+// Standalone button handler — runs outside module context for iPad compatibility
+document.addEventListener('DOMContentLoaded', function() {
+
+  function showTab(tab) {
+    document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('tab-login').className = tab === 'login' ? 'auth-tab active' : 'auth-tab';
+    document.getElementById('tab-register').className = tab === 'register' ? 'auth-tab active' : 'auth-tab';
+    var ae = document.getElementById('auth-error');
+    var re = document.getElementById('reg-error');
+    if(ae) ae.textContent = '';
+    if(re) re.textContent = '';
+  }
+
+  // Tab buttons
+  var tabLogin = document.getElementById('tab-login');
+  var tabReg = document.getElementById('tab-register');
+  if(tabLogin) tabLogin.addEventListener('click', function(e){ e.preventDefault(); showTab('login'); });
+  if(tabReg) tabReg.addEventListener('click', function(e){ e.preventDefault(); showTab('register'); });
+
+});
 </script>
 
 </body>
