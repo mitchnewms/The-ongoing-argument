@@ -1,15 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <head>
-    <meta charset="UTF-8">
-    <title>The Ongoing Argument</title>
-    
-
-  </head>
-    
-  <body>
-  <!DOCTYPE html>
 
 <html lang="en">
 <head>
@@ -73,8 +62,8 @@
 
   // ── Auth actions ──────────────────────────────────────
   window.doLogin = async () => {
-    const email = document.getElementById('auth-email').value.trim();
-    const pass = document.getElementById('auth-pass').value;
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value;
     const err = document.getElementById('auth-error');
     err.textContent = '';
     try {
@@ -85,12 +74,12 @@
   };
 
   window.doRegister = async () => {
-    const email = document.getElementById('auth-email').value.trim();
-    const pass = document.getElementById('auth-pass').value;
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-pass').value;
     const name = document.getElementById('auth-name').value.trim();
     const fightName = document.getElementById('auth-fight').value.trim();
-    const role = document.getElementById('auth-role').value;
-    const err = document.getElementById('auth-error');
+    const role = 'client';
+    const err = document.getElementById('reg-error');
     err.textContent = '';
     if (!name || !fightName) { err.textContent = 'Please fill in all fields.'; return; }
     try {
@@ -115,9 +104,6 @@
     const isLogin = document.getElementById('auth-login').style.display !== 'none';
     document.getElementById('auth-login').style.display = isLogin ? 'none' : 'block';
     document.getElementById('auth-register').style.display = isLogin ? 'block' : 'none';
-    document.getElementById('auth-toggle-msg').textContent = isLogin
-      ? 'Already have an account? Sign in'
-      : "Don't have an account? Create one";
     document.getElementById('auth-error').textContent = '';
   };
 
@@ -424,7 +410,7 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   .auth-btn.primary { background: var(--accent); color: white; }
   .auth-btn.primary:hover { background: #7a5c10; }
   .auth-error { font-size: 0.78rem; color: var(--red); margin-top: 10px; font-style: italic; min-height: 18px; }
-  .auth-toggle { font-size: 0.78rem; color: var(--accent); cursor: pointer; text-align: center; margin-top: 16px; text-decoration: underline; }
+  .auth-toggle { font-size: 0.78rem; color: var(--accent); cursor: pointer; text-align: center; margin-top: 16px; text-decoration: underline; background: none; border: none; width: 100%; padding: 8px; font-family: 'Courier Prime', monospace; }
   .auth-header { text-align: center; margin-bottom: 28px; }
   .auth-header h1 { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; }
   .auth-header p { font-size: 0.78rem; color: #a09080; margin-top: 4px; font-style: italic; }
@@ -547,30 +533,29 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
     <p>A script in progress — always to be continued</p>
   </div>
   <div class="auth-card">
-    <!-- Login -->
     <div id="auth-login">
       <div class="auth-title">Sign In</div>
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
-      <div class="auth-field"><label>Email</label><input type="email" id="auth-email" placeholder="your@email.com" /></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="auth-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" /></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" /></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" /></div>
       <button class="auth-btn primary" onclick="doLogin()">Sign In</button>
       <div class="auth-error" id="auth-error"></div>
+      <button class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? Create one</button>
     </div>
-    <!-- Register -->
     <div id="auth-register" style="display:none;">
       <div class="auth-title">Create Account</div>
       <div class="auth-sub">Set up your private script space.</div>
       <div class="auth-field"><label>Your First Name</label><input type="text" id="auth-name" placeholder="e.g. Jordan" /></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="auth-email" placeholder="your@email.com" /></div>
-      <div class="auth-field"><label>Password (6+ characters)</label><input type="password" id="auth-pass" placeholder="••••••••" /></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com" /></div>
+      <div class="auth-field"><label>Password (6+ characters)</label><input type="password" id="reg-pass" placeholder="••••••••" /></div>
       <div class="auth-field">
         <label>The Fight — what do you both call it?</label>
         <input type="text" id="auth-fight" placeholder="e.g. The One About Time, The Money Thing…" />
       </div>
       <button class="auth-btn primary" onclick="doRegister()">Create Account</button>
-      <div class="auth-error" id="auth-error"></div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="auth-toggle" onclick="toggleAuthMode()">Already have an account? Sign in</button>
     </div>
-    <div class="auth-toggle" id="auth-toggle-msg" onclick="toggleAuthMode()">Don't have an account? Create one</div>
   </div>
 </div>
 
@@ -690,8 +675,4 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
 </script>
 
 </body>
-</html>
-    
-  </body>
-  
 </html>
