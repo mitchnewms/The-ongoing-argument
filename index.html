@@ -192,7 +192,7 @@
     block.dataset.type = 'line';
     block.dataset.char = char;
     block.innerHTML = `
-      <button class="delete-btn" onclick="removeLine(this)" title="Remove">✕</button>
+      <button class="delete-btn" title="Remove">✕</button>
       <span class="char-name ${!isMe ? 'char-b' : ''}" data-char="${char}">${charLabel.toUpperCase()}</span>
       <input class="beat-input" placeholder="(sighs, quietly, laughing…)" value="${beatVal || ''}" oninput="scheduleSave()" />
       <textarea class="dialogue-input" rows="1" placeholder="What they say…" oninput="autoResize(this); scheduleSave()">${dialogueVal || ''}</textarea>
@@ -214,7 +214,7 @@ const container = document.getElementById(‘lines-container’);
 const block = document.createElement(‘div’);
 block.className = ‘direction-line’;
 block.dataset.type = ‘direction’;
-block.innerHTML = `<button class="delete-btn" onclick="removeLine(this)" title="Remove">✕</button> <input class="direction-input" placeholder="— phone rings, door slams, silence, someone walks out… —" value="${val || ''}" oninput="scheduleSave()" />`;
+block.innerHTML = `<button class="delete-btn" title="Remove">✕</button> <input class="direction-input" placeholder="— phone rings, door slams, silence, someone walks out… —" value="${val || ''}" oninput="scheduleSave()" />`;
 container.appendChild(block);
 if (!silent) { block.querySelector(’.direction-input’).focus(); scheduleSave(); }
 };
@@ -275,7 +275,7 @@ const scriptSnap = await getDoc(doc(db, ‘scripts’, client.id));
 const hasScript = scriptSnap.exists() && (scriptSnap.data().lines || []).length > 0;
 const div = document.createElement(‘div’);
 div.className = ‘client-card’;
-div.innerHTML = `<div class="client-info"> <div class="client-name">${client.name}</div> <div class="client-meta">${client.email} · ${client.fightName || 'unnamed fight'}</div> <div class="client-status">${hasScript ? '✓ Script written' : '○ No script yet'}</div> </div> <div class="client-actions"> ${hasScript ?`<button class="coach-btn view-btn" onclick="viewClientScript('${client.id}', '${client.name}', '${client.fightName || ''}')">Read Script</button>`: ''} <button class="coach-btn note-btn" onclick="openNoteModal('${client.id}', '${client.name}')">Send Note</button> </div>`;
+div.innerHTML = `<div class="client-info"> <div class="client-name">${client.name}</div> <div class="client-meta">${client.email} · ${client.fightName || 'unnamed fight'}</div> <div class="client-status">${hasScript ? '✓ Script written' : '○ No script yet'}</div> </div> <div class="client-actions"> ${hasScript ?`<button class="coach-btn view-btn">Read Script</button>`: ''} <button class="coach-btn note-btn">Send Note</button> </div>`;
 container.appendChild(div);
 }
 } catch(e) {
@@ -552,7 +552,7 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
       <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" /></div>
       <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" /></div>
-      <button class="auth-btn primary" onclick="doLogin()">Sign In</button>
+      <button class="auth-btn primary">Sign In</button>
       <div class="auth-error" id="auth-error"></div>
     </div>
     <div id="auth-register" style="display:none;">
@@ -564,7 +564,7 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
         <label>The Fight — what do you both call it?</label>
         <input type="text" id="auth-fight" placeholder="e.g. The One About Time, The Money Thing…" />
       </div>
-      <button class="auth-btn primary" onclick="doRegister()">Create Account</button>
+      <button class="auth-btn primary">Create Account</button>
       <div class="auth-error" id="reg-error"></div>
     </div>
   </div>
@@ -578,7 +578,7 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
       <span id="fight-title-display">The Ongoing Argument</span>
       Signed in as <span id="user-name-display" style="display:inline;font-style:normal;color:#f0e8d5;"></span>
     </div>
-    <button class="signout-btn" onclick="doSignOut()">Sign Out</button>
+    <button class="signout-btn">Sign Out</button>
   </div>
 
   <!-- Coach notes -->
@@ -596,8 +596,8 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   <div class="writer-toggle">
     <label>Writing as:</label>
     <div class="toggle-group">
-      <button id="toggleA" onclick="setWriter('A')" class="active-a"><span id="btnLabelA">Me</span></button>
-      <button id="toggleB" onclick="setWriter('B')">Partner</button>
+      <button id="toggle-a" class="active-a"><span id="btnLabelA">Me</span></button>
+      <button id="toggle-b">Partner</button>
     </div>
   </div>
 </div>
@@ -610,9 +610,9 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
 <div id="lines-container"></div>
 
 <div class="add-bar">
-  <button class="btn" onclick="addLine('A')">+ <span id="btnLabelA2">Me</span> speaks</button>
-  <button class="btn btn-b" onclick="addLine('B')">+ Partner speaks</button>
-  <button class="btn btn-dir" onclick="addDirection()">+ Direction / Scene shift</button>
+  <button class="btn">+ <span id="btnLabelA2">Me</span> speaks</button>
+  <button class="btn btn-b">+ Partner speaks</button>
+  <button class="btn btn-dir">+ Direction / Scene shift</button>
 </div>
 
 <div class="tbc"><span>To Be Continued<span class="dot">...</span></span></div>
@@ -621,7 +621,7 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   </div>
 
   <div class="action-bar">
-    <button class="action-btn save" onclick="saveNow()">Save Progress</button>
+    <button class="action-btn save">Save Progress</button>
   </div>
   <div id="status-msg"></div>
 </div>
@@ -635,8 +635,8 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
       <span>All clients — read scripts, send notes</span>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
-      <button class="coach-refresh" onclick="refreshClients()">↻ Refresh</button>
-      <button class="signout-btn" onclick="doSignOut()">Sign Out</button>
+      <button class="coach-refresh">↻ Refresh</button>
+      <button class="signout-btn">Sign Out</button>
     </div>
   </div>
   <div id="clients-list"></div>
@@ -649,12 +649,12 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   <div class="modal-box">
     <div class="modal-top">
       <h3 id="script-modal-title">Script</h3>
-      <button class="modal-close" onclick="closeScriptModal()">✕</button>
+      <button class="modal-close">✕</button>
     </div>
     <div class="modal-body" id="script-modal-content"></div>
     <div class="modal-actions">
-      <button class="modal-action-btn" onclick="openNoteFromScript()">Send Note to This Client</button>
-      <button class="modal-action-btn" onclick="closeScriptModal()">Close</button>
+      <button class="modal-action-btn">Send Note to This Client</button>
+      <button class="modal-action-btn">Close</button>
     </div>
   </div>
 </div>
@@ -665,13 +665,13 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   <div class="modal-box">
     <div class="modal-top">
       <h3 id="note-modal-title">Send Note</h3>
-      <button class="modal-close" onclick="closeNoteModal()">✕</button>
+      <button class="modal-close">✕</button>
     </div>
     <div class="modal-body">
       <p style="font-size:0.82rem;color:var(--ink-light);font-style:italic;margin-bottom:16px;">This note will appear in the client's script tool the next time they open it.</p>
       <textarea id="note-textarea" placeholder="Write your note here…"></textarea>
       <div style="margin-top:16px;">
-        <button class="send-note-btn" onclick="sendNote()">Send Note</button>
+        <button class="send-note-btn">Send Note</button>
       </div>
     </div>
   </div>
@@ -686,25 +686,50 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
 </script>
 
 <script>
-// Standalone button handler — runs outside module context for iPad compatibility
 document.addEventListener('DOMContentLoaded', function() {
 
+  // ── Tab switching ──────────────────────────────────
   function showTab(tab) {
     document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
     document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
     document.getElementById('tab-login').className = tab === 'login' ? 'auth-tab active' : 'auth-tab';
     document.getElementById('tab-register').className = tab === 'register' ? 'auth-tab active' : 'auth-tab';
-    var ae = document.getElementById('auth-error');
-    var re = document.getElementById('reg-error');
-    if(ae) ae.textContent = '';
-    if(re) re.textContent = '';
   }
 
-  // Tab buttons
-  var tabLogin = document.getElementById('tab-login');
-  var tabReg = document.getElementById('tab-register');
-  if(tabLogin) tabLogin.addEventListener('click', function(e){ e.preventDefault(); showTab('login'); });
-  if(tabReg) tabReg.addEventListener('click', function(e){ e.preventDefault(); showTab('register'); });
+  function bindBtn(id, fn) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', function(e) { e.preventDefault(); fn(); });
+  }
+
+  // ── Auth buttons ───────────────────────────────────
+  bindBtn('tab-login', function() { showTab('login'); });
+  bindBtn('tab-register', function() { showTab('register'); });
+
+  bindBtn('btn-signin', function() {
+    if (window.doLogin) window.doLogin();
+  });
+
+  bindBtn('btn-register', function() {
+    if (window.doRegister) window.doRegister();
+  });
+
+  bindBtn('btn-signout', function() { if (window.doSignOut) window.doSignOut(); });
+  bindBtn('btn-signout-coach', function() { if (window.doSignOut) window.doSignOut(); });
+  bindBtn('btn-save', function() { if (window.saveNow) window.saveNow(); });
+  bindBtn('btn-add-a', function() { if (window.addLine) window.addLine('A'); });
+  bindBtn('btn-add-b', function() { if (window.addLine) window.addLine('B'); });
+  bindBtn('btn-add-dir', function() { if (window.addDirection) window.addDirection(); });
+  bindBtn('btn-refresh', function() { if (window.refreshClients) window.refreshClients(); });
+  bindBtn('btn-close-script-modal', function() { if (window.closeScriptModal) window.closeScriptModal(); });
+  bindBtn('btn-note-from-script', function() { if (window.openNoteFromScript) window.openNoteFromScript(); });
+  bindBtn('btn-close-note-modal', function() { if (window.closeNoteModal) window.closeNoteModal(); });
+  bindBtn('btn-send-note', function() { if (window.sendNote) window.sendNote(); });
+  bindBtn('toggle-a', function() { if (window.setWriter) window.setWriter('A'); });
+  bindBtn('toggle-b', function() { if (window.setWriter) window.setWriter('B'); });
+
+  // Enter key on password fields
+  var lp = document.getElementById('login-pass');
+  if (lp) lp.addEventListener('keydown', function(e) { if (e.key === 'Enter' && window.doLogin) window.doLogin(); });
 
 });
 </script>
