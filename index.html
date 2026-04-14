@@ -3,541 +3,121 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>The Ongoing Argument</title>
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
-
-<!-- Firebase -->
-
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-<script>
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBAuVl_ZdnBiuN4BbtBp01z_n-2f-lJVys",
-    authDomain: "scripting-be260.firebaseapp.com",
-    projectId: "scripting-be260",
-    storageBucket: "scripting-be260.firebasestorage.app",
-    messagingSenderId: "1046536666813",
-    appId: "1:1046536666813:web:93a9ababd49e6fb08941d4"
-  };
-
-  const app = firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  // COACH EMAIL — only this account sees the coach dashboard
-  const COACH_EMAIL = "mitch@mitchnewman.com";
-
-  // ── State ────────────────────────────────────────────
-  let currentUser = null;
-  let isCoach = false;
-  let currentWriter = 'A';
-  let lineCounter = 0;
-  let saveTimer = null;
-
-  // ── Auth state ───────────────────────────────────────
-  auth.onAuthStateChanged( async (user) => {
-    if (user) {
-      currentUser = user;
-      isCoach = user.email === COACH_EMAIL;
-      document.getElementById('auth-screen').style.display = 'none';
-      if (isCoach) {
-        showCoachDashboard();
-      } else {
-        showScriptScreen();
-        await loadScript();
-      }
-    } else {
-      currentUser = null;
-      isCoach = false;
-      document.getElementById('auth-screen').style.display = 'flex';
-      document.getElementById('script-screen').style.display = 'none';
-      document.getElementById('coach-screen').style.display = 'none';
-    }
-  });
-
-  // ── Auth actions ──────────────────────────────────────
-  window.doLogin = async () => {
-    const email = document.getElementById('login-email').value.trim();
-    const pass = document.getElementById('login-pass').value;
-    const err = document.getElementById('auth-error');
-    err.textContent = '';
-    try {
-      await auth.signInWithEmailAndPassword(email, pass);
-    } catch(e) {
-      err.textContent = 'Incorrect email or password. Try again.';
-    }
-  };
-
-  window.doRegister = async () => {
-    const email = document.getElementById('reg-email').value.trim();
-    const pass = document.getElementById('reg-pass').value;
-    const name = document.getElementById('auth-name').value.trim();
-    const fightName = document.getElementById('auth-fight').value.trim();
-    const role = 'client';
-    const err = document.getElementById('reg-error');
-    err.textContent = '';
-    if (!name || !fightName) { err.textContent = 'Please fill in all fields.'; return; }
-    try {
-      const cred = await auth.createUserWithEmailAndPassword(email, pass);
-      await db.collection('users').doc(cred.user.uid).set({
-        email, name, fightName, role, createdAt: new Date().toISOString()
-      });
-    } catch(e) {
-      if (e.code === 'auth/email-already-in-use') err.textContent = 'That email is already registered. Try logging in.';
-      else if (e.code === 'auth/weak-password') err.textContent = 'Password must be at least 6 characters.';
-      else err.textContent = 'Something went wrong. Try again.';
-    }
-  };
-
-  window.doSignOut = async () => {
-    await auth.signOut();
-    document.getElementById('lines-container').innerHTML = '';
-    lineCounter = 0;
-  };
-
-
-  window.showTab = function(tab) {
-    document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
-    document.getElementById('tab-login').className = tab === 'login' ? 'auth-tab active' : 'auth-tab';
-    document.getElementById('tab-register').className = tab === 'register' ? 'auth-tab active' : 'auth-tab';
-    document.getElementById('auth-error').textContent = '';
-  };
-  window.toggleAuthMode = () => {
-    const isLogin = document.getElementById('auth-login').style.display !== 'none';
-    document.getElementById('auth-login').style.display = isLogin ? 'none' : 'block';
-    document.getElementById('auth-register').style.display = isLogin ? 'block' : 'none';
-    document.getElementById('auth-error').textContent = '';
-  };
-
-  // ── Script screen ─────────────────────────────────────
-  async function showScriptScreen() {
-    document.getElementById('script-screen').style.display = 'block';
-    document.getElementById('coach-screen').style.display = 'none';
-    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-    if (userDoc.exists) {
-      const data = userDoc.data();
-      document.getElementById('user-name-display').textContent = data.name || '';
-      document.getElementById('fight-title-display').textContent = data.fightName || 'The Ongoing Argument';
-      document.getElementById('script-title-header').textContent = (data.fightName || 'The Ongoing Argument').toUpperCase();
-      // Set writer toggle labels
-      document.getElementById('btnLabelA').textContent = data.name || 'Me';
-      document.getElementById('toggleA').textContent = data.name || 'Me';
-    }
-    // Load coach notes if any
-    await loadCoachNotes();
-  }
-
-  // ── Save / Load script ────────────────────────────────
-  async function loadScript() {
-    const ref = db.collection('scripts').doc(currentUser.uid);
-    const snap = await ref.get();
-    document.getElementById('lines-container').innerHTML = '';
-    lineCounter = 0;
-    if (snap.exists) {
-      const data = snap.data();
-      document.getElementById('scene-input').value = data.scene || '';
-      (data.lines || []).forEach(l => {
-        if (l.type === 'line') addLine(l.char, l.beat, l.dialogue, true);
-        else if (l.type === 'direction') addDirection(l.text, true);
-      });
-      setTimeout(() => document.querySelectorAll('textarea').forEach(autoResize), 80);
-    }
-  }
-
-  async function saveScript() {
-    if (!currentUser) return;
-    const lines = [];
-    document.querySelectorAll('#lines-container > div').forEach(el => {
-      if (el.dataset.type === 'line') {
-        lines.push({ type: 'line', char: el.dataset.char, beat: el.querySelector('.beat-input').value, dialogue: el.querySelector('.dialogue-input').value });
-      } else if (el.dataset.type === 'direction') {
-        lines.push({ type: 'direction', text: el.querySelector('.direction-input').value });
-      }
-    });
-    await db.collection('scripts').doc(currentUser.uid).set({
-      scene: document.getElementById('scene-input').value,
-      lines,
-      userId: currentUser.uid,
-      updatedAt: new Date().toISOString()
-    });
-    showStatus('Saved.');
-  }
-
-  window.scheduleSave = () => {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveScript, 1500);
-  };
-
-  window.saveNow = async () => {
-    clearTimeout(saveTimer);
-    await saveScript();
-  };
-
-  // ── Lines ─────────────────────────────────────────────
-  window.addLine = function(char, beatVal, dialogueVal, silent) {
-    const container = document.getElementById('lines-container');
-    const userNameEl = document.getElementById('user-name-display');
-    const userName = userNameEl ? userNameEl.textContent : '';
-    const isMe = char === 'A';
-    const charLabel = isMe ? (userName || 'Me') : 'Partner';
-
-    const block = document.createElement('div');
-    block.className = 'script-line';
-    block.dataset.type = 'line';
-    block.dataset.char = char;
-    block.innerHTML = `
-      <button class="delete-btn" title="Remove">✕</button>
-      <span class="char-name ${!isMe ? 'char-b' : ''}" data-char="${char}">${charLabel.toUpperCase()}</span>
-      <input class="beat-input" placeholder="(sighs, quietly, laughing…)" value="${beatVal || ''}" oninput="scheduleSave()" />
-      <textarea class="dialogue-input" rows="1" placeholder="What they say…" oninput="autoResize(this); scheduleSave()">${dialogueVal || ''}</textarea>
-
-```
-`;
-container.appendChild(block);
-if (!silent) {
-  block.querySelector('.dialogue-input').focus();
-  scheduleSave();
-}
-setTimeout(() => document.querySelectorAll('textarea').forEach(autoResize), 30);
-```
-
-};
-
-window.addDirection = function(val, silent) {
-const container = document.getElementById(‘lines-container’);
-const block = document.createElement(‘div’);
-block.className = ‘direction-line’;
-block.dataset.type = ‘direction’;
-block.innerHTML = `<button class="delete-btn" title="Remove">✕</button> <input class="direction-input" placeholder="— phone rings, door slams, silence, someone walks out… —" value="${val || ''}" oninput="scheduleSave()" />`;
-container.appendChild(block);
-if (!silent) { block.querySelector(’.direction-input’).focus(); scheduleSave(); }
-};
-
-window.removeLine = function(btn) {
-btn.closest(’.script-line, .direction-line’).remove();
-scheduleSave();
-};
-
-// ── Coach notes (user view) ───────────────────────────
-async function loadCoachNotes() {
-const notesRef = db.collection( ‘notes’);
-const q = db.collection(‘notes’).where(‘userId’, ‘==’, currentUser.uid).orderBy(‘createdAt’, ‘desc’);
-try {
-const snap = await q.get();
-const container = document.getElementById(‘coach-notes-container’);
-if (snap.empty) {
-container.style.display = ‘none’;
-return;
-}
-container.style.display = ‘block’;
-container.innerHTML = ‘<div class="notes-header">Notes from Mitch</div>’;
-snap.forEach(d => {
-const note = d.data();
-const div = document.createElement(‘div’);
-div.className = ‘coach-note’;
-div.innerHTML = `<div class="note-date">${new Date(note.createdAt).toLocaleDateString()}</div><div class="note-text">${note.text}</div>`;
-container.appendChild(div);
-});
-} catch(e) {
-// notes index may not be ready yet
-}
-}
-
-// ── Coach dashboard ───────────────────────────────────
-async function showCoachDashboard() {
-document.getElementById(‘script-screen’).style.display = ‘none’;
-document.getElementById(‘coach-screen’).style.display = ‘block’;
-await loadAllClients();
-}
-
-async function loadAllClients() {
-const container = document.getElementById(‘clients-list’);
-container.innerHTML = ‘<div class="loading">Loading clients…</div>’;
-try {
-const usersSnap = await db.collection(‘users’).get();
-const clients = [];
-usersSnap.forEach(d => {
-if (d.data().email !== COACH_EMAIL) clients.push({ id: d.id, …d.data() });
-});
-if (clients.length === 0) {
-container.innerHTML = ‘<div class="loading">No clients yet. Share the link to get started.</div>’;
-return;
-}
-container.innerHTML = ‘’;
-for (const client of clients) {
-const scriptSnap = await db.collection(‘scripts’).doc(client.id).get();
-const hasScript = scriptSnap.exists && (scriptSnap.data().lines || []).length > 0;
-const div = document.createElement(‘div’);
-div.className = ‘client-card’;
-div.innerHTML = `<div class="client-info"> <div class="client-name">${client.name}</div> <div class="client-meta">${client.email} · ${client.fightName || 'unnamed fight'}</div> <div class="client-status">${hasScript ? '✓ Script written' : '○ No script yet'}</div> </div> <div class="client-actions"> ${hasScript ?`<button class="coach-btn view-btn">Read Script</button>`: ''} <button class="coach-btn note-btn">Send Note</button> </div>`;
-container.appendChild(div);
-}
-} catch(e) {
-container.innerHTML = ‘<div class="loading">Error loading clients. Try refreshing.</div>’;
-}
-}
-
-window.viewClientScript = async (userId, name, fightName) => {
-const snap = await db.collection(‘scripts’).doc(userId).get();
-if (!snap.exists) return;
-const data = snap.data();
-const modal = document.getElementById(‘script-modal’);
-const content = document.getElementById(‘script-modal-content’);
-document.getElementById(‘script-modal-title’).textContent = `${name} — ${fightName}`;
-content.innerHTML = ‘’;
-
-```
-// Scene
-if (data.scene) {
-  const s = document.createElement('div');
-  s.className = 'modal-scene';
-  s.textContent = data.scene.toUpperCase();
-  content.appendChild(s);
-}
-
-(data.lines || []).forEach(l => {
-  if (l.type === 'line') {
-    const block = document.createElement('div');
-    block.className = 'modal-line';
-    block.innerHTML = `
-      <div class="modal-char">${l.char === 'A' ? name.toUpperCase() : 'PARTNER'}</div>
-      ${l.beat ? `<div class="modal-beat">(${l.beat})</div>` : ''}
-      <div class="modal-dialogue">${l.dialogue}</div>
-    `;
-    content.appendChild(block);
-  } else {
-    const dir = document.createElement('div');
-    dir.className = 'modal-direction';
-    dir.textContent = l.text;
-    content.appendChild(dir);
-  }
-});
-
-const tbc = document.createElement('div');
-tbc.className = 'modal-tbc';
-tbc.textContent = 'TO BE CONTINUED...';
-content.appendChild(tbc);
-
-modal.style.display = 'flex';
-// Store current userId for note sending
-modal.dataset.userId = userId;
-modal.dataset.userName = name;
-```
-
-};
-
-window.closeScriptModal = () => {
-document.getElementById(‘script-modal’).style.display = ‘none’;
-};
-
-window.openNoteModal = (userId, name) => {
-document.getElementById(‘note-modal’).style.display = ‘flex’;
-document.getElementById(‘note-modal-title’).textContent = `Note to ${name}`;
-document.getElementById(‘note-textarea’).value = ‘’;
-document.getElementById(‘note-modal’).dataset.userId = userId;
-document.getElementById(‘note-modal’).dataset.userName = name;
-};
-
-window.openNoteFromScript = () => {
-const modal = document.getElementById(‘script-modal’);
-openNoteModal(modal.dataset.userId, modal.dataset.userName);
-};
-
-window.closeNoteModal = () => {
-document.getElementById(‘note-modal’).style.display = ‘none’;
-};
-
-window.sendNote = async () => {
-const modal = document.getElementById(‘note-modal’);
-const userId = modal.dataset.userId;
-const text = document.getElementById(‘note-textarea’).value.trim();
-if (!text) return;
-await db.collection(‘notes’).add({
-userId, text, coachEmail: COACH_EMAIL, createdAt: new Date().toISOString()
-});
-closeNoteModal();
-showCoachStatus(‘Note sent.’);
-};
-
-window.refreshClients = () => loadAllClients();
-
-// ── Helpers ───────────────────────────────────────────
-window.autoResize = function(el) {
-el.style.height = ‘auto’;
-el.style.height = el.scrollHeight + ‘px’;
-};
-
-let statusTimer = null;
-function showStatus(msg) {
-const el = document.getElementById(‘status-msg’);
-if (el) { el.textContent = msg; clearTimeout(statusTimer); statusTimer = setTimeout(() => el.textContent = ‘’, 3000); }
-}
-function showCoachStatus(msg) {
-const el = document.getElementById(‘coach-status’);
-if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000); }
-}
-</script>
-
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --paper: #f5f0e8; --paper-dark: #ede6d6; --ink: #1a1a1a; --ink-light: #555;
-    --ink-faint: #999; --red: #c0392b; --accent: #8b6914; --line: #d4c9b0;
-  }
-  body { background: #2a2520; min-height: 100vh; font-family: 'Courier Prime', monospace; display: flex; flex-direction: column; align-items: center; padding: 20px 16px 60px; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --paper: #f5f0e8; --paper-dark: #ede6d6; --ink: #1a1a1a; --ink-light: #555;
+  --ink-faint: #999; --red: #c0392b; --accent: #8b6914; --line: #d4c9b0;
+}
+body {
+  background: #2a2520; min-height: 100vh;
+  font-family: 'Courier Prime', monospace;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 16px 60px; -webkit-text-size-adjust: 100%;
+}
+#auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; width: 100%; max-width: 440px; }
+.auth-header { text-align: center; margin-bottom: 28px; }
+.auth-header h1 { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; }
+.auth-header p { font-size: 0.78rem; color: #a09080; margin-top: 4px; font-style: italic; }
+.auth-card { background: var(--paper); width: 100%; border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid var(--accent); padding: 32px 28px; }
+.auth-tabs { display: flex; margin-bottom: 24px; border-bottom: 2px solid var(--line); }
+.auth-tab { flex: 1; padding: 12px 8px; font-family: 'Courier Prime', monospace; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; border: none; background: transparent; color: var(--ink-faint); cursor: pointer; -webkit-appearance: none; appearance: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.auth-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); margin-bottom: -2px; font-weight: bold; }
+.auth-sub { font-size: 0.8rem; color: var(--ink-faint); font-style: italic; margin-bottom: 20px; }
+.auth-field { margin-bottom: 18px; }
+.auth-field label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+.auth-field input { width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 2px; padding: 12px 10px; font-family: 'Courier Prime', monospace; font-size: 1rem; color: var(--ink); outline: none; -webkit-appearance: none; appearance: none; display: block; }
+.auth-field input:focus { border-color: var(--accent); }
+.auth-submit { width: 100%; padding: 16px; font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-radius: 2px; background: var(--accent); color: white; cursor: pointer; -webkit-appearance: none; appearance: none; display: block; margin-top: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.auth-submit:active { background: #7a5c10; }
+.auth-submit:disabled { background: #b8a070; cursor: not-allowed; }
+.auth-error { font-size: 0.78rem; color: var(--red); margin-top: 12px; font-style: italic; min-height: 20px; text-align: center; }
+.auth-loading { text-align: center; font-size: 0.8rem; color: var(--ink-faint); font-style: italic; margin-top: 8px; }
 
-  /* ── AUTH ── */
-  #auth-screen {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 80vh; width: 100%; max-width: 440px;
-  }
-  .auth-card {
-    background: var(--paper); width: 100%; border-radius: 2px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid var(--accent); padding: 32px 28px;
-  }
-  .auth-title { font-family: 'Special Elite', cursive; font-size: 1.4rem; color: var(--ink); margin-bottom: 4px; }
-  .auth-sub { font-size: 0.8rem; color: var(--ink-faint); font-style: italic; margin-bottom: 24px; }
-  .auth-field { margin-bottom: 16px; }
-  .auth-field label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 5px; }
-  .auth-field input, .auth-field select {
-    width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--line);
-    padding: 7px 0; font-family: 'Courier Prime', monospace; font-size: 0.95rem; color: var(--ink); outline: none;
-  }
-  .auth-field input:focus { border-bottom-color: var(--accent); }
-  .auth-btn {
-    width: 100%; padding: 12px; font-family: 'Special Elite', cursive; font-size: 0.9rem;
-    letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer;
-    border-radius: 1px; margin-top: 8px; transition: all 0.2s;
-  }
-  .auth-btn.primary { background: var(--accent); color: white; }
-  .auth-btn.primary:hover { background: #7a5c10; }
-  .auth-error { font-size: 0.78rem; color: var(--red); margin-top: 10px; font-style: italic; min-height: 18px; }
-  .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--line); }
-  .auth-tab { flex: 1; padding: 10px; font-family: 'Courier Prime', monospace; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; border: none; background: transparent; color: var(--ink-faint); cursor: pointer; transition: all 0.15s; }
-  .auth-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); margin-bottom: -2px; }
-  .auth-toggle { font-size: 0.78rem; color: var(--accent); cursor: pointer; text-align: center; margin-top: 16px; text-decoration: underline; background: none; border: none; width: 100%; padding: 8px; font-family: 'Courier Prime', monospace; }
-  .auth-header { text-align: center; margin-bottom: 28px; }
-  .auth-header h1 { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; }
-  .auth-header p { font-size: 0.78rem; color: #a09080; margin-top: 4px; font-style: italic; }
+#script-screen { display: none; width: 100%; max-width: 680px; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
+.top-bar-left { color: #f0e8d5; font-family: ‘Special Elite’, cursive; font-size: 1rem; }
+.top-bar-left span { font-size: 0.75rem; color: #a09080; display: block; font-family: ‘Courier Prime’, monospace; font-style: italic; }
+.signout-btn { font-family: ‘Courier Prime’, monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; border: 1px solid #555; background: transparent; color: #a09080; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+#coach-notes-container { display: none; background: var(–paper); border-top: 3px solid var(–accent); padding: 20px 24px; margin-bottom: 16px; border-radius: 2px; }
+.notes-header { font-family: ‘Special Elite’, cursive; font-size: 0.85rem; color: var(–accent); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+.coach-note { border-bottom: 1px solid var(–line); padding: 10px 0; }
+.coach-note:last-child { border-bottom: none; }
+.note-date { font-size: 0.7rem; color: var(–ink-faint); margin-bottom: 4px; }
+.note-text { font-size: 0.9rem; color: var(–ink); line-height: 1.6; }
+.script-page { background: var(–paper); width: 100%; min-height: 500px; border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); padding: 40px 20px 28px; position: relative; margin-bottom: 16px; }
+.script-page::before { content: ‘’; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg, transparent 0px, transparent 48px, var(–paper-dark) 48px, var(–paper-dark) 52px, transparent 52px, transparent 100px); border-radius: 2px 2px 0 0; }
+.script-title-header { font-family: ‘Special Elite’, cursive; font-size: 1rem; letter-spacing: 0.12em; color: var(–ink); text-align: center; margin-bottom: 4px; }
+.privacy-tag { text-align: center; font-size: 0.7rem; color: var(–accent); font-style: italic; margin-bottom: 20px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(–line); align-items: center; }
+.writer-toggle { display: flex; align-items: center; gap: 8px; }
+.writer-toggle label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(–ink-faint); }
+.toggle-group { display: flex; border: 1px solid var(–line); border-radius: 1px; overflow: hidden; }
+.toggle-group button { font-family: ‘Courier Prime’, monospace; font-size: 0.72rem; padding: 8px 16px; border: none; background: transparent; cursor: pointer; color: var(–ink-faint); -webkit-appearance: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.toggle-group button.active-a { background: var(–ink); color: var(–paper); }
+.toggle-group button.active-b { background: var(–red); color: white; }
+.scene-block { margin-bottom: 24px; text-align: center; }
+.scene-block label { display: block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(–ink-faint); margin-bottom: 6px; }
+#scene-input { background: transparent; border: none; border-bottom: 1px dashed var(–line); padding: 6px 8px; font-family: ‘Courier Prime’, monospace; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(–ink); outline: none; text-align: center; width: 100%; max-width: 460px; }
+#lines-container { margin-bottom: 16px; }
+.script-line { margin-bottom: 28px; text-align: center; position: relative; }
+.direction-line { margin-bottom: 28px; text-align: center; position: relative; }
+.char-name { display: block; font-family: ‘Courier Prime’, monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(–ink); margin-bottom: 2px; }
+.char-name.char-b { color: var(–red); }
+.beat-input { display: block; font-family: ‘Courier Prime’, monospace; font-size: 0.8rem; font-style: italic; color: var(–ink-light); background: transparent; border: none; border-bottom: 1px dashed transparent; outline: none; text-align: center; width: 260px; margin: 0 auto 6px; padding: 2px 0; }
+.beat-input:focus { border-bottom-color: var(–line); }
+.beat-input::placeholder { color: var(–line); }
+.dialogue-input { display: block; background: transparent; border: none; border-bottom: 1px solid var(–line); padding: 5px 8px; font-family: ‘Courier Prime’, monospace; font-size: 0.95rem; color: var(–ink); outline: none; resize: none; min-height: 36px; line-height: 1.65; text-align: center; width: 100%; max-width: 400px; margin: 0 auto; overflow: hidden; }
+.dialogue-input::placeholder { color: var(–line); }
+.direction-input { background: transparent; border: none; border-bottom: 1px dashed var(–line); padding: 5px 8px; font-family: ‘Courier Prime’, monospace; font-size: 0.82rem; font-style: italic; color: var(–ink-light); outline: none; text-align: center; width: 100%; max-width: 500px; }
+.direction-input::placeholder { color: var(–line); }
+.delete-btn { position: absolute; top: 0; right: 0; background: none; border: none; cursor: pointer; color: var(–line); font-size: 0.7rem; padding: 4px 6px; -webkit-appearance: none; touch-action: manipulation; }
+.add-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(–line); }
+.btn { font-family: ‘Courier Prime’, monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 14px; border: 1px solid var(–line); background: transparent; color: var(–ink-light); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.tbc { text-align: center; padding: 28px 0 8px; border-top: 1px solid var(–line); margin-top: 16px; }
+.tbc span { font-family: ‘Special Elite’, cursive; font-size: 0.85rem; letter-spacing: 0.2em; color: var(–ink-faint); text-transform: uppercase; }
+.tbc .dot { color: var(–red); }
+.action-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+.action-btn { flex: 1; font-family: ‘Special Elite’, cursive; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 16px; border: none; cursor: pointer; border-radius: 1px; background: var(–accent); color: white; -webkit-appearance: none; touch-action: manipulation; }
+#status-msg { font-size: 0.7rem; color: #a09080; text-align: center; margin-top: 10px; font-style: italic; min-height: 16px; }
 
-  /* ── SCRIPT SCREEN ── */
-  #script-screen { display: none; width: 100%; max-width: 680px; }
-  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .top-bar-left { color: #f0e8d5; font-family: 'Special Elite', cursive; font-size: 1rem; }
-  .top-bar-left span { font-size: 0.75rem; color: #a09080; display: block; font-family: 'Courier Prime', monospace; font-style: italic; }
-  .signout-btn { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 12px; border: 1px solid #555; background: transparent; color: #a09080; cursor: pointer; border-radius: 1px; transition: all 0.15s; }
-  .signout-btn:hover { border-color: var(--red); color: var(--red); }
-
-  /* Coach notes banner */
-  #coach-notes-container { display: none; background: var(--paper); border-top: 3px solid var(--accent); padding: 20px 24px; margin-bottom: 16px; border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
-  .notes-header { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
-  .coach-note { border-bottom: 1px solid var(--line); padding: 10px 0; }
-  .coach-note:last-child { border-bottom: none; }
-  .note-date { font-size: 0.7rem; color: var(--ink-faint); margin-bottom: 4px; }
-  .note-text { font-size: 0.9rem; color: var(--ink); line-height: 1.6; }
-
-  /* Script page */
-  .script-page { background: var(--paper); width: 100%; min-height: 600px; border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); padding: 40px 20px 28px; position: relative; margin-bottom: 16px; }
-  .script-page::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg, transparent 0px, transparent 48px, var(--paper-dark) 48px, var(--paper-dark) 52px, transparent 52px, transparent 100px); border-radius: 2px 2px 0 0; }
-  .script-title-header { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.12em; color: var(--ink); text-align: center; margin-bottom: 4px; }
-  .privacy-tag { text-align: center; font-size: 0.7rem; color: var(--accent); font-style: italic; margin-bottom: 20px; }
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); align-items: center; }
-  .writer-toggle { display: flex; align-items: center; gap: 8px; }
-  .writer-toggle label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
-  .toggle-group { display: flex; border: 1px solid var(--line); border-radius: 1px; overflow: hidden; }
-  .toggle-group button { font-family: 'Courier Prime', monospace; font-size: 0.72rem; padding: 4px 14px; border: none; background: transparent; cursor: pointer; color: var(--ink-faint); transition: all 0.15s; }
-  .toggle-group button.active-a { background: var(--ink); color: var(--paper); }
-  .toggle-group button.active-b { background: var(--red); color: white; }
-  .scene-block { margin-bottom: 24px; text-align: center; }
-  .scene-block label { display: block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
-  #scene-input { background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 6px 8px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); outline: none; text-align: center; width: 100%; max-width: 460px; }
-  #scene-input::placeholder { color: var(--line); font-weight: 400; text-transform: none; letter-spacing: 0; }
-  #lines-container { margin-bottom: 16px; }
-  .script-line { margin-bottom: 28px; text-align: center; position: relative; animation: fadeIn 0.2s ease; }
-  .direction-line { margin-bottom: 28px; text-align: center; position: relative; animation: fadeIn 0.2s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; } }
-  .char-name { display: block; font-family: 'Courier Prime', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); margin-bottom: 2px; }
-  .char-name.char-b { color: var(--red); }
-  .beat-input { display: block; font-family: 'Courier Prime', monospace; font-size: 0.8rem; font-style: italic; color: var(--ink-light); background: transparent; border: none; border-bottom: 1px dashed transparent; outline: none; text-align: center; width: 260px; margin: 0 auto 6px; padding: 2px 0; transition: border-color 0.2s; }
-  .beat-input:focus { border-bottom-color: var(--line); }
-  .beat-input::placeholder { color: var(--line); }
-  .dialogue-input { display: block; background: transparent; border: none; border-bottom: 1px solid var(--line); padding: 5px 8px; font-family: 'Courier Prime', monospace; font-size: 0.95rem; color: var(--ink); outline: none; resize: none; min-height: 36px; line-height: 1.65; text-align: center; width: 100%; max-width: 400px; margin: 0 auto; transition: border-color 0.2s; }
-  .dialogue-input:focus { border-bottom-color: var(--ink); }
-  .dialogue-input::placeholder { color: var(--line); }
-  .direction-input { background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 5px 8px; font-family: 'Courier Prime', monospace; font-size: 0.82rem; font-style: italic; color: var(--ink-light); outline: none; text-align: center; width: 100%; max-width: 500px; transition: border-color 0.2s; }
-  .direction-input:focus { border-bottom-color: var(--ink-light); }
-  .direction-input::placeholder { color: var(--line); }
-  .delete-btn { position: absolute; top: 0; right: 0; background: none; border: none; cursor: pointer; color: var(--line); font-size: 0.7rem; padding: 2px 4px; transition: color 0.15s; }
-  .delete-btn:hover { color: var(--red); }
-  .add-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
-  .btn { font-family: 'Courier Prime', monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 14px; border: 1px solid var(--line); background: transparent; color: var(--ink-light); cursor: pointer; border-radius: 1px; transition: all 0.15s; }
-  .btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .btn.btn-b:hover { background: var(--red); border-color: var(--red); color: white; }
-  .btn.btn-dir:hover { background: var(--accent); border-color: var(--accent); color: white; }
-  .tbc { text-align: center; padding: 28px 0 8px; border-top: 1px solid var(--line); margin-top: 16px; }
-  .tbc span { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.2em; color: var(--ink-faint); text-transform: uppercase; }
-  .tbc .dot { color: var(--red); }
-  .action-bar { display: flex; gap: 10px; flex-wrap: wrap; }
-  .action-btn { flex: 1; font-family: 'Special Elite', cursive; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 16px; border: none; cursor: pointer; border-radius: 1px; transition: all 0.2s; }
-  .action-btn.save { background: var(--accent); color: white; }
-  .action-btn.save:hover { background: #7a5c10; }
-  #status-msg { font-size: 0.7rem; color: #a09080; text-align: center; margin-top: 10px; font-style: italic; min-height: 16px; }
-  textarea { overflow: hidden; }
-
-  /* ── COACH SCREEN ── */
-  #coach-screen { display: none; width: 100%; max-width: 780px; }
-  .coach-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-  .coach-title { font-family: 'Special Elite', cursive; font-size: 1.4rem; color: #f0e8d5; }
-  .coach-title span { display: block; font-size: 0.75rem; color: #a09080; font-family: 'Courier Prime', monospace; font-style: italic; }
-  .coach-refresh { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 12px; border: 1px solid #555; background: transparent; color: #a09080; cursor: pointer; border-radius: 1px; }
-  .coach-refresh:hover { border-color: var(--accent); color: var(--accent); }
-  #clients-list { width: 100%; }
-  .client-card { background: var(--paper); border-radius: 2px; padding: 20px 24px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .client-name { font-family: 'Special Elite', cursive; font-size: 1.1rem; color: var(--ink); margin-bottom: 2px; }
-  .client-meta { font-size: 0.75rem; color: var(--ink-faint); font-style: italic; margin-bottom: 4px; }
-  .client-status { font-size: 0.75rem; color: var(--accent); }
-  .client-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .coach-btn { font-family: 'Courier Prime', monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 16px; border: 1px solid var(--line); background: transparent; color: var(--ink-light); cursor: pointer; border-radius: 1px; transition: all 0.15s; }
-  .view-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .note-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-  .loading { color: #a09080; font-style: italic; font-size: 0.85rem; padding: 20px 0; text-align: center; }
-  #coach-status { font-size: 0.75rem; color: var(--accent); text-align: center; margin-top: 12px; font-style: italic; min-height: 18px; }
-
-  /* ── MODALS ── */
-  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-  .modal-box { background: var(--paper); border-radius: 2px; width: 100%; max-width: 600px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.5); border-top: 4px solid var(--accent); }
-  .modal-top { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 16px; border-bottom: 1px solid var(--line); }
-  .modal-top h3 { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--ink); }
-  .modal-close { background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 1.1rem; }
-  .modal-close:hover { color: var(--red); }
-  .modal-body { padding: 24px; }
-  .modal-scene { text-align: center; font-family: 'Courier Prime', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-light); margin-bottom: 24px; }
-  .modal-line { margin-bottom: 24px; text-align: center; }
-  .modal-char { font-family: 'Courier Prime', monospace; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); margin-bottom: 2px; }
-  .modal-beat { font-family: 'Courier Prime', monospace; font-size: 0.78rem; font-style: italic; color: var(--ink-faint); margin-bottom: 4px; }
-  .modal-dialogue { font-family: 'Courier Prime', monospace; font-size: 0.92rem; color: var(--ink); line-height: 1.6; max-width: 380px; margin: 0 auto; }
-  .modal-direction { text-align: center; font-family: 'Courier Prime', monospace; font-size: 0.8rem; font-style: italic; color: var(--ink-light); margin-bottom: 24px; }
-  .modal-tbc { text-align: center; font-family: 'Special Elite', cursive; font-size: 0.8rem; letter-spacing: 0.18em; color: var(--ink-faint); padding-top: 20px; border-top: 1px solid var(--line); margin-top: 8px; }
-  .modal-actions { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 10px; }
-  .modal-action-btn { font-family: 'Courier Prime', monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 18px; border: 1px solid var(--line); background: transparent; color: var(--ink-light); cursor: pointer; border-radius: 1px; transition: all 0.15s; }
-  .modal-action-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-  #note-textarea { width: 100%; min-height: 140px; background: transparent; border: 1px solid var(--line); padding: 12px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); outline: none; resize: vertical; line-height: 1.6; border-radius: 1px; }
-  #note-textarea:focus { border-color: var(--accent); }
-  .send-note-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; transition: all 0.2s; }
-  .send-note-btn:hover { background: #7a5c10; }
+#coach-screen { display: none; width: 100%; max-width: 780px; }
+.coach-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
+.coach-title { font-family: ‘Special Elite’, cursive; font-size: 1.4rem; color: #f0e8d5; }
+.coach-title span { display: block; font-size: 0.75rem; color: #a09080; font-family: ‘Courier Prime’, monospace; font-style: italic; }
+.client-card { background: var(–paper); border-radius: 2px; padding: 20px 24px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.client-name { font-family: ‘Special Elite’, cursive; font-size: 1.1rem; color: var(–ink); margin-bottom: 2px; }
+.client-meta { font-size: 0.75rem; color: var(–ink-faint); font-style: italic; margin-bottom: 4px; }
+.client-status { font-size: 0.75rem; color: var(–accent); }
+.client-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.coach-btn { font-family: ‘Courier Prime’, monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border: 1px solid var(–line); background: transparent; color: var(–ink-light); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+.loading { color: #a09080; font-style: italic; font-size: 0.85rem; padding: 20px 0; text-align: center; }
+#coach-status { font-size: 0.75rem; color: var(–accent); text-align: center; margin-top: 12px; font-style: italic; min-height: 18px; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+.modal-box { background: var(–paper); border-radius: 2px; width: 100%; max-width: 600px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.5); border-top: 4px solid var(–accent); }
+.modal-top { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 16px; border-bottom: 1px solid var(–line); }
+.modal-top h3 { font-family: ‘Special Elite’, cursive; font-size: 1rem; color: var(–ink); }
+.modal-x { background: none; border: none; cursor: pointer; color: var(–ink-faint); font-size: 1.1rem; padding: 4px 8px; -webkit-appearance: none; touch-action: manipulation; }
+.modal-body { padding: 24px; }
+.modal-scene { text-align: center; font-family: ‘Courier Prime’, monospace; font-size: 0.85rem; font-weight: 700; color: var(–ink-light); margin-bottom: 24px; text-transform: uppercase; }
+.modal-line { margin-bottom: 24px; text-align: center; }
+.modal-char { font-family: ‘Courier Prime’, monospace; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(–ink); margin-bottom: 2px; }
+.modal-beat { font-family: ‘Courier Prime’, monospace; font-size: 0.78rem; font-style: italic; color: var(–ink-faint); margin-bottom: 4px; }
+.modal-dialogue { font-family: ‘Courier Prime’, monospace; font-size: 0.92rem; color: var(–ink); line-height: 1.6; max-width: 380px; margin: 0 auto; }
+.modal-direction { text-align: center; font-family: ‘Courier Prime’, monospace; font-size: 0.8rem; font-style: italic; color: var(–ink-light); margin-bottom: 24px; }
+.modal-tbc { text-align: center; font-family: ‘Special Elite’, cursive; font-size: 0.8rem; letter-spacing: 0.18em; color: var(–ink-faint); padding-top: 20px; border-top: 1px solid var(–line); margin-top: 8px; }
+.modal-actions { padding: 16px 24px; border-top: 1px solid var(–line); display: flex; gap: 10px; flex-wrap: wrap; }
+.modal-action-btn { font-family: ‘Courier Prime’, monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 18px; border: 1px solid var(–line); background: transparent; color: var(–ink-light); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+#note-textarea { width: 100%; min-height: 140px; background: #fff; border: 1px solid var(–line); padding: 12px; font-family: ‘Courier Prime’, monospace; font-size: 0.9rem; color: var(–ink); outline: none; resize: vertical; line-height: 1.6; border-radius: 1px; }
+#note-textarea:focus { border-color: var(–accent); }
+.send-note-btn { font-family: ‘Special Elite’, cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(–accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; margin-top: 12px; }
 </style>
 
 </head>
 <body>
-
-<!-- AUTH SCREEN -->
 
 <div id="auth-screen">
   <div class="auth-header">
@@ -546,193 +126,453 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   </div>
   <div class="auth-card">
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login">Sign In</button>
-      <button class="auth-tab" id="tab-register">Create Account</button>
+      <button class="auth-tab active" id="tab-signin">Sign In</button>
+      <button class="auth-tab" id="tab-create">Create Account</button>
     </div>
-    <div id="auth-login">
+    <div id="form-signin">
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
-      <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" /></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" /></div>
-      <button class="auth-btn primary" id="btn-signin">Sign In</button>
-      <div class="auth-error" id="auth-error"></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="si-email" placeholder="your@email.com" autocomplete="email" /></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password" /></div>
+      <button class="auth-submit" id="btn-signin">Sign In</button>
+      <div class="auth-error" id="si-error"></div>
     </div>
-    <div id="auth-register" style="display:none;">
+    <div id="form-create" style="display:none;">
       <div class="auth-sub">Set up your private script space.</div>
-      <div class="auth-field"><label>Your First Name</label><input type="text" id="auth-name" placeholder="e.g. Jordan" /></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com" /></div>
-      <div class="auth-field"><label>Password (6+ characters)</label><input type="password" id="reg-pass" placeholder="••••••••" /></div>
-      <div class="auth-field">
-        <label>The Fight — what do you both call it?</label>
-        <input type="text" id="auth-fight" placeholder="e.g. The One About Time, The Money Thing…" />
-      </div>
-      <button class="auth-btn primary" id="btn-register">Create Account</button>
-      <div class="auth-error" id="reg-error"></div>
+      <div class="auth-field"><label>Your First Name</label><input type="text" id="ca-name" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="ca-email" placeholder="your@email.com" autocomplete="email" /></div>
+      <div class="auth-field"><label>Password (6+ characters)</label><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /></div>
+      <div class="auth-field"><label>The Fight — what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
+      <button class="auth-submit" id="btn-create">Create Account</button>
+      <div class="auth-error" id="ca-error"></div>
     </div>
   </div>
 </div>
-
-<!-- SCRIPT SCREEN -->
 
 <div id="script-screen">
   <div class="top-bar">
-    <div class="top-bar-left">
-      <span id="fight-title-display">The Ongoing Argument</span>
-      Signed in as <span id="user-name-display" style="display:inline;font-style:normal;color:#f0e8d5;"></span>
-    </div>
-    <button class="signout-btn">Sign Out</button>
+    <div class="top-bar-left"><span id="fight-title-display">The Ongoing Argument</span>Signed in as <span id="user-name-display" style="display:inline;font-style:normal;color:#f0e8d5;"></span></div>
+    <button class="signout-btn" id="btn-signout">Sign Out</button>
   </div>
-
-  <!-- Coach notes -->
-
   <div id="coach-notes-container"></div>
-
-  <!-- Script page -->
-
   <div class="script-page">
     <div class="script-title-header" id="script-title-header">THE ONGOING ARGUMENT</div>
     <div class="privacy-tag">🔒 Your version — private until you share with Mitch</div>
-
-```
-<div class="toolbar">
-  <div class="writer-toggle">
-    <label>Writing as:</label>
-    <div class="toggle-group">
-      <button id="toggle-a" class="active-a"><span id="btnLabelA">Me</span></button>
-      <button id="toggle-b">Partner</button>
+    <div class="toolbar">
+      <div class="writer-toggle">
+        <label>Writing as:</label>
+        <div class="toggle-group">
+          <button id="toggle-a" class="active-a">Me</button>
+          <button id="toggle-b">Partner</button>
+        </div>
+      </div>
     </div>
+    <div class="scene-block"><label>Scene / Location</label><input type="text" id="scene-input" placeholder="INT. KITCHEN — EVENING" /></div>
+    <div id="lines-container"></div>
+    <div class="add-bar">
+      <button class="btn" id="btn-add-a">+ Me speaks</button>
+      <button class="btn" id="btn-add-b">+ Partner speaks</button>
+      <button class="btn" id="btn-add-dir">+ Direction / Scene shift</button>
+    </div>
+    <div class="tbc"><span>To Be Continued<span class="dot">...</span></span></div>
   </div>
-</div>
-
-<div class="scene-block">
-  <label>Scene / Location</label>
-  <input type="text" id="scene-input" placeholder="INT. KITCHEN — EVENING" oninput="scheduleSave()" />
-</div>
-
-<div id="lines-container"></div>
-
-<div class="add-bar">
-  <button class="btn">+ <span id="btnLabelA2">Me</span> speaks</button>
-  <button class="btn btn-b">+ Partner speaks</button>
-  <button class="btn btn-dir">+ Direction / Scene shift</button>
-</div>
-
-<div class="tbc"><span>To Be Continued<span class="dot">...</span></span></div>
-```
-
-  </div>
-
-  <div class="action-bar">
-    <button class="action-btn save" id="btn-save">Save Progress</button>
-  </div>
+  <div class="action-bar"><button class="action-btn" id="btn-save">Save Progress</button></div>
   <div id="status-msg"></div>
 </div>
 
-<!-- COACH SCREEN -->
-
 <div id="coach-screen">
   <div class="coach-header">
-    <div class="coach-title">
-      Coach Dashboard
-      <span>All clients — read scripts, send notes</span>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button class="coach-refresh">↻ Refresh</button>
-      <button class="signout-btn">Sign Out</button>
+    <div class="coach-title">Coach Dashboard<span>All clients — read scripts, send notes</span></div>
+    <div style="display:flex;gap:8px;">
+      <button class="coach-btn" id="btn-refresh">↻ Refresh</button>
+      <button class="signout-btn" id="btn-signout-coach">Sign Out</button>
     </div>
   </div>
-  <div id="clients-list"></div>
+  <div id="clients-list"><div class="loading">Loading clients…</div></div>
   <div id="coach-status"></div>
 </div>
 
-<!-- SCRIPT VIEW MODAL -->
-
 <div class="modal-overlay" id="script-modal">
   <div class="modal-box">
-    <div class="modal-top">
-      <h3 id="script-modal-title">Script</h3>
-      <button class="modal-close">✕</button>
-    </div>
+    <div class="modal-top"><h3 id="script-modal-title">Script</h3><button class="modal-x" id="btn-close-script">✕</button></div>
     <div class="modal-body" id="script-modal-content"></div>
     <div class="modal-actions">
-      <button class="modal-action-btn">Send Note to This Client</button>
-      <button class="modal-action-btn">Close</button>
+      <button class="modal-action-btn" id="btn-note-from-script">Send Note to This Client</button>
+      <button class="modal-action-btn" id="btn-close-script2">Close</button>
     </div>
   </div>
 </div>
-
-<!-- SEND NOTE MODAL -->
 
 <div class="modal-overlay" id="note-modal">
   <div class="modal-box">
-    <div class="modal-top">
-      <h3 id="note-modal-title">Send Note</h3>
-      <button class="modal-close">✕</button>
-    </div>
+    <div class="modal-top"><h3 id="note-modal-title">Send Note</h3><button class="modal-x" id="btn-close-note">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:0.82rem;color:var(--ink-light);font-style:italic;margin-bottom:16px;">This note will appear in the client's script tool the next time they open it.</p>
+      <p style="font-size:0.82rem;color:var(--ink-light);font-style:italic;margin-bottom:16px;">This note will appear in the client's script tool next time they open it.</p>
       <textarea id="note-textarea" placeholder="Write your note here…"></textarea>
-      <div style="margin-top:16px;">
-        <button class="send-note-btn">Send Note</button>
-      </div>
+      <button class="send-note-btn" id="btn-send-note">Send Note</button>
     </div>
   </div>
 </div>
 
 <script>
-  // Writer toggle (non-module)
-  function setWriter(who) {
-    document.getElementById('toggleA').className = who === 'A' ? 'active-a' : '';
-    document.getElementById('toggleB').className = who === 'B' ? 'active-b' : '';
+var API_KEY = "AIzaSyBAuVl_ZdnBiuN4BbtBp01z_n-2f-lJVys";
+var PROJECT = "scripting-be260";
+var COACH = "mitch@mitchnewman.com";
+var AUTH = "https://identitytoolkit.googleapis.com/v1/accounts";
+var DB = "https://firestore.googleapis.com/v1/projects/" + PROJECT + "/databases/(default)/documents";
+
+var user = null;
+var token = null;
+var saveTimer = null;
+var noteTarget = null;
+var scriptTarget = null;
+
+// INIT
+window.onload = function() {
+  var s = localStorage.getItem('oa_user');
+  if (s) { try { user = JSON.parse(s); token = user.token; refreshAuth(user.refresh); } catch(e) { localStorage.removeItem('oa_user'); } }
+  bindAll();
+};
+
+function bindAll() {
+  on('tab-signin', function() { switchTab('signin'); });
+  on('tab-create', function() { switchTab('create'); });
+  on('btn-signin', signIn);
+  on('btn-create', createAccount);
+  on('btn-signout', signOut);
+  on('btn-signout-coach', signOut);
+  on('btn-save', saveScript);
+  on('btn-add-a', function() { addLine('A'); });
+  on('btn-add-b', function() { addLine('B'); });
+  on('btn-add-dir', addDir);
+  on('toggle-a', function() { setWriter('A'); });
+  on('toggle-b', function() { setWriter('B'); });
+  on('btn-refresh', loadClients);
+  on('btn-close-script', function() { hide('script-modal'); });
+  on('btn-close-script2', function() { hide('script-modal'); });
+  on('btn-note-from-script', function() { hide('script-modal'); if (scriptTarget) openNote(scriptTarget, ''); });
+  on('btn-close-note', function() { hide('note-modal'); });
+  on('btn-send-note', sendNote);
+  var sp = el('si-pass'); if (sp) sp.onkeydown = function(e) { if (e.key === 'Enter') signIn(); };
+  var cp = el('ca-pass'); if (cp) cp.onkeydown = function(e) { if (e.key === 'Enter') createAccount(); };
+  var sc = el('scene-input'); if (sc) sc.oninput = sched;
+}
+
+function on(id, fn) {
+  var e = el(id);
+  if (!e) return;
+  e.addEventListener('touchend', function(ev) { ev.preventDefault(); fn(); }, { passive: false });
+  e.addEventListener('click', function(ev) { ev.preventDefault(); fn(); });
+}
+
+function el(id) { return document.getElementById(id); }
+function show(id) { el(id).style.display = 'block'; }
+function hide(id) { el(id).style.display = 'none'; }
+function showFlex(id) { el(id).style.display = 'flex'; }
+function txt(id, t) { var e = el(id); if (e) e.textContent = t; }
+function val(id) { var e = el(id); return e ? e.value.trim() : ''; }
+
+function switchTab(tab) {
+  if (tab === 'signin') {
+    el('tab-signin').className = 'auth-tab active';
+    el('tab-create').className = 'auth-tab';
+    show('form-signin'); hide('form-create');
+  } else {
+    el('tab-signin').className = 'auth-tab';
+    el('tab-create').className = 'auth-tab active';
+    hide('form-signin'); show('form-create');
   }
-</script>
+}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+// AUTH
+function signIn() {
+  var email = val('si-email'), pass = el('si-pass').value;
+  txt('si-error', '');
+  if (!email || !pass) { txt('si-error', 'Please fill in all fields.'); return; }
+  el('btn-signin').disabled = true;
+  el('btn-signin').textContent = 'Signing in…';
+  post(AUTH + ':signInWithPassword?key=' + API_KEY, { email: email, password: pass, returnSecureToken: true })
+  .then(function(d) {
+    el('btn-signin').disabled = false; el('btn-signin').textContent = 'Sign In';
+    if (d.error) { txt('si-error', 'Incorrect email or password.'); return; }
+    saveSession(d); afterLogin();
+  }).catch(function() { el('btn-signin').disabled = false; el('btn-signin').textContent = 'Sign In'; txt('si-error', 'Connection error. Try again.'); });
+}
 
-  // ── Tab switching ──────────────────────────────────
-  function showTab(tab) {
-    document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
-    document.getElementById('tab-login').className = tab === 'login' ? 'auth-tab active' : 'auth-tab';
-    document.getElementById('tab-register').className = tab === 'register' ? 'auth-tab active' : 'auth-tab';
+function createAccount() {
+  var name = val('ca-name'), email = val('ca-email'), pass = el('ca-pass').value, fight = val('ca-fight');
+  txt('ca-error', '');
+  if (!name) { txt('ca-error', 'Please enter your name.'); return; }
+  if (!email) { txt('ca-error', 'Please enter your email.'); return; }
+  if (!pass || pass.length < 6) { txt('ca-error', 'Password needs at least 6 characters.'); return; }
+  if (!fight) { txt('ca-error', 'Please name the fight.'); return; }
+  el('btn-create').disabled = true;
+  el('btn-create').textContent = 'Creating account…';
+  post(AUTH + ':signUp?key=' + API_KEY, { email: email, password: pass, returnSecureToken: true })
+  .then(function(d) {
+    el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
+    if (d.error) {
+      txt('ca-error', d.error.message === 'EMAIL_EXISTS' ? 'That email is taken. Try signing in.' : 'Could not create account. Try again.');
+      return;
+    }
+    saveSession(d);
+    user.name = name; user.fight = fight;
+    localStorage.setItem('oa_user', JSON.stringify(user));
+    fsSet('users/' + user.uid, { email: email, name: name, fightName: fight, role: 'client', createdAt: new Date().toISOString() });
+    afterLogin();
+  }).catch(function() { el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account'; txt('ca-error', 'Connection error. Try again.'); });
+}
+
+function signOut() {
+  user = null; token = null;
+  localStorage.removeItem('oa_user');
+  hide('script-screen'); hide('coach-screen');
+  showFlex('auth-screen');
+  el('lines-container').innerHTML = '';
+  switchTab('signin');
+}
+
+function saveSession(d) {
+  token = d.idToken;
+  user = { uid: d.localId, email: d.email, token: d.idToken, refresh: d.refreshToken };
+  localStorage.setItem('oa_user', JSON.stringify(user));
+}
+
+function refreshAuth(refreshToken) {
+  post('https://securetoken.googleapis.com/v1/token?key=' + API_KEY, { grant_type: 'refresh_token', refresh_token: refreshToken })
+  .then(function(d) {
+    if (d.id_token) {
+      token = d.id_token; user.token = token; user.refresh = d.refresh_token;
+      localStorage.setItem('oa_user', JSON.stringify(user));
+      afterLogin();
+    } else { signOut(); }
+  }).catch(signOut);
+}
+
+function afterLogin() {
+  hide('auth-screen');
+  if (user.email === COACH) {
+    showFlex('coach-screen'); loadClients();
+  } else {
+    show('script-screen');
+    loadProfile(); loadScript(); loadNotes();
   }
+}
 
-  function bindBtn(id, fn) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener('click', function(e) { e.preventDefault(); fn(); });
+// FIRESTORE
+function fsGet(path) {
+  return fetch(DB + '/' + path, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.json(); });
+}
+
+function fsSet(path, data) {
+  var fields = toFields(data);
+  var mask = Object.keys(data).map(function(k) { return 'updateMask.fieldPaths=' + k; }).join('&');
+  return fetch(DB + '/' + path + '?' + mask, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ fields: fields })
+  }).then(function(r) { return r.json(); });
+}
+
+function fsAdd(col, data) {
+  return fetch(DB + '/' + col, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ fields: toFields(data) })
+  }).then(function(r) { return r.json(); });
+}
+
+function fsList(col) {
+  return fetch(DB + '/' + col, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.json(); });
+}
+
+function toFields(obj) {
+  var f = {};
+  for (var k in obj) {
+    var v = obj[k];
+    if (typeof v === 'string') f[k] = { stringValue: v };
+    else if (typeof v === 'boolean') f[k] = { booleanValue: v };
+    else f[k] = { stringValue: JSON.stringify(v) };
   }
+  return f;
+}
 
-  // ── Auth buttons ───────────────────────────────────
-  bindBtn('tab-login', function() { showTab('login'); });
-  bindBtn('tab-register', function() { showTab('register'); });
+function fromFields(fields) {
+  if (!fields) return {};
+  var obj = {};
+  for (var k in fields) {
+    var v = fields[k];
+    if (v.stringValue !== undefined) { try { obj[k] = JSON.parse(v.stringValue); } catch(e) { obj[k] = v.stringValue; } }
+    else if (v.booleanValue !== undefined) obj[k] = v.booleanValue;
+    else if (v.integerValue !== undefined) obj[k] = parseInt(v.integerValue);
+  }
+  return obj;
+}
 
-  bindBtn('btn-signin', function() {
-    if (window.doLogin) window.doLogin();
+function post(url, body) {
+  return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) { return r.json(); });
+}
+
+// PROFILE
+function loadProfile() {
+  fsGet('users/' + user.uid).then(function(d) {
+    var p = fromFields(d.fields);
+    var name = p.name || user.name || 'Me';
+    var fight = p.fightName || user.fight || 'The Ongoing Argument';
+    txt('user-name-display', name);
+    txt('fight-title-display', fight);
+    txt('script-title-header', fight.toUpperCase());
+    el('btn-add-a').textContent = '+ ' + name + ' speaks';
+    el('toggle-a').textContent = name;
+    user.name = name; user.fight = fight;
+  }).catch(function() {});
+}
+
+// NOTES
+function loadNotes() {
+  fsList('notes').then(function(d) {
+    if (!d.documents) return;
+    var mine = d.documents.map(function(doc) { return fromFields(doc.fields); }).filter(function(n) { return n.userId === user.uid; });
+    if (!mine.length) return;
+    var c = el('coach-notes-container');
+    c.style.display = 'block';
+    c.innerHTML = '<div class="notes-header">Notes from Mitch</div>';
+    mine.forEach(function(n) {
+      var div = document.createElement('div');
+      div.className = 'coach-note';
+      div.innerHTML = '<div class="note-date">' + (n.createdAt ? new Date(n.createdAt).toLocaleDateString() : '') + '</div><div class="note-text">' + (n.text || '') + '</div>';
+      c.appendChild(div);
+    });
+  }).catch(function() {});
+}
+
+// SCRIPT
+function loadScript() {
+  fsGet('scripts/' + user.uid).then(function(d) {
+    if (d.error) return;
+    var s = fromFields(d.fields);
+    if (s.scene) el('scene-input').value = s.scene;
+    if (s.lines) {
+      var lines = typeof s.lines === 'string' ? JSON.parse(s.lines) : s.lines;
+      lines.forEach(function(l) {
+        if (l.type === 'line') addLine(l.char, l.beat, l.dialogue, true);
+        else addDir(l.text, true);
+      });
+      setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 50);
+    }
+  }).catch(function() {});
+}
+
+function sched() { clearTimeout(saveTimer); saveTimer = setTimeout(saveScript, 2000); }
+
+function saveScript() {
+  if (!user || user.email === COACH) return;
+  var lines = [];
+  document.querySelectorAll('#lines-container > div').forEach(function(e) {
+    if (e.dataset.type === 'line') lines.push({ type: 'line', char: e.dataset.char, beat: e.querySelector('.beat-input').value, dialogue: e.querySelector('.dialogue-input').value });
+    else if (e.dataset.type === 'direction') lines.push({ type: 'direction', text: e.querySelector('.direction-input').value });
   });
+  fsSet('scripts/' + user.uid, { scene: el('scene-input').value, lines: JSON.stringify(lines), userId: user.uid, updatedAt: new Date().toISOString() })
+  .then(function() { status('Saved.'); }).catch(function() { status('Save failed.'); });
+}
 
-  bindBtn('btn-register', function() {
-    if (window.doRegister) window.doRegister();
-  });
+// LINES
+function addLine(char, beat, dialogue, silent) {
+  var c = el('lines-container');
+  var isB = char === 'B';
+  var label = isB ? 'Partner' : (user && user.name ? user.name : 'Me');
+  var div = document.createElement('div');
+  div.className = 'script-line'; div.dataset.type = 'line'; div.dataset.char = char;
+  div.innerHTML = '<button class="delete-btn">✕</button>' +
+    '<span class="char-name' + (isB ? ' char-b' : '') + '">' + label.toUpperCase() + '</span>' +
+    '<input class="beat-input" placeholder="(sighs, quietly, laughing…)" value="' + esc(beat || '') + '" />' +
+    '<textarea class="dialogue-input" rows="1" placeholder="What they say…">' + esc(dialogue || '') + '</textarea>';
 
-  bindBtn('btn-signout', function() { if (window.doSignOut) window.doSignOut(); });
-  bindBtn('btn-signout-coach', function() { if (window.doSignOut) window.doSignOut(); });
-  bindBtn('btn-save', function() { if (window.saveNow) window.saveNow(); });
-  bindBtn('btn-add-a', function() { if (window.addLine) window.addLine('A'); });
-  bindBtn('btn-add-b', function() { if (window.addLine) window.addLine('B'); });
-  bindBtn('btn-add-dir', function() { if (window.addDirection) window.addDirection(); });
-  bindBtn('btn-refresh', function() { if (window.refreshClients) window.refreshClients(); });
-  bindBtn('btn-close-script-modal', function() { if (window.closeScriptModal) window.closeScriptModal(); });
-  bindBtn('btn-note-from-script', function() { if (window.openNoteFromScript) window.openNoteFromScript(); });
-  bindBtn('btn-close-note-modal', function() { if (window.closeNoteModal) window.closeNoteModal(); });
-  bindBtn('btn-send-note', function() { if (window.sendNote) window.sendNote(); });
-  bindBtn('toggle-a', function() { if (window.setWriter) window.setWriter('A'); });
-  bindBtn('toggle-b', function() { if (window.setWriter) window.setWriter('B'); });
+c.appendChild(div);
+div.querySelector(’.delete-btn’).addEventListener(‘click’, function() { div.remove(); sched(); });
+div.querySelector(’.beat-input’).addEventListener(‘input’, sched);
+div.querySelector(’.dialogue-input’).addEventListener(‘input’, function() { ar(this); sched(); });
+if (!silent) { div.querySelector(’.dialogue-input’).focus(); sched(); }
+setTimeout(function() { document.querySelectorAll(‘textarea’).forEach(ar); }, 30);
+}
 
-  // Enter key on password fields
-  var lp = document.getElementById('login-pass');
-  if (lp) lp.addEventListener('keydown', function(e) { if (e.key === 'Enter' && window.doLogin) window.doLogin(); });
+function addDir(text, silent) {
+var c = el(‘lines-container’);
+var div = document.createElement(‘div’);
+div.className = ‘direction-line’; div.dataset.type = ‘direction’;
+div.innerHTML = ‘<button class="delete-btn">✕</button>’ +
+‘<input class="direction-input" placeholder="— phone rings, door slams, silence… —" value="' + esc(text || '') + '" />’;
+c.appendChild(div);
+div.querySelector(’.delete-btn’).addEventListener(‘click’, function() { div.remove(); sched(); });
+div.querySelector(’.direction-input’).addEventListener(‘input’, sched);
+if (!silent) { div.querySelector(’.direction-input’).focus(); sched(); }
+}
 
+function setWriter(w) {
+el(‘toggle-a’).className = w === ‘A’ ? ‘active-a’ : ‘’;
+el(‘toggle-b’).className = w === ‘B’ ? ‘active-b’ : ‘’;
+}
+
+function ar(e) { e.style.height = ‘auto’; e.style.height = e.scrollHeight + ‘px’; }
+function esc(s) { return String(s).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’); }
+
+// COACH
+function loadClients() {
+el(‘clients-list’).innerHTML = ‘<div class="loading">Loading clients…</div>’;
+fsList(‘users’).then(function(d) {
+if (!d.documents) { el(‘clients-list’).innerHTML = ‘<div class="loading">No clients yet.</div>’; return; }
+var clients = d.documents.map(function(doc) {
+var p = fromFields(doc.fields); p.id = doc.name.split(’/’).pop(); return p;
+}).filter(function(c) { return c.email !== COACH; });
+if (!clients.length) { el(‘clients-list’).innerHTML = ‘<div class="loading">No clients yet. Share the link to get started.</div>’; return; }
+var c = el(‘clients-list’); c.innerHTML = ‘’;
+clients.forEach(function(client) {
+var card = document.createElement(‘div’); card.className = ‘client-card’;
+card.innerHTML = ‘<div><div class="client-name">’ + (client.name || ‘Unknown’) + ‘</div><div class="client-meta">’ + (client.email || ‘’) + ’ · ’ + (client.fightName || ‘unnamed’) + ‘</div></div>’ +
+‘<div class="client-actions"><button class="coach-btn vb">Read Script</button><button class="coach-btn nb">Send Note</button></div>’;
+card.querySelector(’.vb’).addEventListener(‘click’, function() { viewScript(client.id, client.name, client.fightName); });
+card.querySelector(’.nb’).addEventListener(‘click’, function() { openNote(client.id, client.name); });
+c.appendChild(card);
 });
+}).catch(function() { el(‘clients-list’).innerHTML = ‘<div class="loading">Error loading. Try refreshing.</div>’; });
+}
+
+function viewScript(uid, name, fight) {
+scriptTarget = uid;
+fsGet(‘scripts/’ + uid).then(function(d) {
+var s = fromFields(d.fields);
+var c = el(‘script-modal-content’);
+txt(‘script-modal-title’, (name || ‘Client’) + ’ — ’ + (fight || ‘script’));
+c.innerHTML = ‘’;
+if (s.scene) { var sd = document.createElement(‘div’); sd.className = ‘modal-scene’; sd.textContent = s.scene; c.appendChild(sd); }
+var lines = typeof s.lines === ‘string’ ? JSON.parse(s.lines || ‘[]’) : (s.lines || []);
+lines.forEach(function(l) {
+if (l.type === ‘line’) {
+var b = document.createElement(‘div’); b.className = ‘modal-line’;
+b.innerHTML = ‘<div class="modal-char">’ + (l.char === ‘A’ ? (name || ‘A’).toUpperCase() : ‘PARTNER’) + ‘</div>’ + (l.beat ? ‘<div class="modal-beat">(’ + l.beat + ‘)</div>’ : ‘’) + ‘<div class="modal-dialogue">’ + esc(l.dialogue || ‘’) + ‘</div>’;
+c.appendChild(b);
+} else { var dd = document.createElement(‘div’); dd.className = ‘modal-direction’; dd.textContent = l.text; c.appendChild(dd); }
+});
+var tbc = document.createElement(‘div’); tbc.className = ‘modal-tbc’; tbc.textContent = ‘TO BE CONTINUED…’; c.appendChild(tbc);
+el(‘script-modal’).style.display = ‘flex’;
+}).catch(function() {});
+}
+
+function openNote(uid, name) {
+noteTarget = uid;
+txt(‘note-modal-title’, ’Note to ’ + (name || ‘client’));
+el(‘note-textarea’).value = ‘’;
+el(‘note-modal’).style.display = ‘flex’;
+}
+
+function sendNote() {
+var text = el(‘note-textarea’).value.trim();
+if (!text || !noteTarget) return;
+fsAdd(‘notes’, { userId: noteTarget, text: text, coachEmail: COACH, createdAt: new Date().toISOString() })
+.then(function() { hide(‘note-modal’); txt(‘coach-status’, ‘Note sent.’); setTimeout(function() { txt(‘coach-status’, ‘’); }, 3000); }).catch(function() {});
+}
+
+var st = null;
+function status(msg) { txt(‘status-msg’, msg); clearTimeout(st); st = setTimeout(function() { txt(‘status-msg’, ‘’); }, 3000); }
 </script>
 
 </body>
