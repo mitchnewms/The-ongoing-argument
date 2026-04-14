@@ -9,12 +9,13 @@
 
 <!-- Firebase -->
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, query, where, orderBy }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
 
   const firebaseConfig = {
     apiKey: "AIzaSyBAuVl_ZdnBiuN4BbtBp01z_n-2f-lJVys",
@@ -25,9 +26,9 @@
     appId: "1:1046536666813:web:93a9ababd49e6fb08941d4"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  const app = firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
   // COACH EMAIL — only this account sees the coach dashboard
   const COACH_EMAIL = "mitch@mitchnewman.com";
@@ -40,7 +41,7 @@
   let saveTimer = null;
 
   // ── Auth state ───────────────────────────────────────
-  onAuthStateChanged(auth, async (user) => {
+  auth.onAuthStateChanged( async (user) => {
     if (user) {
       currentUser = user;
       isCoach = user.email === COACH_EMAIL;
@@ -67,7 +68,7 @@
     const err = document.getElementById('auth-error');
     err.textContent = '';
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
+      await auth.signInWithEmailAndPassword(email, pass);
     } catch(e) {
       err.textContent = 'Incorrect email or password. Try again.';
     }
@@ -83,8 +84,8 @@
     err.textContent = '';
     if (!name || !fightName) { err.textContent = 'Please fill in all fields.'; return; }
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await setDoc(doc(db, 'users', cred.user.uid), {
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await db.collection('users').doc(cred.user.uid).set({
         email, name, fightName, role, createdAt: new Date().toISOString()
       });
     } catch(e) {
@@ -95,7 +96,7 @@
   };
 
   window.doSignOut = async () => {
-    await signOut(auth);
+    await auth.signOut();
     document.getElementById('lines-container').innerHTML = '';
     lineCounter = 0;
   };
@@ -119,8 +120,8 @@
   async function showScriptScreen() {
     document.getElementById('script-screen').style.display = 'block';
     document.getElementById('coach-screen').style.display = 'none';
-    const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-    if (userDoc.exists()) {
+    const userDoc = await db.collection('users').doc(currentUser.uid).get();
+    if (userDoc.exists) {
       const data = userDoc.data();
       document.getElementById('user-name-display').textContent = data.name || '';
       document.getElementById('fight-title-display').textContent = data.fightName || 'The Ongoing Argument';
@@ -135,11 +136,11 @@
 
   // ── Save / Load script ────────────────────────────────
   async function loadScript() {
-    const ref = doc(db, 'scripts', currentUser.uid);
-    const snap = await getDoc(ref);
+    const ref = db.collection('scripts').doc(currentUser.uid);
+    const snap = await ref.get();
     document.getElementById('lines-container').innerHTML = '';
     lineCounter = 0;
-    if (snap.exists()) {
+    if (snap.exists) {
       const data = snap.data();
       document.getElementById('scene-input').value = data.scene || '';
       (data.lines || []).forEach(l => {
@@ -160,7 +161,7 @@
         lines.push({ type: 'direction', text: el.querySelector('.direction-input').value });
       }
     });
-    await setDoc(doc(db, 'scripts', currentUser.uid), {
+    await db.collection('scripts').doc(currentUser.uid).set({
       scene: document.getElementById('scene-input').value,
       lines,
       userId: currentUser.uid,
@@ -226,10 +227,10 @@ scheduleSave();
 
 // ── Coach notes (user view) ───────────────────────────
 async function loadCoachNotes() {
-const notesRef = collection(db, ‘notes’);
-const q = query(notesRef, where(‘userId’, ‘==’, currentUser.uid), orderBy(‘createdAt’, ‘desc’));
+const notesRef = db.collection( ‘notes’);
+const q = db.collection(‘notes’).where(‘userId’, ‘==’, currentUser.uid).orderBy(‘createdAt’, ‘desc’);
 try {
-const snap = await getDocs(q);
+const snap = await q.get();
 const container = document.getElementById(‘coach-notes-container’);
 if (snap.empty) {
 container.style.display = ‘none’;
@@ -260,7 +261,7 @@ async function loadAllClients() {
 const container = document.getElementById(‘clients-list’);
 container.innerHTML = ‘<div class="loading">Loading clients…</div>’;
 try {
-const usersSnap = await getDocs(collection(db, ‘users’));
+const usersSnap = await db.collection(‘users’).get();
 const clients = [];
 usersSnap.forEach(d => {
 if (d.data().email !== COACH_EMAIL) clients.push({ id: d.id, …d.data() });
@@ -271,8 +272,8 @@ return;
 }
 container.innerHTML = ‘’;
 for (const client of clients) {
-const scriptSnap = await getDoc(doc(db, ‘scripts’, client.id));
-const hasScript = scriptSnap.exists() && (scriptSnap.data().lines || []).length > 0;
+const scriptSnap = await db.collection(‘scripts’).doc(client.id).get();
+const hasScript = scriptSnap.exists && (scriptSnap.data().lines || []).length > 0;
 const div = document.createElement(‘div’);
 div.className = ‘client-card’;
 div.innerHTML = `<div class="client-info"> <div class="client-name">${client.name}</div> <div class="client-meta">${client.email} · ${client.fightName || 'unnamed fight'}</div> <div class="client-status">${hasScript ? '✓ Script written' : '○ No script yet'}</div> </div> <div class="client-actions"> ${hasScript ?`<button class="coach-btn view-btn">Read Script</button>`: ''} <button class="coach-btn note-btn">Send Note</button> </div>`;
@@ -284,8 +285,8 @@ container.innerHTML = ‘<div class="loading">Error loading clients. Try refresh
 }
 
 window.viewClientScript = async (userId, name, fightName) => {
-const snap = await getDoc(doc(db, ‘scripts’, userId));
-if (!snap.exists()) return;
+const snap = await db.collection(‘scripts’).doc(userId).get();
+if (!snap.exists) return;
 const data = snap.data();
 const modal = document.getElementById(‘script-modal’);
 const content = document.getElementById(‘script-modal-content’);
@@ -358,7 +359,7 @@ const modal = document.getElementById(‘note-modal’);
 const userId = modal.dataset.userId;
 const text = document.getElementById(‘note-textarea’).value.trim();
 if (!text) return;
-await addDoc(collection(db, ‘notes’), {
+await db.collection(‘notes’).add({
 userId, text, coachEmail: COACH_EMAIL, createdAt: new Date().toISOString()
 });
 closeNoteModal();
