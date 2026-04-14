@@ -553,7 +553,7 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
       <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" /></div>
       <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" /></div>
-      <button class="auth-btn primary">Sign In</button>
+      <button class="auth-btn primary" id="btn-signin">Sign In</button>
       <div class="auth-error" id="auth-error"></div>
     </div>
     <div id="auth-register" style="display:none;">
@@ -565,7 +565,7 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
         <label>The Fight — what do you both call it?</label>
         <input type="text" id="auth-fight" placeholder="e.g. The One About Time, The Money Thing…" />
       </div>
-      <button class="auth-btn primary">Create Account</button>
+      <button class="auth-btn primary" id="btn-register">Create Account</button>
       <div class="auth-error" id="reg-error"></div>
     </div>
   </div>
@@ -622,7 +622,7 @@ if (el) { el.textContent = msg; setTimeout(() => el.textContent = ‘’, 3000);
   </div>
 
   <div class="action-bar">
-    <button class="action-btn save">Save Progress</button>
+    <button class="action-btn save" id="btn-save">Save Progress</button>
   </div>
   <div id="status-msg"></div>
 </div>
