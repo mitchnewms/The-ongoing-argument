@@ -125,25 +125,25 @@ body {
     <p>A script in progress — always to be continued</p>
   </div>
   <div class="auth-card">
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-signin">Sign In</button>
-      <button class="auth-tab" id="tab-create">Create Account</button>
+    <div class="auth-tabs" role="tablist">
+      <button type="button" class="auth-tab active" id="tab-signin" role="tab" aria-selected="true" aria-controls="form-signin">Sign In</button>
+      <button type="button" class="auth-tab" id="tab-create" role="tab" aria-selected="false" aria-controls="form-create">Create Account</button>
     </div>
-    <div id="form-signin">
+    <div id="form-signin" role="tabpanel" aria-labelledby="tab-signin">
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
-      <div class="auth-field"><label>Email</label><input type="email" id="si-email" placeholder="your@email.com" autocomplete="email" /></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password" /></div>
+      <div class="auth-field"><label for="si-email">Email</label><input type="email" id="si-email" placeholder="your@email.com" autocomplete="email" /></div>
+      <div class="auth-field"><label for="si-pass">Password</label><input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password" /></div>
       <button type="button" class="auth-submit" id="btn-signin">Sign In</button>
-      <div class="auth-error" id="si-error"></div>
+      <div class="auth-error" id="si-error" role="alert"></div>
     </div>
-    <div id="form-create" style="display:none;">
+    <div id="form-create" style="display:none;" role="tabpanel" aria-labelledby="tab-create">
       <div class="auth-sub">Set up your private script space.</div>
-      <div class="auth-field"><label>Your First Name</label><input type="text" id="ca-name" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="ca-email" placeholder="your@email.com" autocomplete="email" /></div>
-      <div class="auth-field"><label>Password (6+ characters)</label><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /></div>
-      <div class="auth-field"><label>The Fight — what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
+      <div class="auth-field"><label for="ca-name">Your First Name</label><input type="text" id="ca-name" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
+      <div class="auth-field"><label for="ca-email">Email</label><input type="email" id="ca-email" placeholder="your@email.com" autocomplete="email" /></div>
+      <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /></div>
+      <div class="auth-field"><label for="ca-fight">The Fight — what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
       <button type="button" class="auth-submit" id="btn-create">Create Account</button>
-      <div class="auth-error" id="ca-error"></div>
+      <div class="auth-error" id="ca-error" role="alert"></div>
     </div>
   </div>
 </div>
@@ -260,7 +260,7 @@ function bindAll() {
 function on(id, fn) {
   var e = el(id);
   if (!e) return;
-  e.addEventListener('click', function(ev) { ev.preventDefault(); fn(); });
+  e.addEventListener('click', fn);
 }
 
 function el(id) { return document.getElementById(id); }
@@ -273,11 +273,15 @@ function val(id) { var e = el(id); return e ? e.value.trim() : ''; }
 function switchTab(tab) {
   if (tab === 'signin') {
     el('tab-signin').className = 'auth-tab active';
+    el('tab-signin').setAttribute('aria-selected', 'true');
     el('tab-create').className = 'auth-tab';
+    el('tab-create').setAttribute('aria-selected', 'false');
     show('form-signin'); hide('form-create');
   } else {
     el('tab-signin').className = 'auth-tab';
+    el('tab-signin').setAttribute('aria-selected', 'false');
     el('tab-create').className = 'auth-tab active';
+    el('tab-create').setAttribute('aria-selected', 'true');
     hide('form-signin'); show('form-create');
   }
 }
