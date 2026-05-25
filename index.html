@@ -59,7 +59,8 @@ body {
 .script-page::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg, transparent 0px, transparent 48px, var(--paper-dark) 48px, var(--paper-dark) 52px, transparent 52px, transparent 100px); border-radius: 2px 2px 0 0; }
 .script-title-header { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.12em; color: var(--ink); text-align: center; margin-bottom: 4px; }
 .privacy-tag { text-align: center; font-size: 0.7rem; color: var(--accent); font-style: italic; margin-bottom: 20px; }
-.name-row { display: flex; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.name-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); align-items: flex-end; }
+.name-row-label { width: 100%; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: -4px; }
 .name-field { flex: 1; }
 .name-field label { display: block; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px; }
 .name-field input { width: 100%; background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 4px 2px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); outline: none; }
@@ -167,6 +168,7 @@ body {
     <div class="script-title-header" id="script-title-header">THE ONGOING ARGUMENT</div>
     <div class="privacy-tag">🔒 Your version — private until you share with Mitch</div>
     <div class="name-row">
+      <div class="name-row-label">Add Names Here</div>
       <div class="name-field"><label for="input-name-a">Your name</label><input type="text" id="input-name-a" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
       <div class="name-field"><label for="input-name-b">Partner's name</label><input type="text" id="input-name-b" placeholder="e.g. Alex" autocomplete="off" /></div>
     </div>
