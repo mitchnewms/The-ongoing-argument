@@ -142,15 +142,16 @@ body {
     <div id="form-signin" role="tabpanel" aria-labelledby="tab-signin" tabindex="0">
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
       <div class="auth-field"><label for="si-email">Email</label><input type="email" id="si-email" placeholder="your@email.com" autocomplete="email" /></div>
-      <div class="auth-field"><label for="si-pass">Password</label><input type="password" id="si-pass" placeholder="········" autocomplete="current-password" /></div>
+      <div class="auth-field"><label for="si-pass">Password</label><input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password" /></div>
       <button type="button" class="auth-submit" id="btn-signin" onclick="signIn()">Sign In</button>
       <div class="auth-error" id="si-error" role="alert"></div>
     </div>
     <div id="form-create" aria-hidden="true" role="tabpanel" aria-labelledby="tab-create" tabindex="0">
       <div class="auth-sub">Set up your private script space.</div>
       <div class="auth-field"><label for="ca-name">Your First Name</label><input type="text" id="ca-name" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
+      <div class="auth-field"><label for="ca-partner">Partner's First Name</label><input type="text" id="ca-partner" placeholder="e.g. Alex" autocomplete="off" /></div>
       <div class="auth-field"><label for="ca-email">Email</label><input type="email" id="ca-email" placeholder="your@email.com" autocomplete="email" /></div>
-      <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><input type="password" id="ca-pass" placeholder="········" autocomplete="new-password" /></div>
+      <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /></div>
       <div class="auth-field"><label for="ca-fight">The Fight — what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
       <button type="button" class="auth-submit" id="btn-create" onclick="createAccount()">Create Account</button>
       <div class="auth-error" id="ca-error" role="alert"></div>
@@ -304,9 +305,10 @@ function signIn() {
 }
 
 function createAccount() {
-  var name = val('ca-name'), email = val('ca-email'), pass = el('ca-pass').value, fight = val('ca-fight');
+  var name = val('ca-name'), partner = val('ca-partner'), email = val('ca-email'), pass = el('ca-pass').value, fight = val('ca-fight');
   txt('ca-error', '');
   if (!name) { txt('ca-error', 'Please enter your name.'); return; }
+  if (!partner) { txt('ca-error', "Please enter your partner's name."); return; }
   if (!email) { txt('ca-error', 'Please enter your email.'); return; }
   if (!pass || pass.length < 6) { txt('ca-error', 'Password needs at least 6 characters.'); return; }
   if (!fight) { txt('ca-error', 'Please name the fight.'); return; }
@@ -329,9 +331,9 @@ function createAccount() {
       return;
     }
     saveSession(d);
-    user.name = name; user.fight = fight;
+    user.name = name; user.partner = partner; user.fight = fight;
     localStorage.setItem('oa_user', JSON.stringify(user));
-    fsSet('users/' + user.uid, { email: email, name: name, fightName: fight, role: 'client', createdAt: new Date().toISOString() });
+    fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString() });
     afterLogin();
   }).catch(function() { el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account'; txt('ca-error', 'Connection error. Try again.'); });
 }
@@ -431,13 +433,16 @@ function loadProfile() {
   fsGet('users/' + user.uid).then(function(d) {
     var p = fromFields(d.fields);
     var name = p.name || user.name || 'Me';
+    var partner = p.partnerName || user.partner || 'Partner';
     var fight = p.fightName || user.fight || 'The Ongoing Argument';
     txt('user-name-display', name);
     txt('fight-title-display', fight);
     txt('script-title-header', fight.toUpperCase());
     el('btn-add-a').textContent = '+ ' + name + ' speaks';
+    el('btn-add-b').textContent = '+ ' + partner + ' speaks';
     el('toggle-a').textContent = name;
-    user.name = name; user.fight = fight;
+    el('toggle-b').textContent = partner;
+    user.name = name; user.partner = partner; user.fight = fight;
   }).catch(function() {});
 }
 
@@ -493,7 +498,7 @@ function saveScript() {
 function addLine(char, beat, dialogue, silent) {
   var c = el('lines-container');
   var isB = char === 'B';
-  var label = isB ? 'Partner' : (user && user.name ? user.name : 'Me');
+  var label = isB ? (user && user.partner ? user.partner : 'Partner') : (user && user.name ? user.name : 'Me');
   var div = document.createElement('div');
   div.className = 'script-line'; div.dataset.type = 'line'; div.dataset.char = char;
   div.innerHTML = '<button class="delete-btn">✕</button>' +
