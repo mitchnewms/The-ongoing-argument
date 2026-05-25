@@ -59,13 +59,11 @@ body {
 .script-page::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg, transparent 0px, transparent 48px, var(--paper-dark) 48px, var(--paper-dark) 52px, transparent 52px, transparent 100px); border-radius: 2px 2px 0 0; }
 .script-title-header { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.12em; color: var(--ink); text-align: center; margin-bottom: 4px; }
 .privacy-tag { text-align: center; font-size: 0.7rem; color: var(--accent); font-style: italic; margin-bottom: 20px; }
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); align-items: center; }
-.writer-toggle { display: flex; align-items: center; gap: 8px; }
-.writer-toggle label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
-.toggle-group { display: flex; border: 1px solid var(--line); border-radius: 1px; overflow: hidden; }
-.toggle-group button { font-family: 'Courier Prime', monospace; font-size: 0.72rem; padding: 8px 16px; border: none; background: transparent; cursor: pointer; color: var(--ink-faint); -webkit-appearance: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-.toggle-group button.active-a { background: var(--ink); color: var(--paper); }
-.toggle-group button.active-b { background: var(--red); color: white; }
+.name-row { display: flex; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.name-field { flex: 1; }
+.name-field label { display: block; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px; }
+.name-field input { width: 100%; background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 4px 2px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); outline: none; }
+.name-field input:focus { border-bottom-color: var(--accent); }
 .scene-block { margin-bottom: 24px; text-align: center; }
 .scene-block label { display: block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
 #scene-input { background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 6px 8px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); outline: none; text-align: center; width: 100%; max-width: 460px; }
@@ -168,15 +166,9 @@ body {
   <div class="script-page">
     <div class="script-title-header" id="script-title-header">THE ONGOING ARGUMENT</div>
     <div class="privacy-tag">🔒 Your version — private until you share with Mitch</div>
-    <div class="toolbar">
-      <div class="writer-toggle">
-        <label>Writing as:</label>
-        <div class="toggle-group">
-          <button id="toggle-a" class="active-a" title="Click to set your name">Me</button>
-          <button id="toggle-b" title="Click to set partner's name">Partner</button>
-        </div>
-      </div>
-      <span style="font-size:0.65rem;color:var(--ink-faint);font-style:italic;align-self:center;">(tap name to edit)</span>
+    <div class="name-row">
+      <div class="name-field"><label for="input-name-a">Your name</label><input type="text" id="input-name-a" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
+      <div class="name-field"><label for="input-name-b">Partner's name</label><input type="text" id="input-name-b" placeholder="e.g. Alex" autocomplete="off" /></div>
     </div>
     <div class="scene-block"><label>Scene / Location</label><input type="text" id="scene-input" placeholder="INT. KITCHEN — EVENING" /></div>
     <div id="lines-container"></div>
@@ -252,8 +244,8 @@ function bindAll() {
   on('btn-add-a', function() { addLine('A'); });
   on('btn-add-b', function() { addLine('B'); });
   on('btn-add-dir', addDir);
-  on('toggle-a', function() { if (el('toggle-a').textContent === 'Me') { editName('a'); } setWriter('A'); });
-  on('toggle-b', function() { if (el('toggle-b').textContent === 'Partner') { editName('b'); } setWriter('B'); });
+  var na = el('input-name-a'); if (na) na.addEventListener('blur', function() { saveName('a', na.value.trim()); });
+  var nb = el('input-name-b'); if (nb) nb.addEventListener('blur', function() { saveName('b', nb.value.trim()); });
   on('btn-refresh', loadClients);
   on('btn-close-script', function() { hide('script-modal'); });
   on('btn-close-script2', function() { hide('script-modal'); });
@@ -444,8 +436,8 @@ function loadProfile() {
     txt('script-title-header', fight.toUpperCase());
     el('btn-add-a').textContent = '+ ' + name + ' speaks';
     el('btn-add-b').textContent = '+ ' + partner + ' speaks';
-    el('toggle-a').textContent = name;
-    el('toggle-b').textContent = partner;
+    var na = el('input-name-a'); if (na) na.value = name !== 'Me' ? name : '';
+    var nb = el('input-name-b'); if (nb) nb.value = partner !== 'Partner' ? partner : '';
     user.name = name; user.partner = partner; user.fight = fight;
     localStorage.setItem('oa_user', JSON.stringify(user));
   }).catch(function() {});
@@ -531,26 +523,15 @@ div.querySelector('.direction-input').addEventListener('input', sched);
 if (!silent) { div.querySelector('.direction-input').focus(); sched(); }
 }
 
-function setWriter(w) {
-el('toggle-a').className = w === 'A' ? 'active-a' : '';
-el('toggle-b').className = w === 'B' ? 'active-b' : '';
-}
-
-function editName(which) {
+function saveName(which, n) {
+  if (!n || !user) return;
   var isA = which === 'a';
-  var current = isA ? (user && user.name || 'Me') : (user && user.partner || 'Partner');
-  var prompt_text = isA ? 'Your first name:' : "Partner's first name:";
-  var n = window.prompt(prompt_text, current === (isA ? 'Me' : 'Partner') ? '' : current);
-  if (!n || !n.trim()) return;
-  n = n.trim();
   if (isA) {
     user.name = n;
-    el('toggle-a').textContent = n;
     el('btn-add-a').textContent = '+ ' + n + ' speaks';
-    el('user-name-display').textContent = n;
+    txt('user-name-display', n);
   } else {
     user.partner = n;
-    el('toggle-b').textContent = n;
     el('btn-add-b').textContent = '+ ' + n + ' speaks';
   }
   localStorage.setItem('oa_user', JSON.stringify(user));
