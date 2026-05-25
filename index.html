@@ -300,7 +300,10 @@ function signIn() {
   .then(function(d) {
     el('btn-signin').disabled = false; el('btn-signin').textContent = 'Sign In';
     if (d.error) { txt('si-error', 'Incorrect email or password.'); return; }
-    saveSession(d); afterLogin();
+    var prev = user;
+    saveSession(d);
+    if (prev) { user.name = prev.name; user.partner = prev.partner; user.fight = prev.fight; }
+    afterLogin();
   }).catch(function() { el('btn-signin').disabled = false; el('btn-signin').textContent = 'Sign In'; txt('si-error', 'Connection error. Try again.'); });
 }
 
@@ -443,6 +446,7 @@ function loadProfile() {
     el('toggle-a').textContent = name;
     el('toggle-b').textContent = partner;
     user.name = name; user.partner = partner; user.fight = fight;
+    localStorage.setItem('oa_user', JSON.stringify(user));
   }).catch(function() {});
 }
 
