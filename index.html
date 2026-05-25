@@ -41,7 +41,7 @@ body {
 .auth-submit { width: 100%; padding: 16px; font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-radius: 2px; background: var(--accent); color: white; cursor: pointer; -webkit-appearance: none; appearance: none; display: block; margin-top: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .auth-submit:active { background: #7a5c10; }
 .auth-submit:disabled { background: #b8a070; cursor: not-allowed; }
-.auth-error { font-size: 0.78rem; color: var(--red); margin-top: 12px; font-style: italic; min-height: 20px; text-align: center; }
+.auth-error { font-size: 0.85rem; color: var(--red); margin-top: 12px; font-style: italic; min-height: 24px; text-align: center; }
 .auth-loading { text-align: center; font-size: 0.8rem; color: var(--ink-faint); font-style: italic; margin-top: 8px; }
 
 #script-screen { display: none; width: 100%; max-width: 680px; }
@@ -316,7 +316,16 @@ function createAccount() {
   .then(function(d) {
     el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
     if (d.error) {
-      txt('ca-error', d.error.message === 'EMAIL_EXISTS' ? 'That email is taken. Try signing in.' : 'Could not create account. Try again.');
+      console.error('Firebase signup error:', d);
+      var code = d.error.message;
+      var msgs = {
+        'EMAIL_EXISTS': 'That email is already in use. Try signing in.',
+        'OPERATION_NOT_ALLOWED': 'Sign-up is currently disabled — contact support.',
+        'INVALID_EMAIL': 'Please enter a valid email address.',
+        'WEAK_PASSWORD : Password should be at least 6 characters': 'Password is too weak — use at least 6 characters.',
+        'TOO_MANY_ATTEMPTS_TRY_LATER': 'Too many attempts. Please wait a few minutes.'
+      };
+      txt('ca-error', msgs[code] || ('Could not create account (' + code + '). Try again.'));
       return;
     }
     saveSession(d);
