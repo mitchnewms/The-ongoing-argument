@@ -26,6 +26,13 @@ body {
 .auth-tabs { display: flex; margin-bottom: 24px; border-bottom: 2px solid var(--line); }
 .auth-tab { flex: 1; padding: 12px 8px; font-family: 'Courier Prime', monospace; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; border: none; background: transparent; color: var(--ink-faint); cursor: pointer; -webkit-appearance: none; appearance: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .auth-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); margin-bottom: -2px; font-weight: bold; }
+/* CSS-only tab switching via hidden radio inputs */
+.tab-radio { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+#form-create { display: none; }
+#r-create:checked ~ .auth-tabs ~ #form-create { display: block; }
+#r-create:checked ~ .auth-tabs ~ #form-signin { display: none; }
+#r-signin:checked ~ .auth-tabs > label[for="r-signin"],
+#r-create:checked ~ .auth-tabs > label[for="r-create"] { color: var(--accent); border-bottom: 2px solid var(--accent); margin-bottom: -2px; font-weight: bold; }
 .auth-sub { font-size: 0.8rem; color: var(--ink-faint); font-style: italic; margin-bottom: 20px; }
 .auth-field { margin-bottom: 18px; }
 .auth-field label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
@@ -125,9 +132,12 @@ body {
     <p>A script in progress — always to be continued</p>
   </div>
   <div class="auth-card">
+    <!-- Radio inputs power CSS tab switching with zero JS dependency -->
+    <input type="radio" name="authtab" id="r-signin" class="tab-radio" checked tabindex="-1">
+    <input type="radio" name="authtab" id="r-create" class="tab-radio" tabindex="-1">
     <div class="auth-tabs" role="tablist">
-      <button type="button" class="auth-tab active" id="tab-signin" role="tab" aria-selected="true" aria-controls="form-signin" onclick="switchTab('signin')">Sign In</button>
-      <button type="button" class="auth-tab" id="tab-create" role="tab" aria-selected="false" aria-controls="form-create" onclick="switchTab('create')">Create Account</button>
+      <label class="auth-tab" for="r-signin" id="tab-signin" role="tab" aria-selected="true" aria-controls="form-signin" onclick="switchTab('signin')">Sign In</label>
+      <label class="auth-tab" for="r-create" id="tab-create" role="tab" aria-selected="false" aria-controls="form-create" onclick="switchTab('create')">Create Account</label>
     </div>
     <div id="form-signin" role="tabpanel" aria-labelledby="tab-signin" tabindex="0">
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
@@ -136,7 +146,7 @@ body {
       <button type="button" class="auth-submit" id="btn-signin" onclick="signIn()">Sign In</button>
       <div class="auth-error" id="si-error" role="alert"></div>
     </div>
-    <div id="form-create" style="display:none;" aria-hidden="true" role="tabpanel" aria-labelledby="tab-create" tabindex="0">
+    <div id="form-create" aria-hidden="true" role="tabpanel" aria-labelledby="tab-create" tabindex="0">
       <div class="auth-sub">Set up your private script space.</div>
       <div class="auth-field"><label for="ca-name">Your First Name</label><input type="text" id="ca-name" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
       <div class="auth-field"><label for="ca-email">Email</label><input type="email" id="ca-email" placeholder="your@email.com" autocomplete="email" /></div>
@@ -267,25 +277,15 @@ function txt(id, t) { var e = el(id); if (e) e.textContent = t; }
 function val(id) { var e = el(id); return e ? e.value.trim() : ''; }
 
 function switchTab(tab) {
-  if (tab === 'signin') {
-    el('tab-signin').className = 'auth-tab active';
-    el('tab-signin').setAttribute('aria-selected', 'true');
-    el('tab-create').className = 'auth-tab';
-    el('tab-create').setAttribute('aria-selected', 'false');
-    el('form-signin').removeAttribute('aria-hidden');
-    el('form-create').setAttribute('aria-hidden', 'true');
-    show('form-signin'); hide('form-create');
-    var f = el('si-email'); if (f) f.focus();
-  } else {
-    el('tab-signin').className = 'auth-tab';
-    el('tab-signin').setAttribute('aria-selected', 'false');
-    el('tab-create').className = 'auth-tab active';
-    el('tab-create').setAttribute('aria-selected', 'true');
-    el('form-create').removeAttribute('aria-hidden');
-    el('form-signin').setAttribute('aria-hidden', 'true');
-    hide('form-signin'); show('form-create');
-    var f = el('ca-name'); if (f) f.focus();
-  }
+  var isSI = tab === 'signin';
+  // CSS handles show/hide via :checked state; just sync the radio
+  el(isSI ? 'r-signin' : 'r-create').checked = true;
+  el('tab-signin').setAttribute('aria-selected', isSI ? 'true' : 'false');
+  el('tab-create').setAttribute('aria-selected', isSI ? 'false' : 'true');
+  el('form-signin').setAttribute('aria-hidden', isSI ? 'false' : 'true');
+  el('form-create').setAttribute('aria-hidden', isSI ? 'true' : 'false');
+  // setTimeout lets the browser finish label→radio focus before we move focus
+  setTimeout(function() { var f = el(isSI ? 'si-email' : 'ca-name'); if (f) f.focus(); }, 0);
 }
 
 // AUTH
