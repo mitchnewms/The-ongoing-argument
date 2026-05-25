@@ -126,23 +126,23 @@ body {
   </div>
   <div class="auth-card">
     <div class="auth-tabs" role="tablist">
-      <button type="button" class="auth-tab active" id="tab-signin" role="tab" aria-selected="true" aria-controls="form-signin">Sign In</button>
-      <button type="button" class="auth-tab" id="tab-create" role="tab" aria-selected="false" aria-controls="form-create">Create Account</button>
+      <button type="button" class="auth-tab active" id="tab-signin" role="tab" aria-selected="true" aria-controls="form-signin" onclick="switchTab('signin')">Sign In</button>
+      <button type="button" class="auth-tab" id="tab-create" role="tab" aria-selected="false" aria-controls="form-create" onclick="switchTab('create')">Create Account</button>
     </div>
-    <div id="form-signin" role="tabpanel" aria-labelledby="tab-signin">
+    <div id="form-signin" role="tabpanel" aria-labelledby="tab-signin" tabindex="0">
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
       <div class="auth-field"><label for="si-email">Email</label><input type="email" id="si-email" placeholder="your@email.com" autocomplete="email" /></div>
       <div class="auth-field"><label for="si-pass">Password</label><input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password" /></div>
-      <button type="button" class="auth-submit" id="btn-signin">Sign In</button>
+      <button type="button" class="auth-submit" id="btn-signin" onclick="signIn()">Sign In</button>
       <div class="auth-error" id="si-error" role="alert"></div>
     </div>
-    <div id="form-create" style="display:none;" role="tabpanel" aria-labelledby="tab-create">
+    <div id="form-create" style="display:none;" aria-hidden="true" role="tabpanel" aria-labelledby="tab-create" tabindex="0">
       <div class="auth-sub">Set up your private script space.</div>
       <div class="auth-field"><label for="ca-name">Your First Name</label><input type="text" id="ca-name" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
       <div class="auth-field"><label for="ca-email">Email</label><input type="email" id="ca-email" placeholder="your@email.com" autocomplete="email" /></div>
       <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /></div>
       <div class="auth-field"><label for="ca-fight">The Fight — what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
-      <button type="button" class="auth-submit" id="btn-create">Create Account</button>
+      <button type="button" class="auth-submit" id="btn-create" onclick="createAccount()">Create Account</button>
       <div class="auth-error" id="ca-error" role="alert"></div>
     </div>
   </div>
@@ -226,18 +226,14 @@ var saveTimer = null;
 var noteTarget = null;
 var scriptTarget = null;
 
-// INIT
-window.onload = function() {
+// INIT — script is at bottom of body so DOM is ready; no window.onload needed
+(function() {
   var s = localStorage.getItem('oa_user');
   if (s) { try { user = JSON.parse(s); token = user.token; refreshAuth(user.refresh); } catch(e) { localStorage.removeItem('oa_user'); } }
   bindAll();
-};
+}());
 
 function bindAll() {
-  on('tab-signin', function() { switchTab('signin'); });
-  on('tab-create', function() { switchTab('create'); });
-  on('btn-signin', signIn);
-  on('btn-create', createAccount);
   on('btn-signout', signOut);
   on('btn-signout-coach', signOut);
   on('btn-save', saveScript);
@@ -276,13 +272,19 @@ function switchTab(tab) {
     el('tab-signin').setAttribute('aria-selected', 'true');
     el('tab-create').className = 'auth-tab';
     el('tab-create').setAttribute('aria-selected', 'false');
+    el('form-signin').removeAttribute('aria-hidden');
+    el('form-create').setAttribute('aria-hidden', 'true');
     show('form-signin'); hide('form-create');
+    var f = el('si-email'); if (f) f.focus();
   } else {
     el('tab-signin').className = 'auth-tab';
     el('tab-signin').setAttribute('aria-selected', 'false');
     el('tab-create').className = 'auth-tab active';
     el('tab-create').setAttribute('aria-selected', 'true');
+    el('form-create').removeAttribute('aria-hidden');
+    el('form-signin').setAttribute('aria-hidden', 'true');
     hide('form-signin'); show('form-create');
+    var f = el('ca-name'); if (f) f.focus();
   }
 }
 
