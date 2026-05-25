@@ -172,10 +172,11 @@ body {
       <div class="writer-toggle">
         <label>Writing as:</label>
         <div class="toggle-group">
-          <button id="toggle-a" class="active-a">Me</button>
-          <button id="toggle-b">Partner</button>
+          <button id="toggle-a" class="active-a" title="Click to set your name">Me</button>
+          <button id="toggle-b" title="Click to set partner's name">Partner</button>
         </div>
       </div>
+      <span style="font-size:0.65rem;color:var(--ink-faint);font-style:italic;align-self:center;">(tap name to edit)</span>
     </div>
     <div class="scene-block"><label>Scene / Location</label><input type="text" id="scene-input" placeholder="INT. KITCHEN — EVENING" /></div>
     <div id="lines-container"></div>
@@ -251,8 +252,8 @@ function bindAll() {
   on('btn-add-a', function() { addLine('A'); });
   on('btn-add-b', function() { addLine('B'); });
   on('btn-add-dir', addDir);
-  on('toggle-a', function() { setWriter('A'); });
-  on('toggle-b', function() { setWriter('B'); });
+  on('toggle-a', function() { if (el('toggle-a').textContent === 'Me') { editName('a'); } setWriter('A'); });
+  on('toggle-b', function() { if (el('toggle-b').textContent === 'Partner') { editName('b'); } setWriter('B'); });
   on('btn-refresh', loadClients);
   on('btn-close-script', function() { hide('script-modal'); });
   on('btn-close-script2', function() { hide('script-modal'); });
@@ -533,6 +534,27 @@ if (!silent) { div.querySelector(’.direction-input’).focus(); sched(); }
 function setWriter(w) {
 el(‘toggle-a’).className = w === ‘A’ ? ‘active-a’ : ‘’;
 el(‘toggle-b’).className = w === ‘B’ ? ‘active-b’ : ‘’;
+}
+
+function editName(which) {
+  var isA = which === ‘a’;
+  var current = isA ? (user && user.name || ‘Me’) : (user && user.partner || ‘Partner’);
+  var prompt_text = isA ? ‘Your first name:’ : "Partner’s first name:";
+  var n = window.prompt(prompt_text, current === (isA ? ‘Me’ : ‘Partner’) ? ‘’ : current);
+  if (!n || !n.trim()) return;
+  n = n.trim();
+  if (isA) {
+    user.name = n;
+    el(‘toggle-a’).textContent = n;
+    el(‘btn-add-a’).textContent = ‘+ ‘ + n + ‘ speaks’;
+    el(‘user-name-display’).textContent = n;
+  } else {
+    user.partner = n;
+    el(‘toggle-b’).textContent = n;
+    el(‘btn-add-b’).textContent = ‘+ ‘ + n + ‘ speaks’;
+  }
+  localStorage.setItem(‘oa_user’, JSON.stringify(user));
+  fsSet(‘users/’ + user.uid, isA ? { name: n } : { partnerName: n });
 }
 
 function ar(e) { e.style.height = ‘auto’; e.style.height = e.scrollHeight + ‘px’; }
