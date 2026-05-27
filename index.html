@@ -144,6 +144,7 @@ body {
       <div class="auth-field"><label for="si-pass">Password</label><input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password" /></div>
       <button type="button" class="auth-submit" id="btn-signin" onclick="signIn()">Sign In</button>
       <div class="auth-error" id="si-error" role="alert"></div>
+      <button type="button" id="btn-forgot" onclick="forgotPassword()" style="background:none;border:none;color:var(--ink-faint);font-family:'Courier Prime',monospace;font-size:0.75rem;font-style:italic;cursor:pointer;margin-top:8px;padding:0;text-decoration:underline;">Forgot password?</button>
     </div>
     <div id="form-create" aria-hidden="true" role="tabpanel" aria-labelledby="tab-create" tabindex="0">
       <div class="auth-sub">Set up your private script space.</div>
@@ -181,7 +182,10 @@ body {
     </div>
     <div class="tbc"><span>To Be Continued<span class="dot">...</span></span></div>
   </div>
-  <div class="action-bar"><button class="action-btn" id="btn-save">Save Progress</button></div>
+  <div class="action-bar">
+    <button class="action-btn" id="btn-save">Save Progress</button>
+    <button class="action-btn" id="btn-submit" style="background:var(--red);">Submit for Review</button>
+  </div>
   <div id="status-msg"></div>
 </div>
 
@@ -243,6 +247,7 @@ function bindAll() {
   on('btn-signout', signOut);
   on('btn-signout-coach', signOut);
   on('btn-save', saveScript);
+  on('btn-submit', submitForReview);
   on('btn-add-a', function() { addLine('A'); });
   on('btn-add-b', function() { addLine('B'); });
   on('btn-add-dir', addDir);
@@ -300,6 +305,20 @@ function signIn() {
     if (prev) { user.name = prev.name; user.partner = prev.partner; user.fight = prev.fight; }
     afterLogin();
   }).catch(function() { el('btn-signin').disabled = false; el('btn-signin').textContent = 'Sign In'; txt('si-error', 'Connection error. Try again.'); });
+}
+
+function forgotPassword() {
+  var email = val('si-email');
+  if (!email) { txt('si-error', 'Enter your email above first.'); return; }
+  txt('si-error', '');
+  post(AUTH + ':sendOobCode?key=' + API_KEY, { requestType: 'PASSWORD_RESET', email: email })
+  .then(function(d) {
+    if (d.error) { txt('si-error', 'Could not send reset email. Check the address.'); return; }
+    txt('si-error', '');
+    el('btn-forgot').textContent = 'Reset email sent — check your inbox.';
+    el('btn-forgot').style.color = 'var(--accent)';
+    el('btn-forgot').disabled = true;
+  }).catch(function() { txt('si-error', 'Connection error. Try again.'); });
 }
 
 function createAccount() {
@@ -493,6 +512,22 @@ function saveScript() {
   .then(function() { status('Saved.'); }).catch(function() { status('Save failed.'); });
 }
 
+function submitForReview() {
+  if (!user || user.email === COACH) return;
+  var btn = el('btn-submit');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  saveScript();
+  fsSet('users/' + user.uid, { readyForReview: 'true', submittedAt: new Date().toISOString() })
+  .then(function() {
+    btn.textContent = '✓ Submitted for Review';
+    btn.style.background = '#5a8a5a';
+    status('Script submitted — Mitch will be notified.');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Submit for Review';
+    status('Could not submit. Try again.');
+  });
+}
+
 // LINES
 function addLine(char, beat, dialogue, silent) {
   var c = el('lines-container');
@@ -555,8 +590,10 @@ if (!clients.length) { el('clients-list').innerHTML = '<div class="loading">No c
 var c = el('clients-list'); c.innerHTML = '';
 clients.forEach(function(client) {
 var card = document.createElement('div'); card.className = 'client-card';
-card.innerHTML = '<div><div class="client-name">' + (client.name || 'Unknown') + '</div><div class="client-meta">' + (client.email || '') + ' · ' + (client.fightName || 'unnamed') + '</div></div>' +
+var readyBadge = client.readyForReview === 'true' ? '<span style="display:inline-block;background:var(--red);color:white;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:1px;margin-left:8px;vertical-align:middle;">Ready for Review</span>' : '';
+card.innerHTML = '<div><div class="client-name">' + (client.name || 'Unknown') + readyBadge + '</div><div class="client-meta">' + (client.email || '') + ' · ' + (client.fightName || 'unnamed') + '</div></div>' +
 '<div class="client-actions"><button class="coach-btn vb">Read Script</button><button class="coach-btn nb">Send Note</button></div>';
+if (client.readyForReview === 'true') card.style.borderLeft = '3px solid var(--red)';
 card.querySelector('.vb').addEventListener('click', function() { viewScript(client.id, client.name, client.fightName); });
 card.querySelector('.nb').addEventListener('click', function() { openNote(client.id, client.name); });
 c.appendChild(card);
