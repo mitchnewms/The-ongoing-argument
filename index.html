@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>The Ongoing Argument</title>
-<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -122,8 +122,397 @@ body {
 .send-note-btn { font-family: ‘Special Elite’, cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; margin-top: 12px; }
 </style>
 
+<style>
+/* ── LANDING PAGE ─────────────────────────────────────────────
+   All rules use .lp- prefix or are scoped to #landing-screen.
+   No collisions with the app's existing CSS variables.
+   ─────────────────────────────────────────────────────────── */
+
+/* Hide auth on first load — landing appears first */
+#auth-screen { display: none; }
+
+#landing-screen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 10;
+  background: #FAF7F2;
+  color: #1C1814;
+  font-family: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+  line-height: 1.7;
+}
+
+/* HERO */
+.lp-hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 64px 32px 80px;
+}
+
+.lp-photo {
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #EDE4D0, #D8CDB0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 28px;
+  border: 2px solid #C8BAA0;
+  overflow: hidden;
+}
+
+.lp-photo span {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 2.1rem;
+  font-weight: 400;
+  color: #8A7050;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lp-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.lp-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #1C1814;
+  margin-bottom: 5px;
+}
+
+.lp-adviser-title {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9A8870;
+  font-weight: 400;
+  margin-bottom: 56px;
+}
+
+.lp-hero-lines {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.lp-line {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(1.6rem, 5.5vw, 2.15rem);
+  font-weight: 400;
+  line-height: 1.45;
+  color: #1C1814;
+  letter-spacing: -0.01em;
+  display: block;
+  text-wrap: balance;
+}
+
+.lp-line.lp-gold {
+  color: #C8822A;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* SHARED SECTION SHELL */
+.lp-section {
+  padding: 72px 32px;
+  max-width: 680px;
+  margin: 0 auto;
+  border-top: 1px solid #E0D8C8;
+}
+
+/* STORY */
+.lp-body {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(1rem, 2.6vw, 1.1rem);
+  line-height: 1.9;
+  color: #2A2218;
+  max-width: 58ch;
+  margin: 0 auto;
+}
+
+.lp-body p { margin-bottom: 1.5em; }
+.lp-body p:last-child { margin-bottom: 0; }
+.lp-body strong { font-weight: 700; }
+
+/* HOW IT WORKS */
+.lp-heading {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #1C1814;
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.lp-steps { list-style: none; max-width: 52ch; margin: 0 auto; }
+
+.lp-step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.lp-step-n {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #C8822A;
+  min-width: 24px;
+  flex-shrink: 0;
+  padding-top: 2px;
+  line-height: 1.4;
+}
+
+.lp-step-t {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #2A2218;
+}
+
+/* THE TRUTH */
+.lp-truth {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(0.9rem, 2.3vw, 1rem);
+  line-height: 1.95;
+  color: #6A5E4C;
+  text-align: center;
+  font-style: italic;
+  max-width: 50ch;
+  margin: 0 auto;
+}
+
+/* CTA BLOCKS */
+.lp-cta {
+  padding: 72px 32px;
+  text-align: center;
+  border-top: 1px solid #E0D8C8;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.lp-price-note {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9A8870;
+  margin-bottom: 32px;
+}
+
+.lp-btn {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  background: #C8822A;
+  color: #FAF7F2;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  border-radius: 1px;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.lp-btn:hover, .lp-btn:active { background: #A86A1E; }
+.lp-btn:disabled { background: #C8A870; cursor: default; }
+
+.lp-tagline {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #9A8870;
+  margin-top: 24px;
+}
+
+/* HIDDEN SECTIONS — shown by JS */
+#lp-s6, #lp-s7 { display: none; }
+
+@keyframes lp-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.lp-in { animation: lp-in 0.55s ease both; }
+
+/* COMMITMENT TEXT */
+.lp-commit-text {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+  line-height: 1.9;
+  color: #2A2218;
+  text-align: center;
+  max-width: 50ch;
+  margin: 0 auto 40px;
+}
+
+.lp-commit-text p { margin-bottom: 1.4em; }
+.lp-commit-text p:last-child { margin-bottom: 0; }
+
+/* NAME THE FIGHT */
+.lp-fight-hd {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(1.4rem, 4.5vw, 1.85rem);
+  font-weight: 700;
+  color: #1C1814;
+  line-height: 1.3;
+  margin-bottom: 16px;
+  text-wrap: balance;
+}
+
+.lp-fight-sub {
+  font-size: 0.9rem;
+  color: #6A6050;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.lp-fight-eg {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #9A9080;
+  margin-bottom: 32px;
+}
+
+.lp-fight-err {
+  font-size: 0.82rem;
+  color: #C0392B;
+  font-style: italic;
+  min-height: 22px;
+  margin-bottom: 6px;
+}
+
+.lp-fight-input {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 20px;
+  padding: 16px 18px;
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.05rem;
+  color: #1C1814;
+  background: #FFFFFF;
+  border: 1.5px solid #D0C4B0;
+  border-radius: 1px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s;
+}
+
+.lp-fight-input:focus { border-color: #C8822A; }
+.lp-fight-input::placeholder { color: #BEB0A0; }
+</style>
+
 </head>
 <body>
+
+<!-- LANDING PAGE — sits in front of everything; dismissed after fight-name step -->
+<div id="landing-screen">
+
+  <!-- S1: HERO -->
+  <section class="lp-hero">
+    <!-- Replace the .lp-photo div with <img src="..." alt="Mitch Newman"> to add a real photo -->
+    <div class="lp-photo" aria-hidden="true"><span>MN</span></div>
+    <div class="lp-name">Mitch Newman</div>
+    <div class="lp-adviser-title">Relationship Adviser</div>
+    <div class="lp-hero-lines">
+      <span class="lp-line">The fight you keep having.</span>
+      <span class="lp-line">The one that never gets resolved.</span>
+      <span class="lp-line lp-gold">It's trying to get your attention.</span>
+    </div>
+  </section>
+
+  <!-- S2: THE STORY -->
+  <section class="lp-section">
+    <div class="lp-body">
+      <p>When you write for a sitcom you have twenty two minutes.</p>
+      <p>Twenty two minutes to set up a conflict, build it, and resolve it. Every week. Tell a story. Resolve the conflict. Done.</p>
+      <p>Then I became a relationship coach.</p>
+      <p>And I discovered that the same conflicts I was resolving on screen in twenty two minutes were playing out in real relationships for years. Sometimes decades. The same fight. The same lines. No resolution. No end in sight.</p>
+      <p>Just to be continued.</p>
+      <p>So I married what I knew as a screenwriter with what I learned as a coach. And created a process that helps couples do what TV writers do every week.</p>
+      <p><strong>Find the ending.</strong></p>
+    </div>
+  </section>
+
+  <!-- S3: HOW IT WORKS -->
+  <section class="lp-section">
+    <div class="lp-heading">How It Works</div>
+    <ol class="lp-steps">
+      <li class="lp-step"><span class="lp-step-n">1.</span><span class="lp-step-t">Name the fight you keep having. Together.</span></li>
+      <li class="lp-step"><span class="lp-step-n">2.</span><span class="lp-step-t">Each of you writes your version. Separately. Privately.</span></li>
+      <li class="lp-step"><span class="lp-step-n">3.</span><span class="lp-step-t">The system analyzes the conflict and the dynamics. Out of story. Into solution.</span></li>
+      <li class="lp-step"><span class="lp-step-n">4.</span><span class="lp-step-t">Grab some popcorn. Watch your argument performed by avatar actors.</span></li>
+      <li class="lp-step"><span class="lp-step-n">5.</span><span class="lp-step-t">See how the breakdown is really the breakthrough you've needed.</span></li>
+      <li class="lp-step"><span class="lp-step-n">6.</span><span class="lp-step-t">Do the individual work. Get into Relationshape.</span></li>
+      <li class="lp-step"><span class="lp-step-n">7.</span><span class="lp-step-t">Learn a new language. Out of blame. Out of confrontation. Into conversation.</span></li>
+      <li class="lp-step"><span class="lp-step-n">8.</span><span class="lp-step-t">Rewrite the script together. So you both win. And so does the relationship.</span></li>
+    </ol>
+  </section>
+
+  <!-- S4: THE TRUTH -->
+  <section class="lp-section">
+    <p class="lp-truth">It is no coincidence that you found each other. Most couples want the same things. What differs is how they were each taught to get there. The fight is not evidence that something is broken. It is two belief systems asking to be understood. And underneath every ongoing argument is an unmet need that has never been named.<br><br>Name it. Meet it. And watch what becomes possible.</p>
+  </section>
+
+  <!-- S5: CTA -->
+  <div class="lp-cta">
+    <div class="lp-price-note">Pricing &middot; TBD</div>
+    <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">We're ready. Let's begin.</button>
+    <div class="lp-tagline">No fight is too big to have a happy ending.</div>
+  </div>
+
+  <!-- S6: COMMITMENT STATEMENT — hidden until S5 button clicked -->
+  <div id="lp-s6">
+    <div class="lp-cta">
+      <div class="lp-commit-text">
+        <p>Before you begin there is one thing worth knowing.</p>
+        <p>This process is designed to be engaging, enlightening, and at times challenging. It will bring things to the surface. That is the point.</p>
+        <p>It requires both of you to be fully present. Individually committed. And genuinely willing to do the work. Not perfectly. But honestly.</p>
+        <p>This is not therapy. It is coaching. It works when both people are in it.</p>
+        <p>If at any point you find yourself questioning your commitment to the process that is important information worth paying attention to.</p>
+        <p>Are you both willing to begin?</p>
+      </div>
+      <button class="lp-btn" id="lp-btn-commit" onclick="lpRevealFight()">Yes. We are both willing.</button>
+    </div>
+  </div>
+
+  <!-- S7: NAME THE FIGHT — hidden until S6 button clicked -->
+  <div id="lp-s7">
+    <div class="lp-cta">
+      <div class="lp-fight-hd">What do you both call this fight?</div>
+      <div class="lp-fight-sub">The one you both know. Agree on a name together. Right now.</div>
+      <div class="lp-fight-eg">The Money Thing. The Way You Talk To Me. The Kids. The Job.</div>
+      <div class="lp-fight-err" id="lp-fight-err"></div>
+      <input type="text" class="lp-fight-input" id="lp-fight-input" placeholder="Give it a name." autocomplete="off" onkeydown="if(event.key==='Enter')lpProceed()" />
+      <button class="lp-btn" id="lp-btn-go" onclick="lpProceed()">This is the one. Let's go.</button>
+    </div>
+  </div>
+
+</div>
 
 <div id="auth-screen">
   <div class="auth-header">
@@ -382,6 +771,7 @@ function refreshAuth(refreshToken) {
 }
 
 function afterLogin() {
+  hide('landing-screen');
   hide('auth-screen');
   if (user.email === COACH) {
     showFlex('coach-screen'); loadClients();
@@ -638,6 +1028,48 @@ fsAdd(‘notes’, { userId: noteTarget, text: text, coachEmail: COACH, createdA
 
 var st = null;
 function status(msg) { txt(‘status-msg’, msg); clearTimeout(st); st = setTimeout(function() { txt(‘status-msg’, ‘’); }, 3000); }
+
+/* LANDING PAGE */
+function lpScrollTo(t) {
+  var lp = el(‘landing-screen’);
+  var off = t.getBoundingClientRect().top - lp.getBoundingClientRect().top + lp.scrollTop;
+  lp.scrollTo({ top: Math.max(0, off - 24), behavior: ‘smooth’ });
+}
+
+function lpRevealCommitment() {
+  var s6 = el(‘lp-s6’);
+  s6.style.display = ‘block’;
+  void s6.offsetWidth;
+  s6.classList.add(‘lp-in’);
+  el(‘lp-btn-begin’).disabled = true;
+  setTimeout(function() { lpScrollTo(s6); }, 60);
+}
+
+function lpRevealFight() {
+  var s7 = el(‘lp-s7’);
+  s7.style.display = ‘block’;
+  void s7.offsetWidth;
+  s7.classList.add(‘lp-in’);
+  el(‘lp-btn-commit’).disabled = true;
+  setTimeout(function() {
+    lpScrollTo(s7);
+    setTimeout(function() { var fi = el(‘lp-fight-input’); if (fi) fi.focus(); }, 500);
+  }, 60);
+}
+
+function lpProceed() {
+  var fightName = el(‘lp-fight-input’).value.trim();
+  if (!fightName) {
+    el(‘lp-fight-err’).textContent = ‘Give your fight a name before you begin.’;
+    el(‘lp-fight-input’).focus();
+    return;
+  }
+  el(‘lp-fight-err’).textContent = ‘’;
+  hide(‘landing-screen’);
+  el(‘ca-fight’).value = fightName;
+  switchTab(‘create’);
+  showFlex(‘auth-screen’);
+}
 </script>
 
 </body>
