@@ -120,6 +120,48 @@ body {
 #note-textarea { width: 100%; min-height: 140px; background: #fff; border: 1px solid var(--line); padding: 12px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); outline: none; resize: vertical; line-height: 1.6; border-radius: 1px; }
 #note-textarea:focus { border-color: var(--accent); }
 .send-note-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; margin-top: 12px; }
+
+/* ── AWARENESS LOG ──────────────────────────────────────────── */
+#al-fab { display: none; position: fixed; bottom: 24px; right: 20px; z-index: 50; background: var(--accent); color: white; font-family: 'Courier Prime', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; border: none; padding: 10px 14px; border-radius: 1px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.35); -webkit-appearance: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#awareness-log { margin-top: 16px; background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); overflow: hidden; }
+.al-log-toggle { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: var(--paper-dark); border: none; cursor: pointer; font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); -webkit-appearance: none; touch-action: manipulation; }
+.al-log-toggle .al-arrow { font-size: 0.72rem; color: var(--ink-faint); font-family: 'Courier Prime', monospace; letter-spacing: 0; text-transform: none; }
+#al-log-body { display: none; padding: 20px 20px 8px; }
+.al-section { margin-bottom: 28px; }
+.al-section-hd { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #C8822A; margin-bottom: 3px; font-family: 'Courier Prime', monospace; }
+.al-section-desc { font-size: 0.75rem; color: var(--ink-faint); font-style: italic; margin-bottom: 10px; }
+.al-entry { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.al-entry:last-child { border-bottom: none; }
+.al-entry-text { font-size: 0.88rem; color: var(--ink); line-height: 1.55; }
+.al-entry-time { font-size: 0.63rem; color: var(--ink-faint); margin-top: 3px; }
+.al-entries-empty { font-size: 0.75rem; color: var(--ink-faint); font-style: italic; }
+.al-add-inline { font-family: 'Courier Prime', monospace; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--line); background: transparent; color: var(--accent); cursor: pointer; border-radius: 1px; margin-top: 8px; display: inline-block; -webkit-appearance: none; touch-action: manipulation; }
+/* Awareness log popup */
+#al-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+.al-modal-box { background: var(--paper); border-radius: 2px; width: 100%; max-width: 480px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); border-top: 4px solid #C8822A; }
+.al-modal-top { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 14px; border-bottom: 1px solid var(--line); }
+.al-modal-top h3 { font-family: 'Special Elite', cursive; font-size: 0.95rem; color: var(--ink); }
+.al-modal-x { background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 1.1rem; padding: 4px 8px; -webkit-appearance: none; touch-action: manipulation; }
+.al-modal-body { padding: 20px; }
+.al-type-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.al-type-btn { flex: 1; min-width: 0; font-family: 'Courier Prime', monospace; font-size: 0.62rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 7px 4px; border: 1px solid var(--line); background: transparent; color: var(--ink-faint); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; text-align: center; }
+.al-type-btn.al-active { border-color: #C8822A; color: #C8822A; background: #fdf8f2; }
+.al-type-desc { font-size: 0.72rem; color: var(--ink-faint); font-style: italic; margin-bottom: 10px; min-height: 18px; }
+#al-entry-text { width: 100%; min-height: 100px; background: #fff; border: 1px solid var(--line); padding: 12px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); outline: none; resize: vertical; line-height: 1.6; border-radius: 1px; margin-bottom: 14px; display: block; }
+#al-entry-text:focus { border-color: #C8822A; }
+.al-modal-actions { display: flex; gap: 10px; align-items: center; }
+.al-save-btn { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 11px 22px; background: #C8822A; color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+.al-save-btn:disabled { background: #d4a870; cursor: default; }
+.al-cancel-btn { background: none; border: none; font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-faint); cursor: pointer; padding: 4px 0; -webkit-appearance: none; touch-action: manipulation; text-decoration: underline; }
+/* Coach awareness log (inside script modal) */
+.al-coach-block { padding-top: 20px; margin-top: 20px; border-top: 2px solid var(--line); }
+.al-coach-hd { font-family: 'Special Elite', cursive; font-size: 0.82rem; color: #C8822A; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+.al-coach-section { margin-bottom: 18px; }
+.al-coach-section-hd { font-size: 0.60rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #C8822A; margin-bottom: 6px; font-family: 'Courier Prime', monospace; }
+.al-coach-entry { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.al-coach-entry:last-child { border-bottom: none; }
+.al-coach-entry-text { font-size: 0.85rem; color: var(--ink); line-height: 1.5; }
+.al-coach-entry-time { font-size: 0.62rem; color: var(--ink-faint); margin-top: 2px; }
 </style>
 
 <style>
@@ -604,7 +646,38 @@ body {
     <button class="action-btn" id="btn-submit" style="background:var(--red);">Submit for Review</button>
   </div>
   <div id="status-msg"></div>
+
+  <!-- AWARENESS LOG PANEL -->
+  <div id="awareness-log">
+    <button class="al-log-toggle" id="btn-al-toggle" onclick="alToggle()">
+      Awareness Log
+      <span class="al-arrow" id="al-toggle-arrow">&#9658; Open</span>
+    </button>
+    <div id="al-log-body">
+      <div class="al-section">
+        <div class="al-section-hd">Words to Release</div>
+        <div class="al-section-desc">Words and phrases from your old script that no longer serve you.</div>
+        <div id="al-entries-wordsToRelease"><div class="al-entries-empty">Nothing here yet.</div></div>
+        <button class="al-add-inline" onclick="openLogModal('wordsToRelease')">+ Add</button>
+      </div>
+      <div class="al-section">
+        <div class="al-section-hd">New Language to Try</div>
+        <div class="al-section-desc">New words and phrases you want to bring into your conversations.</div>
+        <div id="al-entries-newLanguage"><div class="al-entries-empty">Nothing here yet.</div></div>
+        <button class="al-add-inline" onclick="openLogModal('newLanguage')">+ Add</button>
+      </div>
+      <div class="al-section">
+        <div class="al-section-hd">What I Noticed About Myself</div>
+        <div class="al-section-desc">Awarenesses, patterns, and moments of recognition from your process.</div>
+        <div id="al-entries-selfAwareness"><div class="al-entries-empty">Nothing here yet.</div></div>
+        <button class="al-add-inline" onclick="openLogModal('selfAwareness')">+ Add</button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- AWARENESS LOG FAB — always accessible in script view -->
+<button id="al-fab" onclick="openLogModal('')">+ Log</button>
 
 <div id="coach-screen">
   <div class="coach-header">
@@ -636,6 +709,29 @@ body {
       <p style="font-size:0.82rem;color:var(--ink-light);font-style:italic;margin-bottom:16px;">This note will appear in the client's script tool next time they open it.</p>
       <textarea id="note-textarea" placeholder="Write your note here…"></textarea>
       <button class="send-note-btn" id="btn-send-note">Send Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- AWARENESS LOG POPUP -->
+<div id="al-modal">
+  <div class="al-modal-box">
+    <div class="al-modal-top">
+      <h3>Add to Log</h3>
+      <button class="al-modal-x" onclick="closeLogModal()">✕</button>
+    </div>
+    <div class="al-modal-body">
+      <div class="al-type-row">
+        <button class="al-type-btn" id="al-type-wordsToRelease" onclick="alSetType('wordsToRelease')">Words to Release</button>
+        <button class="al-type-btn" id="al-type-newLanguage" onclick="alSetType('newLanguage')">New Language</button>
+        <button class="al-type-btn" id="al-type-selfAwareness" onclick="alSetType('selfAwareness')">What I Noticed</button>
+      </div>
+      <div class="al-type-desc" id="al-type-desc"></div>
+      <textarea id="al-entry-text" placeholder=""></textarea>
+      <div class="al-modal-actions">
+        <button class="al-save-btn" id="al-save-btn" onclick="saveLogEntry()">Save</button>
+        <button class="al-cancel-btn" onclick="closeLogModal()">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
@@ -776,7 +872,7 @@ function createAccount() {
 function signOut() {
   user = null; token = null;
   localStorage.removeItem('oa_user');
-  hide('script-screen'); hide('coach-screen');
+  hide('script-screen'); hide('coach-screen'); hide('al-fab');
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   switchTab('signin');
@@ -803,8 +899,10 @@ function afterLogin() {
   hide('landing-screen');
   hide('auth-screen');
   if (user.email === COACH) {
+    hide('al-fab');
     showFlex('coach-screen'); loadClients();
   } else {
+    el('al-fab').style.display = 'block';
     show('script-screen');
     loadProfile(); loadScript(); loadNotes();
   }
@@ -1037,6 +1135,7 @@ c.appendChild(b);
 } else { var dd = document.createElement('div'); dd.className = 'modal-direction'; dd.textContent = l.text; c.appendChild(dd); }
 });
 var tbc = document.createElement('div'); tbc.className = 'modal-tbc'; tbc.textContent = 'TO BE CONTINUED…'; c.appendChild(tbc);
+loadClientAwarenessLog(uid, c);
 el('script-modal').style.display = 'flex';
 }).catch(function() {});
 }
@@ -1105,6 +1204,125 @@ function lpProceed() {
     switchTab('create');
     showFlex('auth-screen');
   }, 500);
+}
+
+/* AWARENESS LOG */
+var alCurrentType = 'wordsToRelease';
+var AL_TYPES = {
+  wordsToRelease: { desc: 'Words and phrases from your old script that no longer serve you.', placeholder: 'e.g. "You always do this" or "You never listen"' },
+  newLanguage:    { desc: 'New words and phrases you want to bring into your conversations.', placeholder: 'e.g. "I feel unheard when..." or "What I need right now is..."' },
+  selfAwareness:  { desc: 'Awarenesses, patterns, and moments of recognition from your process.', placeholder: 'e.g. "I sound like my mother when I say..." or "I realize I always shut down when..."' }
+};
+
+function openLogModal(type) {
+  alSetType(type || 'wordsToRelease');
+  el('al-entry-text').value = '';
+  el('al-modal').style.display = 'flex';
+  setTimeout(function() { var t = el('al-entry-text'); if (t) t.focus(); }, 80);
+}
+
+function closeLogModal() {
+  el('al-modal').style.display = 'none';
+}
+
+function alSetType(type) {
+  alCurrentType = AL_TYPES[type] ? type : 'wordsToRelease';
+  ['wordsToRelease', 'newLanguage', 'selfAwareness'].forEach(function(t) {
+    var b = el('al-type-' + t);
+    if (b) b.classList.toggle('al-active', t === alCurrentType);
+  });
+  var info = AL_TYPES[alCurrentType];
+  var desc = el('al-type-desc'); if (desc) desc.textContent = info.desc;
+  var ta = el('al-entry-text'); if (ta) ta.placeholder = info.placeholder;
+}
+
+function saveLogEntry() {
+  var text = (el('al-entry-text').value || '').trim();
+  if (!text || !user) return;
+  var btn = el('al-save-btn');
+  btn.disabled = true;
+  fsAdd('awarenessLog', {
+    userId: user.uid,
+    entryType: alCurrentType,
+    content: text,
+    timestamp: new Date().toISOString(),
+    sharedWithCoach: 'true'
+  }).then(function() {
+    btn.disabled = false;
+    closeLogModal();
+    var body = el('al-log-body');
+    if (body && body.style.display !== 'block') {
+      body.style.display = 'block';
+      var arrow = el('al-toggle-arrow'); if (arrow) arrow.innerHTML = '&#9660; Close';
+    }
+    loadAwarenessLog();
+  }).catch(function() { btn.disabled = false; });
+}
+
+function alToggle() {
+  var body = el('al-log-body');
+  var arrow = el('al-toggle-arrow');
+  if (!body) return;
+  var open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.innerHTML = open ? '&#9658; Open' : '&#9660; Close';
+  if (!open) { loadAwarenessLog(); }
+}
+
+function loadAwarenessLog() {
+  if (!user || user.email === COACH) return;
+  fsList('awarenessLog').then(function(d) {
+    var entries = (d.documents || []).map(function(doc) { return fromFields(doc.fields); })
+      .filter(function(e) { return e.userId === user.uid; })
+      .sort(function(a, b) { return (a.timestamp || '') < (b.timestamp || '') ? -1 : 1; });
+    ['wordsToRelease', 'newLanguage', 'selfAwareness'].forEach(function(t) {
+      var c = el('al-entries-' + t);
+      if (!c) return;
+      var mine = entries.filter(function(e) { return e.entryType === t; });
+      if (!mine.length) { c.innerHTML = '<div class="al-entries-empty">Nothing here yet.</div>'; return; }
+      c.innerHTML = mine.map(function(e) {
+        return '<div class="al-entry"><div class="al-entry-text">' + esc(e.content || '') + '</div><div class="al-entry-time">' + alFmtTime(e.timestamp) + '</div></div>';
+      }).join('');
+    });
+  }).catch(function() {});
+}
+
+function alFmtTime(ts) {
+  if (!ts) return '';
+  try {
+    var d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  } catch(e) { return ts; }
+}
+
+function loadClientAwarenessLog(uid, container) {
+  fsList('awarenessLog').then(function(d) {
+    var entries = (d.documents || []).map(function(doc) { return fromFields(doc.fields); })
+      .filter(function(e) { return e.userId === uid; })
+      .sort(function(a, b) { return (a.timestamp || '') < (b.timestamp || '') ? -1 : 1; });
+    if (!entries.length) return;
+    var sections = [
+      { key: 'wordsToRelease', label: 'Words to Release' },
+      { key: 'newLanguage', label: 'New Language to Try' },
+      { key: 'selfAwareness', label: 'What I Noticed About Myself' }
+    ];
+    var hasAny = sections.some(function(s) { return entries.some(function(e) { return e.entryType === s.key; }); });
+    if (!hasAny) return;
+    var block = document.createElement('div');
+    block.className = 'al-coach-block';
+    var html = '<div class="al-coach-hd">Awareness Log</div>';
+    sections.forEach(function(s) {
+      var mine = entries.filter(function(e) { return e.entryType === s.key; });
+      if (!mine.length) return;
+      html += '<div class="al-coach-section"><div class="al-coach-section-hd">' + s.label + '</div>';
+      mine.forEach(function(e) {
+        html += '<div class="al-coach-entry"><div class="al-coach-entry-text">' + esc(e.content || '') + '</div><div class="al-coach-entry-time">' + alFmtTime(e.timestamp) + '</div></div>';
+      });
+      html += '</div>';
+    });
+    block.innerHTML = html;
+    container.appendChild(block);
+  }).catch(function() {});
 }
 
 window.addEventListener('popstate', function(e) {
