@@ -1845,6 +1845,13 @@ function createAccount() {
         ]).then(function() { return coupleId; });
       }).then(function(coupleId) {
         if (!coupleId) return;
+        // TEMPORARY QA BYPASS — REMOVE BEFORE LAUNCH — bypasses Stripe payment gate
+        if (new URLSearchParams(window.location.search).get('qamode') === 'mitchtest') {
+          var qaCode = generateCoupleCode();
+          fsSet('couples/' + coupleId, { paidStatus: true, coupleCode: qaCode, paidAt: new Date().toISOString() })
+            .then(function() { showPaymentConfirm(qaCode, coupleId); });
+          return;
+        }
         el('btn-create').textContent = 'Redirecting to payment…';
         return fetch('/.netlify/functions/stripe-session', {
           method: 'POST',
