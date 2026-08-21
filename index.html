@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>The Ongoing Argument</title>
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -790,6 +791,14 @@ body {
 .pc-share-url { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-light); word-break: break-all; margin-bottom: 12px; padding: 10px 12px; background: var(--paper-dark); border-radius: 1px; border: 1px solid var(--line); }
 .pc-share-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border: 1px solid var(--line); background: transparent; color: var(--ink-light); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
 .pc-enter-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin-top: 28px; }
+.pc-email-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 10px; text-align: left; }
+.pc-email-input { display: block; width: 100%; padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); background: white; border: 1.5px solid var(--line); border-radius: 1px; outline: none; -webkit-appearance: none; margin-bottom: 8px; }
+.pc-email-input:focus { border-color: var(--accent); }
+.pc-email-input::placeholder { color: var(--ink-faint); }
+.pc-send-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px; background: #5a7a5a; color: white; border: none; border-radius: 1px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; }
+.pc-send-btn:disabled { background: #8aaa8a; cursor: not-allowed; }
+.pc-email-status { font-size: 0.78rem; font-style: italic; color: var(--ink-light); min-height: 20px; margin-top: 8px; font-family: 'Courier Prime', monospace; }
+.pc-resend-btn { background: none; border: none; color: var(--accent); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; padding: 8px 0; display: block; width: 100%; text-align: center; margin-top: 4px; -webkit-appearance: none; text-decoration: underline; }
 
 /* ── Partner B intro screen ── */
 #partner-b-intro-screen { display: none; }
@@ -826,30 +835,7 @@ body {
 </head>
 <body>
 
-<!-- Persistent "join" corner link — visible while landing page is showing -->
-<a class="lp-share-corner" id="lp-share-corner" onclick="chooseJoin(); return false;" href="#" style="display:none;">Your partner started → join here</a>
-
 <!-- ENROLLMENT SCREENS -->
-
-<!-- Starting or Joining? -->
-<div id="start-choice-screen" class="enroll-screen" style="display:none;">
-  <div class="sc-header">
-    <h2>Starting or Joining?</h2>
-    <p>Let us know which best describes you.</p>
-  </div>
-  <div class="sc-cards">
-    <button class="sc-card sc-start" onclick="choosedStart()">
-      <div class="sc-card-label">Partner A</div>
-      <div class="sc-card-title">I'm starting this for us.</div>
-      <div class="sc-card-desc">Create your account, complete the process, and share a code with your partner so they can join you.</div>
-    </button>
-    <button class="sc-card sc-join" onclick="chooseJoin()">
-      <div class="sc-card-label">Partner B</div>
-      <div class="sc-card-title">My partner already started.</div>
-      <div class="sc-card-desc">Enter the code they shared with you to join their process.</div>
-    </button>
-  </div>
-</div>
 
 <!-- Mutual Buy-In -->
 <div id="buyin-screen" class="enroll-screen" style="display:none;">
@@ -865,7 +851,7 @@ body {
       <p>If you are not sure, that is worth a conversation before you begin.</p>
     </div>
     <button class="bi-cta" onclick="showPaymentAuth()">We are both in. Continue.</button>
-    <button class="bi-back" onclick="showStartChoice()">← Go back</button>
+    <button class="bi-back" onclick="biGoBack()">← Go back</button>
   </div>
 </div>
 
@@ -874,12 +860,19 @@ body {
   <div class="pc-card">
     <div class="pc-eyebrow">Payment complete</div>
     <div class="pc-hd">You are all set.</div>
-    <div class="pc-sub">Share this code with your partner so they can join. They will need it to create their account and link to your process.</div>
-    <div class="pc-code-label">Your partner's code</div>
+    <div class="pc-sub">Your partner just needs a link to join you. Send it now or share the code below as a fallback.</div>
+    <div class="pc-divider"></div>
+    <div class="pc-email-label">Send this to your partner so they can join.</div>
+    <input type="email" id="pc-partner-email" class="pc-email-input" placeholder="Enter your partner's email" autocomplete="email" />
+    <button class="pc-send-btn" id="pc-send-btn" onclick="pcSendEmailClick()">Send</button>
+    <div class="pc-email-status" id="pc-email-status"></div>
+    <button class="pc-resend-btn" id="pc-resend-btn" onclick="pcResendEmailClick()" style="display:none;">Resend the link</button>
+    <div class="pc-divider"></div>
+    <div class="pc-code-label">Your partner's code — for reference or as a fallback</div>
     <div class="pc-code" id="pc-code-display">——————</div>
     <button class="pc-copy-btn" id="pc-copy-btn" onclick="pcCopyCode()">Copy Code</button>
     <div class="pc-divider"></div>
-    <div class="pc-share-label">Or share this link directly</div>
+    <div class="pc-share-label">Or copy the join link directly</div>
     <div class="pc-share-url" id="pc-join-url"></div>
     <button class="pc-share-copy-btn" id="pc-share-copy-btn" onclick="pcCopyLink()">Copy Link</button>
     <button class="pc-enter-btn" onclick="pcEnterApp()">Enter Your Script Tool →</button>
@@ -907,9 +900,10 @@ body {
         <p>When both people are fully in it, something real becomes possible. You'll write your version of the fight privately, watch it performed by avatars, do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
       </div>
       <div class="pb-reminder">
-        <p>You are about to commit to something your partner has already started. Take your time before entering your code. This only works if you are both genuinely in it.</p>
+        <p>You are about to commit to something your partner has already started. Take your time before continuing. This only works if you are both genuinely in it.</p>
       </div>
-      <button class="pb-continue-btn" onclick="showCodeEntry()">I'm in. Enter my code →</button>
+      <div id="pb-error" style="display:none; background:rgba(192,57,43,0.12); border-left:3px solid #C0392B; padding:14px 18px; margin-bottom:20px; border-radius:0 2px 2px 0; font-family:'Lora',Georgia,serif; font-size:0.85rem; color:#C0392B; font-style:italic; line-height:1.5;"></div>
+      <button class="pb-continue-btn" id="pb-continue-btn" onclick="pbAutoValidate()">I'm in. Create My Account →</button>
     </div>
   </div>
 </div>
@@ -984,13 +978,6 @@ body {
       <p>Name it. Meet it. And watch what magic becomes possible.</p>
     </div>
   </section>
-
-  <!-- S4b: SHARE WITH PARTNER — subtle joining prompt for Partner B -->
-  <div class="lp-share-section">
-    <div class="lp-share-hd">Your partner already started?</div>
-    <div class="lp-share-sub">If they've been through this process and shared a code with you, start here instead.</div>
-    <button class="lp-share-btn" onclick="chooseJoin()">Join your partner →</button>
-  </div>
 
   <!-- S5: CTA -->
   <div class="lp-cta">
@@ -1574,13 +1561,16 @@ var pendingCoupleId = null; // set for Partner B (from URL or code lookup)
 var pendingPartnerAId = null; // set after code verified
 var pendingFightName = null; // carry fight name into auth
 var pendingJoinCoupleId = null; // coupleId extracted from /join/ URL
+var pendingJoinCode = null; // code extracted from /join/coupleId/code URL
+var pcLastJoinUrl = null; // last join URL used for resend
 
 // INIT — script is at bottom of body so DOM is ready; no window.onload needed
 (function() {
-  // Detect /join/:coupleId URL (Netlify rewrites to index.html)
+  // Detect /join/:coupleId/:coupleCode URL (Netlify rewrites to index.html)
   var pathParts = window.location.pathname.split('/').filter(Boolean);
   if (pathParts[0] === 'join' && pathParts[1]) {
     pendingJoinCoupleId = pathParts[1];
+    if (pathParts[2]) pendingJoinCode = pathParts[2].toUpperCase();
   }
 
   var s = localStorage.getItem('oa_user');
@@ -1602,9 +1592,6 @@ var pendingJoinCoupleId = null; // coupleId extracted from /join/ URL
 
   if (el('landing-screen') && !pendingJoinCoupleId) {
     history.replaceState({ lp: 'main' }, '');
-    // Show the persistent corner link for Partner B
-    var corner = el('lp-share-corner');
-    if (corner) corner.style.display = 'inline-block';
   }
 }());
 
@@ -1768,11 +1755,11 @@ function signOut() {
   user = null; token = null;
   localStorage.removeItem('oa_user');
   enrollMode = null; pendingCoupleId = null; pendingPartnerAId = null;
-  pendingFightName = null; pendingJoinCoupleId = null;
+  pendingFightName = null; pendingJoinCoupleId = null; pendingJoinCode = null; pcLastJoinUrl = null;
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-link-card'); hide('couple-linked-status');
   hide('step2-card'); hide('analysis-banner'); hide('journey-banner');
-  hide('start-choice-screen'); hide('buyin-screen');
+  hide('buyin-screen');
   hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
   ['step3-screen','step4-screen','step5-screen','step6-screen',
    'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen'].forEach(function(id){ hide(id); });
@@ -1827,7 +1814,7 @@ function afterLogin() {
     ]).then(function() {
       user.coupleId = coupleId; user.partnerId = partnerAId;
       localStorage.setItem('oa_user', JSON.stringify(user));
-      pendingCoupleId = null; pendingPartnerAId = null; pendingJoinCoupleId = null;
+      pendingCoupleId = null; pendingPartnerAId = null; pendingJoinCoupleId = null; pendingJoinCode = null;
       enrollMode = null;
       el('al-fab').style.display = 'block';
       show('script-screen');
@@ -1846,9 +1833,8 @@ function afterLogin() {
 
   hide('landing-screen');
   hide('auth-screen');
-  hide('start-choice-screen'); hide('buyin-screen');
+  hide('buyin-screen');
   hide('partner-b-intro-screen'); hide('code-entry-screen');
-  var corner = el('lp-share-corner'); if (corner) corner.style.display = 'none';
 
   if (user.email === COACH) {
     hide('al-fab');
@@ -2197,13 +2183,14 @@ function lpProceed() {
   }
   el('lp-fight-err').textContent = '';
   pendingFightName = fightName;
+  enrollMode = 'start';
   var lp = el('landing-screen');
   lp.style.opacity = '0';
   setTimeout(function() {
     hide('landing-screen');
     lp.style.opacity = '';
-    var corner = el('lp-share-corner'); if (corner) corner.style.display = 'none';
-    showStartChoice();
+    var bi = el('buyin-screen');
+    bi.style.display = 'flex';
   }, 500);
 }
 
@@ -2328,55 +2315,136 @@ function loadClientAwarenessLog(uid, container) {
 
 /* ── ENROLLMENT FLOW ──────────────────────────────────────────── */
 
-function showStartChoice() {
-  hide('landing-screen'); hide('auth-screen');
-  hide('buyin-screen'); hide('payment-confirm-screen');
-  hide('partner-b-intro-screen'); hide('code-entry-screen');
-  var sc = el('start-choice-screen');
-  sc.style.display = 'flex';
-}
-
-function choosedStart() {
-  enrollMode = 'start';
-  hide('start-choice-screen');
-  var bi = el('buyin-screen');
-  bi.style.display = 'flex';
-}
-
-function chooseJoin() {
-  enrollMode = 'join';
-  hide('landing-screen'); hide('start-choice-screen');
-  var corner = el('lp-share-corner'); if (corner) corner.style.display = 'none';
-  var ce = el('code-entry-screen');
-  ce.style.display = 'flex';
-}
-
 function showPaymentAuth() {
   hide('buyin-screen');
-  // Pre-fill fight name into auth form if we have it
   if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
   switchTab('create');
   showFlex('auth-screen');
 }
 
-function ceGoBack() {
-  hide('code-entry-screen');
-  txt('ce-error', '');
-  if (pendingJoinCoupleId) {
-    // Came from /join/ URL — go back to Partner B intro
-    el('partner-b-intro-screen').style.display = 'block';
-  } else {
-    // Came from landing page "Joining" choice — show start-choice or landing
-    showStartChoice();
-  }
+function biGoBack() {
+  hide('buyin-screen');
+  var lp = el('landing-screen');
+  lp.style.display = 'block';
+  // Scroll to the fight-name section
+  setTimeout(function() {
+    var s7 = el('lp-s7');
+    if (s7 && s7.style.display !== 'none') {
+      lp.scrollTo({ top: s7.offsetTop - 24, behavior: 'smooth' });
+      var fi = el('lp-fight-input'); if (fi) fi.focus();
+    }
+  }, 60);
 }
 
-function showCodeEntry() {
-  hide('partner-b-intro-screen');
-  var ce = el('code-entry-screen');
-  ce.style.display = 'flex';
-  setTimeout(function() { var inp = el('ce-code-input'); if (inp) inp.focus(); }, 100);
+function pbAutoValidate() {
+  var btn = el('pb-continue-btn');
+  var errDiv = el('pb-error');
+  if (!pendingJoinCoupleId || !pendingJoinCode) {
+    errDiv.textContent = 'This join link appears to be incomplete. Please ask your partner to resend it.';
+    errDiv.style.display = 'block';
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Checking…';
+  errDiv.style.display = 'none';
+
+  fsGetPublic('couples/' + pendingJoinCoupleId).then(function(d) {
+    btn.disabled = false; btn.textContent = 'I\'m in. Create My Account →';
+    if (!d || !d.fields) {
+      errDiv.textContent = 'We could not find that code. Please check it and try again.';
+      errDiv.style.display = 'block'; return;
+    }
+    var couple = fromFields(d.fields);
+    if ((couple.coupleCode || '').toUpperCase() !== pendingJoinCode) {
+      errDiv.textContent = 'We could not find that code. Please check it and try again.';
+      errDiv.style.display = 'block'; return;
+    }
+    if (!couple.paidStatus) {
+      errDiv.textContent = 'Your partner has started the process but has not completed payment yet. Please check with them, then try your link again.';
+      errDiv.style.display = 'block'; return;
+    }
+    if (couple.partnerBId) {
+      errDiv.textContent = 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.';
+      errDiv.style.display = 'block'; return;
+    }
+    // Valid — proceed to account creation
+    pendingCoupleId = pendingJoinCoupleId;
+    pendingPartnerAId = couple.partnerAId || '';
+    if (couple.fightName) pendingFightName = couple.fightName;
+    hide('partner-b-intro-screen');
+    if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
+    var sub = el('form-create') && el('form-create').querySelector('.auth-sub');
+    if (sub) sub.textContent = 'Create your account to join the process.';
+    switchTab('create');
+    showFlex('auth-screen');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'I\'m in. Create My Account →';
+    errDiv.textContent = 'Connection error. Please try again.';
+    errDiv.style.display = 'block';
+  });
 }
+
+/* EmailJS — partner invite email */
+var pcLastSentEmail = null;
+
+function pcSendEmailClick() {
+  var email = (el('pc-partner-email').value || '').trim();
+  if (!email || !email.includes('@')) {
+    txt('pc-email-status', 'Please enter a valid email address.');
+    return;
+  }
+  pcLastSentEmail = email;
+  pcDoSendEmail(email);
+}
+
+function pcResendEmailClick() {
+  if (!pcLastSentEmail) return;
+  pcDoSendEmail(pcLastSentEmail);
+}
+
+function pcDoSendEmail(toEmail) {
+  var sendBtn = el('pc-send-btn');
+  sendBtn.disabled = true; sendBtn.textContent = 'Sending…';
+  txt('pc-email-status', '');
+
+  var joinUrl = pcLastJoinUrl || (el('pc-join-url').dataset.url || el('pc-join-url').textContent || '').trim();
+  var code = (el('pc-code-display').textContent || '').trim();
+
+  // EmailJS — replace these three placeholders with real credentials in Netlify env or directly
+  // SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY are set as window globals via a <script> tag or constants below
+  var serviceId = window.EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
+  var templateId = window.EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
+  var publicKey = window.EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+
+  if (typeof emailjs === 'undefined') {
+    sendBtn.disabled = false; sendBtn.textContent = 'Send';
+    txt('pc-email-status', 'Email service not available. Please copy the link and send manually.');
+    return;
+  }
+
+  emailjs.init({ publicKey: publicKey });
+  emailjs.send(serviceId, templateId, {
+    to_email: toEmail,
+    join_url: joinUrl,
+    couple_code: code,
+    from_name: (user && user.name) ? user.name : 'Your partner'
+  }).then(function() {
+    sendBtn.disabled = false; sendBtn.textContent = 'Send';
+    txt('pc-email-status', 'Sent. Your partner should have it within a minute.');
+    el('pc-resend-btn').style.display = 'block';
+  }, function(err) {
+    console.error('EmailJS error:', err);
+    sendBtn.disabled = false; sendBtn.textContent = 'Send';
+    txt('pc-email-status', 'Could not send. Please copy the link and send it manually.');
+    el('pc-resend-btn').style.display = 'block';
+  });
+}
+
+// Dead stubs — kept so any residual references don't throw
+function showStartChoice() {}
+function choosedStart() { enrollMode = 'start'; }
+function chooseJoin() {}
+function showCodeEntry() { var ce = el('code-entry-screen'); if (ce) ce.style.display = 'flex'; }
+function ceGoBack() { hide('code-entry-screen'); el('partner-b-intro-screen').style.display = 'block'; }
 
 function submitPartnerCode() {
   var code = (val('ce-code-input') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -2482,12 +2550,16 @@ function handlePaymentSuccess(sessionId) {
 
 function showPaymentConfirm(code, coupleId) {
   hide('auth-screen'); hide('landing-screen');
-  hide('start-choice-screen'); hide('buyin-screen');
+  hide('buyin-screen');
   txt('pc-code-display', code);
-  var joinUrl = window.location.origin + '/join/' + coupleId;
+  var joinUrl = window.location.origin + '/join/' + coupleId + '/' + code;
+  pcLastJoinUrl = joinUrl;
   el('pc-join-url').textContent = joinUrl;
-  // Store joinUrl for copy button
   el('pc-join-url').dataset.url = joinUrl;
+  // Reset email section
+  el('pc-partner-email').value = '';
+  txt('pc-email-status', '');
+  el('pc-resend-btn').style.display = 'none';
   var pc = el('payment-confirm-screen');
   pc.style.display = 'flex';
 }
