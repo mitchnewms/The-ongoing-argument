@@ -200,16 +200,32 @@ body {
 .ab-hd { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 6px; }
 .ab-sub { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 16px; }
 .ab-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
-/* Analysis modal */
-#analysis-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 150; overflow-y: auto; padding: 20px; }
-.am-wrap { display: flex; justify-content: center; min-height: 100%; align-items: flex-start; padding-bottom: 40px; }
-.am-box { background: var(--paper); border-radius: 2px; width: 100%; max-width: 640px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); border-top: 4px solid var(--accent); margin: auto; }
-.am-top { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--paper); z-index: 1; }
-.am-top h3 { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--ink); }
-.am-x { background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 1.1rem; padding: 4px 8px; -webkit-appearance: none; touch-action: manipulation; }
-.am-body { padding: 28px 24px 32px; }
-.am-body p { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); line-height: 1.75; margin-bottom: 14px; }
-.am-body p:last-child { margin-bottom: 0; }
+/* ── STEP 3: MIRROR MOMENT ────────────────────────────────── */
+#step3-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #2a2520; flex-direction: column; }
+.s3-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.s3-back { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.45); font-size: 1.1rem; padding: 4px 8px 4px 0; -webkit-appearance: none; touch-action: manipulation; line-height: 1; }
+.s3-back:hover { color: rgba(255,255,255,0.7); }
+.s3-title { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+.s3-thread { flex: 1; overflow-y: auto; padding: 24px 18px 16px; display: flex; flex-direction: column; gap: 20px; }
+.s3-msg { max-width: 88%; }
+.s3-msg-ai { align-self: flex-start; }
+.s3-msg-user { align-self: flex-end; }
+.s3-bubble { padding: 14px 16px; border-radius: 2px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; line-height: 1.7; }
+.s3-msg-ai .s3-bubble { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.88); border-left: 2px solid var(--accent); }
+.s3-msg-user .s3-bubble { background: rgba(184,160,112,0.15); color: rgba(255,255,255,0.8); border-right: 2px solid rgba(184,160,112,0.4); }
+.s3-typing { align-self: flex-start; }
+.s3-typing .s3-bubble { background: rgba(255,255,255,0.06); border-left: 2px solid var(--accent); display: flex; gap: 5px; align-items: center; padding: 16px; }
+.s3-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.4); animation: s3pulse 1.2s ease-in-out infinite; }
+.s3-dot:nth-child(2) { animation-delay: 0.2s; }
+.s3-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes s3pulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); } 40% { opacity: 1; transform: scale(1); } }
+.s3-input-area { padding: 12px 18px 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.s3-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.s3-input { flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.88); outline: none; resize: none; border-radius: 2px; line-height: 1.55; max-height: 120px; -webkit-appearance: none; }
+.s3-input:focus { border-color: rgba(184,160,112,0.5); }
+.s3-input::placeholder { color: rgba(255,255,255,0.25); }
+.s3-send { background: var(--accent); border: none; cursor: pointer; color: white; font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.06em; padding: 12px 16px; border-radius: 2px; -webkit-appearance: none; touch-action: manipulation; flex-shrink: 0; }
+.s3-send:disabled { background: rgba(184,160,112,0.35); cursor: default; }
 </style>
 
 <style>
@@ -812,15 +828,17 @@ body {
   </div>
 </div>
 
-<!-- ANALYSIS MODAL (Step 3 display) -->
-<div id="analysis-modal">
-  <div class="am-wrap">
-    <div class="am-box">
-      <div class="am-top">
-        <h3>Your Analysis</h3>
-        <button class="am-x" onclick="closeAnalysisModal()">✕</button>
-      </div>
-      <div class="am-body" id="analysis-modal-body"></div>
+<!-- STEP 3: MIRROR MOMENT SCREEN -->
+<div id="step3-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep3()" aria-label="Close">&#8592;</button>
+    <span class="s3-title">Step 3 &mdash; Mirror Moment</span>
+  </div>
+  <div class="s3-thread" id="s3-thread"></div>
+  <div class="s3-input-area">
+    <div class="s3-input-row">
+      <textarea class="s3-input" id="s3-input" placeholder="Respond..." rows="1" onkeydown="s3KeyDown(event)" oninput="s3AutoGrow(this)"></textarea>
+      <button class="s3-send" id="s3-send" onclick="s3Send()">Send</button>
     </div>
   </div>
 </div>
@@ -988,12 +1006,13 @@ function signOut() {
   localStorage.removeItem('oa_user');
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-link-card'); hide('couple-linked-status');
-  hide('step2-card'); hide('analysis-banner'); hide('analysis-modal');
+  hide('step2-card'); hide('analysis-banner'); hide('step3-screen');
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   el('step2-thinking').value = ''; el('step2-feeling').value = '';
   var sb = el('step2-submit-btn'); if (sb) { sb.disabled = false; sb.textContent = 'Submit My Script'; }
   txt('step2-status', '');
+  s3Messages = []; el('s3-thread').innerHTML = '';
   switchTab('signin');
 }
 
@@ -1714,25 +1733,175 @@ function showAnalysisBanner() {
   txt('step2-status', '');
 }
 
+// ── STEP 3: MIRROR MOMENT ────────────────────────────────────
+var s3Messages = [];
+var s3Sending = false;
+
 function viewAnalysis() {
   if (!user || !user.coupleId) return;
-  fsGet('couples/' + user.coupleId).then(function(d) {
-    if (!d || !d.fields) return;
-    var couple = fromFields(d.fields);
-    if (!couple.analysis) return;
-    var body = el('analysis-modal-body');
-    var paras = couple.analysis.split(/\n\n+/);
-    body.innerHTML = paras.map(function(p) {
-      return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>';
-    }).filter(function(p) { return p !== '<p></p>'; }).join('');
-    el('analysis-modal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  }).catch(function() {});
+  var screen = el('step3-screen');
+  screen.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step3/' + user.uid).then(function(d) {
+    if (d && d.fields) {
+      var saved = fromFields(d.fields);
+      if (saved.messages) {
+        try {
+          var parsed = typeof saved.messages === 'string' ? JSON.parse(saved.messages) : saved.messages;
+          if (Array.isArray(parsed) && parsed.length > 1) {
+            s3Messages = parsed;
+            s3Render();
+            s3ScrollBottom();
+            return;
+          }
+        } catch(e) {}
+      }
+    }
+    s3StartDelivery();
+  }).catch(function() {
+    s3StartDelivery();
+  });
 }
 
-function closeAnalysisModal() {
-  hide('analysis-modal');
+function closeStep3() {
+  hide('step3-screen');
   document.body.style.overflow = '';
+}
+
+function s3StartDelivery() {
+  if (!user || !user.coupleId) return;
+  s3Messages = [];
+  s3Render();
+  s3ShowTyping();
+  Promise.all([
+    fsGet('scripts/' + user.uid),
+    user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
+    fsGet('couples/' + user.coupleId)
+  ]).then(function(results) {
+    var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var partnerScript = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var couple = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var analysis = couple.analysis || '';
+    var myName = (user.displayName || 'Person A').split(' ')[0];
+    var partnerName = 'your partner';
+
+    var setupPrompt = 'You are now beginning Step 3 with ' + myName + '. You have already completed the dual-script analysis. Below is the full context you need to deliver the Mirror Moment.\n\n' +
+      '--- FULL ANALYSIS (use this as the foundation; do not quote it verbatim) ---\n' +
+      analysis + '\n\n' +
+      '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' +
+      scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      '--- PARTNER\'S SCRIPT ---\n' +
+      scriptDataToText(partnerScript, partnerName, myName) + '\n\n' +
+      'Now deliver ' + myName + '\'s personalized Mirror Moment. Begin with what you see in their script — their specific words, their recurring themes, the story they are telling themselves. Be warm, precise, and grounded in what they actually wrote. Do not be generic. Do not summarize both people equally. This is for ' + myName + ' only. Speak to them directly. Follow the Mirror Moment guidelines from your training: offer observations as possibilities, not verdicts. Invite reflection. After sharing your observations, ask an open question.';
+
+    s3Messages = [{ role: 'user', content: setupPrompt }];
+    return callAI(s3Messages, '3');
+  }).then(function(text) {
+    s3RemoveTyping();
+    s3Messages.push({ role: 'assistant', content: text });
+    s3SaveConversation();
+    s3Render();
+    s3ScrollBottom();
+  }).catch(function(err) {
+    s3RemoveTyping();
+    s3AppendError('Something went wrong delivering your analysis. Please try again.');
+    console.error('Step 3 delivery error:', err);
+  });
+}
+
+function s3Send() {
+  if (s3Sending) return;
+  var inp = el('s3-input');
+  var text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  s3AutoGrow(inp);
+  s3Sending = true;
+  el('s3-send').disabled = true;
+  s3Messages.push({ role: 'user', content: text });
+  s3Render();
+  s3ScrollBottom();
+  s3ShowTyping();
+  callAI(s3Messages, '3').then(function(reply) {
+    s3RemoveTyping();
+    s3Messages.push({ role: 'assistant', content: reply });
+    s3SaveConversation();
+    s3Render();
+    s3ScrollBottom();
+    s3Sending = false;
+    el('s3-send').disabled = false;
+  }).catch(function(err) {
+    s3RemoveTyping();
+    s3AppendError('Could not reach the AI. Please try again.');
+    s3Sending = false;
+    el('s3-send').disabled = false;
+    console.error('Step 3 send error:', err);
+  });
+}
+
+function s3KeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    s3Send();
+  }
+}
+
+function s3AutoGrow(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+}
+
+function s3Render() {
+  var thread = el('s3-thread');
+  var displayMessages = s3Messages.slice(1);
+  if (displayMessages.length === 0) { thread.innerHTML = ''; return; }
+  thread.innerHTML = displayMessages.map(function(m) {
+    var isAI = m.role === 'assistant';
+    var cls = isAI ? 's3-msg s3-msg-ai' : 's3-msg s3-msg-user';
+    var paras = m.content.split(/\n\n+/).filter(function(p) { return p.trim(); });
+    var html = paras.map(function(p) {
+      return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+    return '<div class="' + cls + '"><div class="s3-bubble">' + html + '</div></div>';
+  }).join('');
+}
+
+function s3ShowTyping() {
+  var thread = el('s3-thread');
+  var div = document.createElement('div');
+  div.className = 's3-typing';
+  div.id = 's3-typing';
+  div.innerHTML = '<div class="s3-bubble"><div class="s3-dot"></div><div class="s3-dot"></div><div class="s3-dot"></div></div>';
+  thread.appendChild(div);
+  s3ScrollBottom();
+}
+
+function s3RemoveTyping() {
+  var t = el('s3-typing');
+  if (t) t.parentNode.removeChild(t);
+}
+
+function s3AppendError(msg) {
+  var thread = el('s3-thread');
+  var div = document.createElement('div');
+  div.className = 's3-msg s3-msg-ai';
+  div.innerHTML = '<div class="s3-bubble" style="color:rgba(255,100,100,0.8)">' + esc(msg) + '</div>';
+  thread.appendChild(div);
+  s3ScrollBottom();
+}
+
+function s3ScrollBottom() {
+  var thread = el('s3-thread');
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function s3SaveConversation() {
+  if (!user) return;
+  fsSet('step3/' + user.uid, {
+    messages: JSON.stringify(s3Messages),
+    savedAt: new Date().toISOString(),
+    uid: user.uid
+  }).catch(function() {});
 }
 
 window.addEventListener('popstate', function(e) {
