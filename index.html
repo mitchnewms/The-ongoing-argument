@@ -180,6 +180,36 @@ body {
 .cl-linked { background: var(--paper); border-radius: 2px; padding: 14px 20px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
 .cl-linked-icon { color: #5a8a5a; font-size: 1rem; font-family: 'Courier Prime', monospace; }
 .cl-linked-text { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-light); }
+
+/* ── STEP 2 ─────────────────────────────────────────────────── */
+#step2-card { display: none; margin-top: 16px; }
+.step2-inner { background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 24px 24px 20px; }
+.step2-hd { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.step2-intro { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 20px; line-height: 1.55; }
+.step2-q-block { margin-bottom: 18px; }
+.step2-q-label { font-size: 0.85rem; color: var(--ink); line-height: 1.55; margin-bottom: 8px; font-style: italic; }
+.step2-textarea { width: 100%; min-height: 80px; background: #fff; border: 1px solid var(--line); padding: 10px 12px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: var(--ink); outline: none; resize: vertical; line-height: 1.6; border-radius: 1px; display: block; }
+.step2-textarea:focus { border-color: var(--accent); }
+.step2-divider { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+.step2-submit-btn { font-family: 'Special Elite', cursive; font-size: 0.88rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; width: 100%; }
+.step2-submit-btn:disabled { background: #b8a070; cursor: default; }
+#step2-status { font-size: 0.72rem; color: var(--ink-faint); font-style: italic; text-align: center; margin-top: 10px; min-height: 16px; }
+/* Analysis ready banner */
+#analysis-banner { display: none; margin-top: 16px; }
+.ab-inner { background: var(--paper); border-radius: 2px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); border-left: 4px solid var(--accent); }
+.ab-hd { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 6px; }
+.ab-sub { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 16px; }
+.ab-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+/* Analysis modal */
+#analysis-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 150; overflow-y: auto; padding: 20px; }
+.am-wrap { display: flex; justify-content: center; min-height: 100%; align-items: flex-start; padding-bottom: 40px; }
+.am-box { background: var(--paper); border-radius: 2px; width: 100%; max-width: 640px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); border-top: 4px solid var(--accent); margin: auto; }
+.am-top { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--paper); z-index: 1; }
+.am-top h3 { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--ink); }
+.am-x { background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 1.1rem; padding: 4px 8px; -webkit-appearance: none; touch-action: manipulation; }
+.am-body { padding: 28px 24px 32px; }
+.am-body p { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); line-height: 1.75; margin-bottom: 14px; }
+.am-body p:last-child { margin-bottom: 0; }
 </style>
 
 <style>
@@ -665,6 +695,34 @@ body {
   </div>
   <div id="status-msg"></div>
 
+  <!-- STEP 2: STORY QUESTIONS + SUBMIT -->
+  <div id="step2-card">
+    <div class="step2-inner">
+      <div class="step2-hd">Your Private Story</div>
+      <p class="step2-intro">Answer honestly before submitting. Your partner will not see these answers until the full analysis is shared with both of you in Step 3.</p>
+      <div class="step2-q-block">
+        <div class="step2-q-label">The story I tell myself about what my partner is thinking in this argument is...</div>
+        <textarea id="step2-thinking" class="step2-textarea" placeholder="Write your honest answer here..."></textarea>
+      </div>
+      <div class="step2-q-block">
+        <div class="step2-q-label">The story I tell myself about what my partner is feeling in this argument is...</div>
+        <textarea id="step2-feeling" class="step2-textarea" placeholder="Write your honest answer here..."></textarea>
+      </div>
+      <hr class="step2-divider">
+      <button class="step2-submit-btn" id="step2-submit-btn" onclick="submitScript()">Submit My Script</button>
+      <div id="step2-status"></div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS READY BANNER -->
+  <div id="analysis-banner">
+    <div class="ab-inner">
+      <div class="ab-hd">Your Analysis Is Ready</div>
+      <div class="ab-sub">The AI has read both scripts. Step 3 is waiting for you.</div>
+      <button class="ab-btn" onclick="viewAnalysis()">Read Your Analysis</button>
+    </div>
+  </div>
+
   <!-- AWARENESS LOG PANEL -->
   <div id="awareness-log">
     <button class="al-log-toggle" id="btn-al-toggle" onclick="alToggle()">
@@ -750,6 +808,19 @@ body {
       <p style="font-size:0.82rem;color:var(--ink-light);font-style:italic;margin-bottom:16px;">This note will appear in the client's script tool next time they open it.</p>
       <textarea id="note-textarea" placeholder="Write your note here…"></textarea>
       <button class="send-note-btn" id="btn-send-note">Send Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYSIS MODAL (Step 3 display) -->
+<div id="analysis-modal">
+  <div class="am-wrap">
+    <div class="am-box">
+      <div class="am-top">
+        <h3>Your Analysis</h3>
+        <button class="am-x" onclick="closeAnalysisModal()">✕</button>
+      </div>
+      <div class="am-body" id="analysis-modal-body"></div>
     </div>
   </div>
 </div>
@@ -917,8 +988,12 @@ function signOut() {
   localStorage.removeItem('oa_user');
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-link-card'); hide('couple-linked-status');
+  hide('step2-card'); hide('analysis-banner'); hide('analysis-modal');
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
+  el('step2-thinking').value = ''; el('step2-feeling').value = '';
+  var sb = el('step2-submit-btn'); if (sb) { sb.disabled = false; sb.textContent = 'Submit My Script'; }
+  txt('step2-status', '');
   switchTab('signin');
 }
 
@@ -1411,6 +1486,7 @@ function clUpdateLinkUI(profile) {
   if (!profile || user.email === COACH) return;
   if (profile.coupleId) {
     clShowLinked(profile.partnerName || 'your partner');
+    step2Init();
     return;
   }
   var code = profile.coupleCode || user.coupleCode;
@@ -1471,12 +1547,192 @@ function clLinkPartner() {
         user.coupleId = coupleId; user.partnerId = partnerId;
         localStorage.setItem('oa_user', JSON.stringify(user));
         clShowLinked(partner.name || 'your partner');
+        step2Init();
       });
     }).catch(function() { txt('cl-error', 'Connection error. Try again.'); });
   }).catch(function() {
     if (input) input.disabled = false; if (btn) btn.disabled = false;
     txt('cl-error', 'Connection error. Try again.');
   });
+}
+
+/* STEP 2 — DUAL SCRIPT SUBMISSION AND ANALYSIS */
+var step2SaveTimer = null;
+
+function step2Init() {
+  if (!user || !user.coupleId) return;
+  el('step2-card').style.display = 'block';
+  fsGet('scripts/' + user.uid).then(function(d) {
+    if (!d || !d.fields) return;
+    var s = fromFields(d.fields);
+    if (s.storyThinking) el('step2-thinking').value = s.storyThinking;
+    if (s.storyFeeling) el('step2-feeling').value = s.storyFeeling;
+    if (s.submitted) {
+      step2ShowSubmittedState();
+      checkAnalysisReady();
+    } else {
+      el('step2-thinking').addEventListener('input', step2AutoSave);
+      el('step2-feeling').addEventListener('input', step2AutoSave);
+    }
+  }).catch(function() {});
+}
+
+function step2AutoSave() {
+  clearTimeout(step2SaveTimer);
+  step2SaveTimer = setTimeout(function() {
+    if (!user || !user.uid) return;
+    var thinking = el('step2-thinking').value;
+    var feeling = el('step2-feeling').value;
+    if (thinking || feeling) {
+      fsSet('scripts/' + user.uid, { storyThinking: thinking, storyFeeling: feeling });
+    }
+  }, 2000);
+}
+
+function submitScript() {
+  var thinking = (el('step2-thinking').value || '').trim();
+  var feeling = (el('step2-feeling').value || '').trim();
+  if (!thinking || !feeling) {
+    txt('step2-status', 'Please answer both questions before submitting.');
+    return;
+  }
+  var btn = el('step2-submit-btn');
+  btn.disabled = true;
+  txt('step2-status', 'Submitting...');
+  fsSet('scripts/' + user.uid, {
+    storyThinking: thinking,
+    storyFeeling: feeling,
+    submitted: true,
+    submittedAt: new Date().toISOString()
+  }).then(function() {
+    step2ShowSubmittedState();
+    return checkPartnerAndAnalyze();
+  }).catch(function() {
+    btn.disabled = false;
+    txt('step2-status', 'Error submitting. Please try again.');
+  });
+}
+
+function step2ShowSubmittedState() {
+  var btn = el('step2-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Script Submitted ✓'; }
+  var partnerName = user.partner || 'your partner';
+  txt('step2-status', 'Submitted. Waiting for ' + partnerName + ' to submit their script...');
+}
+
+function checkPartnerAndAnalyze() {
+  if (!user.coupleId || !user.partnerId) return Promise.resolve();
+  return fsGet('scripts/' + user.partnerId).then(function(d) {
+    if (!d || !d.fields) { setTimeout(pollAnalysisReady, 30000); return; }
+    var partnerData = fromFields(d.fields);
+    if (!partnerData.submitted) { setTimeout(pollAnalysisReady, 30000); return; }
+    return runStep2Analysis(partnerData);
+  }).catch(function() { setTimeout(pollAnalysisReady, 30000); });
+}
+
+function runStep2Analysis(partnerData) {
+  txt('step2-status', 'Both scripts received. Analysis in progress — this may take up to a minute...');
+  return fsGet('scripts/' + user.uid).then(function(d) {
+    var myData = fromFields(d.fields || {});
+    var myName = user.name || 'Partner A';
+    var partnerName = user.partner || 'Partner B';
+    var fightName = user.fight || 'The Ongoing Argument';
+    var myText = scriptDataToText(myData, myName, partnerName);
+    var partnerText = scriptDataToText(partnerData, partnerName, myName);
+    var prompt = 'The couple\'s fight is called: ' + fightName + '\n\n' +
+      '— SCRIPT FROM ' + myName.toUpperCase() + ' —\n\n' + myText + '\n\n' +
+      myName + '\'s story about what ' + partnerName + ' is thinking:\n' +
+      (myData.storyThinking || '(no answer provided)') + '\n\n' +
+      myName + '\'s story about what ' + partnerName + ' is feeling:\n' +
+      (myData.storyFeeling || '(no answer provided)') + '\n\n' +
+      '— SCRIPT FROM ' + partnerName.toUpperCase() + ' —\n\n' + partnerText + '\n\n' +
+      partnerName + '\'s story about what ' + myName + ' is thinking:\n' +
+      (partnerData.storyThinking || '(no answer provided)') + '\n\n' +
+      partnerName + '\'s story about what ' + myName + ' is feeling:\n' +
+      (partnerData.storyFeeling || '(no answer provided)');
+    return callAI([{ role: 'user', content: prompt }], '2').then(function(analysisText) {
+      return fsSet('couples/' + user.coupleId, {
+        analysis: analysisText,
+        analysisReady: true,
+        analysisAt: new Date().toISOString(),
+        currentStep: '3'
+      }).then(function() { showAnalysisBanner(); });
+    }).catch(function() {
+      txt('step2-status', 'Analysis could not complete. Please refresh and try again.');
+    });
+  });
+}
+
+function scriptDataToText(data, personName, partnerName) {
+  var parts = [];
+  if (data.scene) parts.push('SCENE: ' + data.scene);
+  if (data.lines) {
+    var lines = typeof data.lines === 'string' ? JSON.parse(data.lines) : data.lines;
+    lines.forEach(function(l) {
+      if (l.type === 'line') {
+        var speaker = l.char === 'a' ? personName : partnerName;
+        var block = speaker.toUpperCase();
+        if (l.beat) block += '\n(' + l.beat + ')';
+        if (l.dialogue) block += '\n' + l.dialogue;
+        parts.push(block);
+      } else if (l.type === 'direction' && l.text) {
+        parts.push('[' + l.text + ']');
+      }
+    });
+  }
+  return parts.length ? parts.join('\n\n') : '(no script content)';
+}
+
+function checkAnalysisReady() {
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) return;
+    var couple = fromFields(d.fields);
+    if (couple.analysisReady) {
+      showAnalysisBanner();
+    } else {
+      setTimeout(pollAnalysisReady, 30000);
+    }
+  }).catch(function() {});
+}
+
+function pollAnalysisReady() {
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) { setTimeout(pollAnalysisReady, 30000); return; }
+    var couple = fromFields(d.fields);
+    if (couple.analysisReady) {
+      showAnalysisBanner();
+    } else {
+      setTimeout(pollAnalysisReady, 30000);
+    }
+  }).catch(function() { setTimeout(pollAnalysisReady, 30000); });
+}
+
+function showAnalysisBanner() {
+  el('analysis-banner').style.display = 'block';
+  txt('step2-status', '');
+}
+
+function viewAnalysis() {
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) return;
+    var couple = fromFields(d.fields);
+    if (!couple.analysis) return;
+    var body = el('analysis-modal-body');
+    var paras = couple.analysis.split(/\n\n+/);
+    body.innerHTML = paras.map(function(p) {
+      return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>';
+    }).filter(function(p) { return p !== '<p></p>'; }).join('');
+    el('analysis-modal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }).catch(function() {});
+}
+
+function closeAnalysisModal() {
+  hide('analysis-modal');
+  document.body.style.overflow = '';
 }
 
 window.addEventListener('popstate', function(e) {
