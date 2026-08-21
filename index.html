@@ -4295,8 +4295,8 @@ window.addEventListener('popstate', function(e) {
   // If script tool or coach screen is visible, user is logged in — stay put
   var scriptEl = el('script-screen');
   var coachEl = el('coach-screen');
-  if ((scriptEl && scriptEl.style.display !== 'none') ||
-      (coachEl && coachEl.style.display !== 'none')) {
+  var shown = function(e) { return e && (e.style.display === 'block' || e.style.display === 'flex'); };
+  if (shown(scriptEl) || shown(coachEl)) {
     history.pushState({ screen: 'app' }, '');
     return;
   }
