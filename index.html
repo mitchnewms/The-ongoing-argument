@@ -665,10 +665,268 @@ body {
 
 .lp-fight-input:focus { border-color: #C8822A; }
 .lp-fight-input::placeholder { color: #BEB0A0; }
+
+/* ── SHARE CORNER LINK ───────────────────────────────────────── */
+.lp-share-corner {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 200;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #C8822A;
+  background: rgba(42,37,32,0.88);
+  border: 1px solid rgba(200,130,42,0.4);
+  padding: 7px 13px;
+  border-radius: 1px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  text-decoration: none;
+  display: inline-block;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.15s;
+}
+.lp-share-corner:hover { border-color: #C8822A; }
+
+/* ── SHARE-WITH-PARTNER SECTION ─────────────────────────────── */
+.lp-share-section {
+  padding: 40px 24px;
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.lp-share-hd {
+  font-family: 'Special Elite', cursive;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  color: #1C1814;
+  margin-bottom: 8px;
+}
+.lp-share-sub {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.85rem;
+  color: #7a6e60;
+  font-style: italic;
+  margin-bottom: 20px;
+  line-height: 1.55;
+}
+.lp-share-btn {
+  display: inline-block;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px 26px;
+  border: 1.5px solid #C8822A;
+  background: transparent;
+  color: #C8822A;
+  cursor: pointer;
+  border-radius: 1px;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  transition: background 0.15s, color 0.15s;
+}
+.lp-share-btn:hover { background: #C8822A; color: white; }
+</style>
+
+<style>
+/* ── ENROLLMENT SCREENS ───────────────────────────────────────
+   New screens for the payment-gated enrollment flow.
+   All hidden by default; shown via JS.
+   ─────────────────────────────────────────────────────────── */
+
+/* Shared overlay screen base */
+.enroll-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+/* ── Start or Join choice ── */
+#start-choice-screen {}
+.sc-header { text-align: center; margin-bottom: 36px; }
+.sc-header h2 { font-family: 'Special Elite', cursive; font-size: 1.4rem; color: #f0e8d5; letter-spacing: 0.06em; margin-bottom: 8px; }
+.sc-header p { font-size: 0.78rem; color: #a09080; font-style: italic; font-family: 'Courier Prime', monospace; }
+.sc-cards { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.sc-card { background: var(--paper); border-radius: 2px; padding: 28px 24px; cursor: pointer; border-top: 3px solid transparent; box-shadow: 0 4px 20px rgba(0,0,0,0.35); transition: border-color 0.15s, transform 0.15s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; border: none; width: 100%; text-align: left; }
+.sc-card:hover { transform: translateY(-2px); }
+.sc-card.sc-start { border-top-color: var(--accent); }
+.sc-card.sc-join { border-top-color: #5a7a5a; }
+.sc-card-label { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 6px; }
+.sc-card-title { font-family: 'Special Elite', cursive; font-size: 1.1rem; color: var(--ink); margin-bottom: 6px; }
+.sc-card-desc { font-size: 0.78rem; color: var(--ink-light); font-style: italic; font-family: 'Lora', Georgia, serif; line-height: 1.5; }
+
+/* ── Buy-In screen ── */
+#buyin-screen {}
+.bi-card { background: var(--paper); border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid var(--accent); padding: 36px 28px; width: 100%; }
+.bi-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 16px; }
+.bi-body { font-family: 'Lora', Georgia, serif; font-size: 0.95rem; color: var(--ink); line-height: 1.75; margin-bottom: 28px; }
+.bi-body p { margin-bottom: 16px; }
+.bi-body p:last-child { margin-bottom: 0; }
+.bi-cta { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin-top: 28px; }
+.bi-cta:active { background: #7a5c10; }
+.bi-back { background: none; border: none; color: var(--ink-faint); font-family: 'Courier Prime', monospace; font-size: 0.72rem; cursor: pointer; margin-top: 14px; display: block; text-align: center; width: 100%; padding: 8px; -webkit-appearance: none; }
+
+/* ── Payment confirmation screen ── */
+#payment-confirm-screen {}
+.pc-card { background: var(--paper); border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid #C8822A; padding: 36px 28px; width: 100%; text-align: center; }
+.pc-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #C8822A; font-family: 'Courier Prime', monospace; margin-bottom: 12px; }
+.pc-hd { font-family: 'Special Elite', cursive; font-size: 1.15rem; color: var(--ink); margin-bottom: 8px; }
+.pc-sub { font-size: 0.82rem; color: var(--ink-light); font-style: italic; font-family: 'Lora', Georgia, serif; line-height: 1.55; margin-bottom: 28px; }
+.pc-code-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 6px; }
+.pc-code { font-family: 'Special Elite', cursive; font-size: 3rem; letter-spacing: 0.5em; color: #C8822A; margin: 0 auto 16px; padding-left: 0.5em; line-height: 1.1; }
+.pc-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 20px; border: 1.5px solid #C8822A; background: transparent; color: #C8822A; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; transition: background 0.15s, color 0.15s; }
+.pc-copy-btn:hover { background: #C8822A; color: white; }
+.pc-divider { width: 40px; height: 1px; background: var(--line); margin: 28px auto; }
+.pc-share-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 8px; }
+.pc-share-url { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-light); word-break: break-all; margin-bottom: 12px; padding: 10px 12px; background: var(--paper-dark); border-radius: 1px; border: 1px solid var(--line); }
+.pc-share-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border: 1px solid var(--line); background: transparent; color: var(--ink-light); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+.pc-enter-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin-top: 28px; }
+
+/* ── Partner B intro screen ── */
+#partner-b-intro-screen { display: none; }
+.pb-scroll-wrap { width: 100%; max-width: 520px; margin: 0 auto; }
+.pb-hero { text-align: center; padding: 48px 24px 32px; }
+.pb-hero-title { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; margin-bottom: 10px; letter-spacing: 0.04em; }
+.pb-hero-sub { font-family: 'Lora', Georgia, serif; font-size: 0.95rem; color: #a09080; font-style: italic; line-height: 1.6; }
+.pb-section { padding: 32px 24px; }
+.pb-body { font-family: 'Lora', Georgia, serif; font-size: 0.95rem; color: #c8bfb0; line-height: 1.75; margin-bottom: 20px; }
+.pb-body p { margin-bottom: 14px; }
+.pb-video-placeholder { background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15); border-radius: 2px; padding: 48px 24px; text-align: center; margin: 24px 0; }
+.pb-video-placeholder-text { font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; }
+.pb-reminder { background: rgba(200,130,42,0.08); border-left: 3px solid #C8822A; padding: 18px 20px; margin: 24px 0 32px; border-radius: 0 2px 2px 0; }
+.pb-reminder p { font-family: 'Lora', Georgia, serif; font-size: 0.88rem; color: #c8bfb0; line-height: 1.65; font-style: italic; }
+.pb-continue-btn { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin: 0 auto; }
+.pb-continue-btn:active { background: #7a5c10; }
+
+/* ── Code entry screen ── */
+#code-entry-screen {}
+.ce-card { background: var(--paper); border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid #5a7a5a; padding: 36px 28px; width: 100%; }
+.ce-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #5a7a5a; font-family: 'Courier Prime', monospace; margin-bottom: 12px; }
+.ce-hd { font-family: 'Special Elite', cursive; font-size: 1.1rem; color: var(--ink); margin-bottom: 8px; }
+.ce-sub { font-size: 0.8rem; color: var(--ink-light); font-style: italic; font-family: 'Lora', Georgia, serif; line-height: 1.55; margin-bottom: 24px; }
+.ce-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 6px; display: block; }
+.ce-input { display: block; width: 100%; padding: 16px; font-family: 'Special Elite', cursive; font-size: 1.8rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--ink); background: white; border: 1.5px solid var(--line); border-radius: 1px; outline: none; text-align: center; -webkit-appearance: none; margin-bottom: 6px; }
+.ce-input:focus { border-color: var(--accent); }
+.ce-error { font-size: 0.8rem; color: var(--red); font-style: italic; min-height: 24px; margin-bottom: 16px; line-height: 1.4; }
+.ce-submit-btn { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px; background: #5a7a5a; color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; }
+.ce-submit-btn:active { background: #4a6a4a; }
+.ce-submit-btn:disabled { background: #8aaa8a; cursor: not-allowed; }
+.ce-back { background: none; border: none; color: var(--ink-faint); font-family: 'Courier Prime', monospace; font-size: 0.72rem; cursor: pointer; margin-top: 14px; display: block; text-align: center; width: 100%; padding: 8px; -webkit-appearance: none; }
 </style>
 
 </head>
 <body>
+
+<!-- Persistent "join" corner link — visible while landing page is showing -->
+<a class="lp-share-corner" id="lp-share-corner" onclick="chooseJoin(); return false;" href="#" style="display:none;">Your partner started → join here</a>
+
+<!-- ENROLLMENT SCREENS -->
+
+<!-- Starting or Joining? -->
+<div id="start-choice-screen" class="enroll-screen" style="display:none;">
+  <div class="sc-header">
+    <h2>Starting or Joining?</h2>
+    <p>Let us know which best describes you.</p>
+  </div>
+  <div class="sc-cards">
+    <button class="sc-card sc-start" onclick="choosedStart()">
+      <div class="sc-card-label">Partner A</div>
+      <div class="sc-card-title">I'm starting this for us.</div>
+      <div class="sc-card-desc">Create your account, complete the process, and share a code with your partner so they can join you.</div>
+    </button>
+    <button class="sc-card sc-join" onclick="chooseJoin()">
+      <div class="sc-card-label">Partner B</div>
+      <div class="sc-card-title">My partner already started.</div>
+      <div class="sc-card-desc">Enter the code they shared with you to join their process.</div>
+    </button>
+  </div>
+</div>
+
+<!-- Mutual Buy-In -->
+<div id="buyin-screen" class="enroll-screen" style="display:none;">
+  <div class="bi-card">
+    <div class="bi-eyebrow">Before you continue</div>
+    <div class="bi-body">
+      <p>Before you continue, one thing matters more than anything else.</p>
+      <p>This only works if your partner wants this too.</p>
+      <p>Not tolerates it. Not goes along with it. Wants it.</p>
+      <p>The process you are about to start is designed to bring things to the surface. That is the point. It requires two people who are both genuinely willing to do the work. Not perfectly. But honestly. And together.</p>
+      <p>Have you talked to your partner? Do they know you are doing this? Are they in?</p>
+      <p>If the answer is yes — truly yes — then let's go.</p>
+      <p>If you are not sure, that is worth a conversation before you begin.</p>
+    </div>
+    <button class="bi-cta" onclick="showPaymentAuth()">We are both in. Continue.</button>
+    <button class="bi-back" onclick="showStartChoice()">← Go back</button>
+  </div>
+</div>
+
+<!-- Payment Confirmation -->
+<div id="payment-confirm-screen" class="enroll-screen" style="display:none;">
+  <div class="pc-card">
+    <div class="pc-eyebrow">Payment complete</div>
+    <div class="pc-hd">You are all set.</div>
+    <div class="pc-sub">Share this code with your partner so they can join. They will need it to create their account and link to your process.</div>
+    <div class="pc-code-label">Your partner's code</div>
+    <div class="pc-code" id="pc-code-display">——————</div>
+    <button class="pc-copy-btn" id="pc-copy-btn" onclick="pcCopyCode()">Copy Code</button>
+    <div class="pc-divider"></div>
+    <div class="pc-share-label">Or share this link directly</div>
+    <div class="pc-share-url" id="pc-join-url"></div>
+    <button class="pc-share-copy-btn" id="pc-share-copy-btn" onclick="pcCopyLink()">Copy Link</button>
+    <button class="pc-enter-btn" onclick="pcEnterApp()">Enter Your Script Tool →</button>
+  </div>
+</div>
+
+<!-- Partner B Intro (via /join/coupleId URL) -->
+<div id="partner-b-intro-screen" style="display:none; width:100%; overflow-y:auto;">
+  <div class="pb-scroll-wrap">
+    <div class="pb-hero">
+      <div class="pb-hero-title">The Ongoing Argument</div>
+      <div class="pb-hero-sub">Your partner has already started the process.<br>This is where you join them.</div>
+    </div>
+    <div class="pb-section">
+      <div class="pb-body">
+        <p>The fight you keep having. The one that never gets resolved. Your partner has named it and started the work. Now it's your turn.</p>
+        <p>This process was built by Mitch Newman, relationship adviser and former screenwriter, to help couples do what TV writers do every week — find the solution to the ongoing conflict.</p>
+        <p>Watch what's possible.</p>
+      </div>
+      <!-- REPLACE WITH DEMO VIDEO WHEN DELIVERED -->
+      <div class="pb-video-placeholder">
+        <div class="pb-video-placeholder-text">Demo video — coming soon</div>
+      </div>
+      <div class="pb-body">
+        <p>When both people are fully in it, something real becomes possible. You'll write your version of the fight privately, watch it performed by avatars, do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
+      </div>
+      <div class="pb-reminder">
+        <p>You are about to commit to something your partner has already started. Take your time before entering your code. This only works if you are both genuinely in it.</p>
+      </div>
+      <button class="pb-continue-btn" onclick="showCodeEntry()">I'm in. Enter my code →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Code Entry (Partner B) -->
+<div id="code-entry-screen" class="enroll-screen" style="display:none;">
+  <div class="ce-card">
+    <div class="ce-eyebrow">Joining your partner</div>
+    <div class="ce-hd">Enter your partner's code.</div>
+    <div class="ce-sub">They received this 6-character code after completing payment. Check your messages.</div>
+    <label class="ce-label" for="ce-code-input">Partner's code</label>
+    <input type="text" id="ce-code-input" class="ce-input" placeholder="——————" maxlength="6" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')submitPartnerCode()" />
+    <div class="ce-error" id="ce-error"></div>
+    <button class="ce-submit-btn" id="ce-submit-btn" onclick="submitPartnerCode()">Verify Code</button>
+    <button class="ce-back" onclick="ceGoBack()">← Go back</button>
+  </div>
+</div>
 
 <!-- LANDING PAGE — sits in front of everything; dismissed after fight-name step -->
 <div id="landing-screen">
@@ -726,6 +984,13 @@ body {
       <p>Name it. Meet it. And watch what magic becomes possible.</p>
     </div>
   </section>
+
+  <!-- S4b: SHARE WITH PARTNER — subtle joining prompt for Partner B -->
+  <div class="lp-share-section">
+    <div class="lp-share-hd">Your partner already started?</div>
+    <div class="lp-share-sub">If they've been through this process and shared a code with you, start here instead.</div>
+    <button class="lp-share-btn" onclick="chooseJoin()">Join your partner →</button>
+  </div>
 
   <!-- S5: CTA -->
   <div class="lp-cta">
@@ -1303,12 +1568,44 @@ var saveTimer = null;
 var noteTarget = null;
 var scriptTarget = null;
 
+// Enrollment flow
+var enrollMode = null; // 'start' | 'join'
+var pendingCoupleId = null; // set for Partner B (from URL or code lookup)
+var pendingPartnerAId = null; // set after code verified
+var pendingFightName = null; // carry fight name into auth
+var pendingJoinCoupleId = null; // coupleId extracted from /join/ URL
+
 // INIT — script is at bottom of body so DOM is ready; no window.onload needed
 (function() {
+  // Detect /join/:coupleId URL (Netlify rewrites to index.html)
+  var pathParts = window.location.pathname.split('/').filter(Boolean);
+  if (pathParts[0] === 'join' && pathParts[1]) {
+    pendingJoinCoupleId = pathParts[1];
+  }
+
   var s = localStorage.getItem('oa_user');
-  if (s) { try { user = JSON.parse(s); token = user.token; refreshAuth(user.refresh); } catch(e) { localStorage.removeItem('oa_user'); } }
+  if (s) {
+    try { user = JSON.parse(s); token = user.token; refreshAuth(user.refresh); }
+    catch(e) { localStorage.removeItem('oa_user'); }
+  }
+
   bindAll();
-  if (el('landing-screen')) { history.replaceState({ lp: 'main' }, ''); }
+
+  // If Partner B arrived via /join/ URL and is not logged in, show their intro
+  if (pendingJoinCoupleId && !user) {
+    pendingCoupleId = pendingJoinCoupleId;
+    enrollMode = 'join';
+    hide('landing-screen');
+    el('partner-b-intro-screen').style.display = 'block';
+    return;
+  }
+
+  if (el('landing-screen') && !pendingJoinCoupleId) {
+    history.replaceState({ lp: 'main' }, '');
+    // Show the persistent corner link for Partner B
+    var corner = el('lp-share-corner');
+    if (corner) corner.style.display = 'inline-block';
+  }
 }());
 
 function bindAll() {
@@ -1401,8 +1698,8 @@ function createAccount() {
   el('btn-create').textContent = 'Creating account…';
   post(AUTH + ':signUp?key=' + API_KEY, { email: email, password: pass, returnSecureToken: true })
   .then(function(d) {
-    el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
     if (d.error) {
+      el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
       console.error('Firebase signup error:', d);
       var code = d.error.message;
       var msgs = {
@@ -1417,20 +1714,66 @@ function createAccount() {
     }
     saveSession(d);
     user.name = name; user.partner = partner; user.fight = fight;
-    var coupleCode = generateCoupleCode();
-    user.coupleCode = coupleCode;
     localStorage.setItem('oa_user', JSON.stringify(user));
-    fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString(), coupleCode: coupleCode });
-    afterLogin();
+
+    if (enrollMode === 'join' && pendingCoupleId && pendingPartnerAId) {
+      // Partner B: save user doc then afterLogin handles linking
+      el('btn-create').textContent = 'Linking you in…';
+      fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString() })
+      .then(function() { afterLogin(); })
+      .catch(function() { afterLogin(); });
+    } else {
+      // Partner A: create couple doc, then redirect to Stripe
+      el('btn-create').textContent = 'Setting up — one moment…';
+      fsAdd('couples', {
+        partnerAId: user.uid, partnerBId: '',
+        fightName: fight, currentStep: '1',
+        paidStatus: false, coupleCode: '',
+        createdAt: new Date().toISOString()
+      }).then(function(coupleDoc) {
+        if (!coupleDoc || coupleDoc.error) {
+          el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
+          txt('ca-error', 'Could not set up your account. Please try again.');
+          return Promise.reject();
+        }
+        var coupleId = coupleDoc.name.split('/').pop();
+        user.coupleId = coupleId;
+        localStorage.setItem('oa_user', JSON.stringify(user));
+        return Promise.all([
+          fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString(), coupleId: coupleId }),
+        ]).then(function() { return coupleId; });
+      }).then(function(coupleId) {
+        if (!coupleId) return;
+        el('btn-create').textContent = 'Redirecting to payment…';
+        return fetch('/.netlify/functions/stripe-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ coupleId: coupleId, uid: user.uid, fightName: fight })
+        }).then(function(r) { return r.json(); }).then(function(data) {
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
+            txt('ca-error', 'Could not reach payment. Please try again.');
+          }
+        });
+      }).catch(function() {
+        el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
+      });
+    }
   }).catch(function() { el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account'; txt('ca-error', 'Connection error. Try again.'); });
 }
 
 function signOut() {
   user = null; token = null;
   localStorage.removeItem('oa_user');
+  enrollMode = null; pendingCoupleId = null; pendingPartnerAId = null;
+  pendingFightName = null; pendingJoinCoupleId = null;
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-link-card'); hide('couple-linked-status');
   hide('step2-card'); hide('analysis-banner'); hide('journey-banner');
+  hide('start-choice-screen'); hide('buyin-screen');
+  hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
   ['step3-screen','step4-screen','step5-screen','step6-screen',
    'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen'].forEach(function(id){ hide(id); });
   showFlex('auth-screen');
@@ -1465,8 +1808,48 @@ function refreshAuth(refreshToken) {
 }
 
 function afterLogin() {
+  // Check for Stripe payment return
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('payment_success') === '1' && params.get('session_id')) {
+    hide('landing-screen'); hide('auth-screen');
+    handlePaymentSuccess(params.get('session_id'));
+    return;
+  }
+
+  // Partner B linking: if we have a validated coupleId, link now
+  if (enrollMode === 'join' && pendingCoupleId && pendingPartnerAId) {
+    hide('auth-screen'); hide('code-entry-screen'); hide('partner-b-intro-screen');
+    var coupleId = pendingCoupleId;
+    var partnerAId = pendingPartnerAId;
+    Promise.all([
+      fsSet('couples/' + coupleId, { partnerBId: user.uid }),
+      fsSet('users/' + user.uid, { coupleId: coupleId, partnerId: partnerAId })
+    ]).then(function() {
+      user.coupleId = coupleId; user.partnerId = partnerAId;
+      localStorage.setItem('oa_user', JSON.stringify(user));
+      pendingCoupleId = null; pendingPartnerAId = null; pendingJoinCoupleId = null;
+      enrollMode = null;
+      el('al-fab').style.display = 'block';
+      show('script-screen');
+      loadProfile(); loadScript(); loadNotes();
+    }).catch(function() {
+      txt('ca-error', 'Account created but could not link to your partner. Please contact mitch@mitchnewman.com.');
+      el('al-fab').style.display = 'block';
+      show('script-screen');
+      loadProfile(); loadScript(); loadNotes();
+    });
+    return;
+  }
+
+  // Clean any payment query params from URL
+  if (window.location.search) history.replaceState({}, '', '/');
+
   hide('landing-screen');
   hide('auth-screen');
+  hide('start-choice-screen'); hide('buyin-screen');
+  hide('partner-b-intro-screen'); hide('code-entry-screen');
+  var corner = el('lp-share-corner'); if (corner) corner.style.display = 'none';
+
   if (user.email === COACH) {
     hide('al-fab');
     showFlex('coach-screen'); loadClients();
@@ -1508,6 +1891,25 @@ function fsQuery(col, field, value) {
   return fetch(DB + ':runQuery', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: col }],
+        where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } },
+        limit: 1
+      }
+    })
+  }).then(function(r) { return r.json(); });
+}
+
+// Unauthenticated version for pre-login code validation (uses project API key)
+function fsGetPublic(path) {
+  return fetch(DB + '/' + path + '?key=' + API_KEY).then(function(r) { return r.json(); });
+}
+
+function fsQueryPublic(col, field, value) {
+  return fetch(DB + ':runQuery?key=' + API_KEY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       structuredQuery: {
         from: [{ collectionId: col }],
@@ -1794,14 +2196,14 @@ function lpProceed() {
     return;
   }
   el('lp-fight-err').textContent = '';
+  pendingFightName = fightName;
   var lp = el('landing-screen');
   lp.style.opacity = '0';
   setTimeout(function() {
     hide('landing-screen');
     lp.style.opacity = '';
-    el('ca-fight').value = fightName;
-    switchTab('create');
-    showFlex('auth-screen');
+    var corner = el('lp-share-corner'); if (corner) corner.style.display = 'none';
+    showStartChoice();
   }, 500);
 }
 
@@ -1924,6 +2326,218 @@ function loadClientAwarenessLog(uid, container) {
   }).catch(function() {});
 }
 
+/* ── ENROLLMENT FLOW ──────────────────────────────────────────── */
+
+function showStartChoice() {
+  hide('landing-screen'); hide('auth-screen');
+  hide('buyin-screen'); hide('payment-confirm-screen');
+  hide('partner-b-intro-screen'); hide('code-entry-screen');
+  var sc = el('start-choice-screen');
+  sc.style.display = 'flex';
+}
+
+function choosedStart() {
+  enrollMode = 'start';
+  hide('start-choice-screen');
+  var bi = el('buyin-screen');
+  bi.style.display = 'flex';
+}
+
+function chooseJoin() {
+  enrollMode = 'join';
+  hide('landing-screen'); hide('start-choice-screen');
+  var corner = el('lp-share-corner'); if (corner) corner.style.display = 'none';
+  var ce = el('code-entry-screen');
+  ce.style.display = 'flex';
+}
+
+function showPaymentAuth() {
+  hide('buyin-screen');
+  // Pre-fill fight name into auth form if we have it
+  if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
+  switchTab('create');
+  showFlex('auth-screen');
+}
+
+function ceGoBack() {
+  hide('code-entry-screen');
+  txt('ce-error', '');
+  if (pendingJoinCoupleId) {
+    // Came from /join/ URL — go back to Partner B intro
+    el('partner-b-intro-screen').style.display = 'block';
+  } else {
+    // Came from landing page "Joining" choice — show start-choice or landing
+    showStartChoice();
+  }
+}
+
+function showCodeEntry() {
+  hide('partner-b-intro-screen');
+  var ce = el('code-entry-screen');
+  ce.style.display = 'flex';
+  setTimeout(function() { var inp = el('ce-code-input'); if (inp) inp.focus(); }, 100);
+}
+
+function submitPartnerCode() {
+  var code = (val('ce-code-input') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  txt('ce-error', '');
+  if (code.length !== 6) { txt('ce-error', 'Please enter the full 6-character code.'); return; }
+  var btn = el('ce-submit-btn');
+  btn.disabled = true; btn.textContent = 'Checking…';
+
+  // Partner B is not logged in yet — use public (API key) Firestore queries
+  var lookupPromise;
+  if (pendingJoinCoupleId) {
+    lookupPromise = fsGetPublic('couples/' + pendingJoinCoupleId)
+      .then(function(d) {
+        if (!d || !d.fields) return [];
+        var couple = fromFields(d.fields);
+        couple._id = pendingJoinCoupleId;
+        return [couple];
+      });
+  } else {
+    lookupPromise = fsQueryPublic('couples', 'coupleCode', code).then(function(results) {
+      return (results || []).map(function(r) {
+        if (!r.document || !r.document.fields) return null;
+        var couple = fromFields(r.document.fields);
+        couple._id = r.document.name.split('/').pop();
+        return couple;
+      }).filter(Boolean);
+    });
+  }
+
+  lookupPromise.then(function(couples) {
+    btn.disabled = false; btn.textContent = 'Verify Code';
+
+    // Find the one matching our code
+    var match = null;
+    for (var i = 0; i < couples.length; i++) {
+      if ((couples[i].coupleCode || '').toUpperCase() === code) { match = couples[i]; break; }
+    }
+
+    if (!match) {
+      txt('ce-error', 'We could not find that code. Please check it and try again.');
+      return;
+    }
+    if (!match.paidStatus) {
+      txt('ce-error', 'Your partner has started the process but has not completed payment yet. Please check with them, then try your code again.');
+      return;
+    }
+    if (match.partnerBId) {
+      txt('ce-error', 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.');
+      return;
+    }
+
+    // Code valid — store context and show account creation
+    pendingCoupleId = match._id;
+    pendingPartnerAId = match.partnerAId || '';
+    if (match.fightName) { pendingFightName = match.fightName; }
+
+    hide('code-entry-screen');
+    // Pre-fill fight name
+    if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
+    switchTab('create');
+    var sub = el('form-create') && el('form-create').querySelector('.auth-sub');
+    if (sub) sub.textContent = 'Create your account to join the process.';
+    showFlex('auth-screen');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Verify Code';
+    txt('ce-error', 'Connection error. Please try again.');
+  });
+}
+
+/* Payment return handler */
+function handlePaymentSuccess(sessionId) {
+  hide('auth-screen'); hide('landing-screen');
+  var btn = el('btn-create');
+  if (btn) { btn.textContent = 'Verifying payment…'; }
+
+  fetch('/.netlify/functions/stripe-verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: sessionId })
+  }).then(function(r) { return r.json(); })
+  .then(function(d) {
+    history.replaceState({}, '', '/');
+    if (!d.paid || !d.coupleCode || !d.coupleId) {
+      // Payment unverified — just enter app
+      el('al-fab').style.display = 'block';
+      show('script-screen');
+      loadProfile(); loadScript(); loadNotes();
+      return;
+    }
+    // Write paidStatus + coupleCode to couple doc
+    return fsSet('couples/' + d.coupleId, { paidStatus: true, coupleCode: d.coupleCode })
+    .then(function() {
+      showPaymentConfirm(d.coupleCode, d.coupleId);
+    });
+  }).catch(function() {
+    history.replaceState({}, '', '/');
+    // Fallback: enter app without confirmation screen
+    el('al-fab').style.display = 'block';
+    show('script-screen');
+    loadProfile(); loadScript(); loadNotes();
+  });
+}
+
+function showPaymentConfirm(code, coupleId) {
+  hide('auth-screen'); hide('landing-screen');
+  hide('start-choice-screen'); hide('buyin-screen');
+  txt('pc-code-display', code);
+  var joinUrl = window.location.origin + '/join/' + coupleId;
+  el('pc-join-url').textContent = joinUrl;
+  // Store joinUrl for copy button
+  el('pc-join-url').dataset.url = joinUrl;
+  var pc = el('payment-confirm-screen');
+  pc.style.display = 'flex';
+}
+
+function pcCopyCode() {
+  var code = (el('pc-code-display').textContent || '').trim();
+  if (!code) return;
+  var finish = function() {
+    var b = el('pc-copy-btn'); if (b) { b.textContent = 'Copied!'; setTimeout(function() { b.textContent = 'Copy Code'; }, 2000); }
+  };
+  if (navigator.clipboard) { navigator.clipboard.writeText(code).then(finish).catch(finish); return; }
+  var ta = document.createElement('textarea'); ta.value = code;
+  ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta); finish();
+}
+
+function pcCopyLink() {
+  var url = (el('pc-join-url').dataset.url || el('pc-join-url').textContent || '').trim();
+  if (!url) return;
+  var finish = function() {
+    var b = el('pc-share-copy-btn'); if (b) { b.textContent = 'Copied!'; setTimeout(function() { b.textContent = 'Copy Link'; }, 2000); }
+  };
+  if (navigator.clipboard) { navigator.clipboard.writeText(url).then(finish).catch(finish); return; }
+  var ta = document.createElement('textarea'); ta.value = url;
+  ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta); finish();
+}
+
+function pcEnterApp() {
+  hide('payment-confirm-screen');
+  el('al-fab').style.display = 'block';
+  show('script-screen');
+  loadProfile(); loadScript(); loadNotes();
+}
+
+function retryPayment() {
+  if (!user || !user.coupleId) return;
+  var btn = document.querySelector('#cl-payment-pending button');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
+  var fight = user.fight || '';
+  fetch('/.netlify/functions/stripe-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ coupleId: user.coupleId, uid: user.uid, fightName: fight })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.url) { window.location.href = data.url; }
+    else { if (btn) { btn.disabled = false; btn.textContent = 'Complete Payment →'; } }
+  }).catch(function() { if (btn) { btn.disabled = false; btn.textContent = 'Complete Payment →'; } });
+}
+
 /* COUPLE LINKING */
 function generateCoupleCode() {
   var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -1935,19 +2549,41 @@ function generateCoupleCode() {
 function clUpdateLinkUI(profile) {
   if (!profile || user.email === COACH) return;
   if (profile.coupleId) {
-    clShowLinked(profile.partnerName || 'your partner');
-    journeyRoute();
+    // Fetch couple doc to check paidStatus before routing
+    fsGet('couples/' + profile.coupleId).then(function(d) {
+      if (!d || !d.fields) {
+        clShowLinked(profile.partnerName || 'your partner');
+        journeyRoute();
+        return;
+      }
+      var couple = fromFields(d.fields);
+      if (!couple.paidStatus) {
+        // Payment not yet complete — show pending message in place of couple-link-card
+        hide('couple-link-card');
+        hide('couple-linked-status');
+        var existing = el('cl-payment-pending');
+        if (!existing) {
+          var div = document.createElement('div');
+          div.id = 'cl-payment-pending';
+          div.style.cssText = 'margin-top:16px;background:var(--paper);border-radius:2px;padding:20px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.2);font-family:\'Courier Prime\',monospace;font-size:0.82rem;color:var(--ink-light);';
+          div.innerHTML = '<div style="font-style:italic;margin-bottom:12px;">Payment is not yet complete. Complete payment to give your partner access to the full process.</div>'
+            + '<button onclick="retryPayment()" style="font-family:\'Special Elite\',cursive;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;padding:10px 20px;background:var(--accent);color:white;border:none;cursor:pointer;border-radius:1px;">Complete Payment →</button>';
+          var ss = el('script-screen'); if (ss) ss.appendChild(div);
+        }
+        return;
+      }
+      var pName = couple.partnerBId ? (profile.partnerName || 'your partner') : 'waiting for partner';
+      clShowLinked(pName);
+      journeyRoute();
+    }).catch(function() {
+      clShowLinked(profile.partnerName || 'your partner');
+      journeyRoute();
+    });
     return;
   }
-  var code = profile.coupleCode || user.coupleCode;
-  if (!code) {
-    code = generateCoupleCode();
-    user.coupleCode = code;
-    localStorage.setItem('oa_user', JSON.stringify(user));
-    fsSet('users/' + user.uid, { coupleCode: code });
-  }
-  txt('cl-code-display', code);
-  el('couple-link-card').style.display = 'block';
+  // No coupleId — hide old manual link card in new payment flow
+  // (old flow users without a coupleId won't normally reach this in the new system)
+  hide('couple-link-card');
 }
 
 function clShowLinked(partnerName) {
