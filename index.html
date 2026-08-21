@@ -1020,6 +1020,18 @@ function post(url, body) {
   return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) { return r.json(); });
 }
 
+// AI PROXY
+function callAI(messages, step) {
+  return fetch('/.netlify/functions/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: messages, step: step || '1' })
+  }).then(function(r) {
+    if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'AI error'); });
+    return r.json();
+  }).then(function(d) { return d.text || ''; });
+}
+
 // PROFILE
 function loadProfile() {
   fsGet('users/' + user.uid).then(function(d) {
