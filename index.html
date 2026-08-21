@@ -226,6 +226,120 @@ body {
 .s3-input::placeholder { color: rgba(255,255,255,0.25); }
 .s3-send { background: var(--accent); border: none; cursor: pointer; color: white; font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.06em; padding: 12px 16px; border-radius: 2px; -webkit-appearance: none; touch-action: manipulation; flex-shrink: 0; }
 .s3-send:disabled { background: rgba(184,160,112,0.35); cursor: default; }
+.s3-complete { background: none; border: none; color: rgba(255,255,255,0.28); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.06em; cursor: pointer; padding: 6px 0; width: 100%; text-align: center; -webkit-appearance: none; touch-action: manipulation; }
+.s3-complete:hover { color: rgba(255,255,255,0.5); }
+
+/* ── JOURNEY BANNER (steps 4-11 entry points) ─────────────── */
+#journey-banner { display: none; margin-top: 16px; }
+.jb-inner { background: var(--paper); border-radius: 2px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); border-left: 4px solid var(--accent); }
+.jb-step { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 4px; }
+.jb-hd { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 6px; }
+.jb-sub { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 16px; line-height: 1.55; }
+.jb-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+
+/* ── SHARED FULL-SCREEN STEP SCREENS ──────────────────────── */
+/* Steps 4-11 use position:fixed overlay with dark bg, same as #step3-screen */
+#step4-screen,#step5-screen,#step6-screen,#step7-screen,#step8-screen,#step9-screen,#step10-screen,#step11-screen {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200; background: #2a2520; flex-direction: column;
+}
+
+/* ── STEPS 4 & 5: VIDEO PLACEHOLDER ──────────────────────── */
+.s45-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 40px; }
+.s45-intro { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.82); line-height: 1.75; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.s45-video-ph { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 2px; padding: 44px 24px; text-align: center; margin-bottom: 24px; }
+.s45-play-icon { font-size: 2.2rem; color: rgba(255,255,255,0.2); margin-bottom: 10px; }
+.s45-ph-label { font-family: 'Special Elite', cursive; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+.s45-ph-note { font-size: 0.72rem; color: rgba(255,255,255,0.2); font-style: italic; }
+.s45-tx-hd { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 10px; }
+.s45-tx { background: rgba(255,255,255,0.04); border-left: 2px solid rgba(184,160,112,0.35); padding: 18px 16px; margin-bottom: 24px; max-height: 260px; overflow-y: auto; }
+.s45-tx-line { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.72); line-height: 1.65; margin-bottom: 14px; }
+.s45-tx-line:last-child { margin-bottom: 0; }
+.s45-tx-spk { display: block; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(184,160,112,0.75); margin-bottom: 2px; }
+.s45-continue { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; }
+
+/* ── STEP 6: REFLECTIVE QUESTIONS ─────────────────────────── */
+.s6-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 40px; }
+.s6-intro { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.75; margin-bottom: 28px; }
+.s6-q-block { margin-bottom: 22px; }
+.s6-q-num { display: block; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(184,160,112,0.7); margin-bottom: 4px; }
+.s6-q-label { font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.55; margin-bottom: 8px; font-style: italic; font-family: 'Courier Prime', monospace; display: block; }
+.s6-textarea { width: 100%; min-height: 80px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.88); outline: none; resize: vertical; line-height: 1.6; border-radius: 2px; display: block; -webkit-appearance: none; }
+.s6-textarea:focus { border-color: rgba(184,160,112,0.5); }
+.s6-textarea::placeholder { color: rgba(255,255,255,0.2); }
+.s6-submit { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; }
+.s6-submit:disabled { background: rgba(184,160,112,0.35); cursor: default; }
+.s6-ai-wrap { display: none; margin-top: 24px; padding: 20px; background: rgba(255,255,255,0.06); border-left: 2px solid var(--accent); border-radius: 1px; }
+.s6-ai-wrap p { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.75; margin-bottom: 12px; }
+.s6-ai-wrap p:last-child { margin-bottom: 0; }
+.s6-continue { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 1px; width: 100%; margin-top: 16px; -webkit-appearance: none; touch-action: manipulation; }
+.s6-continue:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
+
+/* ── STEPS 7 & 8: CHAT SCREENS (share s3- styles) + extras ── */
+.s78-input-area { padding: 12px 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.s78-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.s7-log-btn { background: rgba(184,160,112,0.15); border: 1px solid rgba(184,160,112,0.3); color: rgba(255,255,255,0.6); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.06em; padding: 6px 12px; border-radius: 1px; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; }
+.s7-complete-btn,.s8-complete-btn { background: none; border: none; color: rgba(255,255,255,0.28); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.04em; cursor: pointer; padding: 0; -webkit-appearance: none; touch-action: manipulation; }
+.s7-complete-btn:hover,.s8-complete-btn:hover { color: rgba(255,255,255,0.5); }
+.s78-send-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 8px; }
+.s7-one-thing { display: none; padding: 14px 0 0; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px; }
+.s7-ot-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(184,160,112,0.65); margin-bottom: 6px; font-family: 'Courier Prime', monospace; display: block; }
+.s7-ot-input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 10px 14px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.88); outline: none; border-radius: 2px; -webkit-appearance: none; }
+.s7-ot-input:focus { border-color: rgba(184,160,112,0.5); }
+.s7-ot-save { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; background: transparent; border: 1px solid rgba(184,160,112,0.4); color: rgba(184,160,112,0.8); cursor: pointer; border-radius: 1px; margin-top: 6px; -webkit-appearance: none; touch-action: manipulation; }
+
+/* ── STEP 9: THE REWRITE ───────────────────────────────────── */
+.s9-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 20px; }
+.s9-intro { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.75; margin-bottom: 20px; }
+.s9-example-toggle { background: none; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-family: 'Courier Prime', monospace; font-size: 0.78rem; letter-spacing: 0.06em; padding: 10px 14px; border-radius: 1px; cursor: pointer; width: 100%; text-align: left; margin-bottom: 16px; -webkit-appearance: none; touch-action: manipulation; }
+.s9-example-pane { display: none; background: rgba(0,0,0,0.35); border-radius: 2px; padding: 20px; margin-bottom: 20px; overflow-y: auto; max-height: 320px; }
+.s9-example-pane.open { display: block; }
+.s9-example-hd { font-family: 'Special Elite', cursive; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.s9-example-txt { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.68); line-height: 1.7; white-space: pre-wrap; }
+.s9-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 20px 0; }
+.s9-rewrite-label { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 8px; display: block; }
+.s9-rewrite-area { width: 100%; min-height: 260px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 16px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.88); outline: none; resize: vertical; line-height: 1.7; border-radius: 2px; display: block; -webkit-appearance: none; }
+.s9-rewrite-area:focus { border-color: rgba(184,160,112,0.5); }
+.s9-rewrite-area::placeholder { color: rgba(255,255,255,0.15); }
+.s9-checkin { padding: 12px 16px; background: rgba(184,160,112,0.08); border-left: 2px solid rgba(184,160,112,0.35); margin: 12px 0; font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.55); font-style: italic; border-radius: 1px; min-height: 0; }
+.s9-input-area { padding: 12px 18px 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.s9-status { font-size: 0.72rem; color: rgba(255,255,255,0.3); font-style: italic; text-align: center; margin-top: 8px; min-height: 14px; }
+.s9-submit { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; }
+.s9-submit:disabled { background: rgba(184,160,112,0.35); cursor: default; }
+
+/* ── STEP 10: AI FEEDBACK ON REWRITE ──────────────────────── */
+.s10-scroll { flex: 1; overflow-y: auto; padding: 28px 18px 80px; }
+.s10-waiting { text-align: center; padding: 60px 0; }
+.s10-waiting p { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.4); font-style: italic; }
+.s10-body p { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.75; margin-bottom: 14px; }
+.s10-continue { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 13px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 1px; width: 100%; margin-top: 24px; -webkit-appearance: none; touch-action: manipulation; }
+.s10-continue:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
+
+/* ── STEP 11: CAP GLOBAL BRIDGE ───────────────────────────── */
+.s11-scroll { flex: 1; overflow-y: auto; padding: 32px 18px 60px; }
+.s11-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 10px; }
+.s11-heading { font-family: 'Special Elite', cursive; font-size: 1.15rem; color: rgba(255,255,255,0.92); margin-bottom: 14px; line-height: 1.4; }
+.s11-prose { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.72); line-height: 1.85; margin-bottom: 14px; }
+.s11-prose:last-of-type { margin-bottom: 0; }
+.s11-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 36px 0; }
+.s11-cap-card { background: rgba(184,160,112,0.08); border: 1px solid rgba(184,160,112,0.25); border-radius: 2px; padding: 28px 24px; margin-bottom: 24px; }
+.s11-cap-name { font-family: 'Special Elite', cursive; font-size: 1.3rem; color: rgba(255,255,255,0.95); margin-bottom: 4px; letter-spacing: 0.04em; }
+.s11-cap-tagline { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(184,160,112,0.75); font-style: italic; margin-bottom: 14px; }
+.s11-cap-desc { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.7; margin-bottom: 20px; }
+.s11-trial { font-size: 0.75rem; color: rgba(255,255,255,0.35); font-style: italic; margin-bottom: 16px; font-family: 'Courier Prime', monospace; }
+.s11-cap-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px 32px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; display: block; }
+.s11-email-section { background: rgba(255,255,255,0.03); border-radius: 2px; padding: 20px; margin-top: 24px; }
+.s11-email-hd { font-family: 'Special Elite', cursive; font-size: 0.85rem; color: rgba(255,255,255,0.65); margin-bottom: 6px; }
+.s11-email-sub { font-size: 0.75rem; color: rgba(255,255,255,0.3); font-style: italic; margin-bottom: 14px; font-family: 'Courier Prime', monospace; line-height: 1.55; }
+.s11-email-row { display: flex; gap: 10px; }
+.s11-email-input { flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.88); outline: none; border-radius: 2px; -webkit-appearance: none; }
+.s11-email-input:focus { border-color: rgba(184,160,112,0.5); }
+.s11-email-input::placeholder { color: rgba(255,255,255,0.2); }
+.s11-email-btn { background: rgba(184,160,112,0.45); border: none; color: white; font-family: 'Special Elite', cursive; font-size: 0.8rem; letter-spacing: 0.06em; padding: 12px 16px; border-radius: 2px; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; flex-shrink: 0; }
+.s11-email-btn:disabled { background: rgba(184,160,112,0.2); cursor: default; }
+.s11-email-note { font-size: 0.65rem; color: rgba(255,255,255,0.2); font-style: italic; margin-top: 8px; }
+.s11-done { text-align: center; padding: 32px 0 0; }
+.s11-done p { font-family: 'Special Elite', cursive; font-size: 1rem; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; }
 </style>
 
 <style>
@@ -739,6 +853,16 @@ body {
     </div>
   </div>
 
+  <!-- JOURNEY BANNER (Steps 4–11 continuation) -->
+  <div id="journey-banner">
+    <div class="jb-inner">
+      <div class="jb-step" id="jb-step"></div>
+      <div class="jb-hd" id="jb-title"></div>
+      <div class="jb-sub" id="jb-sub"></div>
+      <button class="jb-btn" id="jb-btn" onclick="openJourneyStep()"></button>
+    </div>
+  </div>
+
   <!-- AWARENESS LOG PANEL -->
   <div id="awareness-log">
     <button class="al-log-toggle" id="btn-al-toggle" onclick="alToggle()">
@@ -839,6 +963,306 @@ body {
     <div class="s3-input-row">
       <textarea class="s3-input" id="s3-input" placeholder="Respond..." rows="1" onkeydown="s3KeyDown(event)" oninput="s3AutoGrow(this)"></textarea>
       <button class="s3-send" id="s3-send" onclick="s3Send()">Send</button>
+    </div>
+    <button class="s3-complete" id="s3-complete-btn" onclick="completeStep3()" style="display:none">Complete Step 3 — Continue to Step 4 ›</button>
+  </div>
+</div>
+
+<!-- STEP 4: WATCH YOUR OWN SCRIPT -->
+<div id="step4-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep4()">&#8592;</button>
+    <span class="s3-title">Step 4 &mdash; Watch Your Script</span>
+  </div>
+  <div class="s45-scroll" id="s4-inner">
+    <p class="s45-intro" id="s4-intro"></p>
+    <div class="s45-video-ph">
+      <div class="s45-play-icon">&#9654;</div>
+      <div class="s45-ph-label">Avatar Video &mdash; Coming Soon</div>
+      <div class="s45-ph-note">HeyGen integration will appear here. Read your transcript below.</div>
+    </div>
+    <div class="s45-tx-hd">Your Script Transcript</div>
+    <div class="s45-tx" id="s4-transcript"></div>
+    <button class="s45-continue" onclick="completeStep4()">I&rsquo;ve Watched &mdash; Continue to Step 5 &#8250;</button>
+  </div>
+</div>
+
+<!-- STEP 5: WATCH PARTNER'S SCRIPT -->
+<div id="step5-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep5()">&#8592;</button>
+    <span class="s3-title">Step 5 &mdash; Watch Your Partner&rsquo;s Script</span>
+  </div>
+  <div class="s45-scroll" id="s5-inner">
+    <p class="s45-intro" id="s5-intro"></p>
+    <div class="s45-video-ph">
+      <div class="s45-play-icon">&#9654;</div>
+      <div class="s45-ph-label">Avatar Video &mdash; Coming Soon</div>
+      <div class="s45-ph-note">HeyGen integration will appear here. Read the transcript below.</div>
+    </div>
+    <div class="s45-tx-hd">Partner&rsquo;s Script Transcript</div>
+    <div class="s45-tx" id="s5-transcript"></div>
+    <button class="s45-continue" onclick="completeStep5()">I&rsquo;ve Watched &mdash; Continue to Step 6 &#8250;</button>
+  </div>
+</div>
+
+<!-- STEP 6: REFLECTIVE QUESTIONS -->
+<div id="step6-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep6()">&#8592;</button>
+    <span class="s3-title">Step 6 &mdash; Reflective Questions</span>
+  </div>
+  <div class="s6-scroll">
+    <p class="s6-intro">Answer each question honestly, in your own words. Your partner will not see your answers unless you choose to share them. After you submit, the AI will offer one final thought and encourage you to share what you noticed with your partner before you continue.</p>
+    <div class="s6-q-block">
+      <span class="s6-q-num">Question 1</span>
+      <label class="s6-q-label">What did you notice about your partner&rsquo;s experience that you hadn&rsquo;t considered before?</label>
+      <textarea class="s6-textarea" id="s6-q1" placeholder="Your honest answer..."></textarea>
+    </div>
+    <div class="s6-q-block">
+      <span class="s6-q-num">Question 2</span>
+      <label class="s6-q-label">Was there anything in their version that surprised you?</label>
+      <textarea class="s6-textarea" id="s6-q2" placeholder="Your honest answer..."></textarea>
+    </div>
+    <div class="s6-q-block">
+      <span class="s6-q-num">Question 3</span>
+      <label class="s6-q-label">Did anything shift in how you understand what was happening for them in this fight?</label>
+      <textarea class="s6-textarea" id="s6-q3" placeholder="Your honest answer..."></textarea>
+    </div>
+    <div class="s6-q-block">
+      <span class="s6-q-num">Question 4</span>
+      <label class="s6-q-label">What do you think they most needed you to understand?</label>
+      <textarea class="s6-textarea" id="s6-q4" placeholder="Your honest answer..."></textarea>
+    </div>
+    <button class="s6-submit" id="s6-submit-btn" onclick="submitStep6()">Submit My Reflections</button>
+    <div class="s6-ai-wrap" id="s6-ai-wrap">
+      <div id="s6-ai-body"></div>
+      <button class="s6-continue" onclick="completeStep6()">Continue to Step 7 &mdash; Individual Work &#8250;</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 7: INDIVIDUAL WORK -->
+<div id="step7-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep7()">&#8592;</button>
+    <span class="s3-title">Step 7 &mdash; Individual Work</span>
+  </div>
+  <div class="s3-thread" id="s7-thread"></div>
+  <div class="s78-input-area">
+    <div class="s78-top-row">
+      <button class="s7-log-btn" onclick="openLogModal('')">+ Add to Awareness Log</button>
+      <button class="s7-complete-btn" id="s7-complete-btn" onclick="showOneThingArea()">Complete Step 7 ›</button>
+    </div>
+    <div class="s78-send-row">
+      <textarea class="s3-input" id="s7-input" placeholder="Respond..." rows="1" onkeydown="s7KeyDown(event)" oninput="s3AutoGrow(this)"></textarea>
+      <button class="s3-send" id="s7-send" onclick="s7Send()">Send</button>
+    </div>
+    <div class="s7-one-thing" id="s7-one-thing-area">
+      <label class="s7-ot-label">The One Thing &mdash; Write it down before you continue</label>
+      <input type="text" class="s7-ot-input" id="s7-ot-input" placeholder="What I am willing to try differently next time is..." />
+      <button class="s7-ot-save" onclick="saveOneThingAndComplete()">Save &amp; Continue to Step 8 &#8250;</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 8: NVC TOGETHER -->
+<div id="step8-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep8()">&#8592;</button>
+    <span class="s3-title">Step 8 &mdash; NVC Practice</span>
+  </div>
+  <div class="s3-thread" id="s8-thread"></div>
+  <div class="s78-input-area">
+    <div class="s78-top-row">
+      <span style="font-size:0.7rem;color:rgba(255,255,255,0.3);font-style:italic;font-family:'Courier Prime',monospace">Nonviolent Communication</span>
+      <button class="s8-complete-btn" id="s8-complete-btn" onclick="completeStep8()">Complete Step 8 ›</button>
+    </div>
+    <div class="s78-send-row">
+      <textarea class="s3-input" id="s8-input" placeholder="Respond..." rows="1" onkeydown="s8KeyDown(event)" oninput="s3AutoGrow(this)"></textarea>
+      <button class="s3-send" id="s8-send" onclick="s8Send()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 9: THE REWRITE -->
+<div id="step9-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep9()">&#8592;</button>
+    <span class="s3-title">Step 9 &mdash; The Rewrite</span>
+  </div>
+  <div class="s9-scroll">
+    <p class="s9-intro">Before you write a single word, read the Before and Better example below. A real fight. Two versions. See what is possible before you attempt your own.</p>
+    <button class="s9-example-toggle" id="s9-example-toggle" onclick="s9ToggleExample()">&#9654; Read the Before &amp; Better Example</button>
+    <div class="s9-example-pane" id="s9-example-pane">
+      <div class="s9-example-hd">Before</div>
+      <div class="s9-example-txt">LOCATION: Kitchen, Sunday morning.
+
+ALEX
+(loading dishwasher, back turned)
+You never put things where they go.
+
+JORDAN
+I just woke up.
+
+ALEX
+That's not what I'm talking about.
+
+JORDAN
+Then say what you're talking about.
+
+ALEX
+(turns around)
+Every single time. I ask for one thing.
+
+JORDAN
+You didn't ask. You announced.
+
+ALEX
+Oh so now I'm bad at communicating too?
+
+JORDAN
+I'm going back to bed.
+
+ALEX
+Of course you are. That's what you do.
+
+JORDAN
+(stops)
+What does that mean?
+
+ALEX
+It means you disappear when things get hard.
+
+JORDAN
+I disappear? You've been cold to me for three days.
+
+ALEX
+Because you don't listen.
+
+JORDAN
+I can't listen to what you never say.
+
+ALEX
+I shouldn't have to spell it out every time.
+
+JORDAN
+Then I don't know how to help you.
+
+ALEX
+(quietly)
+That's exactly the problem.</div>
+      <div class="s9-example-hd" style="margin-top:24px">Better</div>
+      <div class="s9-example-txt">LOCATION: Kitchen, Sunday morning.
+
+ALEX
+(loading dishwasher, pauses)
+Can I say something without it becoming a thing?
+
+JORDAN
+I can try. What's up?
+
+ALEX
+When things aren't where I expect them I get anxious. I know that's mine. But it's been happening a lot and I haven't known how to bring it up.
+
+JORDAN
+Okay. I didn't know it was landing that way.
+
+ALEX
+I think I've been needing to feel like we're on the same team about the space. Not rules. Just — shared.
+
+JORDAN
+That makes sense. I think I sometimes zone out and don't notice. Not because I don't care. I just move differently.
+
+ALEX
+I know you do. I don't need you to be me about it. I just need to feel like it matters to you that it matters to me.
+
+JORDAN
+It does. I think I need reminders sometimes. Gentle ones.
+
+ALEX
+(small smile)
+I can do gentle.
+
+JORDAN
+Thank you for saying this instead of going quiet.
+
+ALEX
+Thank you for not getting defensive.
+
+JORDAN
+I almost did.
+
+ALEX
+Me too.</div>
+    </div>
+    <hr class="s9-divider">
+    <p class="s9-intro" style="margin-bottom:16px">The AI is right here with you throughout this rewrite. If you get triggered, stuck, or uncertain — tap the AI button. You do not have to figure it out alone.</p>
+    <div class="s9-checkin" id="s9-checkin" style="display:none"></div>
+    <span class="s9-rewrite-label">Your Rewrite &mdash; write it differently this time</span>
+    <textarea class="s9-rewrite-area" id="s9-rewrite-area" placeholder="Write the same fight differently. Together. Not perfectly. Honestly.&#10;&#10;Start with your setting. Then your first line..." oninput="s9AutoSave()"></textarea>
+    <div class="s9-input-area">
+      <button class="s9-submit" id="s9-submit-btn" onclick="submitRewrite()">Submit Our Rewrite</button>
+      <div class="s9-status" id="s9-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 10: AI FEEDBACK ON REWRITE -->
+<div id="step10-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep10()">&#8592;</button>
+    <span class="s3-title">Step 10 &mdash; Feedback</span>
+  </div>
+  <div class="s10-scroll">
+    <div id="s10-waiting" class="s10-waiting">
+      <p>Reading your rewrite&hellip;<br>Something worth reading is on its way.</p>
+    </div>
+    <div id="s10-body" class="s10-body" style="display:none"></div>
+    <button class="s10-continue" id="s10-continue-btn" onclick="completeStep10()" style="display:none">Continue to Step 11 &#8250;</button>
+  </div>
+</div>
+
+<!-- STEP 11: THE BRIDGE TO CAP GLOBAL -->
+<div id="step11-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep11()">&#8592;</button>
+    <span class="s3-title">Step 11 &mdash; The Bridge</span>
+  </div>
+  <div class="s11-scroll">
+    <div class="s11-section">
+      <div class="s11-eyebrow">The Forgetting and Remembering</div>
+      <div class="s11-heading">From time to time, everyone forgets.</div>
+      <p class="s11-prose">They drift from their center. From their knowing. From the wholeness that was never actually lost. And then something calls to them — and in the return to the present moment, they remember.</p>
+      <p class="s11-prose">The ongoing argument you just worked through is one example of the forgetting. An old program ran. Old roles appeared. Old needs went unmet again. The work you just did together is the remembering.</p>
+      <p class="s11-prose">But you will forget again. Not because the work failed. Because you are human.</p>
+    </div>
+    <hr class="s11-divider">
+    <div class="s11-section">
+      <div class="s11-eyebrow">The Tools Apply Everywhere</div>
+      <div class="s11-heading">These are not relationship tools. These are human tools.</div>
+      <p class="s11-prose">The tools practiced here were prompted by one relationship. But look at what those tools actually are. Listening beneath the surface. Identifying what is truly needed. Owning your own experience. Making requests instead of demands. Getting out of story and into solution.</p>
+      <p class="s11-prose">Every relationship in your life asks for the same thing. Colleagues. Parents. Children. The self. The programming that showed up here shows up there too. Different names. Different stages. The same disconnect. The same unmet need underneath it. The same invitation to something better.</p>
+    </div>
+    <hr class="s11-divider">
+    <div class="s11-cap-card">
+      <div class="s11-cap-name">CAP Global</div>
+      <div class="s11-cap-tagline">Community At Play &mdash; where the work continues</div>
+      <div class="s11-cap-desc">The place where this work continues and where the tools get applied to every relationship in your life. Not just this one. Ongoing support. Ongoing growth. A community that helps you remember when you forget.</div>
+      <div class="s11-trial">Free two-week membership &mdash; $47 / person / month after that</div>
+      <button class="s11-cap-btn" onclick="s11TrackCAP()">Visit Community At Play &#8250;</button>
+    </div>
+    <div class="s11-email-section">
+      <div class="s11-email-hd">Stay Connected</div>
+      <div class="s11-email-sub">If you visit CAP and have questions before joining, we&rsquo;d love to answer them. Leave your email and we&rsquo;ll follow up warmly &mdash; not with a sales pitch, with a genuine open door.</div>
+      <div class="s11-email-row">
+        <input type="email" class="s11-email-input" id="s11-email-input" placeholder="your@email.com" />
+        <button class="s11-email-btn" id="s11-email-btn" onclick="s11SaveEmail()">Save</button>
+      </div>
+      <div class="s11-email-note" id="s11-email-note">Email notifications will be enabled once EmailJS is connected. Your email will be saved securely.</div>
+    </div>
+    <div class="s11-done">
+      <p>You have done the work.</p>
     </div>
   </div>
 </div>
@@ -1006,13 +1430,20 @@ function signOut() {
   localStorage.removeItem('oa_user');
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-link-card'); hide('couple-linked-status');
-  hide('step2-card'); hide('analysis-banner'); hide('step3-screen');
+  hide('step2-card'); hide('analysis-banner'); hide('journey-banner');
+  ['step3-screen','step4-screen','step5-screen','step6-screen',
+   'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen'].forEach(function(id){ hide(id); });
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   el('step2-thinking').value = ''; el('step2-feeling').value = '';
   var sb = el('step2-submit-btn'); if (sb) { sb.disabled = false; sb.textContent = 'Submit My Script'; }
   txt('step2-status', '');
   s3Messages = []; el('s3-thread').innerHTML = '';
+  s7Messages = []; if (el('s7-thread')) el('s7-thread').innerHTML = '';
+  s8Messages = []; if (el('s8-thread')) el('s8-thread').innerHTML = '';
+  if (s9CheckinTimer) { clearTimeout(s9CheckinTimer); s9CheckinTimer = null; }
+  if (s10PollTimer) { clearTimeout(s10PollTimer); s10PollTimer = null; }
+  currentJourneyStep = null;
   switchTab('signin');
 }
 
@@ -1505,7 +1936,7 @@ function clUpdateLinkUI(profile) {
   if (!profile || user.email === COACH) return;
   if (profile.coupleId) {
     clShowLinked(profile.partnerName || 'your partner');
-    step2Init();
+    journeyRoute();
     return;
   }
   var code = profile.coupleCode || user.coupleCode;
@@ -1566,7 +1997,7 @@ function clLinkPartner() {
         user.coupleId = coupleId; user.partnerId = partnerId;
         localStorage.setItem('oa_user', JSON.stringify(user));
         clShowLinked(partner.name || 'your partner');
-        step2Init();
+        journeyRoute();
       });
     }).catch(function() { txt('cl-error', 'Connection error. Try again.'); });
   }).catch(function() {
@@ -1729,6 +2160,7 @@ function pollAnalysisReady() {
 }
 
 function showAnalysisBanner() {
+  if (currentJourneyStep && parseInt(currentJourneyStep) > 3) return;
   el('analysis-banner').style.display = 'block';
   txt('step2-status', '');
 }
@@ -1902,6 +2334,647 @@ function s3SaveConversation() {
     savedAt: new Date().toISOString(),
     uid: user.uid
   }).catch(function() {});
+}
+
+// ── JOURNEY ROUTING ─────────────────────────────────────────
+var JOURNEY_STEPS = {
+  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'Two neutral avatars will perform your words. For now, read your transcript. Watch as an observer, not a participant.', btn: 'Watch My Script' },
+  '5': { label: 'Step 5', title: 'Watch Your Partner\'s Script', sub: 'The same fight from a completely different experience. Back to back. Without having to say a word to each other yet.', btn: 'Watch Partner\'s Script' },
+  '6': { label: 'Step 6', title: 'Reflective Questions', sub: 'Four questions. Private answers. In your own words, without your partner\'s influence. This is where insight becomes clarity.', btn: 'Answer the Questions' },
+  '7': { label: 'Step 7', title: 'Your Individual Work', sub: 'Before the two of you can work together effectively, each person must do their own work first. There is no authentic we unless it starts with an I.', btn: 'Begin Individual Work' },
+  '8': { label: 'Step 8', title: 'NVC Together', sub: 'Now equipped individually, you come back together to practice a new way of communicating. Out of story and into solution.', btn: 'Begin NVC Practice' },
+  '9': { label: 'Step 9', title: 'The Rewrite', sub: 'You have everything you need. The same fight. New tools. New eyes. Write it differently this time. Not perfectly. Honestly. And together.', btn: 'Begin the Rewrite' },
+  '10': { label: 'Step 10', title: 'Your Feedback Is Ready', sub: 'Something worth reading is waiting for you. The AI has read your rewrite. Whenever you\'re ready.', btn: 'Read the Feedback' },
+  '11': { label: 'Step 11', title: 'The Bridge', sub: 'You\'ve done the work. Now find out where it takes you.', btn: 'Continue' }
+};
+
+var currentJourneyStep = null;
+
+function journeyRoute() {
+  if (!user || !user.coupleId) return;
+  step2Init();
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) return;
+    var couple = fromFields(d.fields);
+    var step = String(couple.currentStep || '1');
+    currentJourneyStep = step;
+    if (step === '3' && couple.analysisReady) {
+      showAnalysisBanner();
+    } else if (JOURNEY_STEPS[step]) {
+      showJourneyBanner(step);
+      hide('analysis-banner');
+    }
+    if (step === '3') {
+      el('s3-complete-btn').style.display = 'block';
+    }
+  }).catch(function() {});
+}
+
+function showJourneyBanner(step) {
+  var cfg = JOURNEY_STEPS[step];
+  if (!cfg) return;
+  txt('jb-step', cfg.label);
+  txt('jb-title', cfg.title);
+  txt('jb-sub', cfg.sub);
+  txt('jb-btn', cfg.btn);
+  currentJourneyStep = step;
+  el('journey-banner').style.display = 'block';
+}
+
+function openJourneyStep() {
+  var step = currentJourneyStep;
+  if (step === '4') openStep4();
+  else if (step === '5') openStep5();
+  else if (step === '6') openStep6();
+  else if (step === '7') openStep7();
+  else if (step === '8') openStep8();
+  else if (step === '9') openStep9();
+  else if (step === '10') openStep10();
+  else if (step === '11') openStep11();
+}
+
+function advanceStep(newStep) {
+  if (!user || !user.coupleId) return Promise.resolve();
+  return fsSet('couples/' + user.coupleId, { currentStep: newStep }).then(function() {
+    currentJourneyStep = newStep;
+    if (JOURNEY_STEPS[newStep]) showJourneyBanner(newStep);
+  });
+}
+
+// ── STEP 3: COMPLETE ─────────────────────────────────────────
+function completeStep3() {
+  hide('step3-screen');
+  document.body.style.overflow = '';
+  advanceStep('4');
+}
+
+// ── STEP 4: WATCH YOUR SCRIPT ─────────────────────────────────
+function openStep4() {
+  if (!user) return;
+  el('step4-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  el('s4-intro').textContent = 'Watch with curiosity. Consider who you see in your own role. Does it sound like you at your best? Does one of the characters remind you of someone from your past? Watch without judgment. Just notice.';
+  if (user.uid) {
+    fsGet('scripts/' + user.uid).then(function(d) {
+      if (!d || !d.fields) return;
+      renderScriptTranscript(fromFields(d.fields), 's4-transcript', user.name || 'Me', user.partner || 'Partner');
+    }).catch(function() {});
+  }
+}
+
+function closeStep4() { hide('step4-screen'); document.body.style.overflow = ''; }
+
+function completeStep4() {
+  fsSet('step4/' + user.uid, { completedAt: new Date().toISOString(), uid: user.uid }).catch(function() {});
+  closeStep4();
+  advanceStep('5');
+}
+
+function renderScriptTranscript(data, containerId, myName, partnerName) {
+  var container = el(containerId);
+  if (!container) return;
+  var html = '';
+  if (data.scene) html += '<div class="s45-tx-line"><span class="s45-tx-spk">Scene</span>' + esc(data.scene) + '</div>';
+  if (data.lines) {
+    var lines = typeof data.lines === 'string' ? JSON.parse(data.lines) : data.lines;
+    lines.forEach(function(l) {
+      if (l.type === 'line') {
+        var spk = l.char === 'a' ? myName : partnerName;
+        var beat = l.beat ? ' <em style="opacity:0.55">(' + esc(l.beat) + ')</em>' : '';
+        html += '<div class="s45-tx-line"><span class="s45-tx-spk">' + esc(spk) + '</span>' + beat + esc(l.dialogue || '') + '</div>';
+      } else if (l.type === 'direction' && l.text) {
+        html += '<div class="s45-tx-line" style="opacity:0.5;font-style:italic">[' + esc(l.text) + ']</div>';
+      }
+    });
+  }
+  container.innerHTML = html || '<div style="opacity:0.4;font-style:italic;font-size:0.82rem">No script content found.</div>';
+}
+
+// ── STEP 5: WATCH PARTNER'S SCRIPT ───────────────────────────
+function openStep5() {
+  if (!user) return;
+  el('step5-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  el('s5-intro').textContent = 'Watching your own script is powerful. Watching your partner\'s version immediately after is extraordinary. The same fight from two completely different experiences. Watch as a witness to their journey.';
+  if (user.partnerId) {
+    fsGet('scripts/' + user.partnerId).then(function(d) {
+      if (!d || !d.fields) return;
+      renderScriptTranscript(fromFields(d.fields), 's5-transcript', user.partner || 'Partner', user.name || 'Me');
+    }).catch(function() {});
+  }
+}
+
+function closeStep5() { hide('step5-screen'); document.body.style.overflow = ''; }
+
+function completeStep5() {
+  fsSet('step5/' + user.uid, { completedAt: new Date().toISOString(), uid: user.uid }).catch(function() {});
+  closeStep5();
+  advanceStep('6');
+}
+
+// ── STEP 6: REFLECTIVE QUESTIONS ─────────────────────────────
+var s6Submitted = false;
+
+function openStep6() {
+  el('step6-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step6/' + user.uid).then(function(d) {
+    if (!d || !d.fields) return;
+    var s = fromFields(d.fields);
+    if (s.q1) el('s6-q1').value = s.q1;
+    if (s.q2) el('s6-q2').value = s.q2;
+    if (s.q3) el('s6-q3').value = s.q3;
+    if (s.q4) el('s6-q4').value = s.q4;
+    if (s.submitted) {
+      s6Submitted = true;
+      el('s6-submit-btn').disabled = true;
+      el('s6-submit-btn').textContent = 'Reflections Submitted ✓';
+      if (s.aiResponse) renderS6Response(s.aiResponse);
+    }
+  }).catch(function() {});
+}
+
+function closeStep6() { hide('step6-screen'); document.body.style.overflow = ''; }
+
+function submitStep6() {
+  var q1 = (el('s6-q1').value || '').trim();
+  var q2 = (el('s6-q2').value || '').trim();
+  var q3 = (el('s6-q3').value || '').trim();
+  var q4 = (el('s6-q4').value || '').trim();
+  if (!q1 || !q2 || !q3 || !q4) {
+    alert('Please answer all four questions before submitting.'); return;
+  }
+  var btn = el('s6-submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  var myName = (user.name || 'Me').split(' ')[0];
+  var partnerName = user.partner || 'your partner';
+  var prompt = 'This is ' + myName + '\'s Step 6 reflective responses after watching both avatar scripts.\n\n' +
+    'Question 1 — What did you notice about your partner\'s experience that you hadn\'t considered before?\n' + q1 + '\n\n' +
+    'Question 2 — Was there anything in their version that surprised you?\n' + q2 + '\n\n' +
+    'Question 3 — Did anything shift in how you understand what was happening for them in this fight?\n' + q3 + '\n\n' +
+    'Question 4 — What do you think they most needed you to understand?\n' + q4 + '\n\n' +
+    'Respond with a brief, warm acknowledgment of what ' + myName + ' noticed. Then gently encourage them to share what surfaced with ' + partnerName + ' in person, when they are both ready — not to debate, not to defend, just to let each other in. Close with: "What you share in that conversation may be one of the most honest exchanges you\'ve had about this fight. Take that time together when you\'re ready. Then come back and we\'ll continue."';
+  callAI([{ role: 'user', content: prompt }], '6').then(function(text) {
+    btn.textContent = 'Reflections Submitted ✓';
+    fsSet('step6/' + user.uid, { q1: q1, q2: q2, q3: q3, q4: q4, submitted: true, aiResponse: text, submittedAt: new Date().toISOString() }).catch(function() {});
+    renderS6Response(text);
+    s6Submitted = true;
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Submit My Reflections';
+    alert('Could not reach the AI. Please try again.');
+  });
+}
+
+function renderS6Response(text) {
+  var wrap = el('s6-ai-wrap');
+  var body = el('s6-ai-body');
+  var paras = text.split(/\n\n+/).filter(function(p) { return p.trim(); });
+  body.innerHTML = paras.map(function(p) { return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  wrap.style.display = 'block';
+}
+
+function completeStep6() {
+  closeStep6();
+  advanceStep('7');
+}
+
+// ── STEP 7: INDIVIDUAL WORK ───────────────────────────────────
+var s7Messages = [];
+var s7Sending = false;
+
+function openStep7() {
+  el('step7-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step7/' + user.uid).then(function(d) {
+    if (d && d.fields) {
+      var saved = fromFields(d.fields);
+      if (saved.oneThing) el('s7-ot-input').value = saved.oneThing;
+      if (saved.messages) {
+        try {
+          var parsed = typeof saved.messages === 'string' ? JSON.parse(saved.messages) : saved.messages;
+          if (Array.isArray(parsed) && parsed.length > 1) {
+            s7Messages = parsed;
+            s7Render();
+            s7ScrollBottom();
+            return;
+          }
+        } catch(e) {}
+      }
+    }
+    s7StartDelivery();
+  }).catch(function() { s7StartDelivery(); });
+}
+
+function closeStep7() { hide('step7-screen'); document.body.style.overflow = ''; }
+
+function s7StartDelivery() {
+  s7Messages = [];
+  s7Render();
+  s3ShowTypingIn('s7-thread');
+  var myName = (user.name || 'Me').split(' ')[0];
+  var partnerName = user.partner || 'your partner';
+  Promise.all([
+    fsGet('scripts/' + user.uid),
+    fsGet('couples/' + user.coupleId),
+    fsGet('step6/' + user.uid)
+  ]).then(function(results) {
+    var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var couple = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var step6 = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var setupPrompt = 'You are now beginning Step 7 — Individual Work — with ' + myName + '.\n\n' +
+      'Here is all the context you need:\n\n' +
+      '--- COUPLE\'S ANALYSIS (from Step 2) ---\n' + (couple.analysis || '(none)') + '\n\n' +
+      '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      '--- ' + myName.toUpperCase() + '\'S REFLECTIONS (Step 6) ---\n' +
+      'Q1: ' + (step6.q1 || '(not answered)') + '\n' +
+      'Q2: ' + (step6.q2 || '(not answered)') + '\n' +
+      'Q3: ' + (step6.q3 || '(not answered)') + '\n' +
+      'Q4: ' + (step6.q4 || '(not answered)') + '\n\n' +
+      'Begin Step 7 with ' + myName + '. Start with the Language Awareness Work — turn attention to the actual words on the page. Not who they want to be in the argument. Who they want to be in the exchange that would turn it from a confrontation into a conversation. Identify specific words and phrases from their script that might be landing as attacks, carrying old charge, or projecting a belief onto ' + partnerName + '. Prompt them to consider new language. When insight surfaces, invite them to add it to their Awareness Log. Eventually guide them to "The One Thing" — one concrete thing they are willing to try differently next time. Follow the Step 7 guidelines from your training exactly.';
+    s7Messages = [{ role: 'user', content: setupPrompt }];
+    return callAI(s7Messages, '7');
+  }).then(function(text) {
+    s3RemoveTypingFrom('s7-thread');
+    s7Messages.push({ role: 'assistant', content: text });
+    s7SaveConversation();
+    s7Render(); s7ScrollBottom();
+    el('s7-complete-btn').style.display = 'block';
+  }).catch(function(err) {
+    s3RemoveTypingFrom('s7-thread');
+    s7AppendError('Something went wrong. Please try again.');
+    console.error('Step 7 error:', err);
+  });
+}
+
+function s7Send() {
+  if (s7Sending) return;
+  var inp = el('s7-input');
+  var text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; s3AutoGrow(inp);
+  s7Sending = true; el('s7-send').disabled = true;
+  s7Messages.push({ role: 'user', content: text });
+  s7Render(); s7ScrollBottom();
+  s3ShowTypingIn('s7-thread');
+  callAI(s7Messages, '7').then(function(reply) {
+    s3RemoveTypingFrom('s7-thread');
+    s7Messages.push({ role: 'assistant', content: reply });
+    s7SaveConversation(); s7Render(); s7ScrollBottom();
+    s7Sending = false; el('s7-send').disabled = false;
+  }).catch(function(err) {
+    s3RemoveTypingFrom('s7-thread');
+    s7AppendError('Could not reach the AI. Please try again.');
+    s7Sending = false; el('s7-send').disabled = false;
+  });
+}
+
+function s7KeyDown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); s7Send(); } }
+
+function s7Render() {
+  var thread = el('s7-thread');
+  var msgs = s7Messages.slice(1);
+  thread.innerHTML = msgs.map(function(m) {
+    var cls = m.role === 'assistant' ? 's3-msg s3-msg-ai' : 's3-msg s3-msg-user';
+    var html = m.content.split(/\n\n+/).filter(function(p){return p.trim();}).map(function(p){return '<p>'+esc(p.trim()).replace(/\n/g,'<br>')+'</p>';}).join('');
+    return '<div class="' + cls + '"><div class="s3-bubble">' + html + '</div></div>';
+  }).join('');
+}
+
+function s7ScrollBottom() { var t = el('s7-thread'); t.scrollTop = t.scrollHeight; }
+
+function s7AppendError(msg) {
+  var t = el('s7-thread');
+  var d = document.createElement('div');
+  d.className = 's3-msg s3-msg-ai';
+  d.innerHTML = '<div class="s3-bubble" style="color:rgba(255,100,100,0.8)">' + esc(msg) + '</div>';
+  t.appendChild(d); s7ScrollBottom();
+}
+
+function s7SaveConversation() {
+  if (!user) return;
+  fsSet('step7/' + user.uid, { messages: JSON.stringify(s7Messages), savedAt: new Date().toISOString() }).catch(function(){});
+}
+
+function showOneThingArea() {
+  el('s7-one-thing-area').style.display = 'block';
+  el('s7-ot-input').focus();
+  s7ScrollBottom();
+}
+
+function saveOneThingAndComplete() {
+  var oneThing = (el('s7-ot-input').value || '').trim();
+  fsSet('step7/' + user.uid, { oneThing: oneThing, messages: JSON.stringify(s7Messages), savedAt: new Date().toISOString() }).catch(function(){});
+  closeStep7();
+  advanceStep('8');
+}
+
+// ── STEP 8: NVC TOGETHER ─────────────────────────────────────
+var s8Messages = [];
+var s8Sending = false;
+
+function openStep8() {
+  el('step8-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step8/' + user.uid).then(function(d) {
+    if (d && d.fields) {
+      var saved = fromFields(d.fields);
+      if (saved.messages) {
+        try {
+          var parsed = typeof saved.messages === 'string' ? JSON.parse(saved.messages) : saved.messages;
+          if (Array.isArray(parsed) && parsed.length > 1) {
+            s8Messages = parsed; s8Render(); s8ScrollBottom(); return;
+          }
+        } catch(e) {}
+      }
+    }
+    s8StartDelivery();
+  }).catch(function() { s8StartDelivery(); });
+}
+
+function closeStep8() { hide('step8-screen'); document.body.style.overflow = ''; }
+
+function s8StartDelivery() {
+  s8Messages = []; s8Render();
+  s3ShowTypingIn('s8-thread');
+  var myName = (user.name || 'Me').split(' ')[0];
+  var partnerName = user.partner || 'your partner';
+  Promise.all([
+    fsGet('scripts/' + user.uid),
+    fsGet('couples/' + user.coupleId),
+    fsGet('step7/' + user.uid)
+  ]).then(function(results) {
+    var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var couple = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var step7 = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var setupPrompt = 'You are beginning Step 8 — NVC Together — with ' + myName + '.\n\n' +
+      '--- COUPLE\'S ANALYSIS ---\n' + (couple.analysis || '(none)') + '\n\n' +
+      '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      '--- THE ONE THING (' + myName + ' identified in Step 7) ---\n' + (step7.oneThing || '(not captured)') + '\n\n' +
+      'Begin Step 8 with ' + myName + '. Introduce the Nonviolent Communication framework by Marshall Rosenberg and explain that this is the explicit framework you\'ll be using together. Walk them through the NVC structure: I am feeling _____ because my need for _____ is not being met. Guide them to practice both sides of the exchange — making an NVC statement and reflecting their partner\'s back. Help them identify their feeling and their unmet need, practice the reflection loop, and work toward a genuine request. When agreement is reached, restate it clearly so both parties hear it confirmed. Then introduce "Grace and the Reset." Follow the Step 8 guidelines from your training exactly.';
+    s8Messages = [{ role: 'user', content: setupPrompt }];
+    return callAI(s8Messages, '8');
+  }).then(function(text) {
+    s3RemoveTypingFrom('s8-thread');
+    s8Messages.push({ role: 'assistant', content: text });
+    s8SaveConversation(); s8Render(); s8ScrollBottom();
+    el('s8-complete-btn').style.display = 'block';
+  }).catch(function(err) {
+    s3RemoveTypingFrom('s8-thread');
+    var d = document.createElement('div');
+    d.className = 's3-msg s3-msg-ai';
+    d.innerHTML = '<div class="s3-bubble" style="color:rgba(255,100,100,0.8)">Something went wrong. Please try again.</div>';
+    el('s8-thread').appendChild(d);
+  });
+}
+
+function s8Send() {
+  if (s8Sending) return;
+  var inp = el('s8-input');
+  var text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; s3AutoGrow(inp);
+  s8Sending = true; el('s8-send').disabled = true;
+  s8Messages.push({ role: 'user', content: text });
+  s8Render(); s8ScrollBottom();
+  s3ShowTypingIn('s8-thread');
+  callAI(s8Messages, '8').then(function(reply) {
+    s3RemoveTypingFrom('s8-thread');
+    s8Messages.push({ role: 'assistant', content: reply });
+    s8SaveConversation(); s8Render(); s8ScrollBottom();
+    s8Sending = false; el('s8-send').disabled = false;
+  }).catch(function() {
+    s3RemoveTypingFrom('s8-thread');
+    s8Sending = false; el('s8-send').disabled = false;
+  });
+}
+
+function s8KeyDown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); s8Send(); } }
+
+function s8Render() {
+  var t = el('s8-thread');
+  t.innerHTML = s8Messages.slice(1).map(function(m) {
+    var cls = m.role === 'assistant' ? 's3-msg s3-msg-ai' : 's3-msg s3-msg-user';
+    var html = m.content.split(/\n\n+/).filter(function(p){return p.trim();}).map(function(p){return '<p>'+esc(p.trim()).replace(/\n/g,'<br>')+'</p>';}).join('');
+    return '<div class="' + cls + '"><div class="s3-bubble">' + html + '</div></div>';
+  }).join('');
+}
+
+function s8ScrollBottom() { var t = el('s8-thread'); t.scrollTop = t.scrollHeight; }
+
+function s8SaveConversation() {
+  if (!user) return;
+  fsSet('step8/' + user.uid, { messages: JSON.stringify(s8Messages), savedAt: new Date().toISOString() }).catch(function(){});
+}
+
+function completeStep8() {
+  s8SaveConversation();
+  closeStep8();
+  advanceStep('9');
+}
+
+// ── STEP 9: THE REWRITE ───────────────────────────────────────
+var s9CheckinTimer = null;
+var s9CheckinIndex = 0;
+var s9SaveTimer = null;
+var S9_CHECKINS = [
+  'Still here if you need me. If you find yourself reaching for an old line — check your Awareness Log first.',
+  'Quick reminder. If a "you" statement sneaks in, try flipping it to an "I" statement. I\'m here if you want help with that.',
+  'How\'s the energy in the room? If it\'s getting charged, take a breath before the next line. I\'m right here.',
+  'Remember. Not perfectly. Honestly. And together. You\'re doing the work.'
+];
+
+function openStep9() {
+  el('step9-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (d && d.fields) {
+      var couple = fromFields(d.fields);
+      if (couple.rewrite) el('s9-rewrite-area').value = couple.rewrite;
+    }
+  }).catch(function(){});
+  s9CheckinTimer = setTimeout(s9NextCheckin, 3 * 60 * 1000);
+}
+
+function closeStep9() {
+  hide('step9-screen');
+  document.body.style.overflow = '';
+  if (s9CheckinTimer) { clearTimeout(s9CheckinTimer); s9CheckinTimer = null; }
+}
+
+function s9ToggleExample() {
+  var pane = el('s9-example-pane');
+  var tog = el('s9-example-toggle');
+  var open = pane.classList.toggle('open');
+  tog.textContent = (open ? '▾' : '▶') + ' Read the Before & Better Example';
+}
+
+function s9AutoSave() {
+  clearTimeout(s9SaveTimer);
+  s9SaveTimer = setTimeout(function() {
+    if (!user || !user.coupleId) return;
+    fsSet('couples/' + user.coupleId, { rewrite: el('s9-rewrite-area').value }).catch(function(){});
+  }, 2000);
+}
+
+function s9NextCheckin() {
+  var msg = S9_CHECKINS[s9CheckinIndex % S9_CHECKINS.length];
+  s9CheckinIndex++;
+  var c = el('s9-checkin');
+  c.textContent = msg;
+  c.style.display = 'block';
+  s9CheckinTimer = setTimeout(s9NextCheckin, 4 * 60 * 1000);
+}
+
+function submitRewrite() {
+  var text = (el('s9-rewrite-area').value || '').trim();
+  if (!text || text.length < 50) {
+    alert('Please write your rewrite before submitting. It looks like there isn\'t enough content yet.'); return;
+  }
+  var btn = el('s9-submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  txt('s9-status', 'Saving your rewrite...');
+  if (s9CheckinTimer) { clearTimeout(s9CheckinTimer); s9CheckinTimer = null; }
+  fsSet('couples/' + user.coupleId, {
+    rewrite: text, rewriteSubmittedAt: new Date().toISOString()
+  }).then(function() {
+    txt('s9-status', 'Rewrite saved. The AI is reading it now...');
+    return runRewriteAnalysis(text);
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Submit Our Rewrite';
+    txt('s9-status', 'Error saving. Please try again.');
+  });
+}
+
+function runRewriteAnalysis(rewriteText) {
+  return Promise.all([
+    fsGet('scripts/' + user.uid),
+    user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
+    fsGet('couples/' + user.coupleId)
+  ]).then(function(results) {
+    var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var partnerScript = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var couple = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var myName = user.name || 'Partner A';
+    var partnerName = user.partner || 'Partner B';
+    var prompt = 'This is Step 10. The couple has completed their rewrite. Here is the full context:\n\n' +
+      '--- COUPLE\'S ANALYSIS (from Step 2) ---\n' + (couple.analysis || '(none)') + '\n\n' +
+      '--- ORIGINAL SCRIPT FROM ' + myName.toUpperCase() + ' ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      '--- ORIGINAL SCRIPT FROM ' + partnerName.toUpperCase() + ' ---\n' + scriptDataToText(partnerScript, partnerName, myName) + '\n\n' +
+      '--- THEIR REWRITE ---\n' + rewriteText + '\n\n' +
+      'Deliver the Step 10 response. Open by acknowledging the courage it took before saying anything analytical. Then: celebrate specifically what worked — name exact moments, exact lines, exact shifts in language or tone. Then offer one or two observations about things still worth considering — specific, forward-facing, always an invitation, never a verdict. Close with a celebration of the distance traveled and the expectation that this is a beginning, not an ending. Follow the Step 10 guidelines from your training exactly.';
+    return callAI([{ role: 'user', content: prompt }], '10');
+  }).then(function(feedbackText) {
+    return fsSet('couples/' + user.coupleId, {
+      rewriteFeedback: feedbackText,
+      rewriteFeedbackReady: true,
+      currentStep: '10'
+    });
+  }).then(function() {
+    closeStep9();
+    currentJourneyStep = '10';
+    showJourneyBanner('10');
+  }).catch(function(err) {
+    var btn = el('s9-submit-btn');
+    btn.disabled = false; btn.textContent = 'Submit Our Rewrite';
+    txt('s9-status', 'Analysis could not complete. Please try again.');
+    console.error('Step 9 analysis error:', err);
+  });
+}
+
+// ── STEP 10: AI FEEDBACK ─────────────────────────────────────
+var s10PollTimer = null;
+
+function openStep10() {
+  el('step10-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  el('s10-waiting').style.display = 'block';
+  el('s10-body').style.display = 'none';
+  el('s10-continue-btn').style.display = 'none';
+  checkRewriteFeedback();
+}
+
+function closeStep10() {
+  hide('step10-screen');
+  document.body.style.overflow = '';
+  if (s10PollTimer) { clearTimeout(s10PollTimer); s10PollTimer = null; }
+}
+
+function checkRewriteFeedback() {
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) { s10PollTimer = setTimeout(checkRewriteFeedback, 15000); return; }
+    var couple = fromFields(d.fields);
+    if (couple.rewriteFeedbackReady && couple.rewriteFeedback) {
+      renderS10Feedback(couple.rewriteFeedback);
+    } else {
+      s10PollTimer = setTimeout(checkRewriteFeedback, 15000);
+    }
+  }).catch(function() { s10PollTimer = setTimeout(checkRewriteFeedback, 15000); });
+}
+
+function renderS10Feedback(text) {
+  var body = el('s10-body');
+  var paras = text.split(/\n\n+/).filter(function(p) { return p.trim(); });
+  body.innerHTML = paras.map(function(p) { return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  el('s10-waiting').style.display = 'none';
+  body.style.display = 'block';
+  el('s10-continue-btn').style.display = 'block';
+}
+
+function completeStep10() {
+  closeStep10();
+  advanceStep('11');
+}
+
+// ── STEP 11: CAP GLOBAL BRIDGE ────────────────────────────────
+function openStep11() {
+  el('step11-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step11/' + user.uid).then(function(d) {
+    if (!d || !d.fields) return;
+    var s = fromFields(d.fields);
+    if (s.email) { el('s11-email-input').value = s.email; el('s11-email-btn').disabled = true; el('s11-email-btn').textContent = 'Saved ✓'; }
+  }).catch(function(){});
+}
+
+function closeStep11() { hide('step11-screen'); document.body.style.overflow = ''; }
+
+function s11TrackCAP() {
+  fsSet('step11/' + user.uid, { capClickedAt: new Date().toISOString(), uid: user.uid }).catch(function(){});
+  // Open CAP Global — placeholder URL to be updated when live
+  window.open('https://capglobal.com', '_blank');
+}
+
+function s11SaveEmail() {
+  var email = (el('s11-email-input').value || '').trim();
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  var btn = el('s11-email-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  fsSet('step11/' + user.uid, { email: email, emailSavedAt: new Date().toISOString(), uid: user.uid }).then(function() {
+    btn.textContent = 'Saved ✓';
+    txt('s11-email-note', 'Thank you. We\'ll reach out when you\'re ready.');
+    // EmailJS integration goes here when credentials are set up
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Save';
+    txt('s11-email-note', 'Could not save email. Please try again.');
+  });
+}
+
+// ── SHARED TYPING INDICATOR HELPERS ──────────────────────────
+function s3ShowTypingIn(threadId) {
+  var thread = el(threadId);
+  var div = document.createElement('div');
+  div.className = 's3-typing';
+  div.id = threadId + '-typing';
+  div.innerHTML = '<div class="s3-bubble"><div class="s3-dot"></div><div class="s3-dot"></div><div class="s3-dot"></div></div>';
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function s3RemoveTypingFrom(threadId) {
+  var t = el(threadId + '-typing');
+  if (t) t.parentNode.removeChild(t);
 }
 
 window.addEventListener('popstate', function(e) {
