@@ -39,6 +39,14 @@ body {
 .auth-field label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
 .auth-field input { width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 2px; padding: 12px 10px; font-family: 'Courier Prime', monospace; font-size: 1rem; color: var(--ink); outline: none; -webkit-appearance: none; appearance: none; display: block; }
 .auth-field input:focus { border-color: var(--accent); }
+/* Password visibility toggle */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { padding-right: 40px !important; }
+.pw-eye { position: absolute; right: 0; top: 0; bottom: 0; width: 38px; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.pw-eye:hover { color: var(--ink); }
+.pw-eye svg { width: 15px; height: 15px; display: block; }
+/* Field-level validation errors */
+.field-error { font-size: 0.78rem; color: var(--red); font-style: italic; margin-top: 6px; display: none; }
 .auth-submit { width: 100%; padding: 16px; font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-radius: 2px; background: var(--accent); color: white; cursor: pointer; -webkit-appearance: none; appearance: none; display: block; margin-top: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .auth-submit:active { background: #7a5c10; }
 .auth-submit:disabled { background: #b8a070; cursor: not-allowed; }
@@ -1067,7 +1075,7 @@ body {
     <div id="form-signin" role="tabpanel" aria-labelledby="tab-signin" tabindex="0">
       <div class="auth-sub">Welcome back. Your script is waiting.</div>
       <div class="auth-field"><label for="si-email">Email</label><input type="email" id="si-email" placeholder="your@email.com" autocomplete="email" /></div>
-      <div class="auth-field"><label for="si-pass">Password</label><input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password" /></div>
+      <div class="auth-field"><label for="si-pass">Password</label><div class="pw-wrap"><input type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password" /><button type="button" class="pw-eye" onclick="togglePw('si-pass',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
       <button type="button" class="auth-submit" id="btn-signin" onclick="signIn()">Sign In</button>
       <div class="auth-error" id="si-error" role="alert"></div>
       <button type="button" id="btn-forgot" onclick="forgotPassword()" style="background:none;border:none;color:var(--ink-faint);font-family:'Courier Prime',monospace;font-size:0.75rem;font-style:italic;cursor:pointer;margin-top:8px;padding:0;text-decoration:underline;">Forgot password?</button>
@@ -1077,7 +1085,9 @@ body {
       <div class="auth-field"><label for="ca-name">Your First Name</label><input type="text" id="ca-name" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
       <div class="auth-field"><label for="ca-partner">Partner's First Name</label><input type="text" id="ca-partner" placeholder="e.g. Alex" autocomplete="off" /></div>
       <div class="auth-field"><label for="ca-email">Email</label><input type="email" id="ca-email" placeholder="your@email.com" autocomplete="email" /></div>
-      <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /></div>
+      <div class="auth-field"><label for="ca-email-confirm">Confirm Email</label><input type="email" id="ca-email-confirm" placeholder="your@email.com" autocomplete="email" /><div id="ca-email-match-err" class="field-error">Emails do not match. Please try again.</div></div>
+      <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><div class="pw-wrap"><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /><button type="button" class="pw-eye" onclick="togglePw('ca-pass',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+      <div class="auth-field"><label for="ca-pass-confirm">Confirm Password</label><div class="pw-wrap"><input type="password" id="ca-pass-confirm" placeholder="••••••••" autocomplete="new-password" /><button type="button" class="pw-eye" onclick="togglePw('ca-pass-confirm',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div id="ca-pass-match-err" class="field-error">Passwords do not match. Please try again.</div></div>
       <div class="auth-field"><label for="ca-fight">The Fight — what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
       <button type="button" class="auth-submit" id="btn-create" onclick="createAccount()">Create Account</button>
       <div class="auth-error" id="ca-error" role="alert"></div>
@@ -1700,6 +1710,7 @@ var pbSending = false;
     pendingCoupleId = pendingJoinCoupleId;
     enrollMode = 'join';
     hide('landing-screen');
+    history.replaceState({ screen: 'pb-intro' }, '');
     el('partner-b-intro-screen').style.display = 'block';
     return;
   }
@@ -1743,6 +1754,17 @@ function showFlex(id) { el(id).style.display = 'flex'; }
 function txt(id, t) { var e = el(id); if (e) e.textContent = t; }
 function val(id) { var e = el(id); return e ? e.value.trim() : ''; }
 
+var EYE_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+var EYE_CLOSED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+function togglePw(inputId, btn) {
+  var inp = el(inputId);
+  if (!inp) return;
+  var isHidden = inp.type === 'password';
+  inp.type = isHidden ? 'text' : 'password';
+  btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+  btn.innerHTML = isHidden ? EYE_CLOSED : EYE_OPEN;
+}
+
 function switchTab(tab) {
   var isSI = tab === 'signin';
   // CSS handles show/hide via :checked state; just sync the radio
@@ -1779,21 +1801,30 @@ function forgotPassword() {
   txt('si-error', '');
   post(AUTH + ':sendOobCode?key=' + API_KEY, { requestType: 'PASSWORD_RESET', email: email })
   .then(function(d) {
-    if (d.error) { txt('si-error', 'Could not send reset email. Check the address.'); return; }
+    console.log('Password reset response:', JSON.stringify(d));
+    if (d.error) {
+      console.error('Password reset error:', d.error);
+      txt('si-error', 'Could not send reset email. Check the address and try again.');
+      return;
+    }
     txt('si-error', '');
-    el('btn-forgot').textContent = 'Reset email sent — check your inbox.';
+    el('btn-forgot').textContent = 'Reset email sent — check your inbox (and spam folder).';
     el('btn-forgot').style.color = 'var(--accent)';
     el('btn-forgot').disabled = true;
-  }).catch(function() { txt('si-error', 'Connection error. Try again.'); });
+  }).catch(function(err) { console.error('Password reset fetch error:', err); txt('si-error', 'Connection error. Try again.'); });
 }
 
 function createAccount() {
-  var name = val('ca-name'), partner = val('ca-partner'), email = val('ca-email'), pass = el('ca-pass').value, fight = val('ca-fight');
+  var name = val('ca-name'), partner = val('ca-partner'), email = val('ca-email'), emailConfirm = val('ca-email-confirm'), pass = el('ca-pass').value, passConfirm = (el('ca-pass-confirm') ? el('ca-pass-confirm').value : pass), fight = val('ca-fight');
   txt('ca-error', '');
+  el('ca-email-match-err').style.display = 'none';
+  el('ca-pass-match-err').style.display = 'none';
   if (!name) { txt('ca-error', 'Please enter your name.'); return; }
   if (!partner) { txt('ca-error', "Please enter your partner's name."); return; }
   if (!email) { txt('ca-error', 'Please enter your email.'); return; }
+  if (email !== emailConfirm) { el('ca-email-match-err').style.display = 'block'; el('ca-email-confirm').focus(); return; }
   if (!pass || pass.length < 6) { txt('ca-error', 'Password needs at least 6 characters.'); return; }
+  if (pass !== passConfirm) { el('ca-pass-match-err').style.display = 'block'; el('ca-pass-confirm').focus(); return; }
   if (!fight) { txt('ca-error', 'Please name the fight.'); return; }
   el('btn-create').disabled = true;
   el('btn-create').textContent = 'Creating account…';
@@ -1957,6 +1988,8 @@ function afterLogin() {
   hide('auth-screen');
   hide('buyin-screen');
   hide('partner-b-intro-screen'); hide('code-entry-screen');
+
+  history.replaceState({ screen: 'app' }, '');
 
   if (user.email === COACH) {
     hide('al-fab');
@@ -2328,6 +2361,7 @@ function lpProceed() {
   setTimeout(function() {
     hide('landing-screen');
     lp.style.opacity = '';
+    history.pushState({ screen: 'buyin' }, '');
     var bi = el('buyin-screen');
     bi.style.display = 'flex';
   }, 500);
@@ -2456,6 +2490,7 @@ function loadClientAwarenessLog(uid, container) {
 
 function showPaymentAuth() {
   hide('buyin-screen');
+  history.pushState({ screen: 'auth' }, '');
   if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
   switchTab('create');
   showFlex('auth-screen');
@@ -2510,6 +2545,7 @@ function pbAutoValidate() {
     pendingPartnerAId = couple.partnerAId || '';
     if (couple.fightName) pendingFightName = couple.fightName;
     hide('partner-b-intro-screen');
+    history.pushState({ screen: 'auth' }, '');
     if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
     var sub = el('form-create') && el('form-create').querySelector('.auth-sub');
     if (sub) sub.textContent = 'Create your account to join the process.';
@@ -2729,6 +2765,7 @@ function pcCopyLink() {
 
 function pcEnterApp() {
   hide('payment-confirm-screen');
+  history.replaceState({ screen: 'app' }, '');
   el('al-fab').style.display = 'block';
   show('script-screen');
   loadProfile(); loadScript(); loadNotes();
@@ -4245,18 +4282,68 @@ function pbDismissHandoff() {
 }
 
 window.addEventListener('popstate', function(e) {
-  var lp = el('landing-screen');
-  if (!lp || lp.style.display === 'none') { return; }
-  var state = e.state && e.state.lp;
+  var state = (e.state) || {};
+  var screen = state.screen;
+  var lpState = state.lp;
+
+  // Terminal app state — push sentinel back to prevent browser exit
+  if (screen === 'app') {
+    history.pushState({ screen: 'app' }, '');
+    return;
+  }
+
+  // If script tool or coach screen is visible, user is logged in — stay put
+  var scriptEl = el('script-screen');
+  var coachEl = el('coach-screen');
+  if ((scriptEl && scriptEl.style.display !== 'none') ||
+      (coachEl && coachEl.style.display !== 'none')) {
+    history.pushState({ screen: 'app' }, '');
+    return;
+  }
+
+  // Back from auth → return to buyin
+  if (screen === 'buyin') {
+    hide('auth-screen');
+    var bi = el('buyin-screen');
+    if (bi) bi.style.display = 'flex';
+    return;
+  }
+
+  // Back from buyin → return to landing with fight section visible
+  if (lpState === 'fight' || (!lpState && !screen && el('buyin-screen') && el('buyin-screen').style.display !== 'none')) {
+    hide('buyin-screen');
+    var lp = el('landing-screen');
+    if (lp) {
+      lp.style.display = 'block';
+      var s6f = el('lp-s6'), s7f = el('lp-s7');
+      if (s6f) { s6f.style.display = 'block'; s6f.classList.add('lp-in'); }
+      if (s7f) { s7f.style.display = 'block'; s7f.classList.add('lp-in'); }
+      setTimeout(function() { if (s7f) lpScrollTo(s7f); }, 60);
+    }
+    return;
+  }
+
+  // Back from partner B intro → nothing meaningful (they came from external link), prevent exit
+  if (screen === 'pb-intro') {
+    history.pushState({ screen: 'pb-intro' }, '');
+    return;
+  }
+
+  // Landing page section navigation
+  var lpEl = el('landing-screen');
+  if (!lpEl || lpEl.style.display === 'none') {
+    history.pushState({ screen: 'app' }, '');
+    return;
+  }
   var s6 = el('lp-s6');
   var s7 = el('lp-s7');
-  if (state === 'main' || !state) {
+  if (lpState === 'main' || !lpState) {
     if (s7) { s7.style.display = 'none'; s7.classList.remove('lp-in'); }
     if (s6) { s6.style.display = 'none'; s6.classList.remove('lp-in'); }
     var btnBegin = el('lp-btn-begin');
     if (btnBegin) { btnBegin.disabled = false; }
-    lp.scrollTo({ top: 0, behavior: 'smooth' });
-  } else if (state === 'commitment') {
+    lpEl.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (lpState === 'commitment') {
     if (s7) { s7.style.display = 'none'; s7.classList.remove('lp-in'); }
     var btnCommit = el('lp-btn-commit');
     if (btnCommit) { btnCommit.disabled = false; }
