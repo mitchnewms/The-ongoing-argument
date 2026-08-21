@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>The Ongoing Argument</title>
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -120,13 +121,270 @@ body {
 #note-textarea { width: 100%; min-height: 140px; background: #fff; border: 1px solid var(--line); padding: 12px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); outline: none; resize: vertical; line-height: 1.6; border-radius: 1px; }
 #note-textarea:focus { border-color: var(--accent); }
 .send-note-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; margin-top: 12px; }
+
+/* ── AWARENESS LOG ──────────────────────────────────────────── */
+#al-fab { display: none; position: fixed; bottom: 24px; right: 20px; z-index: 50; background: var(--accent); color: white; font-family: 'Courier Prime', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; border: none; padding: 10px 14px; border-radius: 1px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.35); -webkit-appearance: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#awareness-log { margin-top: 16px; background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); overflow: hidden; }
+.al-log-toggle { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: var(--paper-dark); border: none; cursor: pointer; font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); -webkit-appearance: none; touch-action: manipulation; }
+.al-log-toggle .al-arrow { font-size: 0.72rem; color: var(--ink-faint); font-family: 'Courier Prime', monospace; letter-spacing: 0; text-transform: none; }
+#al-log-body { display: none; padding: 20px 20px 8px; }
+.al-section { margin-bottom: 28px; }
+.al-section-hd { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #C8822A; margin-bottom: 3px; font-family: 'Courier Prime', monospace; }
+.al-section-desc { font-size: 0.75rem; color: var(--ink-faint); font-style: italic; margin-bottom: 10px; }
+.al-entry { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.al-entry:last-child { border-bottom: none; }
+.al-entry-text { font-size: 0.88rem; color: var(--ink); line-height: 1.55; }
+.al-entry-time { font-size: 0.63rem; color: var(--ink-faint); margin-top: 3px; }
+.al-entries-empty { font-size: 0.75rem; color: var(--ink-faint); font-style: italic; }
+.al-add-inline { font-family: 'Courier Prime', monospace; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--line); background: transparent; color: var(--accent); cursor: pointer; border-radius: 1px; margin-top: 8px; display: inline-block; -webkit-appearance: none; touch-action: manipulation; }
+/* Awareness log popup */
+#al-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+.al-modal-box { background: var(--paper); border-radius: 2px; width: 100%; max-width: 480px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); border-top: 4px solid #C8822A; }
+.al-modal-top { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 14px; border-bottom: 1px solid var(--line); }
+.al-modal-top h3 { font-family: 'Special Elite', cursive; font-size: 0.95rem; color: var(--ink); }
+.al-modal-x { background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 1.1rem; padding: 4px 8px; -webkit-appearance: none; touch-action: manipulation; }
+.al-modal-body { padding: 20px; }
+.al-type-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.al-type-btn { flex: 1; min-width: 0; font-family: 'Courier Prime', monospace; font-size: 0.62rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 7px 4px; border: 1px solid var(--line); background: transparent; color: var(--ink-faint); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; text-align: center; }
+.al-type-btn.al-active { border-color: #C8822A; color: #C8822A; background: #fdf8f2; }
+.al-type-desc { font-size: 0.72rem; color: var(--ink-faint); font-style: italic; margin-bottom: 10px; min-height: 18px; }
+#al-entry-text { width: 100%; min-height: 100px; background: #fff; border: 1px solid var(--line); padding: 12px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); outline: none; resize: vertical; line-height: 1.6; border-radius: 1px; margin-bottom: 14px; display: block; }
+#al-entry-text:focus { border-color: #C8822A; }
+.al-modal-actions { display: flex; gap: 10px; align-items: center; }
+.al-save-btn { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 11px 22px; background: #C8822A; color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+.al-save-btn:disabled { background: #d4a870; cursor: default; }
+.al-cancel-btn { background: none; border: none; font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-faint); cursor: pointer; padding: 4px 0; -webkit-appearance: none; touch-action: manipulation; text-decoration: underline; }
+/* Coach awareness log (inside script modal) */
+.al-coach-block { padding-top: 20px; margin-top: 20px; border-top: 2px solid var(--line); }
+.al-coach-hd { font-family: 'Special Elite', cursive; font-size: 0.82rem; color: #C8822A; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+.al-coach-section { margin-bottom: 18px; }
+.al-coach-section-hd { font-size: 0.60rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #C8822A; margin-bottom: 6px; font-family: 'Courier Prime', monospace; }
+.al-coach-entry { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.al-coach-entry:last-child { border-bottom: none; }
+.al-coach-entry-text { font-size: 0.85rem; color: var(--ink); line-height: 1.5; }
+.al-coach-entry-time { font-size: 0.62rem; color: var(--ink-faint); margin-top: 2px; }
+
+/* ── COUPLE LINKING ─────────────────────────────────────────── */
+#couple-link-card { display: none; margin-top: 16px; }
+.cl-card { background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 24px 24px 20px; }
+.cl-hd { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+.cl-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; font-family: 'Courier Prime', monospace; }
+.cl-code { font-family: 'Special Elite', cursive; font-size: 2.2rem; letter-spacing: 0.35em; color: var(--ink); margin-bottom: 10px; }
+.cl-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--line); background: transparent; color: var(--accent); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+.cl-divider { font-size: 0.72rem; color: var(--ink-faint); font-style: italic; text-align: center; margin: 20px 0 16px; }
+.cl-input-row { display: flex; gap: 8px; }
+.cl-input { flex: 1; background: #fff; border: 1px solid var(--line); padding: 10px 12px; font-family: 'Courier Prime', monospace; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); outline: none; border-radius: 1px; -webkit-appearance: none; }
+.cl-input:focus { border-color: var(--accent); }
+.cl-link-btn { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.08em; padding: 10px 18px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; white-space: nowrap; -webkit-appearance: none; touch-action: manipulation; }
+.cl-error { font-size: 0.78rem; color: var(--red); font-style: italic; margin-top: 10px; min-height: 18px; }
+#couple-linked-status { display: none; margin-top: 16px; }
+.cl-linked { background: var(--paper); border-radius: 2px; padding: 14px 20px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+.cl-linked-icon { color: #5a8a5a; font-size: 1rem; font-family: 'Courier Prime', monospace; }
+.cl-linked-text { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-light); }
+
+/* ── STEP 2 ─────────────────────────────────────────────────── */
+#step2-card { display: none; margin-top: 16px; }
+.step2-inner { background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 24px 24px 20px; }
+.step2-hd { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.step2-intro { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 20px; line-height: 1.55; }
+.step2-q-block { margin-bottom: 18px; }
+.step2-q-label { font-size: 0.85rem; color: var(--ink); line-height: 1.55; margin-bottom: 8px; font-style: italic; }
+.step2-textarea { width: 100%; min-height: 80px; background: #fff; border: 1px solid var(--line); padding: 10px 12px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: var(--ink); outline: none; resize: vertical; line-height: 1.6; border-radius: 1px; display: block; }
+.step2-textarea:focus { border-color: var(--accent); }
+.step2-divider { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+.step2-submit-btn { font-family: 'Special Elite', cursive; font-size: 0.88rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; width: 100%; }
+.step2-submit-btn:disabled { background: #b8a070; cursor: default; }
+#step2-status { font-size: 0.72rem; color: var(--ink-faint); font-style: italic; text-align: center; margin-top: 10px; min-height: 16px; }
+/* Analysis ready banner */
+#analysis-banner { display: none; margin-top: 16px; }
+.ab-inner { background: var(--paper); border-radius: 2px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); border-left: 4px solid var(--accent); }
+.ab-hd { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 6px; }
+.ab-sub { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 16px; }
+.ab-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+/* ── STEP 3: MIRROR MOMENT ────────────────────────────────── */
+#step3-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #2a2520; flex-direction: column; }
+.s3-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.s3-back { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.45); font-size: 1.1rem; padding: 4px 8px 4px 0; -webkit-appearance: none; touch-action: manipulation; line-height: 1; }
+.s3-back:hover { color: rgba(255,255,255,0.7); }
+.s3-title { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+.s3-thread { flex: 1; overflow-y: auto; padding: 24px 18px 16px; display: flex; flex-direction: column; gap: 20px; }
+.s3-msg { max-width: 88%; }
+.s3-msg-ai { align-self: flex-start; }
+.s3-msg-user { align-self: flex-end; }
+.s3-bubble { padding: 14px 16px; border-radius: 2px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; line-height: 1.7; }
+.s3-msg-ai .s3-bubble { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.88); border-left: 2px solid var(--accent); }
+.s3-msg-user .s3-bubble { background: rgba(184,160,112,0.15); color: rgba(255,255,255,0.8); border-right: 2px solid rgba(184,160,112,0.4); }
+.s3-typing { align-self: flex-start; }
+.s3-typing .s3-bubble { background: rgba(255,255,255,0.06); border-left: 2px solid var(--accent); display: flex; gap: 5px; align-items: center; padding: 16px; }
+.s3-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.4); animation: s3pulse 1.2s ease-in-out infinite; }
+.s3-dot:nth-child(2) { animation-delay: 0.2s; }
+.s3-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes s3pulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); } 40% { opacity: 1; transform: scale(1); } }
+.s3-input-area { padding: 12px 18px 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.s3-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.s3-input { flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.88); outline: none; resize: none; border-radius: 2px; line-height: 1.55; max-height: 120px; -webkit-appearance: none; }
+.s3-input:focus { border-color: rgba(184,160,112,0.5); }
+.s3-input::placeholder { color: rgba(255,255,255,0.25); }
+.s3-send { background: var(--accent); border: none; cursor: pointer; color: white; font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.06em; padding: 12px 16px; border-radius: 2px; -webkit-appearance: none; touch-action: manipulation; flex-shrink: 0; }
+.s3-send:disabled { background: rgba(184,160,112,0.35); cursor: default; }
+.s3-complete { background: none; border: none; color: rgba(255,255,255,0.28); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.06em; cursor: pointer; padding: 6px 0; width: 100%; text-align: center; -webkit-appearance: none; touch-action: manipulation; }
+.s3-complete:hover { color: rgba(255,255,255,0.5); }
+
+/* ── JOURNEY BANNER (steps 4-11 entry points) ─────────────── */
+#journey-banner { display: none; margin-top: 16px; }
+.jb-inner { background: var(--paper); border-radius: 2px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); border-left: 4px solid var(--accent); }
+.jb-step { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 4px; }
+.jb-hd { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 6px; }
+.jb-sub { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 16px; line-height: 1.55; }
+.jb-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+
+/* ── SHARED FULL-SCREEN STEP SCREENS ──────────────────────── */
+/* Steps 4-11 use position:fixed overlay with dark bg, same as #step3-screen */
+#step4-screen,#step5-screen,#step6-screen,#step7-screen,#step8-screen,#step9-screen,#step10-screen,#step11-screen {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200; background: #2a2520; flex-direction: column;
+}
+
+/* ── STEPS 4 & 5: VIDEO PLACEHOLDER ──────────────────────── */
+.s45-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 40px; }
+.s45-intro { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.82); line-height: 1.75; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.s45-video-ph { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 2px; padding: 44px 24px; text-align: center; margin-bottom: 24px; }
+.s45-play-icon { font-size: 2.2rem; color: rgba(255,255,255,0.2); margin-bottom: 10px; }
+.s45-ph-label { font-family: 'Special Elite', cursive; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+.s45-ph-note { font-size: 0.72rem; color: rgba(255,255,255,0.2); font-style: italic; }
+.s45-tx-hd { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 10px; }
+.s45-tx { background: rgba(255,255,255,0.04); border-left: 2px solid rgba(184,160,112,0.35); padding: 18px 16px; margin-bottom: 24px; max-height: 260px; overflow-y: auto; }
+.s45-tx-line { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.72); line-height: 1.65; margin-bottom: 14px; }
+.s45-tx-line:last-child { margin-bottom: 0; }
+.s45-tx-spk { display: block; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(184,160,112,0.75); margin-bottom: 2px; }
+.s45-continue { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; }
+
+/* ── STEP 6: REFLECTIVE QUESTIONS ─────────────────────────── */
+.s6-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 40px; }
+.s6-intro { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.75; margin-bottom: 28px; }
+.s6-q-block { margin-bottom: 22px; }
+.s6-q-num { display: block; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(184,160,112,0.7); margin-bottom: 4px; }
+.s6-q-label { font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.55; margin-bottom: 8px; font-style: italic; font-family: 'Courier Prime', monospace; display: block; }
+.s6-textarea { width: 100%; min-height: 80px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.88); outline: none; resize: vertical; line-height: 1.6; border-radius: 2px; display: block; -webkit-appearance: none; }
+.s6-textarea:focus { border-color: rgba(184,160,112,0.5); }
+.s6-textarea::placeholder { color: rgba(255,255,255,0.2); }
+.s6-submit { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; }
+.s6-submit:disabled { background: rgba(184,160,112,0.35); cursor: default; }
+.s6-ai-wrap { display: none; margin-top: 24px; padding: 20px; background: rgba(255,255,255,0.06); border-left: 2px solid var(--accent); border-radius: 1px; }
+.s6-ai-wrap p { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.75; margin-bottom: 12px; }
+.s6-ai-wrap p:last-child { margin-bottom: 0; }
+.s6-continue { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 1px; width: 100%; margin-top: 16px; -webkit-appearance: none; touch-action: manipulation; }
+.s6-continue:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
+
+/* ── STEPS 7 & 8: CHAT SCREENS (share s3- styles) + extras ── */
+.s78-input-area { padding: 12px 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.s78-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.s7-log-btn { background: rgba(184,160,112,0.15); border: 1px solid rgba(184,160,112,0.3); color: rgba(255,255,255,0.6); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.06em; padding: 6px 12px; border-radius: 1px; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; }
+.s7-complete-btn,.s8-complete-btn { background: none; border: none; color: rgba(255,255,255,0.28); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.04em; cursor: pointer; padding: 0; -webkit-appearance: none; touch-action: manipulation; }
+.s7-complete-btn:hover,.s8-complete-btn:hover { color: rgba(255,255,255,0.5); }
+.s78-send-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 8px; }
+.s7-one-thing { display: none; padding: 14px 0 0; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px; }
+.s7-ot-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(184,160,112,0.65); margin-bottom: 6px; font-family: 'Courier Prime', monospace; display: block; }
+.s7-ot-input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 10px 14px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.88); outline: none; border-radius: 2px; -webkit-appearance: none; }
+.s7-ot-input:focus { border-color: rgba(184,160,112,0.5); }
+.s7-ot-save { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; background: transparent; border: 1px solid rgba(184,160,112,0.4); color: rgba(184,160,112,0.8); cursor: pointer; border-radius: 1px; margin-top: 6px; -webkit-appearance: none; touch-action: manipulation; }
+
+/* ── STEP 9: THE REWRITE ───────────────────────────────────── */
+.s9-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 20px; }
+.s9-intro { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.75; margin-bottom: 20px; }
+.s9-example-toggle { background: none; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-family: 'Courier Prime', monospace; font-size: 0.78rem; letter-spacing: 0.06em; padding: 10px 14px; border-radius: 1px; cursor: pointer; width: 100%; text-align: left; margin-bottom: 16px; -webkit-appearance: none; touch-action: manipulation; }
+.s9-example-pane { display: none; background: rgba(0,0,0,0.35); border-radius: 2px; padding: 20px; margin-bottom: 20px; overflow-y: auto; max-height: 320px; }
+.s9-example-pane.open { display: block; }
+.s9-example-hd { font-family: 'Special Elite', cursive; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.s9-example-txt { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.68); line-height: 1.7; white-space: pre-wrap; }
+.s9-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 20px 0; }
+.s9-rewrite-label { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 8px; display: block; }
+.s9-rewrite-area { width: 100%; min-height: 260px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 16px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.88); outline: none; resize: vertical; line-height: 1.7; border-radius: 2px; display: block; -webkit-appearance: none; }
+.s9-rewrite-area:focus { border-color: rgba(184,160,112,0.5); }
+.s9-rewrite-area::placeholder { color: rgba(255,255,255,0.15); }
+.s9-checkin { padding: 12px 16px; background: rgba(184,160,112,0.08); border-left: 2px solid rgba(184,160,112,0.35); margin: 12px 0; font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.55); font-style: italic; border-radius: 1px; min-height: 0; }
+.s9-input-area { padding: 12px 18px 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.s9-status { font-size: 0.72rem; color: rgba(255,255,255,0.3); font-style: italic; text-align: center; margin-top: 8px; min-height: 14px; }
+.s9-submit { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; }
+.s9-submit:disabled { background: rgba(184,160,112,0.35); cursor: default; }
+
+/* ── STEP 10: AI FEEDBACK ON REWRITE ──────────────────────── */
+.s10-scroll { flex: 1; overflow-y: auto; padding: 28px 18px 80px; }
+.s10-waiting { text-align: center; padding: 60px 0; }
+.s10-waiting p { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.4); font-style: italic; }
+.s10-body p { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.75; margin-bottom: 14px; }
+.s10-continue { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 13px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 1px; width: 100%; margin-top: 24px; -webkit-appearance: none; touch-action: manipulation; }
+.s10-continue:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
+
+/* ── WAITING STATE BANNERS ───────────────────────────────────── */
+#step1-waiting-banner, #video-waiting-banner { display: none; background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); margin-top: 16px; }
+.wb-inner { border-left: 3px solid var(--accent); padding: 22px 20px 20px; }
+.wb-heading { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--ink); margin-bottom: 12px; }
+.wb-body { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: var(--ink-light); line-height: 1.75; }
+.wb-indicator { display: flex; gap: 7px; align-items: center; margin-top: 18px; }
+.wb-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.3; animation: wb-blink 2.2s ease-in-out infinite; }
+.wb-dot:nth-child(2) { animation-delay: 0.45s; }
+.wb-dot:nth-child(3) { animation-delay: 0.9s; }
+@keyframes wb-blink { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 0.65; transform: scale(1); } }
+.wb-note { font-family: 'Courier Prime', monospace; font-size: 0.7rem; color: var(--ink-faint); font-style: italic; }
+
+/* ── PATH CHOICE SCREEN ──────────────────────────────────────── */
+#path-choice-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #2a2520; align-items: flex-start; justify-content: center; padding: 32px 24px 60px; overflow-y: auto; flex-direction: column; }
+.pc-wrap { width: 100%; max-width: 520px; margin: auto; }
+.pc-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 12px; text-align: center; }
+.pc-heading { font-family: 'Special Elite', cursive; font-size: 1.2rem; color: rgba(255,255,255,0.92); margin-bottom: 8px; text-align: center; }
+.pc-sub { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.48); font-style: italic; text-align: center; margin-bottom: 32px; line-height: 1.65; }
+.pc-cards { display: flex; flex-direction: column; gap: 16px; }
+.pc-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; padding: 24px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.pc-card:active { background: rgba(255,255,255,0.09); }
+.pc-card-label { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 8px; }
+.pc-card-title { font-family: 'Special Elite', cursive; font-size: 1rem; color: rgba(255,255,255,0.88); margin-bottom: 8px; }
+.pc-card-desc { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.48); line-height: 1.65; }
+.pc-card-b { border-color: rgba(184,160,112,0.22); }
+.pc-privacy { font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.22); text-align: center; margin-top: 24px; font-style: italic; }
+
+/* ── PATH B: INTAKE SCREEN ───────────────────────────────────── */
+#path-b-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #2a2520; flex-direction: column; }
+
+/* ── PATH B: HANDOFF BANNER ──────────────────────────────────── */
+#pb-handoff-banner { display: none; background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 28px 24px; margin-bottom: 16px; border-left: 4px solid var(--accent); }
+.pbh-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 12px; }
+.pbh-heading { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--ink); margin-bottom: 14px; }
+.pbh-body { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: var(--ink-light); line-height: 1.75; margin-bottom: 12px; }
+.pbh-dismiss { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; margin-top: 8px; -webkit-appearance: none; touch-action: manipulation; }
+
+/* ── STEP 11: CAP GLOBAL BRIDGE ───────────────────────────── */
+.s11-scroll { flex: 1; overflow-y: auto; padding: 32px 18px 60px; }
+.s11-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 10px; }
+.s11-heading { font-family: 'Special Elite', cursive; font-size: 1.15rem; color: rgba(255,255,255,0.92); margin-bottom: 14px; line-height: 1.4; }
+.s11-prose { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.72); line-height: 1.85; margin-bottom: 14px; }
+.s11-prose:last-of-type { margin-bottom: 0; }
+.s11-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 36px 0; }
+.s11-cap-card { background: rgba(184,160,112,0.08); border: 1px solid rgba(184,160,112,0.25); border-radius: 2px; padding: 28px 24px; margin-bottom: 24px; }
+.s11-cap-name { font-family: 'Special Elite', cursive; font-size: 1.3rem; color: rgba(255,255,255,0.95); margin-bottom: 4px; letter-spacing: 0.04em; }
+.s11-cap-tagline { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(184,160,112,0.75); font-style: italic; margin-bottom: 14px; }
+.s11-cap-desc { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.7; margin-bottom: 20px; }
+.s11-trial { font-size: 0.75rem; color: rgba(255,255,255,0.35); font-style: italic; margin-bottom: 16px; font-family: 'Courier Prime', monospace; }
+.s11-cap-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px 32px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; display: block; }
+.s11-email-section { background: rgba(255,255,255,0.03); border-radius: 2px; padding: 20px; margin-top: 24px; }
+.s11-email-hd { font-family: 'Special Elite', cursive; font-size: 0.85rem; color: rgba(255,255,255,0.65); margin-bottom: 6px; }
+.s11-email-sub { font-size: 0.75rem; color: rgba(255,255,255,0.3); font-style: italic; margin-bottom: 14px; font-family: 'Courier Prime', monospace; line-height: 1.55; }
+.s11-email-row { display: flex; gap: 10px; }
+.s11-email-input { flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.88); outline: none; border-radius: 2px; -webkit-appearance: none; }
+.s11-email-input:focus { border-color: rgba(184,160,112,0.5); }
+.s11-email-input::placeholder { color: rgba(255,255,255,0.2); }
+.s11-email-btn { background: rgba(184,160,112,0.45); border: none; color: white; font-family: 'Special Elite', cursive; font-size: 0.8rem; letter-spacing: 0.06em; padding: 12px 16px; border-radius: 2px; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; flex-shrink: 0; }
+.s11-email-btn:disabled { background: rgba(184,160,112,0.2); cursor: default; }
+.s11-email-note { font-size: 0.65rem; color: rgba(255,255,255,0.2); font-style: italic; margin-top: 8px; }
+.s11-done { text-align: center; padding: 32px 0 0; }
+.s11-done p { font-family: 'Special Elite', cursive; font-size: 1rem; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; }
 </style>
 
 <style>
-/* ── LANDING PAGE ───────────────────────────────────────────────
+/* ── LANDING PAGE ─────────────────────────────────────────────
    All rules use .lp- prefix or are scoped to #landing-screen.
    No collisions with the app's existing CSS variables.
-   ─────────────────────────────────────────────────── */
+   ─────────────────────────────────────────────────────────── */
 
 /* Hide auth on first load — landing appears first */
 #auth-screen { display: none; }
@@ -141,6 +399,7 @@ body {
   color: #1C1814;
   font-family: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
   line-height: 1.7;
+  transition: opacity 0.5s ease;
 }
 
 /* HERO */
@@ -148,40 +407,51 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
   text-align: center;
-  padding: 64px 32px 80px;
 }
 
+/* Full-width hero photo — replace with <img> when you have a real photo */
 .lp-photo {
-  width: 148px;
-  height: 148px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #EDE4D0, #D8CDB0);
+  width: 100%;
+  height: 72vw;
+  max-height: 560px;
+  min-height: 280px;
+  background: linear-gradient(160deg, #EDE4D0, #C8BDA8);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 28px;
-  border: 2px solid #C8BAA0;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .lp-photo span {
   font-family: 'Lora', Georgia, serif;
-  font-size: 2.1rem;
+  font-size: 5rem;
   font-weight: 400;
-  color: #8A7050;
-  letter-spacing: 0.04em;
+  color: rgba(138, 112, 80, 0.35);
+  letter-spacing: 0.08em;
   pointer-events: none;
   user-select: none;
 }
 
+/* To add a real photo: replace the .lp-photo div entirely with:
+   <img src="your-photo.jpg" alt="Mitch Newman" class="lp-photo" style="object-fit:cover;object-position:center top;">
+   Or add an <img> inside .lp-photo and remove the <span>MN</span> */
 .lp-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center top;
+}
+
+.lp-hero-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 32px 80px;
+  flex: 1;
+  justify-content: center;
 }
 
 .lp-name {
@@ -235,7 +505,7 @@ body {
 /* STORY */
 .lp-body {
   font-family: 'Lora', Georgia, serif;
-  font-size: clamp(1rem, 2.6vw, 1.1rem);
+  font-size: clamp(1.1rem, 3vw, 1.25rem);
   line-height: 1.9;
   color: #2A2218;
   max-width: 58ch;
@@ -248,13 +518,14 @@ body {
 
 /* HOW IT WORKS */
 .lp-heading {
-  font-size: 0.68rem;
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
   font-weight: 700;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
   color: #1C1814;
   text-align: center;
   margin-bottom: 48px;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 .lp-steps { list-style: none; max-width: 52ch; margin: 0 auto; }
@@ -286,7 +557,7 @@ body {
 /* THE TRUTH */
 .lp-truth {
   font-family: 'Lora', Georgia, serif;
-  font-size: clamp(0.9rem, 2.3vw, 1rem);
+  font-size: clamp(1rem, 2.6vw, 1.15rem);
   line-height: 1.95;
   color: #6A5E4C;
   text-align: center;
@@ -294,6 +565,9 @@ body {
   max-width: 50ch;
   margin: 0 auto;
 }
+
+.lp-truth p { margin-bottom: 1.5em; }
+.lp-truth p:last-child { margin-bottom: 0; }
 
 /* CTA BLOCKS */
 .lp-cta {
@@ -340,10 +614,15 @@ body {
 
 .lp-tagline {
   font-family: 'Lora', Georgia, serif;
-  font-size: 0.9rem;
+  font-size: clamp(1.15rem, 3.2vw, 1.5rem);
   font-style: italic;
-  color: #9A8870;
-  margin-top: 24px;
+  color: #5A4E3C;
+  margin-top: 32px;
+  line-height: 1.4;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+  text-wrap: balance;
 }
 
 /* HIDDEN SECTIONS — shown by JS */
@@ -359,7 +638,7 @@ body {
 /* COMMITMENT TEXT */
 .lp-commit-text {
   font-family: 'Lora', Georgia, serif;
-  font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+  font-size: clamp(1.05rem, 2.8vw, 1.2rem);
   line-height: 1.9;
   color: #2A2218;
   text-align: center;
@@ -424,24 +703,279 @@ body {
 
 .lp-fight-input:focus { border-color: #C8822A; }
 .lp-fight-input::placeholder { color: #BEB0A0; }
+
+/* ── SHARE CORNER LINK ───────────────────────────────────────── */
+.lp-share-corner {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 200;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #C8822A;
+  background: rgba(42,37,32,0.88);
+  border: 1px solid rgba(200,130,42,0.4);
+  padding: 7px 13px;
+  border-radius: 1px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  text-decoration: none;
+  display: inline-block;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.15s;
+}
+.lp-share-corner:hover { border-color: #C8822A; }
+
+/* ── SHARE-WITH-PARTNER SECTION ─────────────────────────────── */
+.lp-share-section {
+  padding: 40px 24px;
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.lp-share-hd {
+  font-family: 'Special Elite', cursive;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  color: #1C1814;
+  margin-bottom: 8px;
+}
+.lp-share-sub {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.85rem;
+  color: #7a6e60;
+  font-style: italic;
+  margin-bottom: 20px;
+  line-height: 1.55;
+}
+.lp-share-btn {
+  display: inline-block;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px 26px;
+  border: 1.5px solid #C8822A;
+  background: transparent;
+  color: #C8822A;
+  cursor: pointer;
+  border-radius: 1px;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  transition: background 0.15s, color 0.15s;
+}
+.lp-share-btn:hover { background: #C8822A; color: white; }
+</style>
+
+<style>
+/* ── ENROLLMENT SCREENS ───────────────────────────────────────
+   New screens for the payment-gated enrollment flow.
+   All hidden by default; shown via JS.
+   ─────────────────────────────────────────────────────────── */
+
+/* Shared overlay screen base */
+.enroll-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+/* ── Start or Join choice ── */
+#start-choice-screen {}
+.sc-header { text-align: center; margin-bottom: 36px; }
+.sc-header h2 { font-family: 'Special Elite', cursive; font-size: 1.4rem; color: #f0e8d5; letter-spacing: 0.06em; margin-bottom: 8px; }
+.sc-header p { font-size: 0.78rem; color: #a09080; font-style: italic; font-family: 'Courier Prime', monospace; }
+.sc-cards { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.sc-card { background: var(--paper); border-radius: 2px; padding: 28px 24px; cursor: pointer; border-top: 3px solid transparent; box-shadow: 0 4px 20px rgba(0,0,0,0.35); transition: border-color 0.15s, transform 0.15s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; border: none; width: 100%; text-align: left; }
+.sc-card:hover { transform: translateY(-2px); }
+.sc-card.sc-start { border-top-color: var(--accent); }
+.sc-card.sc-join { border-top-color: #5a7a5a; }
+.sc-card-label { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 6px; }
+.sc-card-title { font-family: 'Special Elite', cursive; font-size: 1.1rem; color: var(--ink); margin-bottom: 6px; }
+.sc-card-desc { font-size: 0.78rem; color: var(--ink-light); font-style: italic; font-family: 'Lora', Georgia, serif; line-height: 1.5; }
+
+/* ── Buy-In screen ── */
+#buyin-screen {}
+.bi-card { background: var(--paper); border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid var(--accent); padding: 36px 28px; width: 100%; }
+.bi-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 16px; }
+.bi-body { font-family: 'Lora', Georgia, serif; font-size: 0.95rem; color: var(--ink); line-height: 1.75; margin-bottom: 28px; }
+.bi-body p { margin-bottom: 16px; }
+.bi-body p:last-child { margin-bottom: 0; }
+.bi-cta { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin-top: 28px; }
+.bi-cta:active { background: #7a5c10; }
+.bi-back { background: none; border: none; color: var(--ink-faint); font-family: 'Courier Prime', monospace; font-size: 0.72rem; cursor: pointer; margin-top: 14px; display: block; text-align: center; width: 100%; padding: 8px; -webkit-appearance: none; }
+
+/* ── Payment confirmation screen ── */
+#payment-confirm-screen {}
+.pc-card { background: var(--paper); border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid #C8822A; padding: 36px 28px; width: 100%; text-align: center; }
+.pc-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #C8822A; font-family: 'Courier Prime', monospace; margin-bottom: 12px; }
+.pc-hd { font-family: 'Special Elite', cursive; font-size: 1.15rem; color: var(--ink); margin-bottom: 8px; }
+.pc-sub { font-size: 0.82rem; color: var(--ink-light); font-style: italic; font-family: 'Lora', Georgia, serif; line-height: 1.55; margin-bottom: 28px; }
+.pc-code-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 6px; }
+.pc-code { font-family: 'Special Elite', cursive; font-size: 3rem; letter-spacing: 0.5em; color: #C8822A; margin: 0 auto 16px; padding-left: 0.5em; line-height: 1.1; }
+.pc-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 20px; border: 1.5px solid #C8822A; background: transparent; color: #C8822A; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; transition: background 0.15s, color 0.15s; }
+.pc-copy-btn:hover { background: #C8822A; color: white; }
+.pc-divider { width: 40px; height: 1px; background: var(--line); margin: 28px auto; }
+.pc-share-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 8px; }
+.pc-share-url { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-light); word-break: break-all; margin-bottom: 12px; padding: 10px 12px; background: var(--paper-dark); border-radius: 1px; border: 1px solid var(--line); }
+.pc-share-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border: 1px solid var(--line); background: transparent; color: var(--ink-light); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+.pc-enter-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin-top: 28px; }
+.pc-email-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 10px; text-align: left; }
+.pc-email-input { display: block; width: 100%; padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); background: white; border: 1.5px solid var(--line); border-radius: 1px; outline: none; -webkit-appearance: none; margin-bottom: 8px; }
+.pc-email-input:focus { border-color: var(--accent); }
+.pc-email-input::placeholder { color: var(--ink-faint); }
+.pc-send-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px; background: #5a7a5a; color: white; border: none; border-radius: 1px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; }
+.pc-send-btn:disabled { background: #8aaa8a; cursor: not-allowed; }
+.pc-email-status { font-size: 0.78rem; font-style: italic; color: var(--ink-light); min-height: 20px; margin-top: 8px; font-family: 'Courier Prime', monospace; }
+.pc-resend-btn { background: none; border: none; color: var(--accent); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; padding: 8px 0; display: block; width: 100%; text-align: center; margin-top: 4px; -webkit-appearance: none; text-decoration: underline; }
+
+/* ── Partner B intro screen ── */
+#partner-b-intro-screen { display: none; }
+.pb-scroll-wrap { width: 100%; max-width: 520px; margin: 0 auto; }
+.pb-hero { text-align: center; padding: 48px 24px 32px; }
+.pb-hero-title { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; margin-bottom: 10px; letter-spacing: 0.04em; }
+.pb-hero-sub { font-family: 'Lora', Georgia, serif; font-size: 0.95rem; color: #a09080; font-style: italic; line-height: 1.6; }
+.pb-section { padding: 32px 24px; }
+.pb-body { font-family: 'Lora', Georgia, serif; font-size: 0.95rem; color: #c8bfb0; line-height: 1.75; margin-bottom: 20px; }
+.pb-body p { margin-bottom: 14px; }
+.pb-video-placeholder { background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15); border-radius: 2px; padding: 48px 24px; text-align: center; margin: 24px 0; }
+.pb-video-placeholder-text { font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; }
+.pb-reminder { background: rgba(200,130,42,0.08); border-left: 3px solid #C8822A; padding: 18px 20px; margin: 24px 0 32px; border-radius: 0 2px 2px 0; }
+.pb-reminder p { font-family: 'Lora', Georgia, serif; font-size: 0.88rem; color: #c8bfb0; line-height: 1.65; font-style: italic; }
+.pb-continue-btn { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin: 0 auto; }
+.pb-continue-btn:active { background: #7a5c10; }
+
+/* ── Code entry screen ── */
+#code-entry-screen {}
+.ce-card { background: var(--paper); border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid #5a7a5a; padding: 36px 28px; width: 100%; }
+.ce-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #5a7a5a; font-family: 'Courier Prime', monospace; margin-bottom: 12px; }
+.ce-hd { font-family: 'Special Elite', cursive; font-size: 1.1rem; color: var(--ink); margin-bottom: 8px; }
+.ce-sub { font-size: 0.8rem; color: var(--ink-light); font-style: italic; font-family: 'Lora', Georgia, serif; line-height: 1.55; margin-bottom: 24px; }
+.ce-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 6px; display: block; }
+.ce-input { display: block; width: 100%; padding: 16px; font-family: 'Special Elite', cursive; font-size: 1.8rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--ink); background: white; border: 1.5px solid var(--line); border-radius: 1px; outline: none; text-align: center; -webkit-appearance: none; margin-bottom: 6px; }
+.ce-input:focus { border-color: var(--accent); }
+.ce-error { font-size: 0.8rem; color: var(--red); font-style: italic; min-height: 24px; margin-bottom: 16px; line-height: 1.4; }
+.ce-submit-btn { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px; background: #5a7a5a; color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; }
+.ce-submit-btn:active { background: #4a6a4a; }
+.ce-submit-btn:disabled { background: #8aaa8a; cursor: not-allowed; }
+.ce-back { background: none; border: none; color: var(--ink-faint); font-family: 'Courier Prime', monospace; font-size: 0.72rem; cursor: pointer; margin-top: 14px; display: block; text-align: center; width: 100%; padding: 8px; -webkit-appearance: none; }
 </style>
 
 </head>
 <body>
+
+<!-- ENROLLMENT SCREENS -->
+
+<!-- Mutual Buy-In -->
+<div id="buyin-screen" class="enroll-screen" style="display:none;">
+  <div class="bi-card">
+    <div class="bi-eyebrow">Before you continue</div>
+    <div class="bi-body">
+      <p>Before you continue, one thing matters more than anything else.</p>
+      <p>This only works if your partner wants this too.</p>
+      <p>Not tolerates it. Not goes along with it. Wants it.</p>
+      <p>The process you are about to start is designed to bring things to the surface. That is the point. It requires two people who are both genuinely willing to do the work. Not perfectly. But honestly. And together.</p>
+      <p>Have you talked to your partner? Do they know you are doing this? Are they in?</p>
+      <p>If the answer is yes — truly yes — then let's go.</p>
+      <p>If you are not sure, that is worth a conversation before you begin.</p>
+    </div>
+    <button class="bi-cta" onclick="showPaymentAuth()">We are both in. Continue.</button>
+    <button class="bi-back" onclick="biGoBack()">← Go back</button>
+  </div>
+</div>
+
+<!-- Payment Confirmation -->
+<div id="payment-confirm-screen" class="enroll-screen" style="display:none;">
+  <div class="pc-card">
+    <div class="pc-eyebrow">Payment complete</div>
+    <div class="pc-hd">You are all set.</div>
+    <div class="pc-sub">Your partner just needs a link to join you. Send it now or share the code below as a fallback.</div>
+    <div class="pc-divider"></div>
+    <div class="pc-email-label">Send this to your partner so they can join.</div>
+    <input type="email" id="pc-partner-email" class="pc-email-input" placeholder="Enter your partner's email" autocomplete="email" />
+    <button class="pc-send-btn" id="pc-send-btn" onclick="pcSendEmailClick()">Send</button>
+    <div class="pc-email-status" id="pc-email-status"></div>
+    <button class="pc-resend-btn" id="pc-resend-btn" onclick="pcResendEmailClick()" style="display:none;">Resend the link</button>
+    <div class="pc-divider"></div>
+    <div class="pc-code-label">Your partner's code — for reference or as a fallback</div>
+    <div class="pc-code" id="pc-code-display">——————</div>
+    <button class="pc-copy-btn" id="pc-copy-btn" onclick="pcCopyCode()">Copy Code</button>
+    <div class="pc-divider"></div>
+    <div class="pc-share-label">Or copy the join link directly</div>
+    <div class="pc-share-url" id="pc-join-url"></div>
+    <button class="pc-share-copy-btn" id="pc-share-copy-btn" onclick="pcCopyLink()">Copy Link</button>
+    <button class="pc-enter-btn" onclick="pcEnterApp()">Enter Your Script Tool →</button>
+  </div>
+</div>
+
+<!-- Partner B Intro (via /join/coupleId URL) -->
+<div id="partner-b-intro-screen" style="display:none; width:100%; overflow-y:auto;">
+  <div class="pb-scroll-wrap">
+    <div class="pb-hero">
+      <div class="pb-hero-title">The Ongoing Argument</div>
+      <div class="pb-hero-sub">Your partner has already started the process.<br>This is where you join them.</div>
+    </div>
+    <div class="pb-section">
+      <div class="pb-body">
+        <p>The fight you keep having. The one that never gets resolved. Your partner has named it and started the work. Now it's your turn.</p>
+        <p>This process was built by Mitch Newman, relationship adviser and former screenwriter, to help couples do what TV writers do every week — find the solution to the ongoing conflict.</p>
+        <p>Watch what's possible.</p>
+      </div>
+      <!-- REPLACE WITH DEMO VIDEO WHEN DELIVERED -->
+      <div class="pb-video-placeholder">
+        <div class="pb-video-placeholder-text">Demo video — coming soon</div>
+      </div>
+      <div class="pb-body">
+        <p>When both people are fully in it, something real becomes possible. You'll write your version of the fight privately, watch it performed by avatars, do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
+      </div>
+      <div class="pb-reminder">
+        <p>You are about to commit to something your partner has already started. Take your time before continuing. This only works if you are both genuinely in it.</p>
+      </div>
+      <div id="pb-error" style="display:none; background:rgba(192,57,43,0.12); border-left:3px solid #C0392B; padding:14px 18px; margin-bottom:20px; border-radius:0 2px 2px 0; font-family:'Lora',Georgia,serif; font-size:0.85rem; color:#C0392B; font-style:italic; line-height:1.5;"></div>
+      <button class="pb-continue-btn" id="pb-continue-btn" onclick="pbAutoValidate()">I'm in. Create My Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Code Entry (Partner B) -->
+<div id="code-entry-screen" class="enroll-screen" style="display:none;">
+  <div class="ce-card">
+    <div class="ce-eyebrow">Joining your partner</div>
+    <div class="ce-hd">Enter your partner's code.</div>
+    <div class="ce-sub">They received this 6-character code after completing payment. Check your messages.</div>
+    <label class="ce-label" for="ce-code-input">Partner's code</label>
+    <input type="text" id="ce-code-input" class="ce-input" placeholder="——————" maxlength="6" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')submitPartnerCode()" />
+    <div class="ce-error" id="ce-error"></div>
+    <button class="ce-submit-btn" id="ce-submit-btn" onclick="submitPartnerCode()">Verify Code</button>
+    <button class="ce-back" onclick="ceGoBack()">← Go back</button>
+  </div>
+</div>
 
 <!-- LANDING PAGE — sits in front of everything; dismissed after fight-name step -->
 <div id="landing-screen">
 
   <!-- S1: HERO -->
   <section class="lp-hero">
-    <!-- Replace the .lp-photo div with <img src="..." alt="Mitch Newman"> to add a real photo -->
+    <!-- PHOTO: Replace this div with your real photo. Two options:
+         Option A — swap the whole div: <img src="mitch.jpg" alt="Mitch Newman" class="lp-photo" style="object-fit:cover;object-position:center top;">
+         Option B — keep the div, remove the <span>, add <img src="mitch.jpg" alt="Mitch Newman"> inside it -->
     <div class="lp-photo" aria-hidden="true"><span>MN</span></div>
-    <div class="lp-name">Mitch Newman</div>
-    <div class="lp-adviser-title">Relationship Adviser</div>
-    <div class="lp-hero-lines">
-      <span class="lp-line">The fight you keep having.</span>
-      <span class="lp-line">The one that never gets resolved.</span>
-      <span class="lp-line lp-gold">It’s trying to get your attention.</span>
+    <div class="lp-hero-body">
+      <div class="lp-name">Mitch Newman, M.A.</div>
+      <div class="lp-adviser-title">Relationship Adviser</div>
+      <div class="lp-hero-lines">
+        <span class="lp-line">The fight you keep having.</span>
+        <span class="lp-line">The one that never gets resolved.</span>
+        <span class="lp-line lp-gold">It's trying to get your attention.</span>
+      </div>
     </div>
   </section>
 
@@ -454,7 +988,7 @@ body {
       <p>And I discovered that the same conflicts I was resolving on screen in twenty two minutes were playing out in real relationships for years. Sometimes decades. The same fight. The same lines. No resolution. No end in sight.</p>
       <p>Just to be continued.</p>
       <p>So I married what I knew as a screenwriter with what I learned as a coach. And created a process that helps couples do what TV writers do every week.</p>
-      <p><strong>Find the ending.</strong></p>
+      <p><strong>Find the solution.</strong></p>
     </div>
   </section>
 
@@ -466,7 +1000,7 @@ body {
       <li class="lp-step"><span class="lp-step-n">2.</span><span class="lp-step-t">Each of you writes your version. Separately. Privately.</span></li>
       <li class="lp-step"><span class="lp-step-n">3.</span><span class="lp-step-t">The system analyzes the conflict and the dynamics. Out of story. Into solution.</span></li>
       <li class="lp-step"><span class="lp-step-n">4.</span><span class="lp-step-t">Grab some popcorn. Watch your argument performed by avatar actors.</span></li>
-      <li class="lp-step"><span class="lp-step-n">5.</span><span class="lp-step-t">See how the breakdown is really the breakthrough you’ve needed.</span></li>
+      <li class="lp-step"><span class="lp-step-n">5.</span><span class="lp-step-t">See how the breakdown is really the breakthrough you've needed.</span></li>
       <li class="lp-step"><span class="lp-step-n">6.</span><span class="lp-step-t">Do the individual work. Get into Relationshape.</span></li>
       <li class="lp-step"><span class="lp-step-n">7.</span><span class="lp-step-t">Learn a new language. Out of blame. Out of confrontation. Into conversation.</span></li>
       <li class="lp-step"><span class="lp-step-n">8.</span><span class="lp-step-t">Rewrite the script together. So you both win. And so does the relationship.</span></li>
@@ -475,13 +1009,16 @@ body {
 
   <!-- S4: THE TRUTH -->
   <section class="lp-section">
-    <p class="lp-truth">It is no coincidence that you found each other. Most couples want the same things. What differs is how they were each taught to get there. The fight is not evidence that something is broken. It is two belief systems asking to be understood. And underneath every ongoing argument is an unmet need that has never been named.<br><br>Name it. Meet it. And watch what becomes possible.</p>
+    <div class="lp-truth">
+      <p>It is no coincidence that you found each other. We often seek the one person who will ultimately challenge us to reconsider the parts of ourselves we fear the most by activating those parts. And in kind and in reaction we then know exactly what to say to share that gift back for them. And I do mean gift. Change. Healing. Both tend to sting a bit before we get to the good parts.</p>
+      <p>Here is what is important to know. Most couples want the same things. What differs is how they were each taught to achieve them. The fight is not evidence that something is broken. It is evidence that something needs to be broken open to reveal one's greatest capacity for loving. Underneath every ongoing argument is an unmet need that has never been named and clearly not met.</p>
+      <p>Name it. Meet it. And watch what magic becomes possible.</p>
+    </div>
   </section>
 
   <!-- S5: CTA -->
   <div class="lp-cta">
-    <div class="lp-price-note">Pricing &middot; TBD</div>
-    <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">We’re ready. Let’s begin.</button>
+    <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">Begin</button>
     <div class="lp-tagline">No fight is too big to have a happy ending.</div>
   </div>
 
@@ -489,14 +1026,14 @@ body {
   <div id="lp-s6">
     <div class="lp-cta">
       <div class="lp-commit-text">
-        <p>Before you begin there is one thing worth knowing.</p>
+        <p>Before you start there is one thing worth knowing.</p>
         <p>This process is designed to be engaging, enlightening, and at times challenging. It will bring things to the surface. That is the point.</p>
         <p>It requires both of you to be fully present. Individually committed. And genuinely willing to do the work. Not perfectly. But honestly.</p>
-        <p>This is not therapy. It is coaching. It works when both people are in it.</p>
+        <p>This is not therapy. It is coaching. It works when both people are fully engaged.</p>
         <p>If at any point you find yourself questioning your commitment to the process that is important information worth paying attention to.</p>
-        <p>Are you both willing to begin?</p>
+        <p>Are you both committed and willing?</p>
       </div>
-      <button class="lp-btn" id="lp-btn-commit" onclick="lpRevealFight()">Yes. We are both willing.</button>
+      <button class="lp-btn" id="lp-btn-commit" onclick="lpRevealFight()">Yes. Let's do this.</button>
     </div>
   </div>
 
@@ -508,7 +1045,7 @@ body {
       <div class="lp-fight-eg">The Money Thing. The Way You Talk To Me. The Kids. The Job.</div>
       <div class="lp-fight-err" id="lp-fight-err"></div>
       <input type="text" class="lp-fight-input" id="lp-fight-input" placeholder="Give it a name." autocomplete="off" onkeydown="if(event.key==='Enter')lpProceed()" />
-      <button class="lp-btn" id="lp-btn-go" onclick="lpProceed()">This is the one. Let’s go.</button>
+      <button class="lp-btn" id="lp-btn-go" onclick="lpProceed()">This is the one. Let's go.</button>
     </div>
   </div>
 
@@ -554,6 +1091,17 @@ body {
     <button class="signout-btn" id="btn-signout">Sign Out</button>
   </div>
   <div id="coach-notes-container"></div>
+
+  <!-- PATH B: HANDOFF BANNER — shown above script page after AI draft generated -->
+  <div id="pb-handoff-banner">
+    <div class="pbh-eyebrow">Your AI Draft Is Ready</div>
+    <div class="pbh-heading">Here's what the AI built from your intake.</div>
+    <p class="pbh-body">This is a first draft, not a final one. The AI has captured the structure and emotional arc of your fight as you described it. Some of it will feel accurate. Some of it may not.</p>
+    <p class="pbh-body">Read through it before you change anything. Then edit it into something that actually sounds like the two of you. The goal isn't a perfect script — it's an honest one.</p>
+    <p class="pbh-body">The same submission process applies: when you're ready and the script feels true, answer the two questions below and submit. Your partner is doing the same thing privately.</p>
+    <button class="pbh-dismiss" onclick="pbDismissHandoff()">Got it — start editing</button>
+  </div>
+
   <div class="script-page">
     <div class="script-title-header" id="script-title-header">THE ONGOING ARGUMENT</div>
     <div class="privacy-tag">🔒 Your version — private until you share with Mitch</div>
@@ -576,7 +1124,123 @@ body {
     <button class="action-btn" id="btn-submit" style="background:var(--red);">Submit for Review</button>
   </div>
   <div id="status-msg"></div>
+
+  <!-- STEP 2: STORY QUESTIONS + SUBMIT -->
+  <div id="step2-card">
+    <div class="step2-inner">
+      <div class="step2-hd">Your Private Story</div>
+      <p class="step2-intro">Answer honestly before submitting. Your partner will not see these answers until the full analysis is shared with both of you in Step 3.</p>
+      <div class="step2-q-block">
+        <div class="step2-q-label">The story I tell myself about what my partner is thinking in this argument is...</div>
+        <textarea id="step2-thinking" class="step2-textarea" placeholder="Write your honest answer here..."></textarea>
+      </div>
+      <div class="step2-q-block">
+        <div class="step2-q-label">The story I tell myself about what my partner is feeling in this argument is...</div>
+        <textarea id="step2-feeling" class="step2-textarea" placeholder="Write your honest answer here..."></textarea>
+      </div>
+      <hr class="step2-divider">
+      <button class="step2-submit-btn" id="step2-submit-btn" onclick="submitScript()">Submit My Script</button>
+      <div id="step2-status"></div>
+    </div>
+  </div>
+
+  <!-- STEP 1: WAITING FOR ANALYSIS — shown after submission while analysis generates -->
+  <div id="step1-waiting-banner">
+    <div class="wb-inner">
+      <div class="wb-heading">Your script is in.</div>
+      <p class="wb-body">The AI is reading both scripts now. This takes some real thought, not a quick pass, so there is no need to keep checking. You will get an email the moment it is ready.</p>
+      <div class="wb-indicator">
+        <div class="wb-dot"></div><div class="wb-dot"></div><div class="wb-dot"></div>
+        <span class="wb-note">Waiting</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS READY BANNER -->
+  <div id="analysis-banner">
+    <div class="ab-inner">
+      <div class="ab-hd">Your Analysis Is Ready</div>
+      <div class="ab-sub">The AI has read both scripts. Step 3 is waiting for you.</div>
+      <button class="ab-btn" onclick="viewAnalysis()">Read Your Analysis</button>
+    </div>
+  </div>
+
+  <!-- JOURNEY BANNER (Steps 4–11 continuation) -->
+  <div id="journey-banner">
+    <div class="jb-inner">
+      <div class="jb-step" id="jb-step"></div>
+      <div class="jb-hd" id="jb-title"></div>
+      <div class="jb-sub" id="jb-sub"></div>
+      <button class="jb-btn" id="jb-btn" onclick="openJourneyStep()"></button>
+    </div>
+  </div>
+
+  <!-- AVATAR VIDEO WAITING STATE — shown at steps 4/5 until HeyGen videos are ready -->
+  <div id="video-waiting-banner">
+    <div class="wb-inner">
+      <div class="wb-heading">Your avatar videos are being created now.</div>
+      <p class="wb-body">This takes a little time to get right. You do not need to keep checking. You will get an email the moment they are ready to watch.</p>
+      <div class="wb-indicator">
+        <div class="wb-dot"></div><div class="wb-dot"></div><div class="wb-dot"></div>
+        <span class="wb-note">Waiting</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AWARENESS LOG PANEL -->
+  <div id="awareness-log">
+    <button class="al-log-toggle" id="btn-al-toggle" onclick="alToggle()">
+      Awareness Log
+      <span class="al-arrow" id="al-toggle-arrow">&#9658; Open</span>
+    </button>
+    <div id="al-log-body">
+      <div class="al-section">
+        <div class="al-section-hd">Words to Release</div>
+        <div class="al-section-desc">Words and phrases from your old script that no longer serve you.</div>
+        <div id="al-entries-wordsToRelease"><div class="al-entries-empty">Nothing here yet.</div></div>
+        <button class="al-add-inline" onclick="openLogModal('wordsToRelease')">+ Add</button>
+      </div>
+      <div class="al-section">
+        <div class="al-section-hd">New Language to Try</div>
+        <div class="al-section-desc">New words and phrases you want to bring into your conversations.</div>
+        <div id="al-entries-newLanguage"><div class="al-entries-empty">Nothing here yet.</div></div>
+        <button class="al-add-inline" onclick="openLogModal('newLanguage')">+ Add</button>
+      </div>
+      <div class="al-section">
+        <div class="al-section-hd">What I Noticed About Myself</div>
+        <div class="al-section-desc">Awarenesses, patterns, and moments of recognition from your process.</div>
+        <div id="al-entries-selfAwareness"><div class="al-entries-empty">Nothing here yet.</div></div>
+        <button class="al-add-inline" onclick="openLogModal('selfAwareness')">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COUPLE LINKING -->
+  <div id="couple-link-card">
+    <div class="cl-card">
+      <div class="cl-hd">Link with Your Partner</div>
+      <div class="cl-label">Your code — share this with your partner</div>
+      <div class="cl-code" id="cl-code-display">——————</div>
+      <button class="cl-copy-btn" id="cl-copy-btn" onclick="clCopyCode()">Copy Code</button>
+      <div class="cl-divider">already have your partner's code?</div>
+      <div class="cl-input-row">
+        <input type="text" id="cl-partner-code" class="cl-input" placeholder="XXXXXX" maxlength="6" autocomplete="off" onkeydown="if(event.key==='Enter')clLinkPartner()" />
+        <button class="cl-link-btn" onclick="clLinkPartner()">Link</button>
+      </div>
+      <div id="cl-error" class="cl-error"></div>
+    </div>
+  </div>
+
+  <div id="couple-linked-status">
+    <div class="cl-linked">
+      <span class="cl-linked-icon">✓</span>
+      <span class="cl-linked-text" id="cl-linked-text">Linked with your partner</span>
+    </div>
+  </div>
 </div>
+
+<!-- AWARENESS LOG FAB — always accessible in script view -->
+<button id="al-fab" onclick="openLogModal('')">+ Log</button>
 
 <div id="coach-screen">
   <div class="coach-header">
@@ -612,6 +1276,381 @@ body {
   </div>
 </div>
 
+<!-- STEP 3: MIRROR MOMENT SCREEN -->
+<div id="step3-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep3()" aria-label="Close">&#8592;</button>
+    <span class="s3-title">Step 3 &mdash; Mirror Moment</span>
+  </div>
+  <div class="s3-thread" id="s3-thread"></div>
+  <div class="s3-input-area">
+    <div class="s3-input-row">
+      <textarea class="s3-input" id="s3-input" placeholder="Respond..." rows="1" onkeydown="s3KeyDown(event)" oninput="s3AutoGrow(this)"></textarea>
+      <button class="s3-send" id="s3-send" onclick="s3Send()">Send</button>
+    </div>
+    <button class="s3-complete" id="s3-complete-btn" onclick="completeStep3()" style="display:none">Complete Step 3 — Continue to Step 4 ›</button>
+  </div>
+</div>
+
+<!-- PATH CHOICE SCREEN — private choice before script writing begins -->
+<div id="path-choice-screen">
+  <div class="pc-wrap">
+    <div class="pc-eyebrow">Script Writing</div>
+    <div class="pc-heading">How do you want to build your script?</div>
+    <p class="pc-sub">This is private. Your partner makes the same choice on their own.</p>
+    <div class="pc-cards">
+      <div class="pc-card" onclick="choosePathA()">
+        <div class="pc-card-label">Path A</div>
+        <div class="pc-card-title">Write it yourself</div>
+        <div class="pc-card-desc">Start with a blank script and build it line by line. You add each beat, each line of dialogue, each stage direction. This is the most direct version of the fight, in your own words, exactly as you remember it.</div>
+      </div>
+      <div class="pc-card pc-card-b" onclick="choosePathB()">
+        <div class="pc-card-label">Path B</div>
+        <div class="pc-card-title">Have the AI build a first draft</div>
+        <div class="pc-card-desc">Answer a series of questions about how the fight unfolds. The AI will generate a rough draft of the script from your answers. You'll edit that draft into something that actually sounds like the two of you before submitting.</div>
+      </div>
+    </div>
+    <div class="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
+  </div>
+</div>
+
+<!-- PATH B: AI INTAKE SCREEN -->
+<div id="path-b-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="pbBack()" aria-label="Back">&#8592;</button>
+    <span class="s3-title">AI Script Intake</span>
+  </div>
+  <div class="s3-thread" id="pb-thread"></div>
+  <div class="s3-input-area">
+    <div class="s3-input-row">
+      <textarea class="s3-input" id="pb-input" placeholder="Your answer..." rows="1" onkeydown="pbKeyDown(event)" oninput="pbAutoGrow(this)"></textarea>
+      <button class="s3-send" id="pb-send" onclick="pbSend()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4: WATCH YOUR OWN SCRIPT -->
+<div id="step4-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep4()">&#8592;</button>
+    <span class="s3-title">Step 4 &mdash; Watch Your Script</span>
+  </div>
+  <div class="s45-scroll" id="s4-inner">
+    <p class="s45-intro" id="s4-intro"></p>
+    <div class="s45-video-ph">
+      <div class="s45-play-icon">&#9654;</div>
+      <div class="s45-ph-label">Avatar Video &mdash; Coming Soon</div>
+      <div class="s45-ph-note">HeyGen integration will appear here. Read your transcript below.</div>
+    </div>
+    <div class="s45-tx-hd">Your Script Transcript</div>
+    <div class="s45-tx" id="s4-transcript"></div>
+    <button class="s45-continue" onclick="completeStep4()">I&rsquo;ve Watched &mdash; Continue to Step 5 &#8250;</button>
+  </div>
+</div>
+
+<!-- STEP 5: WATCH PARTNER'S SCRIPT -->
+<div id="step5-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep5()">&#8592;</button>
+    <span class="s3-title">Step 5 &mdash; Watch Your Partner&rsquo;s Script</span>
+  </div>
+  <div class="s45-scroll" id="s5-inner">
+    <p class="s45-intro" id="s5-intro"></p>
+    <div class="s45-video-ph">
+      <div class="s45-play-icon">&#9654;</div>
+      <div class="s45-ph-label">Avatar Video &mdash; Coming Soon</div>
+      <div class="s45-ph-note">HeyGen integration will appear here. Read the transcript below.</div>
+    </div>
+    <div class="s45-tx-hd">Partner&rsquo;s Script Transcript</div>
+    <div class="s45-tx" id="s5-transcript"></div>
+    <button class="s45-continue" onclick="completeStep5()">I&rsquo;ve Watched &mdash; Continue to Step 6 &#8250;</button>
+  </div>
+</div>
+
+<!-- STEP 6: REFLECTIVE QUESTIONS -->
+<div id="step6-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep6()">&#8592;</button>
+    <span class="s3-title">Step 6 &mdash; Reflective Questions</span>
+  </div>
+  <div class="s6-scroll">
+    <p class="s6-intro">Answer each question honestly, in your own words. Your partner will not see your answers unless you choose to share them. After you submit, the AI will offer one final thought and encourage you to share what you noticed with your partner before you continue.</p>
+    <div class="s6-q-block">
+      <span class="s6-q-num">Question 1</span>
+      <label class="s6-q-label">What did you notice about your partner&rsquo;s experience that you hadn&rsquo;t considered before?</label>
+      <textarea class="s6-textarea" id="s6-q1" placeholder="Your honest answer..."></textarea>
+    </div>
+    <div class="s6-q-block">
+      <span class="s6-q-num">Question 2</span>
+      <label class="s6-q-label">Was there anything in their version that surprised you?</label>
+      <textarea class="s6-textarea" id="s6-q2" placeholder="Your honest answer..."></textarea>
+    </div>
+    <div class="s6-q-block">
+      <span class="s6-q-num">Question 3</span>
+      <label class="s6-q-label">Did anything shift in how you understand what was happening for them in this fight?</label>
+      <textarea class="s6-textarea" id="s6-q3" placeholder="Your honest answer..."></textarea>
+    </div>
+    <div class="s6-q-block">
+      <span class="s6-q-num">Question 4</span>
+      <label class="s6-q-label">What do you think they most needed you to understand?</label>
+      <textarea class="s6-textarea" id="s6-q4" placeholder="Your honest answer..."></textarea>
+    </div>
+    <button class="s6-submit" id="s6-submit-btn" onclick="submitStep6()">Submit My Reflections</button>
+    <div class="s6-ai-wrap" id="s6-ai-wrap">
+      <div id="s6-ai-body"></div>
+      <button class="s6-continue" onclick="completeStep6()">Continue to Step 7 &mdash; Individual Work &#8250;</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 7: INDIVIDUAL WORK -->
+<div id="step7-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep7()">&#8592;</button>
+    <span class="s3-title">Step 7 &mdash; Individual Work</span>
+  </div>
+  <div class="s3-thread" id="s7-thread"></div>
+  <div class="s78-input-area">
+    <div class="s78-top-row">
+      <button class="s7-log-btn" onclick="openLogModal('')">+ Add to Awareness Log</button>
+      <button class="s7-complete-btn" id="s7-complete-btn" onclick="showOneThingArea()">Complete Step 7 ›</button>
+    </div>
+    <div class="s78-send-row">
+      <textarea class="s3-input" id="s7-input" placeholder="Respond..." rows="1" onkeydown="s7KeyDown(event)" oninput="s3AutoGrow(this)"></textarea>
+      <button class="s3-send" id="s7-send" onclick="s7Send()">Send</button>
+    </div>
+    <div class="s7-one-thing" id="s7-one-thing-area">
+      <label class="s7-ot-label">The One Thing &mdash; Write it down before you continue</label>
+      <input type="text" class="s7-ot-input" id="s7-ot-input" placeholder="What I am willing to try differently next time is..." />
+      <button class="s7-ot-save" onclick="saveOneThingAndComplete()">Save &amp; Continue to Step 8 &#8250;</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 8: NVC TOGETHER -->
+<div id="step8-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep8()">&#8592;</button>
+    <span class="s3-title">Step 8 &mdash; NVC Practice</span>
+  </div>
+  <div class="s3-thread" id="s8-thread"></div>
+  <div class="s78-input-area">
+    <div class="s78-top-row">
+      <span style="font-size:0.7rem;color:rgba(255,255,255,0.3);font-style:italic;font-family:'Courier Prime',monospace">Nonviolent Communication</span>
+      <button class="s8-complete-btn" id="s8-complete-btn" onclick="completeStep8()">Complete Step 8 ›</button>
+    </div>
+    <div class="s78-send-row">
+      <textarea class="s3-input" id="s8-input" placeholder="Respond..." rows="1" onkeydown="s8KeyDown(event)" oninput="s3AutoGrow(this)"></textarea>
+      <button class="s3-send" id="s8-send" onclick="s8Send()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 9: THE REWRITE -->
+<div id="step9-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep9()">&#8592;</button>
+    <span class="s3-title">Step 9 &mdash; The Rewrite</span>
+  </div>
+  <div class="s9-scroll">
+    <p class="s9-intro">Before you write a single word, read the Before and Better example below. A real fight. Two versions. See what is possible before you attempt your own.</p>
+    <button class="s9-example-toggle" id="s9-example-toggle" onclick="s9ToggleExample()">&#9654; Read the Before &amp; Better Example</button>
+    <div class="s9-example-pane" id="s9-example-pane">
+      <div class="s9-example-hd">Before</div>
+      <div class="s9-example-txt">LOCATION: Kitchen, Sunday morning.
+
+ALEX
+(loading dishwasher, back turned)
+You never put things where they go.
+
+JORDAN
+I just woke up.
+
+ALEX
+That's not what I'm talking about.
+
+JORDAN
+Then say what you're talking about.
+
+ALEX
+(turns around)
+Every single time. I ask for one thing.
+
+JORDAN
+You didn't ask. You announced.
+
+ALEX
+Oh so now I'm bad at communicating too?
+
+JORDAN
+I'm going back to bed.
+
+ALEX
+Of course you are. That's what you do.
+
+JORDAN
+(stops)
+What does that mean?
+
+ALEX
+It means you disappear when things get hard.
+
+JORDAN
+I disappear? You've been cold to me for three days.
+
+ALEX
+Because you don't listen.
+
+JORDAN
+I can't listen to what you never say.
+
+ALEX
+I shouldn't have to spell it out every time.
+
+JORDAN
+Then I don't know how to help you.
+
+ALEX
+(quietly)
+That's exactly the problem.</div>
+      <div class="s9-example-hd" style="margin-top:24px">Better</div>
+      <div class="s9-example-txt">LOCATION: Kitchen, Sunday morning.
+
+ALEX
+(loading dishwasher, pauses)
+Can I say something without it becoming a thing?
+
+JORDAN
+I can try. What's up?
+
+ALEX
+When things aren't where I expect them I get anxious. I know that's mine. But it's been happening a lot and I haven't known how to bring it up.
+
+JORDAN
+Okay. I didn't know it was landing that way.
+
+ALEX
+I think I've been needing to feel like we're on the same team about the space. Not rules. Just — shared.
+
+JORDAN
+That makes sense. I think I sometimes zone out and don't notice. Not because I don't care. I just move differently.
+
+ALEX
+I know you do. I don't need you to be me about it. I just need to feel like it matters to you that it matters to me.
+
+JORDAN
+It does. I think I need reminders sometimes. Gentle ones.
+
+ALEX
+(small smile)
+I can do gentle.
+
+JORDAN
+Thank you for saying this instead of going quiet.
+
+ALEX
+Thank you for not getting defensive.
+
+JORDAN
+I almost did.
+
+ALEX
+Me too.</div>
+    </div>
+    <hr class="s9-divider">
+    <p class="s9-intro" style="margin-bottom:16px">The AI is right here with you throughout this rewrite. If you get triggered, stuck, or uncertain — tap the AI button. You do not have to figure it out alone.</p>
+    <div class="s9-checkin" id="s9-checkin" style="display:none"></div>
+    <span class="s9-rewrite-label">Your Rewrite &mdash; write it differently this time</span>
+    <textarea class="s9-rewrite-area" id="s9-rewrite-area" placeholder="Write the same fight differently. Together. Not perfectly. Honestly.&#10;&#10;Start with your setting. Then your first line..." oninput="s9AutoSave()"></textarea>
+    <div class="s9-input-area">
+      <button class="s9-submit" id="s9-submit-btn" onclick="submitRewrite()">Submit Our Rewrite</button>
+      <div class="s9-status" id="s9-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 10: AI FEEDBACK ON REWRITE -->
+<div id="step10-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep10()">&#8592;</button>
+    <span class="s3-title">Step 10 &mdash; Feedback</span>
+  </div>
+  <div class="s10-scroll">
+    <div id="s10-waiting" class="s10-waiting">
+      <p>Reading your rewrite&hellip;<br>Something worth reading is on its way.</p>
+    </div>
+    <div id="s10-body" class="s10-body" style="display:none"></div>
+    <button class="s10-continue" id="s10-continue-btn" onclick="completeStep10()" style="display:none">Continue to Step 11 &#8250;</button>
+  </div>
+</div>
+
+<!-- STEP 11: THE BRIDGE TO CAP GLOBAL -->
+<div id="step11-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="closeStep11()">&#8592;</button>
+    <span class="s3-title">Step 11 &mdash; The Bridge</span>
+  </div>
+  <div class="s11-scroll">
+    <div class="s11-section">
+      <div class="s11-eyebrow">The Forgetting and Remembering</div>
+      <div class="s11-heading">From time to time, everyone forgets.</div>
+      <p class="s11-prose">They drift from their center. From their knowing. From the wholeness that was never actually lost. And then something calls to them — and in the return to the present moment, they remember.</p>
+      <p class="s11-prose">The ongoing argument you just worked through is one example of the forgetting. An old program ran. Old roles appeared. Old needs went unmet again. The work you just did together is the remembering.</p>
+      <p class="s11-prose">But you will forget again. Not because the work failed. Because you are human.</p>
+    </div>
+    <hr class="s11-divider">
+    <div class="s11-section">
+      <div class="s11-eyebrow">The Tools Apply Everywhere</div>
+      <div class="s11-heading">These are not relationship tools. These are human tools.</div>
+      <p class="s11-prose">The tools practiced here were prompted by one relationship. But look at what those tools actually are. Listening beneath the surface. Identifying what is truly needed. Owning your own experience. Making requests instead of demands. Getting out of story and into solution.</p>
+      <p class="s11-prose">Every relationship in your life asks for the same thing. Colleagues. Parents. Children. The self. The programming that showed up here shows up there too. Different names. Different stages. The same disconnect. The same unmet need underneath it. The same invitation to something better.</p>
+    </div>
+    <hr class="s11-divider">
+    <div class="s11-cap-card">
+      <div class="s11-cap-name">CAP Global</div>
+      <div class="s11-cap-tagline">Community At Play &mdash; where the work continues</div>
+      <div class="s11-cap-desc">The place where this work continues and where the tools get applied to every relationship in your life. Not just this one. Ongoing support. Ongoing growth. A community that helps you remember when you forget.</div>
+      <div class="s11-trial">Free two-week membership &mdash; $47 / person / month after that</div>
+      <button class="s11-cap-btn" onclick="s11TrackCAP()">Visit Community At Play &#8250;</button>
+    </div>
+    <div class="s11-email-section">
+      <div class="s11-email-hd">Stay Connected</div>
+      <div class="s11-email-sub">If you visit CAP and have questions before joining, we&rsquo;d love to answer them. Leave your email and we&rsquo;ll follow up warmly &mdash; not with a sales pitch, with a genuine open door.</div>
+      <div class="s11-email-row">
+        <input type="email" class="s11-email-input" id="s11-email-input" placeholder="your@email.com" />
+        <button class="s11-email-btn" id="s11-email-btn" onclick="s11SaveEmail()">Save</button>
+      </div>
+      <div class="s11-email-note" id="s11-email-note">Email notifications will be enabled once EmailJS is connected. Your email will be saved securely.</div>
+    </div>
+    <div class="s11-done">
+      <p>You have done the work.</p>
+    </div>
+  </div>
+</div>
+
+<!-- AWARENESS LOG POPUP -->
+<div id="al-modal">
+  <div class="al-modal-box">
+    <div class="al-modal-top">
+      <h3>Add to Log</h3>
+      <button class="al-modal-x" onclick="closeLogModal()">✕</button>
+    </div>
+    <div class="al-modal-body">
+      <div class="al-type-row">
+        <button class="al-type-btn" id="al-type-wordsToRelease" onclick="alSetType('wordsToRelease')">Words to Release</button>
+        <button class="al-type-btn" id="al-type-newLanguage" onclick="alSetType('newLanguage')">New Language</button>
+        <button class="al-type-btn" id="al-type-selfAwareness" onclick="alSetType('selfAwareness')">What I Noticed</button>
+      </div>
+      <div class="al-type-desc" id="al-type-desc"></div>
+      <textarea id="al-entry-text" placeholder=""></textarea>
+      <div class="al-modal-actions">
+        <button class="al-save-btn" id="al-save-btn" onclick="saveLogEntry()">Save</button>
+        <button class="al-cancel-btn" onclick="closeLogModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 var API_KEY = "AIzaSyBAuVl_ZdnBiuN4BbtBp01z_n-2f-lJVys";
 var PROJECT = "scripting-be260";
@@ -625,11 +1664,49 @@ var saveTimer = null;
 var noteTarget = null;
 var scriptTarget = null;
 
+// Enrollment flow
+var enrollMode = null; // 'start' | 'join'
+var pendingCoupleId = null; // set for Partner B (from URL or code lookup)
+var pendingPartnerAId = null; // set after code verified
+var pendingFightName = null; // carry fight name into auth
+var pendingJoinCoupleId = null; // coupleId extracted from /join/ URL
+var pendingJoinCode = null; // code extracted from /join/coupleId/code URL
+var pcLastJoinUrl = null; // last join URL used for resend
+
+// Path B intake state
+var pbAnswers = {};
+var pbState = null; // current question id
+var pbSending = false;
+
 // INIT — script is at bottom of body so DOM is ready; no window.onload needed
 (function() {
+  // Detect /join/:coupleId/:coupleCode URL (Netlify rewrites to index.html)
+  var pathParts = window.location.pathname.split('/').filter(Boolean);
+  if (pathParts[0] === 'join' && pathParts[1]) {
+    pendingJoinCoupleId = pathParts[1];
+    if (pathParts[2]) pendingJoinCode = pathParts[2].toUpperCase();
+  }
+
   var s = localStorage.getItem('oa_user');
-  if (s) { try { user = JSON.parse(s); token = user.token; refreshAuth(user.refresh); } catch(e) { localStorage.removeItem('oa_user'); } }
+  if (s) {
+    try { user = JSON.parse(s); token = user.token; refreshAuth(user.refresh); }
+    catch(e) { localStorage.removeItem('oa_user'); }
+  }
+
   bindAll();
+
+  // If Partner B arrived via /join/ URL and is not logged in, show their intro
+  if (pendingJoinCoupleId && !user) {
+    pendingCoupleId = pendingJoinCoupleId;
+    enrollMode = 'join';
+    hide('landing-screen');
+    el('partner-b-intro-screen').style.display = 'block';
+    return;
+  }
+
+  if (el('landing-screen') && !pendingJoinCoupleId) {
+    history.replaceState({ lp: 'main' }, '');
+  }
 }());
 
 function bindAll() {
@@ -722,8 +1799,8 @@ function createAccount() {
   el('btn-create').textContent = 'Creating account…';
   post(AUTH + ':signUp?key=' + API_KEY, { email: email, password: pass, returnSecureToken: true })
   .then(function(d) {
-    el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
     if (d.error) {
+      el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
       console.error('Firebase signup error:', d);
       var code = d.error.message;
       var msgs = {
@@ -739,17 +1816,79 @@ function createAccount() {
     saveSession(d);
     user.name = name; user.partner = partner; user.fight = fight;
     localStorage.setItem('oa_user', JSON.stringify(user));
-    fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString() });
-    afterLogin();
+
+    if (enrollMode === 'join' && pendingCoupleId && pendingPartnerAId) {
+      // Partner B: save user doc then afterLogin handles linking
+      el('btn-create').textContent = 'Linking you in…';
+      fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString() })
+      .then(function() { afterLogin(); })
+      .catch(function() { afterLogin(); });
+    } else {
+      // Partner A: create couple doc, then redirect to Stripe
+      el('btn-create').textContent = 'Setting up — one moment…';
+      fsAdd('couples', {
+        partnerAId: user.uid, partnerBId: '',
+        fightName: fight, currentStep: '1',
+        paidStatus: false, coupleCode: '',
+        createdAt: new Date().toISOString()
+      }).then(function(coupleDoc) {
+        if (!coupleDoc || coupleDoc.error) {
+          el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
+          txt('ca-error', 'Could not set up your account. Please try again.');
+          return Promise.reject();
+        }
+        var coupleId = coupleDoc.name.split('/').pop();
+        user.coupleId = coupleId;
+        localStorage.setItem('oa_user', JSON.stringify(user));
+        return Promise.all([
+          fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString(), coupleId: coupleId }),
+        ]).then(function() { return coupleId; });
+      }).then(function(coupleId) {
+        if (!coupleId) return;
+        el('btn-create').textContent = 'Redirecting to payment…';
+        return fetch('/.netlify/functions/stripe-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ coupleId: coupleId, uid: user.uid, fightName: fight })
+        }).then(function(r) { return r.json(); }).then(function(data) {
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
+            txt('ca-error', 'Could not reach payment. Please try again.');
+          }
+        });
+      }).catch(function() {
+        el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account';
+      });
+    }
   }).catch(function() { el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account'; txt('ca-error', 'Connection error. Try again.'); });
 }
 
 function signOut() {
   user = null; token = null;
   localStorage.removeItem('oa_user');
-  hide('script-screen'); hide('coach-screen');
+  enrollMode = null; pendingCoupleId = null; pendingPartnerAId = null;
+  pendingFightName = null; pendingJoinCoupleId = null; pendingJoinCode = null; pcLastJoinUrl = null;
+  hide('script-screen'); hide('coach-screen'); hide('al-fab');
+  hide('couple-link-card'); hide('couple-linked-status');
+  hide('step2-card'); hide('analysis-banner'); hide('journey-banner');
+  hide('step1-waiting-banner'); hide('video-waiting-banner'); hide('pb-handoff-banner');
+  hide('buyin-screen');
+  hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
+  ['step3-screen','step4-screen','step5-screen','step6-screen',
+   'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen'].forEach(function(id){ hide(id); });
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
+  el('step2-thinking').value = ''; el('step2-feeling').value = '';
+  var sb = el('step2-submit-btn'); if (sb) { sb.disabled = false; sb.textContent = 'Submit My Script'; }
+  txt('step2-status', '');
+  s3Messages = []; el('s3-thread').innerHTML = '';
+  s7Messages = []; if (el('s7-thread')) el('s7-thread').innerHTML = '';
+  s8Messages = []; if (el('s8-thread')) el('s8-thread').innerHTML = '';
+  if (s9CheckinTimer) { clearTimeout(s9CheckinTimer); s9CheckinTimer = null; }
+  if (s10PollTimer) { clearTimeout(s10PollTimer); s10PollTimer = null; }
+  currentJourneyStep = null;
   switchTab('signin');
 }
 
@@ -771,11 +1910,52 @@ function refreshAuth(refreshToken) {
 }
 
 function afterLogin() {
+  // Check for Stripe payment return
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('payment_success') === '1' && params.get('session_id')) {
+    hide('landing-screen'); hide('auth-screen');
+    handlePaymentSuccess(params.get('session_id'));
+    return;
+  }
+
+  // Partner B linking: if we have a validated coupleId, link now
+  if (enrollMode === 'join' && pendingCoupleId && pendingPartnerAId) {
+    hide('auth-screen'); hide('code-entry-screen'); hide('partner-b-intro-screen');
+    var coupleId = pendingCoupleId;
+    var partnerAId = pendingPartnerAId;
+    Promise.all([
+      fsSet('couples/' + coupleId, { partnerBId: user.uid }),
+      fsSet('users/' + user.uid, { coupleId: coupleId, partnerId: partnerAId })
+    ]).then(function() {
+      user.coupleId = coupleId; user.partnerId = partnerAId;
+      localStorage.setItem('oa_user', JSON.stringify(user));
+      pendingCoupleId = null; pendingPartnerAId = null; pendingJoinCoupleId = null; pendingJoinCode = null;
+      enrollMode = null;
+      el('al-fab').style.display = 'block';
+      show('script-screen');
+      loadProfile(); loadScript(); loadNotes();
+    }).catch(function() {
+      txt('ca-error', 'Account created but could not link to your partner. Please contact mitch@mitchnewman.com.');
+      el('al-fab').style.display = 'block';
+      show('script-screen');
+      loadProfile(); loadScript(); loadNotes();
+    });
+    return;
+  }
+
+  // Clean any payment query params from URL
+  if (window.location.search) history.replaceState({}, '', '/');
+
   hide('landing-screen');
   hide('auth-screen');
+  hide('buyin-screen');
+  hide('partner-b-intro-screen'); hide('code-entry-screen');
+
   if (user.email === COACH) {
+    hide('al-fab');
     showFlex('coach-screen'); loadClients();
   } else {
+    el('al-fab').style.display = 'block';
     show('script-screen');
     loadProfile(); loadScript(); loadNotes();
   }
@@ -808,6 +1988,39 @@ function fsList(col) {
   return fetch(DB + '/' + col, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.json(); });
 }
 
+function fsQuery(col, field, value) {
+  return fetch(DB + ':runQuery', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: col }],
+        where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } },
+        limit: 1
+      }
+    })
+  }).then(function(r) { return r.json(); });
+}
+
+// Unauthenticated version for pre-login code validation (uses project API key)
+function fsGetPublic(path) {
+  return fetch(DB + '/' + path + '?key=' + API_KEY).then(function(r) { return r.json(); });
+}
+
+function fsQueryPublic(col, field, value) {
+  return fetch(DB + ':runQuery?key=' + API_KEY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: col }],
+        where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } },
+        limit: 1
+      }
+    })
+  }).then(function(r) { return r.json(); });
+}
+
 function toFields(obj) {
   var f = {};
   for (var k in obj) {
@@ -835,6 +2048,18 @@ function post(url, body) {
   return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) { return r.json(); });
 }
 
+// AI PROXY
+function callAI(messages, step) {
+  return fetch('/.netlify/functions/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: messages, step: step || '1' })
+  }).then(function(r) {
+    if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'AI error'); });
+    return r.json();
+  }).then(function(d) { return d.text || ''; });
+}
+
 // PROFILE
 function loadProfile() {
   fsGet('users/' + user.uid).then(function(d) {
@@ -850,7 +2075,11 @@ function loadProfile() {
     var na = el('input-name-a'); if (na) na.value = name !== 'Me' ? name : '';
     var nb = el('input-name-b'); if (nb) nb.value = partner !== 'Partner' ? partner : '';
     user.name = name; user.partner = partner; user.fight = fight;
+    if (p.coupleCode) user.coupleCode = p.coupleCode;
+    if (p.coupleId) user.coupleId = p.coupleId;
+    if (p.partnerId) user.partnerId = p.partnerId;
     localStorage.setItem('oa_user', JSON.stringify(user));
+    clUpdateLinkUI(p);
   }).catch(function() {});
 }
 
@@ -875,7 +2104,11 @@ function loadNotes() {
 // SCRIPT
 function loadScript() {
   fsGet('scripts/' + user.uid).then(function(d) {
-    if (d.error) return;
+    if (d.error) {
+      // No script doc — new user, show path choice
+      checkPathChoice();
+      return;
+    }
     var s = fromFields(d.fields);
     if (s.scene) el('scene-input').value = s.scene;
     if (s.lines) {
@@ -885,6 +2118,19 @@ function loadScript() {
         else addDir(l.text, true);
       });
       setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 50);
+      // Path B: show handoff banner if not yet dismissed
+      if (s.scriptPath === 'b' && !s.handoffSeen) {
+        if (s.q6aAnswer && el('step2-thinking') && !el('step2-thinking').value) {
+          el('step2-thinking').value = s.q6aAnswer;
+        }
+        if (s.q6bAnswer && el('step2-feeling') && !el('step2-feeling').value) {
+          el('step2-feeling').value = s.q6bAnswer;
+        }
+        pbShowHandoff();
+      }
+    } else if (!s.scriptPath) {
+      // Doc exists but no lines and no path chosen yet — show choice
+      checkPathChoice();
     }
   }).catch(function() {});
 }
@@ -1008,6 +2254,7 @@ c.appendChild(b);
 } else { var dd = document.createElement('div'); dd.className = 'modal-direction'; dd.textContent = l.text; c.appendChild(dd); }
 });
 var tbc = document.createElement('div'); tbc.className = 'modal-tbc'; tbc.textContent = 'TO BE CONTINUED…'; c.appendChild(tbc);
+loadClientAwarenessLog(uid, c);
 el('script-modal').style.display = 'flex';
 }).catch(function() {});
 }
@@ -1042,6 +2289,7 @@ function lpRevealCommitment() {
   void s6.offsetWidth;
   s6.classList.add('lp-in');
   el('lp-btn-begin').disabled = true;
+  history.pushState({ lp: 'commitment' }, '');
   setTimeout(function() { lpScrollTo(s6); }, 60);
 }
 
@@ -1051,6 +2299,7 @@ function lpRevealFight() {
   void s7.offsetWidth;
   s7.classList.add('lp-in');
   el('lp-btn-commit').disabled = true;
+  history.pushState({ lp: 'fight' }, '');
   setTimeout(function() {
     lpScrollTo(s7);
     setTimeout(function() { var fi = el('lp-fight-input'); if (fi) fi.focus(); }, 500);
@@ -1065,11 +2314,1956 @@ function lpProceed() {
     return;
   }
   el('lp-fight-err').textContent = '';
-  hide('landing-screen');
-  el('ca-fight').value = fightName;
+  pendingFightName = fightName;
+  enrollMode = 'start';
+  var lp = el('landing-screen');
+  lp.style.opacity = '0';
+  setTimeout(function() {
+    hide('landing-screen');
+    lp.style.opacity = '';
+    var bi = el('buyin-screen');
+    bi.style.display = 'flex';
+  }, 500);
+}
+
+/* AWARENESS LOG */
+var alCurrentType = 'wordsToRelease';
+var AL_TYPES = {
+  wordsToRelease: { desc: 'Words and phrases from your old script that no longer serve you.', placeholder: 'e.g. "You always do this" or "You never listen"' },
+  newLanguage:    { desc: 'New words and phrases you want to bring into your conversations.', placeholder: 'e.g. "I feel unheard when..." or "What I need right now is..."' },
+  selfAwareness:  { desc: 'Awarenesses, patterns, and moments of recognition from your process.', placeholder: 'e.g. "I sound like my mother when I say..." or "I realize I always shut down when..."' }
+};
+
+function openLogModal(type) {
+  alSetType(type || 'wordsToRelease');
+  el('al-entry-text').value = '';
+  el('al-modal').style.display = 'flex';
+  setTimeout(function() { var t = el('al-entry-text'); if (t) t.focus(); }, 80);
+}
+
+function closeLogModal() {
+  el('al-modal').style.display = 'none';
+}
+
+function alSetType(type) {
+  alCurrentType = AL_TYPES[type] ? type : 'wordsToRelease';
+  ['wordsToRelease', 'newLanguage', 'selfAwareness'].forEach(function(t) {
+    var b = el('al-type-' + t);
+    if (b) b.classList.toggle('al-active', t === alCurrentType);
+  });
+  var info = AL_TYPES[alCurrentType];
+  var desc = el('al-type-desc'); if (desc) desc.textContent = info.desc;
+  var ta = el('al-entry-text'); if (ta) ta.placeholder = info.placeholder;
+}
+
+function saveLogEntry() {
+  var text = (el('al-entry-text').value || '').trim();
+  if (!text || !user) return;
+  var btn = el('al-save-btn');
+  btn.disabled = true;
+  fsAdd('awarenessLog', {
+    userId: user.uid,
+    entryType: alCurrentType,
+    content: text,
+    timestamp: new Date().toISOString(),
+    sharedWithCoach: 'true'
+  }).then(function() {
+    btn.disabled = false;
+    closeLogModal();
+    var body = el('al-log-body');
+    if (body && body.style.display !== 'block') {
+      body.style.display = 'block';
+      var arrow = el('al-toggle-arrow'); if (arrow) arrow.innerHTML = '&#9660; Close';
+    }
+    loadAwarenessLog();
+  }).catch(function() { btn.disabled = false; });
+}
+
+function alToggle() {
+  var body = el('al-log-body');
+  var arrow = el('al-toggle-arrow');
+  if (!body) return;
+  var open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.innerHTML = open ? '&#9658; Open' : '&#9660; Close';
+  if (!open) { loadAwarenessLog(); }
+}
+
+function loadAwarenessLog() {
+  if (!user || user.email === COACH) return;
+  fsList('awarenessLog').then(function(d) {
+    var entries = (d.documents || []).map(function(doc) { return fromFields(doc.fields); })
+      .filter(function(e) { return e.userId === user.uid; })
+      .sort(function(a, b) { return (a.timestamp || '') < (b.timestamp || '') ? -1 : 1; });
+    ['wordsToRelease', 'newLanguage', 'selfAwareness'].forEach(function(t) {
+      var c = el('al-entries-' + t);
+      if (!c) return;
+      var mine = entries.filter(function(e) { return e.entryType === t; });
+      if (!mine.length) { c.innerHTML = '<div class="al-entries-empty">Nothing here yet.</div>'; return; }
+      c.innerHTML = mine.map(function(e) {
+        return '<div class="al-entry"><div class="al-entry-text">' + esc(e.content || '') + '</div><div class="al-entry-time">' + alFmtTime(e.timestamp) + '</div></div>';
+      }).join('');
+    });
+  }).catch(function() {});
+}
+
+function alFmtTime(ts) {
+  if (!ts) return '';
+  try {
+    var d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  } catch(e) { return ts; }
+}
+
+function loadClientAwarenessLog(uid, container) {
+  fsList('awarenessLog').then(function(d) {
+    var entries = (d.documents || []).map(function(doc) { return fromFields(doc.fields); })
+      .filter(function(e) { return e.userId === uid; })
+      .sort(function(a, b) { return (a.timestamp || '') < (b.timestamp || '') ? -1 : 1; });
+    if (!entries.length) return;
+    var sections = [
+      { key: 'wordsToRelease', label: 'Words to Release' },
+      { key: 'newLanguage', label: 'New Language to Try' },
+      { key: 'selfAwareness', label: 'What I Noticed About Myself' }
+    ];
+    var hasAny = sections.some(function(s) { return entries.some(function(e) { return e.entryType === s.key; }); });
+    if (!hasAny) return;
+    var block = document.createElement('div');
+    block.className = 'al-coach-block';
+    var html = '<div class="al-coach-hd">Awareness Log</div>';
+    sections.forEach(function(s) {
+      var mine = entries.filter(function(e) { return e.entryType === s.key; });
+      if (!mine.length) return;
+      html += '<div class="al-coach-section"><div class="al-coach-section-hd">' + s.label + '</div>';
+      mine.forEach(function(e) {
+        html += '<div class="al-coach-entry"><div class="al-coach-entry-text">' + esc(e.content || '') + '</div><div class="al-coach-entry-time">' + alFmtTime(e.timestamp) + '</div></div>';
+      });
+      html += '</div>';
+    });
+    block.innerHTML = html;
+    container.appendChild(block);
+  }).catch(function() {});
+}
+
+/* ── ENROLLMENT FLOW ──────────────────────────────────────────── */
+
+function showPaymentAuth() {
+  hide('buyin-screen');
+  if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
   switchTab('create');
   showFlex('auth-screen');
 }
+
+function biGoBack() {
+  hide('buyin-screen');
+  var lp = el('landing-screen');
+  lp.style.display = 'block';
+  // Scroll to the fight-name section
+  setTimeout(function() {
+    var s7 = el('lp-s7');
+    if (s7 && s7.style.display !== 'none') {
+      lp.scrollTo({ top: s7.offsetTop - 24, behavior: 'smooth' });
+      var fi = el('lp-fight-input'); if (fi) fi.focus();
+    }
+  }, 60);
+}
+
+function pbAutoValidate() {
+  var btn = el('pb-continue-btn');
+  var errDiv = el('pb-error');
+  if (!pendingJoinCoupleId || !pendingJoinCode) {
+    errDiv.textContent = 'This join link appears to be incomplete. Please ask your partner to resend it.';
+    errDiv.style.display = 'block';
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Checking…';
+  errDiv.style.display = 'none';
+
+  fsGetPublic('couples/' + pendingJoinCoupleId).then(function(d) {
+    btn.disabled = false; btn.textContent = 'I\'m in. Create My Account →';
+    if (!d || !d.fields) {
+      errDiv.textContent = 'We could not find that code. Please check it and try again.';
+      errDiv.style.display = 'block'; return;
+    }
+    var couple = fromFields(d.fields);
+    if ((couple.coupleCode || '').toUpperCase() !== pendingJoinCode) {
+      errDiv.textContent = 'We could not find that code. Please check it and try again.';
+      errDiv.style.display = 'block'; return;
+    }
+    if (!couple.paidStatus) {
+      errDiv.textContent = 'Your partner has started the process but has not completed payment yet. Please check with them, then try your link again.';
+      errDiv.style.display = 'block'; return;
+    }
+    if (couple.partnerBId) {
+      errDiv.textContent = 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.';
+      errDiv.style.display = 'block'; return;
+    }
+    // Valid — proceed to account creation
+    pendingCoupleId = pendingJoinCoupleId;
+    pendingPartnerAId = couple.partnerAId || '';
+    if (couple.fightName) pendingFightName = couple.fightName;
+    hide('partner-b-intro-screen');
+    if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
+    var sub = el('form-create') && el('form-create').querySelector('.auth-sub');
+    if (sub) sub.textContent = 'Create your account to join the process.';
+    switchTab('create');
+    showFlex('auth-screen');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'I\'m in. Create My Account →';
+    errDiv.textContent = 'Connection error. Please try again.';
+    errDiv.style.display = 'block';
+  });
+}
+
+/* EmailJS — partner invite email */
+var pcLastSentEmail = null;
+
+function pcSendEmailClick() {
+  var email = (el('pc-partner-email').value || '').trim();
+  if (!email || !email.includes('@')) {
+    txt('pc-email-status', 'Please enter a valid email address.');
+    return;
+  }
+  pcLastSentEmail = email;
+  pcDoSendEmail(email);
+}
+
+function pcResendEmailClick() {
+  if (!pcLastSentEmail) return;
+  pcDoSendEmail(pcLastSentEmail);
+}
+
+function pcDoSendEmail(toEmail) {
+  var sendBtn = el('pc-send-btn');
+  sendBtn.disabled = true; sendBtn.textContent = 'Sending…';
+  txt('pc-email-status', '');
+
+  var joinUrl = pcLastJoinUrl || (el('pc-join-url').dataset.url || el('pc-join-url').textContent || '').trim();
+  var code = (el('pc-code-display').textContent || '').trim();
+
+  // EmailJS — replace these three placeholders with real credentials in Netlify env or directly
+  // SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY are set as window globals via a <script> tag or constants below
+  var serviceId = window.EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
+  var templateId = window.EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
+  var publicKey = window.EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+
+  if (typeof emailjs === 'undefined') {
+    sendBtn.disabled = false; sendBtn.textContent = 'Send';
+    txt('pc-email-status', 'Email service not available. Please copy the link and send manually.');
+    return;
+  }
+
+  emailjs.init({ publicKey: publicKey });
+  emailjs.send(serviceId, templateId, {
+    to_email: toEmail,
+    join_url: joinUrl,
+    couple_code: code,
+    from_name: (user && user.name) ? user.name : 'Your partner'
+  }).then(function() {
+    sendBtn.disabled = false; sendBtn.textContent = 'Send';
+    txt('pc-email-status', 'Sent. Your partner should have it within a minute.');
+    el('pc-resend-btn').style.display = 'block';
+  }, function(err) {
+    console.error('EmailJS error:', err);
+    sendBtn.disabled = false; sendBtn.textContent = 'Send';
+    txt('pc-email-status', 'Could not send. Please copy the link and send it manually.');
+    el('pc-resend-btn').style.display = 'block';
+  });
+}
+
+// Dead stubs — kept so any residual references don't throw
+function showStartChoice() {}
+function choosedStart() { enrollMode = 'start'; }
+function chooseJoin() {}
+function showCodeEntry() { var ce = el('code-entry-screen'); if (ce) ce.style.display = 'flex'; }
+function ceGoBack() { hide('code-entry-screen'); el('partner-b-intro-screen').style.display = 'block'; }
+
+function submitPartnerCode() {
+  var code = (val('ce-code-input') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  txt('ce-error', '');
+  if (code.length !== 6) { txt('ce-error', 'Please enter the full 6-character code.'); return; }
+  var btn = el('ce-submit-btn');
+  btn.disabled = true; btn.textContent = 'Checking…';
+
+  // Partner B is not logged in yet — use public (API key) Firestore queries
+  var lookupPromise;
+  if (pendingJoinCoupleId) {
+    lookupPromise = fsGetPublic('couples/' + pendingJoinCoupleId)
+      .then(function(d) {
+        if (!d || !d.fields) return [];
+        var couple = fromFields(d.fields);
+        couple._id = pendingJoinCoupleId;
+        return [couple];
+      });
+  } else {
+    lookupPromise = fsQueryPublic('couples', 'coupleCode', code).then(function(results) {
+      return (results || []).map(function(r) {
+        if (!r.document || !r.document.fields) return null;
+        var couple = fromFields(r.document.fields);
+        couple._id = r.document.name.split('/').pop();
+        return couple;
+      }).filter(Boolean);
+    });
+  }
+
+  lookupPromise.then(function(couples) {
+    btn.disabled = false; btn.textContent = 'Verify Code';
+
+    // Find the one matching our code
+    var match = null;
+    for (var i = 0; i < couples.length; i++) {
+      if ((couples[i].coupleCode || '').toUpperCase() === code) { match = couples[i]; break; }
+    }
+
+    if (!match) {
+      txt('ce-error', 'We could not find that code. Please check it and try again.');
+      return;
+    }
+    if (!match.paidStatus) {
+      txt('ce-error', 'Your partner has started the process but has not completed payment yet. Please check with them, then try your code again.');
+      return;
+    }
+    if (match.partnerBId) {
+      txt('ce-error', 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.');
+      return;
+    }
+
+    // Code valid — store context and show account creation
+    pendingCoupleId = match._id;
+    pendingPartnerAId = match.partnerAId || '';
+    if (match.fightName) { pendingFightName = match.fightName; }
+
+    hide('code-entry-screen');
+    // Pre-fill fight name
+    if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
+    switchTab('create');
+    var sub = el('form-create') && el('form-create').querySelector('.auth-sub');
+    if (sub) sub.textContent = 'Create your account to join the process.';
+    showFlex('auth-screen');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Verify Code';
+    txt('ce-error', 'Connection error. Please try again.');
+  });
+}
+
+/* Payment return handler */
+function handlePaymentSuccess(sessionId) {
+  hide('auth-screen'); hide('landing-screen');
+  var btn = el('btn-create');
+  if (btn) { btn.textContent = 'Verifying payment…'; }
+
+  fetch('/.netlify/functions/stripe-verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: sessionId })
+  }).then(function(r) { return r.json(); })
+  .then(function(d) {
+    history.replaceState({}, '', '/');
+    if (!d.paid || !d.coupleCode || !d.coupleId) {
+      // Payment unverified — just enter app
+      el('al-fab').style.display = 'block';
+      show('script-screen');
+      loadProfile(); loadScript(); loadNotes();
+      return;
+    }
+    // Write paidStatus + coupleCode to couple doc
+    return fsSet('couples/' + d.coupleId, { paidStatus: true, coupleCode: d.coupleCode })
+    .then(function() {
+      showPaymentConfirm(d.coupleCode, d.coupleId);
+    });
+  }).catch(function() {
+    history.replaceState({}, '', '/');
+    // Fallback: enter app without confirmation screen
+    el('al-fab').style.display = 'block';
+    show('script-screen');
+    loadProfile(); loadScript(); loadNotes();
+  });
+}
+
+function showPaymentConfirm(code, coupleId) {
+  hide('auth-screen'); hide('landing-screen');
+  hide('buyin-screen');
+  txt('pc-code-display', code);
+  var joinUrl = window.location.origin + '/join/' + coupleId + '/' + code;
+  pcLastJoinUrl = joinUrl;
+  el('pc-join-url').textContent = joinUrl;
+  el('pc-join-url').dataset.url = joinUrl;
+  // Reset email section
+  el('pc-partner-email').value = '';
+  txt('pc-email-status', '');
+  el('pc-resend-btn').style.display = 'none';
+  var pc = el('payment-confirm-screen');
+  pc.style.display = 'flex';
+}
+
+function pcCopyCode() {
+  var code = (el('pc-code-display').textContent || '').trim();
+  if (!code) return;
+  var finish = function() {
+    var b = el('pc-copy-btn'); if (b) { b.textContent = 'Copied!'; setTimeout(function() { b.textContent = 'Copy Code'; }, 2000); }
+  };
+  if (navigator.clipboard) { navigator.clipboard.writeText(code).then(finish).catch(finish); return; }
+  var ta = document.createElement('textarea'); ta.value = code;
+  ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta); finish();
+}
+
+function pcCopyLink() {
+  var url = (el('pc-join-url').dataset.url || el('pc-join-url').textContent || '').trim();
+  if (!url) return;
+  var finish = function() {
+    var b = el('pc-share-copy-btn'); if (b) { b.textContent = 'Copied!'; setTimeout(function() { b.textContent = 'Copy Link'; }, 2000); }
+  };
+  if (navigator.clipboard) { navigator.clipboard.writeText(url).then(finish).catch(finish); return; }
+  var ta = document.createElement('textarea'); ta.value = url;
+  ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta); finish();
+}
+
+function pcEnterApp() {
+  hide('payment-confirm-screen');
+  el('al-fab').style.display = 'block';
+  show('script-screen');
+  loadProfile(); loadScript(); loadNotes();
+}
+
+function retryPayment() {
+  if (!user || !user.coupleId) return;
+  var btn = document.querySelector('#cl-payment-pending button');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
+  var fight = user.fight || '';
+  fetch('/.netlify/functions/stripe-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ coupleId: user.coupleId, uid: user.uid, fightName: fight })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.url) { window.location.href = data.url; }
+    else { if (btn) { btn.disabled = false; btn.textContent = 'Complete Payment →'; } }
+  }).catch(function() { if (btn) { btn.disabled = false; btn.textContent = 'Complete Payment →'; } });
+}
+
+/* COUPLE LINKING */
+function generateCoupleCode() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code = '';
+  for (var i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function clUpdateLinkUI(profile) {
+  if (!profile || user.email === COACH) return;
+  if (profile.coupleId) {
+    // Fetch couple doc to check paidStatus before routing
+    fsGet('couples/' + profile.coupleId).then(function(d) {
+      if (!d || !d.fields) {
+        clShowLinked(profile.partnerName || 'your partner');
+        journeyRoute();
+        return;
+      }
+      var couple = fromFields(d.fields);
+      if (!couple.paidStatus) {
+        // Payment not yet complete — show pending message in place of couple-link-card
+        hide('couple-link-card');
+        hide('couple-linked-status');
+        var existing = el('cl-payment-pending');
+        if (!existing) {
+          var div = document.createElement('div');
+          div.id = 'cl-payment-pending';
+          div.style.cssText = 'margin-top:16px;background:var(--paper);border-radius:2px;padding:20px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.2);font-family:\'Courier Prime\',monospace;font-size:0.82rem;color:var(--ink-light);';
+          div.innerHTML = '<div style="font-style:italic;margin-bottom:12px;">Payment is not yet complete. Complete payment to give your partner access to the full process.</div>'
+            + '<button onclick="retryPayment()" style="font-family:\'Special Elite\',cursive;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;padding:10px 20px;background:var(--accent);color:white;border:none;cursor:pointer;border-radius:1px;">Complete Payment →</button>';
+          var ss = el('script-screen'); if (ss) ss.appendChild(div);
+        }
+        return;
+      }
+      var pName = couple.partnerBId ? (profile.partnerName || 'your partner') : 'waiting for partner';
+      clShowLinked(pName);
+      journeyRoute();
+    }).catch(function() {
+      clShowLinked(profile.partnerName || 'your partner');
+      journeyRoute();
+    });
+    return;
+  }
+  // No coupleId — hide old manual link card in new payment flow
+  // (old flow users without a coupleId won't normally reach this in the new system)
+  hide('couple-link-card');
+}
+
+function clShowLinked(partnerName) {
+  hide('couple-link-card');
+  txt('cl-linked-text', 'Linked with ' + partnerName);
+  el('couple-linked-status').style.display = 'block';
+}
+
+function clCopyCode() {
+  var code = (el('cl-code-display').textContent || '').trim();
+  if (!code) return;
+  var finish = function() {
+    var b = el('cl-copy-btn'); if (b) { b.textContent = 'Copied!'; setTimeout(function() { b.textContent = 'Copy Code'; }, 2000); }
+  };
+  if (navigator.clipboard) { navigator.clipboard.writeText(code).then(finish).catch(finish); return; }
+  var ta = document.createElement('textarea'); ta.value = code;
+  ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta); finish();
+}
+
+function clLinkPartner() {
+  var code = (val('cl-partner-code') || '').toUpperCase();
+  if (code.length !== 6) { txt('cl-error', 'Enter the 6-character code from your partner.'); return; }
+  if (user.coupleCode && code === user.coupleCode) { txt('cl-error', "That’s your own code — enter your partner’s code."); return; }
+  txt('cl-error', '');
+  var input = el('cl-partner-code'); var btn = document.querySelector('.cl-link-btn');
+  if (input) input.disabled = true; if (btn) btn.disabled = true;
+  fsQuery('users', 'coupleCode', code).then(function(results) {
+    if (input) input.disabled = false; if (btn) btn.disabled = false;
+    var doc = results && results[0] && results[0].document;
+    if (!doc) { txt('cl-error', 'Code not found. Check with your partner.'); return; }
+    var partner = fromFields(doc.fields);
+    var partnerId = doc.name.split('/').pop();
+    if (partnerId === user.uid) { txt('cl-error', "That’s your own code — enter your partner’s code."); return; }
+    if (partner.coupleId) { txt('cl-error', 'This code is already linked to another account.'); return; }
+    var fightName = user.fight || partner.fightName || 'The Ongoing Argument';
+    fsAdd('couples', {
+      partnerAId: partnerId, partnerBId: user.uid,
+      fightName: fightName, currentStep: '1', createdAt: new Date().toISOString()
+    }).then(function(coupleDoc) {
+      if (!coupleDoc || coupleDoc.error) { txt('cl-error', 'Could not link accounts. Try again.'); return; }
+      var coupleId = coupleDoc.name.split('/').pop();
+      return Promise.all([
+        fsSet('users/' + user.uid, { coupleId: coupleId, partnerId: partnerId }),
+        fsSet('users/' + partnerId, { coupleId: coupleId, partnerId: user.uid })
+      ]).then(function() {
+        user.coupleId = coupleId; user.partnerId = partnerId;
+        localStorage.setItem('oa_user', JSON.stringify(user));
+        clShowLinked(partner.name || 'your partner');
+        journeyRoute();
+      });
+    }).catch(function() { txt('cl-error', 'Connection error. Try again.'); });
+  }).catch(function() {
+    if (input) input.disabled = false; if (btn) btn.disabled = false;
+    txt('cl-error', 'Connection error. Try again.');
+  });
+}
+
+/* STEP 2 — DUAL SCRIPT SUBMISSION AND ANALYSIS */
+var step2SaveTimer = null;
+
+function step2Init() {
+  if (!user || !user.coupleId) return;
+  el('step2-card').style.display = 'block';
+  fsGet('scripts/' + user.uid).then(function(d) {
+    if (!d || !d.fields) return;
+    var s = fromFields(d.fields);
+    if (s.storyThinking) el('step2-thinking').value = s.storyThinking;
+    if (s.storyFeeling) el('step2-feeling').value = s.storyFeeling;
+    if (s.submitted) {
+      step2ShowSubmittedState();
+      checkAnalysisReady();
+    } else {
+      el('step2-thinking').addEventListener('input', step2AutoSave);
+      el('step2-feeling').addEventListener('input', step2AutoSave);
+    }
+  }).catch(function() {});
+}
+
+function step2AutoSave() {
+  clearTimeout(step2SaveTimer);
+  step2SaveTimer = setTimeout(function() {
+    if (!user || !user.uid) return;
+    var thinking = el('step2-thinking').value;
+    var feeling = el('step2-feeling').value;
+    if (thinking || feeling) {
+      fsSet('scripts/' + user.uid, { storyThinking: thinking, storyFeeling: feeling });
+    }
+  }, 2000);
+}
+
+function submitScript() {
+  var thinking = (el('step2-thinking').value || '').trim();
+  var feeling = (el('step2-feeling').value || '').trim();
+  if (!thinking || !feeling) {
+    txt('step2-status', 'Please answer both questions before submitting.');
+    return;
+  }
+  var btn = el('step2-submit-btn');
+  btn.disabled = true;
+  txt('step2-status', 'Submitting...');
+  fsSet('scripts/' + user.uid, {
+    storyThinking: thinking,
+    storyFeeling: feeling,
+    submitted: true,
+    submittedAt: new Date().toISOString()
+  }).then(function() {
+    step2ShowSubmittedState();
+    return checkPartnerAndAnalyze();
+  }).catch(function() {
+    btn.disabled = false;
+    txt('step2-status', 'Error submitting. Please try again.');
+  });
+}
+
+function step2ShowSubmittedState() {
+  var btn = el('step2-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Script Submitted ✓'; }
+  txt('step2-status', '');
+  el('step1-waiting-banner').style.display = 'block';
+}
+
+function checkPartnerAndAnalyze() {
+  if (!user.coupleId || !user.partnerId) return Promise.resolve();
+  return fsGet('scripts/' + user.partnerId).then(function(d) {
+    if (!d || !d.fields) { setTimeout(pollAnalysisReady, 30000); return; }
+    var partnerData = fromFields(d.fields);
+    if (!partnerData.submitted) { setTimeout(pollAnalysisReady, 30000); return; }
+    return runStep2Analysis(partnerData);
+  }).catch(function() { setTimeout(pollAnalysisReady, 30000); });
+}
+
+function runStep2Analysis(partnerData) {
+  txt('step2-status', 'Both scripts received. Analysis in progress — this may take up to a minute...');
+  return fsGet('scripts/' + user.uid).then(function(d) {
+    var myData = fromFields(d.fields || {});
+    var myName = user.name || 'Partner A';
+    var partnerName = user.partner || 'Partner B';
+    var fightName = user.fight || 'The Ongoing Argument';
+    var myText = scriptDataToText(myData, myName, partnerName);
+    var partnerText = scriptDataToText(partnerData, partnerName, myName);
+    var prompt = 'The couple\'s fight is called: ' + fightName + '\n\n' +
+      '— SCRIPT FROM ' + myName.toUpperCase() + ' —\n\n' + myText + '\n\n' +
+      myName + '\'s story about what ' + partnerName + ' is thinking:\n' +
+      (myData.storyThinking || '(no answer provided)') + '\n\n' +
+      myName + '\'s story about what ' + partnerName + ' is feeling:\n' +
+      (myData.storyFeeling || '(no answer provided)') + '\n\n' +
+      '— SCRIPT FROM ' + partnerName.toUpperCase() + ' —\n\n' + partnerText + '\n\n' +
+      partnerName + '\'s story about what ' + myName + ' is thinking:\n' +
+      (partnerData.storyThinking || '(no answer provided)') + '\n\n' +
+      partnerName + '\'s story about what ' + myName + ' is feeling:\n' +
+      (partnerData.storyFeeling || '(no answer provided)');
+    return callAI([{ role: 'user', content: prompt }], '2').then(function(analysisText) {
+      return fsSet('couples/' + user.coupleId, {
+        analysis: analysisText,
+        analysisReady: true,
+        analysisAt: new Date().toISOString(),
+        currentStep: '3'
+      }).then(function() {
+        showAnalysisBanner();
+        sendAnalysisReadyNotifications();
+      });
+    }).catch(function() {
+      txt('step2-status', 'Analysis could not complete. Please refresh and try again.');
+    });
+  });
+}
+
+function scriptDataToText(data, personName, partnerName) {
+  var parts = [];
+  if (data.scene) parts.push('SCENE: ' + data.scene);
+  if (data.lines) {
+    var lines = typeof data.lines === 'string' ? JSON.parse(data.lines) : data.lines;
+    lines.forEach(function(l) {
+      if (l.type === 'line') {
+        var speaker = l.char === 'a' ? personName : partnerName;
+        var block = speaker.toUpperCase();
+        if (l.beat) block += '\n(' + l.beat + ')';
+        if (l.dialogue) block += '\n' + l.dialogue;
+        parts.push(block);
+      } else if (l.type === 'direction' && l.text) {
+        parts.push('[' + l.text + ']');
+      }
+    });
+  }
+  return parts.length ? parts.join('\n\n') : '(no script content)';
+}
+
+function checkAnalysisReady() {
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) return;
+    var couple = fromFields(d.fields);
+    if (couple.analysisReady) {
+      showAnalysisBanner();
+    } else {
+      setTimeout(pollAnalysisReady, 30000);
+    }
+  }).catch(function() {});
+}
+
+function pollAnalysisReady() {
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) { setTimeout(pollAnalysisReady, 30000); return; }
+    var couple = fromFields(d.fields);
+    if (couple.analysisReady) {
+      showAnalysisBanner();
+    } else {
+      setTimeout(pollAnalysisReady, 30000);
+    }
+  }).catch(function() { setTimeout(pollAnalysisReady, 30000); });
+}
+
+function showAnalysisBanner() {
+  if (currentJourneyStep && parseInt(currentJourneyStep) > 3) return;
+  el('analysis-banner').style.display = 'block';
+  el('step1-waiting-banner').style.display = 'none';
+  txt('step2-status', '');
+}
+
+// ── STEP 3: MIRROR MOMENT ────────────────────────────────────
+var s3Messages = [];
+var s3Sending = false;
+
+function viewAnalysis() {
+  if (!user || !user.coupleId) return;
+  var screen = el('step3-screen');
+  screen.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step3/' + user.uid).then(function(d) {
+    if (d && d.fields) {
+      var saved = fromFields(d.fields);
+      if (saved.messages) {
+        try {
+          var parsed = typeof saved.messages === 'string' ? JSON.parse(saved.messages) : saved.messages;
+          if (Array.isArray(parsed) && parsed.length > 1) {
+            s3Messages = parsed;
+            s3Render();
+            s3ScrollBottom();
+            return;
+          }
+        } catch(e) {}
+      }
+    }
+    s3StartDelivery();
+  }).catch(function() {
+    s3StartDelivery();
+  });
+}
+
+function closeStep3() {
+  hide('step3-screen');
+  document.body.style.overflow = '';
+}
+
+function s3StartDelivery() {
+  if (!user || !user.coupleId) return;
+  s3Messages = [];
+  s3Render();
+  s3ShowTyping();
+  Promise.all([
+    fsGet('scripts/' + user.uid),
+    user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
+    fsGet('couples/' + user.coupleId)
+  ]).then(function(results) {
+    var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var partnerScript = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var couple = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var analysis = couple.analysis || '';
+    var myName = (user.displayName || 'Person A').split(' ')[0];
+    var partnerName = 'your partner';
+
+    var setupPrompt = 'You are now beginning Step 3 with ' + myName + '. You have already completed the dual-script analysis. Below is the full context you need to deliver the Mirror Moment.\n\n' +
+      '--- FULL ANALYSIS (use this as the foundation; do not quote it verbatim) ---\n' +
+      analysis + '\n\n' +
+      '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' +
+      scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      '--- PARTNER\'S SCRIPT ---\n' +
+      scriptDataToText(partnerScript, partnerName, myName) + '\n\n' +
+      'Now deliver ' + myName + '\'s personalized Mirror Moment. Begin with what you see in their script — their specific words, their recurring themes, the story they are telling themselves. Be warm, precise, and grounded in what they actually wrote. Do not be generic. Do not summarize both people equally. This is for ' + myName + ' only. Speak to them directly. Follow the Mirror Moment guidelines from your training: offer observations as possibilities, not verdicts. Invite reflection. After sharing your observations, ask an open question.';
+
+    s3Messages = [{ role: 'user', content: setupPrompt }];
+    return callAI(s3Messages, '3');
+  }).then(function(text) {
+    s3RemoveTyping();
+    s3Messages.push({ role: 'assistant', content: text });
+    s3SaveConversation();
+    s3Render();
+    s3ScrollBottom();
+  }).catch(function(err) {
+    s3RemoveTyping();
+    s3AppendError('Something went wrong delivering your analysis. Please try again.');
+    console.error('Step 3 delivery error:', err);
+  });
+}
+
+function s3Send() {
+  if (s3Sending) return;
+  var inp = el('s3-input');
+  var text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  s3AutoGrow(inp);
+  s3Sending = true;
+  el('s3-send').disabled = true;
+  s3Messages.push({ role: 'user', content: text });
+  s3Render();
+  s3ScrollBottom();
+  s3ShowTyping();
+  callAI(s3Messages, '3').then(function(reply) {
+    s3RemoveTyping();
+    s3Messages.push({ role: 'assistant', content: reply });
+    s3SaveConversation();
+    s3Render();
+    s3ScrollBottom();
+    s3Sending = false;
+    el('s3-send').disabled = false;
+  }).catch(function(err) {
+    s3RemoveTyping();
+    s3AppendError('Could not reach the AI. Please try again.');
+    s3Sending = false;
+    el('s3-send').disabled = false;
+    console.error('Step 3 send error:', err);
+  });
+}
+
+function s3KeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    s3Send();
+  }
+}
+
+function s3AutoGrow(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+}
+
+function s3Render() {
+  var thread = el('s3-thread');
+  var displayMessages = s3Messages.slice(1);
+  if (displayMessages.length === 0) { thread.innerHTML = ''; return; }
+  thread.innerHTML = displayMessages.map(function(m) {
+    var isAI = m.role === 'assistant';
+    var cls = isAI ? 's3-msg s3-msg-ai' : 's3-msg s3-msg-user';
+    var paras = m.content.split(/\n\n+/).filter(function(p) { return p.trim(); });
+    var html = paras.map(function(p) {
+      return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+    return '<div class="' + cls + '"><div class="s3-bubble">' + html + '</div></div>';
+  }).join('');
+}
+
+function s3ShowTyping() {
+  var thread = el('s3-thread');
+  var div = document.createElement('div');
+  div.className = 's3-typing';
+  div.id = 's3-typing';
+  div.innerHTML = '<div class="s3-bubble"><div class="s3-dot"></div><div class="s3-dot"></div><div class="s3-dot"></div></div>';
+  thread.appendChild(div);
+  s3ScrollBottom();
+}
+
+function s3RemoveTyping() {
+  var t = el('s3-typing');
+  if (t) t.parentNode.removeChild(t);
+}
+
+function s3AppendError(msg) {
+  var thread = el('s3-thread');
+  var div = document.createElement('div');
+  div.className = 's3-msg s3-msg-ai';
+  div.innerHTML = '<div class="s3-bubble" style="color:rgba(255,100,100,0.8)">' + esc(msg) + '</div>';
+  thread.appendChild(div);
+  s3ScrollBottom();
+}
+
+function s3ScrollBottom() {
+  var thread = el('s3-thread');
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function s3SaveConversation() {
+  if (!user) return;
+  fsSet('step3/' + user.uid, {
+    messages: JSON.stringify(s3Messages),
+    savedAt: new Date().toISOString(),
+    uid: user.uid
+  }).catch(function() {});
+}
+
+// ── JOURNEY ROUTING ─────────────────────────────────────────
+var JOURNEY_STEPS = {
+  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'Two neutral avatars will perform your words. For now, read your transcript. Watch as an observer, not a participant.', btn: 'Watch My Script' },
+  '5': { label: 'Step 5', title: 'Watch Your Partner\'s Script', sub: 'The same fight from a completely different experience. Back to back. Without having to say a word to each other yet.', btn: 'Watch Partner\'s Script' },
+  '6': { label: 'Step 6', title: 'Reflective Questions', sub: 'Four questions. Private answers. In your own words, without your partner\'s influence. This is where insight becomes clarity.', btn: 'Answer the Questions' },
+  '7': { label: 'Step 7', title: 'Your Individual Work', sub: 'Before the two of you can work together effectively, each person must do their own work first. There is no authentic we unless it starts with an I.', btn: 'Begin Individual Work' },
+  '8': { label: 'Step 8', title: 'NVC Together', sub: 'Now equipped individually, you come back together to practice a new way of communicating. Out of story and into solution.', btn: 'Begin NVC Practice' },
+  '9': { label: 'Step 9', title: 'The Rewrite', sub: 'You have everything you need. The same fight. New tools. New eyes. Write it differently this time. Not perfectly. Honestly. And together.', btn: 'Begin the Rewrite' },
+  '10': { label: 'Step 10', title: 'Your Feedback Is Ready', sub: 'Something worth reading is waiting for you. The AI has read your rewrite. Whenever you\'re ready.', btn: 'Read the Feedback' },
+  '11': { label: 'Step 11', title: 'The Bridge', sub: 'You\'ve done the work. Now find out where it takes you.', btn: 'Continue' }
+};
+
+var currentJourneyStep = null;
+
+function journeyRoute() {
+  if (!user || !user.coupleId) return;
+  step2Init();
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) return;
+    var couple = fromFields(d.fields);
+    var step = String(couple.currentStep || '1');
+    currentJourneyStep = step;
+    if (step === '3' && couple.analysisReady) {
+      showAnalysisBanner();
+    } else if (step === '4' || step === '5') {
+      hide('analysis-banner');
+      checkVideoReady(step);
+    } else if (JOURNEY_STEPS[step]) {
+      showJourneyBanner(step);
+      hide('analysis-banner');
+    }
+    if (step === '3') {
+      el('s3-complete-btn').style.display = 'block';
+    }
+  }).catch(function() {});
+}
+
+function showJourneyBanner(step) {
+  var cfg = JOURNEY_STEPS[step];
+  if (!cfg) return;
+  txt('jb-step', cfg.label);
+  txt('jb-title', cfg.title);
+  txt('jb-sub', cfg.sub);
+  txt('jb-btn', cfg.btn);
+  currentJourneyStep = step;
+  el('journey-banner').style.display = 'block';
+}
+
+function openJourneyStep() {
+  var step = currentJourneyStep;
+  if (step === '4') openStep4();
+  else if (step === '5') openStep5();
+  else if (step === '6') openStep6();
+  else if (step === '7') openStep7();
+  else if (step === '8') openStep8();
+  else if (step === '9') openStep9();
+  else if (step === '10') openStep10();
+  else if (step === '11') openStep11();
+}
+
+function advanceStep(newStep) {
+  if (!user || !user.coupleId) return Promise.resolve();
+  return fsSet('couples/' + user.coupleId, { currentStep: newStep }).then(function() {
+    currentJourneyStep = newStep;
+    if (JOURNEY_STEPS[newStep]) showJourneyBanner(newStep);
+  });
+}
+
+// ── STEP 3: COMPLETE ─────────────────────────────────────────
+function completeStep3() {
+  hide('step3-screen');
+  document.body.style.overflow = '';
+  advanceStep('4');
+}
+
+// ── STEP 4: WATCH YOUR SCRIPT ─────────────────────────────────
+function openStep4() {
+  if (!user) return;
+  el('step4-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  el('s4-intro').textContent = 'Watch with curiosity. Consider who you see in your own role. Does it sound like you at your best? Does one of the characters remind you of someone from your past? Watch without judgment. Just notice.';
+  if (user.uid) {
+    fsGet('scripts/' + user.uid).then(function(d) {
+      if (!d || !d.fields) return;
+      renderScriptTranscript(fromFields(d.fields), 's4-transcript', user.name || 'Me', user.partner || 'Partner');
+    }).catch(function() {});
+  }
+}
+
+function closeStep4() { hide('step4-screen'); document.body.style.overflow = ''; }
+
+function completeStep4() {
+  fsSet('step4/' + user.uid, { completedAt: new Date().toISOString(), uid: user.uid }).catch(function() {});
+  closeStep4();
+  advanceStep('5');
+}
+
+function renderScriptTranscript(data, containerId, myName, partnerName) {
+  var container = el(containerId);
+  if (!container) return;
+  var html = '';
+  if (data.scene) html += '<div class="s45-tx-line"><span class="s45-tx-spk">Scene</span>' + esc(data.scene) + '</div>';
+  if (data.lines) {
+    var lines = typeof data.lines === 'string' ? JSON.parse(data.lines) : data.lines;
+    lines.forEach(function(l) {
+      if (l.type === 'line') {
+        var spk = l.char === 'a' ? myName : partnerName;
+        var beat = l.beat ? ' <em style="opacity:0.55">(' + esc(l.beat) + ')</em>' : '';
+        html += '<div class="s45-tx-line"><span class="s45-tx-spk">' + esc(spk) + '</span>' + beat + esc(l.dialogue || '') + '</div>';
+      } else if (l.type === 'direction' && l.text) {
+        html += '<div class="s45-tx-line" style="opacity:0.5;font-style:italic">[' + esc(l.text) + ']</div>';
+      }
+    });
+  }
+  container.innerHTML = html || '<div style="opacity:0.4;font-style:italic;font-size:0.82rem">No script content found.</div>';
+}
+
+// ── STEP 5: WATCH PARTNER'S SCRIPT ───────────────────────────
+function openStep5() {
+  if (!user) return;
+  el('step5-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  el('s5-intro').textContent = 'Watching your own script is powerful. Watching your partner\'s version immediately after is extraordinary. The same fight from two completely different experiences. Watch as a witness to their journey.';
+  if (user.partnerId) {
+    fsGet('scripts/' + user.partnerId).then(function(d) {
+      if (!d || !d.fields) return;
+      renderScriptTranscript(fromFields(d.fields), 's5-transcript', user.partner || 'Partner', user.name || 'Me');
+    }).catch(function() {});
+  }
+}
+
+function closeStep5() { hide('step5-screen'); document.body.style.overflow = ''; }
+
+function completeStep5() {
+  fsSet('step5/' + user.uid, { completedAt: new Date().toISOString(), uid: user.uid }).catch(function() {});
+  closeStep5();
+  advanceStep('6');
+}
+
+// ── STEP 6: REFLECTIVE QUESTIONS ─────────────────────────────
+var s6Submitted = false;
+
+function openStep6() {
+  el('step6-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step6/' + user.uid).then(function(d) {
+    if (!d || !d.fields) return;
+    var s = fromFields(d.fields);
+    if (s.q1) el('s6-q1').value = s.q1;
+    if (s.q2) el('s6-q2').value = s.q2;
+    if (s.q3) el('s6-q3').value = s.q3;
+    if (s.q4) el('s6-q4').value = s.q4;
+    if (s.submitted) {
+      s6Submitted = true;
+      el('s6-submit-btn').disabled = true;
+      el('s6-submit-btn').textContent = 'Reflections Submitted ✓';
+      if (s.aiResponse) renderS6Response(s.aiResponse);
+    }
+  }).catch(function() {});
+}
+
+function closeStep6() { hide('step6-screen'); document.body.style.overflow = ''; }
+
+function submitStep6() {
+  var q1 = (el('s6-q1').value || '').trim();
+  var q2 = (el('s6-q2').value || '').trim();
+  var q3 = (el('s6-q3').value || '').trim();
+  var q4 = (el('s6-q4').value || '').trim();
+  if (!q1 || !q2 || !q3 || !q4) {
+    alert('Please answer all four questions before submitting.'); return;
+  }
+  var btn = el('s6-submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  var myName = (user.name || 'Me').split(' ')[0];
+  var partnerName = user.partner || 'your partner';
+  var prompt = 'This is ' + myName + '\'s Step 6 reflective responses after watching both avatar scripts.\n\n' +
+    'Question 1 — What did you notice about your partner\'s experience that you hadn\'t considered before?\n' + q1 + '\n\n' +
+    'Question 2 — Was there anything in their version that surprised you?\n' + q2 + '\n\n' +
+    'Question 3 — Did anything shift in how you understand what was happening for them in this fight?\n' + q3 + '\n\n' +
+    'Question 4 — What do you think they most needed you to understand?\n' + q4 + '\n\n' +
+    'Respond with a brief, warm acknowledgment of what ' + myName + ' noticed. Then gently encourage them to share what surfaced with ' + partnerName + ' in person, when they are both ready — not to debate, not to defend, just to let each other in. Close with: "What you share in that conversation may be one of the most honest exchanges you\'ve had about this fight. Take that time together when you\'re ready. Then come back and we\'ll continue."';
+  callAI([{ role: 'user', content: prompt }], '6').then(function(text) {
+    btn.textContent = 'Reflections Submitted ✓';
+    fsSet('step6/' + user.uid, { q1: q1, q2: q2, q3: q3, q4: q4, submitted: true, aiResponse: text, submittedAt: new Date().toISOString() }).catch(function() {});
+    renderS6Response(text);
+    s6Submitted = true;
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Submit My Reflections';
+    alert('Could not reach the AI. Please try again.');
+  });
+}
+
+function renderS6Response(text) {
+  var wrap = el('s6-ai-wrap');
+  var body = el('s6-ai-body');
+  var paras = text.split(/\n\n+/).filter(function(p) { return p.trim(); });
+  body.innerHTML = paras.map(function(p) { return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  wrap.style.display = 'block';
+}
+
+function completeStep6() {
+  closeStep6();
+  advanceStep('7');
+}
+
+// ── STEP 7: INDIVIDUAL WORK ───────────────────────────────────
+var s7Messages = [];
+var s7Sending = false;
+
+function openStep7() {
+  el('step7-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step7/' + user.uid).then(function(d) {
+    if (d && d.fields) {
+      var saved = fromFields(d.fields);
+      if (saved.oneThing) el('s7-ot-input').value = saved.oneThing;
+      if (saved.messages) {
+        try {
+          var parsed = typeof saved.messages === 'string' ? JSON.parse(saved.messages) : saved.messages;
+          if (Array.isArray(parsed) && parsed.length > 1) {
+            s7Messages = parsed;
+            s7Render();
+            s7ScrollBottom();
+            return;
+          }
+        } catch(e) {}
+      }
+    }
+    s7StartDelivery();
+  }).catch(function() { s7StartDelivery(); });
+}
+
+function closeStep7() { hide('step7-screen'); document.body.style.overflow = ''; }
+
+function s7StartDelivery() {
+  s7Messages = [];
+  s7Render();
+  s3ShowTypingIn('s7-thread');
+  var myName = (user.name || 'Me').split(' ')[0];
+  var partnerName = user.partner || 'your partner';
+  Promise.all([
+    fsGet('scripts/' + user.uid),
+    fsGet('couples/' + user.coupleId),
+    fsGet('step6/' + user.uid)
+  ]).then(function(results) {
+    var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var couple = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var step6 = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var setupPrompt = 'You are now beginning Step 7 — Individual Work — with ' + myName + '.\n\n' +
+      'Here is all the context you need:\n\n' +
+      '--- COUPLE\'S ANALYSIS (from Step 2) ---\n' + (couple.analysis || '(none)') + '\n\n' +
+      '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      '--- ' + myName.toUpperCase() + '\'S REFLECTIONS (Step 6) ---\n' +
+      'Q1: ' + (step6.q1 || '(not answered)') + '\n' +
+      'Q2: ' + (step6.q2 || '(not answered)') + '\n' +
+      'Q3: ' + (step6.q3 || '(not answered)') + '\n' +
+      'Q4: ' + (step6.q4 || '(not answered)') + '\n\n' +
+      'Begin Step 7 with ' + myName + '. Start with the Language Awareness Work — turn attention to the actual words on the page. Not who they want to be in the argument. Who they want to be in the exchange that would turn it from a confrontation into a conversation. Identify specific words and phrases from their script that might be landing as attacks, carrying old charge, or projecting a belief onto ' + partnerName + '. Prompt them to consider new language. When insight surfaces, invite them to add it to their Awareness Log. Eventually guide them to "The One Thing" — one concrete thing they are willing to try differently next time. Follow the Step 7 guidelines from your training exactly.';
+    s7Messages = [{ role: 'user', content: setupPrompt }];
+    return callAI(s7Messages, '7');
+  }).then(function(text) {
+    s3RemoveTypingFrom('s7-thread');
+    s7Messages.push({ role: 'assistant', content: text });
+    s7SaveConversation();
+    s7Render(); s7ScrollBottom();
+    el('s7-complete-btn').style.display = 'block';
+  }).catch(function(err) {
+    s3RemoveTypingFrom('s7-thread');
+    s7AppendError('Something went wrong. Please try again.');
+    console.error('Step 7 error:', err);
+  });
+}
+
+function s7Send() {
+  if (s7Sending) return;
+  var inp = el('s7-input');
+  var text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; s3AutoGrow(inp);
+  s7Sending = true; el('s7-send').disabled = true;
+  s7Messages.push({ role: 'user', content: text });
+  s7Render(); s7ScrollBottom();
+  s3ShowTypingIn('s7-thread');
+  callAI(s7Messages, '7').then(function(reply) {
+    s3RemoveTypingFrom('s7-thread');
+    s7Messages.push({ role: 'assistant', content: reply });
+    s7SaveConversation(); s7Render(); s7ScrollBottom();
+    s7Sending = false; el('s7-send').disabled = false;
+  }).catch(function(err) {
+    s3RemoveTypingFrom('s7-thread');
+    s7AppendError('Could not reach the AI. Please try again.');
+    s7Sending = false; el('s7-send').disabled = false;
+  });
+}
+
+function s7KeyDown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); s7Send(); } }
+
+function s7Render() {
+  var thread = el('s7-thread');
+  var msgs = s7Messages.slice(1);
+  thread.innerHTML = msgs.map(function(m) {
+    var cls = m.role === 'assistant' ? 's3-msg s3-msg-ai' : 's3-msg s3-msg-user';
+    var html = m.content.split(/\n\n+/).filter(function(p){return p.trim();}).map(function(p){return '<p>'+esc(p.trim()).replace(/\n/g,'<br>')+'</p>';}).join('');
+    return '<div class="' + cls + '"><div class="s3-bubble">' + html + '</div></div>';
+  }).join('');
+}
+
+function s7ScrollBottom() { var t = el('s7-thread'); t.scrollTop = t.scrollHeight; }
+
+function s7AppendError(msg) {
+  var t = el('s7-thread');
+  var d = document.createElement('div');
+  d.className = 's3-msg s3-msg-ai';
+  d.innerHTML = '<div class="s3-bubble" style="color:rgba(255,100,100,0.8)">' + esc(msg) + '</div>';
+  t.appendChild(d); s7ScrollBottom();
+}
+
+function s7SaveConversation() {
+  if (!user) return;
+  fsSet('step7/' + user.uid, { messages: JSON.stringify(s7Messages), savedAt: new Date().toISOString() }).catch(function(){});
+}
+
+function showOneThingArea() {
+  el('s7-one-thing-area').style.display = 'block';
+  el('s7-ot-input').focus();
+  s7ScrollBottom();
+}
+
+function saveOneThingAndComplete() {
+  var oneThing = (el('s7-ot-input').value || '').trim();
+  fsSet('step7/' + user.uid, { oneThing: oneThing, messages: JSON.stringify(s7Messages), savedAt: new Date().toISOString() }).catch(function(){});
+  closeStep7();
+  advanceStep('8');
+}
+
+// ── STEP 8: NVC TOGETHER ─────────────────────────────────────
+var s8Messages = [];
+var s8Sending = false;
+
+function openStep8() {
+  el('step8-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step8/' + user.uid).then(function(d) {
+    if (d && d.fields) {
+      var saved = fromFields(d.fields);
+      if (saved.messages) {
+        try {
+          var parsed = typeof saved.messages === 'string' ? JSON.parse(saved.messages) : saved.messages;
+          if (Array.isArray(parsed) && parsed.length > 1) {
+            s8Messages = parsed; s8Render(); s8ScrollBottom(); return;
+          }
+        } catch(e) {}
+      }
+    }
+    s8StartDelivery();
+  }).catch(function() { s8StartDelivery(); });
+}
+
+function closeStep8() { hide('step8-screen'); document.body.style.overflow = ''; }
+
+function s8StartDelivery() {
+  s8Messages = []; s8Render();
+  s3ShowTypingIn('s8-thread');
+  var myName = (user.name || 'Me').split(' ')[0];
+  var partnerName = user.partner || 'your partner';
+  Promise.all([
+    fsGet('scripts/' + user.uid),
+    fsGet('couples/' + user.coupleId),
+    fsGet('step7/' + user.uid)
+  ]).then(function(results) {
+    var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var couple = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var step7 = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var setupPrompt = 'You are beginning Step 8 — NVC Together — with ' + myName + '.\n\n' +
+      '--- COUPLE\'S ANALYSIS ---\n' + (couple.analysis || '(none)') + '\n\n' +
+      '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      '--- THE ONE THING (' + myName + ' identified in Step 7) ---\n' + (step7.oneThing || '(not captured)') + '\n\n' +
+      'Begin Step 8 with ' + myName + '. Introduce the Nonviolent Communication framework by Marshall Rosenberg and explain that this is the explicit framework you\'ll be using together. Walk them through the NVC structure: I am feeling _____ because my need for _____ is not being met. Guide them to practice both sides of the exchange — making an NVC statement and reflecting their partner\'s back. Help them identify their feeling and their unmet need, practice the reflection loop, and work toward a genuine request. When agreement is reached, restate it clearly so both parties hear it confirmed. Then introduce "Grace and the Reset." Follow the Step 8 guidelines from your training exactly.';
+    s8Messages = [{ role: 'user', content: setupPrompt }];
+    return callAI(s8Messages, '8');
+  }).then(function(text) {
+    s3RemoveTypingFrom('s8-thread');
+    s8Messages.push({ role: 'assistant', content: text });
+    s8SaveConversation(); s8Render(); s8ScrollBottom();
+    el('s8-complete-btn').style.display = 'block';
+  }).catch(function(err) {
+    s3RemoveTypingFrom('s8-thread');
+    var d = document.createElement('div');
+    d.className = 's3-msg s3-msg-ai';
+    d.innerHTML = '<div class="s3-bubble" style="color:rgba(255,100,100,0.8)">Something went wrong. Please try again.</div>';
+    el('s8-thread').appendChild(d);
+  });
+}
+
+function s8Send() {
+  if (s8Sending) return;
+  var inp = el('s8-input');
+  var text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; s3AutoGrow(inp);
+  s8Sending = true; el('s8-send').disabled = true;
+  s8Messages.push({ role: 'user', content: text });
+  s8Render(); s8ScrollBottom();
+  s3ShowTypingIn('s8-thread');
+  callAI(s8Messages, '8').then(function(reply) {
+    s3RemoveTypingFrom('s8-thread');
+    s8Messages.push({ role: 'assistant', content: reply });
+    s8SaveConversation(); s8Render(); s8ScrollBottom();
+    s8Sending = false; el('s8-send').disabled = false;
+  }).catch(function() {
+    s3RemoveTypingFrom('s8-thread');
+    s8Sending = false; el('s8-send').disabled = false;
+  });
+}
+
+function s8KeyDown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); s8Send(); } }
+
+function s8Render() {
+  var t = el('s8-thread');
+  t.innerHTML = s8Messages.slice(1).map(function(m) {
+    var cls = m.role === 'assistant' ? 's3-msg s3-msg-ai' : 's3-msg s3-msg-user';
+    var html = m.content.split(/\n\n+/).filter(function(p){return p.trim();}).map(function(p){return '<p>'+esc(p.trim()).replace(/\n/g,'<br>')+'</p>';}).join('');
+    return '<div class="' + cls + '"><div class="s3-bubble">' + html + '</div></div>';
+  }).join('');
+}
+
+function s8ScrollBottom() { var t = el('s8-thread'); t.scrollTop = t.scrollHeight; }
+
+function s8SaveConversation() {
+  if (!user) return;
+  fsSet('step8/' + user.uid, { messages: JSON.stringify(s8Messages), savedAt: new Date().toISOString() }).catch(function(){});
+}
+
+function completeStep8() {
+  s8SaveConversation();
+  closeStep8();
+  advanceStep('9');
+}
+
+// ── STEP 9: THE REWRITE ───────────────────────────────────────
+var s9CheckinTimer = null;
+var s9CheckinIndex = 0;
+var s9SaveTimer = null;
+var S9_CHECKINS = [
+  'Still here if you need me. If you find yourself reaching for an old line — check your Awareness Log first.',
+  'Quick reminder. If a "you" statement sneaks in, try flipping it to an "I" statement. I\'m here if you want help with that.',
+  'How\'s the energy in the room? If it\'s getting charged, take a breath before the next line. I\'m right here.',
+  'Remember. Not perfectly. Honestly. And together. You\'re doing the work.'
+];
+
+function openStep9() {
+  el('step9-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (d && d.fields) {
+      var couple = fromFields(d.fields);
+      if (couple.rewrite) el('s9-rewrite-area').value = couple.rewrite;
+    }
+  }).catch(function(){});
+  s9CheckinTimer = setTimeout(s9NextCheckin, 3 * 60 * 1000);
+}
+
+function closeStep9() {
+  hide('step9-screen');
+  document.body.style.overflow = '';
+  if (s9CheckinTimer) { clearTimeout(s9CheckinTimer); s9CheckinTimer = null; }
+}
+
+function s9ToggleExample() {
+  var pane = el('s9-example-pane');
+  var tog = el('s9-example-toggle');
+  var open = pane.classList.toggle('open');
+  tog.textContent = (open ? '▾' : '▶') + ' Read the Before & Better Example';
+}
+
+function s9AutoSave() {
+  clearTimeout(s9SaveTimer);
+  s9SaveTimer = setTimeout(function() {
+    if (!user || !user.coupleId) return;
+    fsSet('couples/' + user.coupleId, { rewrite: el('s9-rewrite-area').value }).catch(function(){});
+  }, 2000);
+}
+
+function s9NextCheckin() {
+  var msg = S9_CHECKINS[s9CheckinIndex % S9_CHECKINS.length];
+  s9CheckinIndex++;
+  var c = el('s9-checkin');
+  c.textContent = msg;
+  c.style.display = 'block';
+  s9CheckinTimer = setTimeout(s9NextCheckin, 4 * 60 * 1000);
+}
+
+function submitRewrite() {
+  var text = (el('s9-rewrite-area').value || '').trim();
+  if (!text || text.length < 50) {
+    alert('Please write your rewrite before submitting. It looks like there isn\'t enough content yet.'); return;
+  }
+  var btn = el('s9-submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  txt('s9-status', 'Saving your rewrite...');
+  if (s9CheckinTimer) { clearTimeout(s9CheckinTimer); s9CheckinTimer = null; }
+  fsSet('couples/' + user.coupleId, {
+    rewrite: text, rewriteSubmittedAt: new Date().toISOString()
+  }).then(function() {
+    txt('s9-status', 'Rewrite saved. The AI is reading it now...');
+    return runRewriteAnalysis(text);
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Submit Our Rewrite';
+    txt('s9-status', 'Error saving. Please try again.');
+  });
+}
+
+function runRewriteAnalysis(rewriteText) {
+  return Promise.all([
+    fsGet('scripts/' + user.uid),
+    user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
+    fsGet('couples/' + user.coupleId)
+  ]).then(function(results) {
+    var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var partnerScript = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var couple = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var myName = user.name || 'Partner A';
+    var partnerName = user.partner || 'Partner B';
+    var prompt = 'This is Step 10. The couple has completed their rewrite. Here is the full context:\n\n' +
+      '--- COUPLE\'S ANALYSIS (from Step 2) ---\n' + (couple.analysis || '(none)') + '\n\n' +
+      '--- ORIGINAL SCRIPT FROM ' + myName.toUpperCase() + ' ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      '--- ORIGINAL SCRIPT FROM ' + partnerName.toUpperCase() + ' ---\n' + scriptDataToText(partnerScript, partnerName, myName) + '\n\n' +
+      '--- THEIR REWRITE ---\n' + rewriteText + '\n\n' +
+      'Deliver the Step 10 response. Open by acknowledging the courage it took before saying anything analytical. Then: celebrate specifically what worked — name exact moments, exact lines, exact shifts in language or tone. Then offer one or two observations about things still worth considering — specific, forward-facing, always an invitation, never a verdict. Close with a celebration of the distance traveled and the expectation that this is a beginning, not an ending. Follow the Step 10 guidelines from your training exactly.';
+    return callAI([{ role: 'user', content: prompt }], '10');
+  }).then(function(feedbackText) {
+    return fsSet('couples/' + user.coupleId, {
+      rewriteFeedback: feedbackText,
+      rewriteFeedbackReady: true,
+      currentStep: '10'
+    });
+  }).then(function() {
+    closeStep9();
+    currentJourneyStep = '10';
+    showJourneyBanner('10');
+  }).catch(function(err) {
+    var btn = el('s9-submit-btn');
+    btn.disabled = false; btn.textContent = 'Submit Our Rewrite';
+    txt('s9-status', 'Analysis could not complete. Please try again.');
+    console.error('Step 9 analysis error:', err);
+  });
+}
+
+// ── STEP 10: AI FEEDBACK ─────────────────────────────────────
+var s10PollTimer = null;
+
+function openStep10() {
+  el('step10-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  el('s10-waiting').style.display = 'block';
+  el('s10-body').style.display = 'none';
+  el('s10-continue-btn').style.display = 'none';
+  checkRewriteFeedback();
+}
+
+function closeStep10() {
+  hide('step10-screen');
+  document.body.style.overflow = '';
+  if (s10PollTimer) { clearTimeout(s10PollTimer); s10PollTimer = null; }
+}
+
+function checkRewriteFeedback() {
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) { s10PollTimer = setTimeout(checkRewriteFeedback, 15000); return; }
+    var couple = fromFields(d.fields);
+    if (couple.rewriteFeedbackReady && couple.rewriteFeedback) {
+      renderS10Feedback(couple.rewriteFeedback);
+    } else {
+      s10PollTimer = setTimeout(checkRewriteFeedback, 15000);
+    }
+  }).catch(function() { s10PollTimer = setTimeout(checkRewriteFeedback, 15000); });
+}
+
+function renderS10Feedback(text) {
+  var body = el('s10-body');
+  var paras = text.split(/\n\n+/).filter(function(p) { return p.trim(); });
+  body.innerHTML = paras.map(function(p) { return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  el('s10-waiting').style.display = 'none';
+  body.style.display = 'block';
+  el('s10-continue-btn').style.display = 'block';
+}
+
+function completeStep10() {
+  closeStep10();
+  advanceStep('11');
+}
+
+// ── STEP 11: CAP GLOBAL BRIDGE ────────────────────────────────
+function openStep11() {
+  el('step11-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  fsGet('step11/' + user.uid).then(function(d) {
+    if (!d || !d.fields) return;
+    var s = fromFields(d.fields);
+    if (s.email) { el('s11-email-input').value = s.email; el('s11-email-btn').disabled = true; el('s11-email-btn').textContent = 'Saved ✓'; }
+  }).catch(function(){});
+}
+
+function closeStep11() { hide('step11-screen'); document.body.style.overflow = ''; }
+
+function s11TrackCAP() {
+  fsSet('step11/' + user.uid, { capClickedAt: new Date().toISOString(), uid: user.uid }).catch(function(){});
+  // Open CAP Global — placeholder URL to be updated when live
+  window.open('https://capglobal.com', '_blank');
+}
+
+function s11SaveEmail() {
+  var email = (el('s11-email-input').value || '').trim();
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  var btn = el('s11-email-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  fsSet('step11/' + user.uid, { email: email, emailSavedAt: new Date().toISOString(), uid: user.uid }).then(function() {
+    btn.textContent = 'Saved ✓';
+    txt('s11-email-note', 'Thank you. We\'ll reach out when you\'re ready.');
+    // EmailJS integration goes here when credentials are set up
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Save';
+    txt('s11-email-note', 'Could not save email. Please try again.');
+  });
+}
+
+// ── SHARED TYPING INDICATOR HELPERS ──────────────────────────
+function s3ShowTypingIn(threadId) {
+  var thread = el(threadId);
+  var div = document.createElement('div');
+  div.className = 's3-typing';
+  div.id = threadId + '-typing';
+  div.innerHTML = '<div class="s3-bubble"><div class="s3-dot"></div><div class="s3-dot"></div><div class="s3-dot"></div></div>';
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function s3RemoveTypingFrom(threadId) {
+  var t = el(threadId + '-typing');
+  if (t) t.parentNode.removeChild(t);
+}
+
+// ── NOTIFICATION EMAILS ──────────────────────────────────────
+
+function sendNotificationEmail(toEmail) {
+  if (!toEmail || typeof emailjs === 'undefined') return;
+  var serviceId = window.EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
+  var notifyTemplateId = window.EMAILJS_NOTIFY_TEMPLATE_ID || 'YOUR_NOTIFY_TEMPLATE_ID';
+  var publicKey = window.EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+  emailjs.init({ publicKey: publicKey });
+  emailjs.send(serviceId, notifyTemplateId, {
+    to_email: toEmail,
+    app_link: 'https://mitchnewman.com'
+  }).catch(function(err) {
+    console.error('Notification email error to ' + toEmail + ':', err);
+  });
+}
+
+function sendAnalysisReadyNotifications() {
+  // Send to the person who triggered the analysis
+  if (user.email) sendNotificationEmail(user.email);
+  // Fetch partner's email and send to them too
+  if (user.partnerId) {
+    fsGet('users/' + user.partnerId).then(function(d) {
+      if (!d || !d.fields) return;
+      var p = fromFields(d.fields);
+      if (p.email) sendNotificationEmail(p.email);
+    }).catch(function() {});
+  }
+}
+
+// ── VIDEO READINESS ───────────────────────────────────────────
+
+function checkVideoReady(step) {
+  if (!user || !user.uid) { showVideoWaiting(); return; }
+  fsGet('users/' + user.uid).then(function(d) {
+    if (!d || !d.fields) { showVideoWaiting(); pollVideoReady(step); return; }
+    var p = fromFields(d.fields);
+    if (p.ownVideoUrl && p.partnerVideoUrl) {
+      onVideoReady(step, p);
+    } else {
+      showVideoWaiting();
+      setTimeout(function() { pollVideoReady(step); }, 30000);
+    }
+  }).catch(function() {
+    showVideoWaiting();
+    setTimeout(function() { pollVideoReady(step); }, 30000);
+  });
+}
+
+function pollVideoReady(step) {
+  if (!user || !user.uid) return;
+  fsGet('users/' + user.uid).then(function(d) {
+    if (!d || !d.fields) { setTimeout(function() { pollVideoReady(step); }, 30000); return; }
+    var p = fromFields(d.fields);
+    if (p.ownVideoUrl && p.partnerVideoUrl) {
+      onVideoReady(step, p);
+    } else {
+      setTimeout(function() { pollVideoReady(step); }, 30000);
+    }
+  }).catch(function() { setTimeout(function() { pollVideoReady(step); }, 30000); });
+}
+
+function showVideoWaiting() {
+  hide('journey-banner');
+  el('video-waiting-banner').style.display = 'block';
+}
+
+function onVideoReady(step, profileData) {
+  hide('video-waiting-banner');
+  showJourneyBanner(step);
+  // Send notification email once per person when videos become available
+  if (!profileData.videoEmailSent && user.email) {
+    sendNotificationEmail(user.email);
+    fsSet('users/' + user.uid, { videoEmailSent: true }).catch(function() {});
+  }
+}
+
+// ── PATH B: AI ASSISTED SCRIPT WRITING ──────────────────────
+
+var PB_QUESTIONS = {
+  q1:  'Is this a fight that happens the same way every time, or does it change? The same patterns, the same words, the same ending — or does it depend on circumstances, moods, what happened that day?',
+  q2:  'Walk me through it. Where does it tend to start — what\'s the setup, the moment before it begins?',
+  q2b: 'Tell me about a specific recent time it happened. Where did it start? What was going on that day?',
+  q3:  'Where does it usually happen? What\'s the physical space — kitchen, bedroom, car? Is one of those spaces more charged than others?',
+  q4:  'What sets it off? Not the topic — the moment. The specific trigger that tells you both: here we go again. Is it a tone of voice, a word, a facial expression, something that doesn\'t get done?',
+  q5:  'Walk me through it as it unfolds. Don\'t summarize — take me through it beat by beat. What happens first, and then what?',
+  q5fu:'I want to make sure I capture this fully. Tell me more — what happens in the middle of it? Where does it go from there?',
+  q5b: 'When you\'re in it, what are you feeling? Not what you\'re thinking — the physical feeling, the emotional charge. Where does it live in your body?',
+  q5c: 'Does it escalate, or does it tend to flatline? Does someone pull back, or does it keep building? How does it end — not resolve, just end?',
+  q5d: 'What does your partner do or say that lands hardest in the moment? A specific tone, a phrase, a look? The thing that makes it feel impossible to continue?',
+  q5e: 'Underneath all of it — underneath the argument — what do you think this fight is really about for you? What\'s the belief or the fear that\'s driving it?',
+  q6a: 'When you imagine your partner watching a version of this fight written as a script, what do you think the story they\'re telling themselves is? About your intentions, about what you want, about what you think of them?',
+  q6b: 'And what are you feeling in this fight that you don\'t think your partner sees or understands? The part that\'s real for you but doesn\'t seem to land.'
+};
+
+// State machine: after recording answer for pbState, return the next state
+function pbNextState(current, answer) {
+  if (current === 'q1') {
+    // Detect "same every time" vs "changes/depends"
+    var a = answer.toLowerCase();
+    var changes = /depend|chang|different|vari|sometime|it depend/.test(a);
+    return changes ? 'q2b' : 'q2';
+  }
+  if (current === 'q2' || current === 'q2b') return 'q3';
+  if (current === 'q3') return 'q4';
+  if (current === 'q4') return 'q5';
+  if (current === 'q5') {
+    // Thin answer check — fewer than ~50 non-space chars triggers follow-up
+    return answer.replace(/\s/g, '').length < 50 ? 'q5fu' : 'q5b';
+  }
+  if (current === 'q5fu') return 'q5b';
+  if (current === 'q5b') return 'q5c';
+  if (current === 'q5c') return 'q5d';
+  if (current === 'q5d') return 'q5e';
+  if (current === 'q5e') return 'q6a';
+  if (current === 'q6a') return 'q6b';
+  if (current === 'q6b') return 'done';
+  return 'done';
+}
+
+function checkPathChoice() {
+  showFlex('path-choice-screen');
+  document.body.style.overflow = 'hidden';
+}
+
+function choosePathA() {
+  el('path-choice-screen').style.display = 'none';
+  document.body.style.overflow = '';
+  // Mark path A so we don't re-prompt
+  fsSet('scripts/' + user.uid, { scriptPath: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
+}
+
+function choosePathB() {
+  el('path-choice-screen').style.display = 'none';
+  pbAnswers = {};
+  pbState = 'q1';
+  pbSending = false;
+  el('pb-thread').innerHTML = '';
+  el('pb-input').value = '';
+  el('path-b-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(function() { pbAskQuestion('q1'); }, 200);
+}
+
+function pbBack() {
+  el('path-b-screen').style.display = 'none';
+  document.body.style.overflow = 'hidden';
+  showFlex('path-choice-screen');
+}
+
+function pbAskQuestion(qid) {
+  var text = PB_QUESTIONS[qid];
+  if (!text) return;
+  s3ShowTypingIn('pb-thread');
+  setTimeout(function() {
+    s3RemoveTypingFrom('pb-thread');
+    pbAppendAI(text);
+    var inp = el('pb-input');
+    if (inp) { inp.disabled = false; inp.focus(); }
+    var btn = el('pb-send');
+    if (btn) btn.disabled = false;
+  }, 700);
+}
+
+function pbAppendAI(text) {
+  var thread = el('pb-thread');
+  var div = document.createElement('div');
+  div.className = 's3-msg s3-msg-ai';
+  div.innerHTML = '<div class="s3-bubble">' + text.replace(/\n/g, '<br>') + '</div>';
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function pbAppendUser(text) {
+  var thread = el('pb-thread');
+  var div = document.createElement('div');
+  div.className = 's3-msg s3-msg-user';
+  div.innerHTML = '<div class="s3-bubble">' + esc(text).replace(/\n/g, '<br>') + '</div>';
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function pbKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); pbSend(); }
+}
+
+function pbAutoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function pbSend() {
+  if (pbSending) return;
+  var inp = el('pb-input');
+  var answer = (inp.value || '').trim();
+  if (!answer) return;
+
+  pbAnswers[pbState] = answer;
+  pbAppendUser(answer);
+  inp.value = '';
+  inp.style.height = 'auto';
+  inp.disabled = true;
+  el('pb-send').disabled = true;
+  pbSending = true;
+
+  var next = pbNextState(pbState, answer);
+  pbState = next;
+
+  if (next === 'done') {
+    pbGenerateDraft();
+  } else {
+    pbSending = false;
+    pbAskQuestion(next);
+  }
+}
+
+function pbBuildPrompt() {
+  var name = (user && user.name) ? user.name : 'Person A';
+  var partner = (user && user.partner) ? user.partner : 'Person B';
+  var fight = (user && user.fight) ? user.fight : 'the argument';
+  var q2val = pbAnswers.q2 || pbAnswers.q2b || '';
+  var q2label = pbAnswers.q2 ? 'How it typically starts' : 'A specific recent instance — how it started';
+  var q5full = (pbAnswers.q5 || '') + (pbAnswers.q5fu ? '\n\nMore detail: ' + pbAnswers.q5fu : '');
+
+  return 'Write a rough-draft screenplay script of an argument between two partners. The argument is called "' + fight + '". ' + name + ' is Character A; ' + partner + ' is Character B.\n\n' +
+    'Here is everything about how this fight unfolds:\n\n' +
+    'Pattern: ' + (pbAnswers.q1 || '') + '\n\n' +
+    q2label + ': ' + q2val + '\n\n' +
+    'Physical setting: ' + (pbAnswers.q3 || '') + '\n\n' +
+    'What triggers it: ' + (pbAnswers.q4 || '') + '\n\n' +
+    'How it unfolds beat by beat: ' + q5full + '\n\n' +
+    'What I feel when I\'m in it: ' + (pbAnswers.q5b || '') + '\n\n' +
+    'How it escalates and ends: ' + (pbAnswers.q5c || '') + '\n\n' +
+    'What my partner does that lands hardest: ' + (pbAnswers.q5d || '') + '\n\n' +
+    'What this fight is really about for me underneath: ' + (pbAnswers.q5e || '') + '\n\n' +
+    'Format the script exactly as follows. Start with:\nSCENE: [brief location from the setting described above]\n\n' +
+    'For each line of dialogue:\n[CHARACTER NAME IN CAPS]\n([emotional beat or tone in parentheses])\n[What they say]\n\n' +
+    'For stage directions:\nDIRECTION: [brief description]\n\n' +
+    'Write 12-20 exchanges minimum. The beats and stage directions must reflect the emotional and physical reality described above — the feeling of escalation, the specific triggers, the body language, the charge in the room. ' +
+    'Use the actual names ' + name + ' (Character A) and ' + partner + ' (Character B) in all caps as character headers. ' +
+    'The script should reflect the tonal and emotional answers given — not just a factual retelling. ' +
+    'Output only the script itself, starting with SCENE:. No preamble, no commentary, no explanation.';
+}
+
+function pbGenerateDraft() {
+  pbAppendAI('Thank you. I have everything I need. Generating your draft now — this may take a moment.');
+  s3ShowTypingIn('pb-thread');
+
+  callAI([{ role: 'user', content: pbBuildPrompt() }], 'b').then(function(text) {
+    s3RemoveTypingFrom('pb-thread');
+    if (!text || text.length < 100) {
+      pbAppendAI('Something went wrong generating the draft. Please go back and try again.');
+      pbSending = false;
+      var btn = el('pb-send');
+      if (btn) btn.disabled = false;
+      return;
+    }
+    var name = (user && user.name) ? user.name : 'Person A';
+    var partner = (user && user.partner) ? user.partner : 'Person B';
+    var parsed = pbParseDraft(text, name, partner);
+    pbLoadDraftIntoTool(parsed);
+  }).catch(function(err) {
+    s3RemoveTypingFrom('pb-thread');
+    pbAppendAI('There was an error reaching the AI. Please go back and try again.');
+    pbSending = false;
+    var btn = el('pb-send');
+    if (btn) btn.disabled = false;
+  });
+}
+
+function pbParseDraft(text, nameA, nameB) {
+  var result = { scene: '', lines: [] };
+  var rawLines = text.split('\n');
+  var i = 0;
+  var nameAU = nameA.toUpperCase();
+  var nameBU = nameB.toUpperCase();
+
+  // Find SCENE: line
+  for (; i < rawLines.length; i++) {
+    var l = rawLines[i].trim();
+    if (/^SCENE:/i.test(l)) {
+      result.scene = l.replace(/^SCENE:\s*/i, '').trim();
+      i++;
+      break;
+    }
+  }
+
+  while (i < rawLines.length) {
+    var line = rawLines[i].trim();
+    if (!line) { i++; continue; }
+
+    // Stage direction
+    if (/^DIRECTION:/i.test(line)) {
+      result.lines.push({ type: 'direction', text: line.replace(/^DIRECTION:\s*/i, '').trim() });
+      i++;
+      continue;
+    }
+
+    // Parenthetical-only line at top level — treat as direction
+    if (line.startsWith('(') && line.endsWith(')') && !pbIsCharName(line, nameAU, nameBU)) {
+      result.lines.push({ type: 'direction', text: line.slice(1, -1).trim() });
+      i++;
+      continue;
+    }
+
+    // Character name line
+    var lineUpper = line.toUpperCase();
+    var isA = lineUpper === nameAU || lineUpper.startsWith(nameAU + ' ') || lineUpper.startsWith(nameAU + ':');
+    var isB = lineUpper === nameBU || lineUpper.startsWith(nameBU + ' ') || lineUpper.startsWith(nameBU + ':');
+
+    if (isA || isB) {
+      var charKey = isA ? 'A' : 'B';
+      i++;
+      var beat = '';
+      // Check for parenthetical beat
+      if (i < rawLines.length) {
+        var nextL = rawLines[i].trim();
+        if (nextL.startsWith('(') && nextL.endsWith(')')) {
+          beat = nextL.slice(1, -1).trim();
+          i++;
+        }
+      }
+      // Collect dialogue lines until blank or next char/direction
+      var dlLines = [];
+      while (i < rawLines.length) {
+        var dl = rawLines[i].trim();
+        if (!dl) { i++; break; }
+        var dlu = dl.toUpperCase();
+        if (dlu === nameAU || dlu === nameBU || /^DIRECTION:/i.test(dl) || /^SCENE:/i.test(dl)) break;
+        dlLines.push(dl);
+        i++;
+      }
+      var dialogue = dlLines.join(' ').trim();
+      if (dialogue) {
+        result.lines.push({ type: 'line', char: charKey, beat: beat, dialogue: dialogue });
+      }
+      continue;
+    }
+
+    // Fallback: lines starting with em-dash or dash as directions
+    if (line.charAt(0) === '—' || line.startsWith('- ')) {
+      result.lines.push({ type: 'direction', text: line.replace(/^[—\-]\s*/, '').trim() });
+    }
+    i++;
+  }
+
+  return result;
+}
+
+function pbIsCharName(line, nameAU, nameBU) {
+  var u = line.toUpperCase();
+  return u === nameAU || u === nameBU;
+}
+
+function pbLoadDraftIntoTool(parsed) {
+  el('lines-container').innerHTML = '';
+  el('scene-input').value = parsed.scene || '';
+
+  parsed.lines.forEach(function(l) {
+    if (l.type === 'line') addLine(l.char, l.beat, l.dialogue, true);
+    else addDir(l.text, true);
+  });
+
+  setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 50);
+
+  // Collect lines for Firebase
+  var lines = [];
+  document.querySelectorAll('#lines-container > div').forEach(function(e) {
+    if (e.dataset.type === 'line') {
+      lines.push({ type: 'line', char: e.dataset.char, beat: e.querySelector('.beat-input').value, dialogue: e.querySelector('.dialogue-input').value });
+    } else if (e.dataset.type === 'direction') {
+      lines.push({ type: 'direction', text: e.querySelector('.direction-input').value });
+    }
+  });
+
+  fsSet('scripts/' + user.uid, {
+    scene: parsed.scene || '',
+    lines: JSON.stringify(lines),
+    userId: user.uid,
+    updatedAt: new Date().toISOString(),
+    scriptPath: 'b',
+    q6aAnswer: pbAnswers.q6a || '',
+    q6bAnswer: pbAnswers.q6b || ''
+  }).then(function() {
+    // Pre-populate Step 2 fields
+    if (pbAnswers.q6a && el('step2-thinking') && !el('step2-thinking').value) {
+      el('step2-thinking').value = pbAnswers.q6a;
+      setTimeout(function() { ar(el('step2-thinking')); }, 50);
+    }
+    if (pbAnswers.q6b && el('step2-feeling') && !el('step2-feeling').value) {
+      el('step2-feeling').value = pbAnswers.q6b;
+      setTimeout(function() { ar(el('step2-feeling')); }, 50);
+    }
+    el('path-b-screen').style.display = 'none';
+    document.body.style.overflow = '';
+    pbShowHandoff();
+  }).catch(function() {
+    el('path-b-screen').style.display = 'none';
+    document.body.style.overflow = '';
+    pbShowHandoff();
+  });
+}
+
+function pbShowHandoff() {
+  el('pb-handoff-banner').style.display = 'block';
+  // Scroll to top of script screen
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function pbDismissHandoff() {
+  el('pb-handoff-banner').style.display = 'none';
+  fsSet('scripts/' + user.uid, { handoffSeen: true }).catch(function(){});
+}
+
+window.addEventListener('popstate', function(e) {
+  var lp = el('landing-screen');
+  if (!lp || lp.style.display === 'none') { return; }
+  var state = e.state && e.state.lp;
+  var s6 = el('lp-s6');
+  var s7 = el('lp-s7');
+  if (state === 'main' || !state) {
+    if (s7) { s7.style.display = 'none'; s7.classList.remove('lp-in'); }
+    if (s6) { s6.style.display = 'none'; s6.classList.remove('lp-in'); }
+    var btnBegin = el('lp-btn-begin');
+    if (btnBegin) { btnBegin.disabled = false; }
+    lp.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (state === 'commitment') {
+    if (s7) { s7.style.display = 'none'; s7.classList.remove('lp-in'); }
+    var btnCommit = el('lp-btn-commit');
+    if (btnCommit) { btnCommit.disabled = false; }
+    if (s6) { setTimeout(function() { lpScrollTo(s6); }, 60); }
+  }
+});
+</script>
+
+<!-- EmailJS credentials — update here only, used everywhere -->
+<script>
+window.EMAILJS_SERVICE_ID        = 'service_k0ocp9f';
+window.EMAILJS_TEMPLATE_ID       = 'template_hregqk5';
+window.EMAILJS_NOTIFY_TEMPLATE_ID = 'template_ocptuqm';
+window.EMAILJS_PUBLIC_KEY        = '1HSruQu2MRIfbUF0B';
 </script>
 
 </body>
