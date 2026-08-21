@@ -316,6 +316,18 @@ body {
 .s10-continue { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 13px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 1px; width: 100%; margin-top: 24px; -webkit-appearance: none; touch-action: manipulation; }
 .s10-continue:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
 
+/* ── WAITING STATE BANNERS ───────────────────────────────────── */
+#step1-waiting-banner, #video-waiting-banner { display: none; background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); margin-top: 16px; }
+.wb-inner { border-left: 3px solid var(--accent); padding: 22px 20px 20px; }
+.wb-heading { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--ink); margin-bottom: 12px; }
+.wb-body { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: var(--ink-light); line-height: 1.75; }
+.wb-indicator { display: flex; gap: 7px; align-items: center; margin-top: 18px; }
+.wb-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.3; animation: wb-blink 2.2s ease-in-out infinite; }
+.wb-dot:nth-child(2) { animation-delay: 0.45s; }
+.wb-dot:nth-child(3) { animation-delay: 0.9s; }
+@keyframes wb-blink { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 0.65; transform: scale(1); } }
+.wb-note { font-family: 'Courier Prime', monospace; font-size: 0.7rem; color: var(--ink-faint); font-style: italic; }
+
 /* ── PATH CHOICE SCREEN ──────────────────────────────────────── */
 #path-choice-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #2a2520; align-items: flex-start; justify-content: center; padding: 32px 24px 60px; overflow-y: auto; flex-direction: column; }
 .pc-wrap { width: 100%; max-width: 520px; margin: auto; }
@@ -1132,6 +1144,18 @@ body {
     </div>
   </div>
 
+  <!-- STEP 1: WAITING FOR ANALYSIS — shown after submission while analysis generates -->
+  <div id="step1-waiting-banner">
+    <div class="wb-inner">
+      <div class="wb-heading">Your script is in.</div>
+      <p class="wb-body">The AI is reading both scripts now. This takes some real thought, not a quick pass, so there is no need to keep checking. You will get an email the moment it is ready.</p>
+      <div class="wb-indicator">
+        <div class="wb-dot"></div><div class="wb-dot"></div><div class="wb-dot"></div>
+        <span class="wb-note">Waiting</span>
+      </div>
+    </div>
+  </div>
+
   <!-- ANALYSIS READY BANNER -->
   <div id="analysis-banner">
     <div class="ab-inner">
@@ -1148,6 +1172,18 @@ body {
       <div class="jb-hd" id="jb-title"></div>
       <div class="jb-sub" id="jb-sub"></div>
       <button class="jb-btn" id="jb-btn" onclick="openJourneyStep()"></button>
+    </div>
+  </div>
+
+  <!-- AVATAR VIDEO WAITING STATE — shown at steps 4/5 until HeyGen videos are ready -->
+  <div id="video-waiting-banner">
+    <div class="wb-inner">
+      <div class="wb-heading">Your avatar videos are being created now.</div>
+      <p class="wb-body">This takes a little time to get right. You do not need to keep checking. You will get an email the moment they are ready to watch.</p>
+      <div class="wb-indicator">
+        <div class="wb-dot"></div><div class="wb-dot"></div><div class="wb-dot"></div>
+        <span class="wb-note">Waiting</span>
+      </div>
     </div>
   </div>
 
@@ -1837,6 +1873,7 @@ function signOut() {
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-link-card'); hide('couple-linked-status');
   hide('step2-card'); hide('analysis-banner'); hide('journey-banner');
+  hide('step1-waiting-banner'); hide('video-waiting-banner'); hide('pb-handoff-banner');
   hide('buyin-screen');
   hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
   ['step3-screen','step4-screen','step5-screen','step6-screen',
@@ -2869,8 +2906,8 @@ function submitScript() {
 function step2ShowSubmittedState() {
   var btn = el('step2-submit-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Script Submitted ✓'; }
-  var partnerName = user.partner || 'your partner';
-  txt('step2-status', 'Submitted. Waiting for ' + partnerName + ' to submit their script...');
+  txt('step2-status', '');
+  el('step1-waiting-banner').style.display = 'block';
 }
 
 function checkPartnerAndAnalyze() {
@@ -2909,7 +2946,10 @@ function runStep2Analysis(partnerData) {
         analysisReady: true,
         analysisAt: new Date().toISOString(),
         currentStep: '3'
-      }).then(function() { showAnalysisBanner(); });
+      }).then(function() {
+        showAnalysisBanner();
+        sendAnalysisReadyNotifications();
+      });
     }).catch(function() {
       txt('step2-status', 'Analysis could not complete. Please refresh and try again.');
     });
@@ -2965,6 +3005,7 @@ function pollAnalysisReady() {
 function showAnalysisBanner() {
   if (currentJourneyStep && parseInt(currentJourneyStep) > 3) return;
   el('analysis-banner').style.display = 'block';
+  el('step1-waiting-banner').style.display = 'none';
   txt('step2-status', '');
 }
 
@@ -3163,6 +3204,9 @@ function journeyRoute() {
     currentJourneyStep = step;
     if (step === '3' && couple.analysisReady) {
       showAnalysisBanner();
+    } else if (step === '4' || step === '5') {
+      hide('analysis-banner');
+      checkVideoReady(step);
     } else if (JOURNEY_STEPS[step]) {
       showJourneyBanner(step);
       hide('analysis-banner');
@@ -3778,6 +3822,82 @@ function s3ShowTypingIn(threadId) {
 function s3RemoveTypingFrom(threadId) {
   var t = el(threadId + '-typing');
   if (t) t.parentNode.removeChild(t);
+}
+
+// ── NOTIFICATION EMAILS ──────────────────────────────────────
+
+function sendNotificationEmail(toEmail) {
+  if (!toEmail || typeof emailjs === 'undefined') return;
+  var serviceId = window.EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
+  var notifyTemplateId = window.EMAILJS_NOTIFY_TEMPLATE_ID || 'YOUR_NOTIFY_TEMPLATE_ID';
+  var publicKey = window.EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+  emailjs.init({ publicKey: publicKey });
+  emailjs.send(serviceId, notifyTemplateId, {
+    to_email: toEmail,
+    app_link: 'https://mitchnewman.com'
+  }).catch(function(err) {
+    console.error('Notification email error to ' + toEmail + ':', err);
+  });
+}
+
+function sendAnalysisReadyNotifications() {
+  // Send to the person who triggered the analysis
+  if (user.email) sendNotificationEmail(user.email);
+  // Fetch partner's email and send to them too
+  if (user.partnerId) {
+    fsGet('users/' + user.partnerId).then(function(d) {
+      if (!d || !d.fields) return;
+      var p = fromFields(d.fields);
+      if (p.email) sendNotificationEmail(p.email);
+    }).catch(function() {});
+  }
+}
+
+// ── VIDEO READINESS ───────────────────────────────────────────
+
+function checkVideoReady(step) {
+  if (!user || !user.uid) { showVideoWaiting(); return; }
+  fsGet('users/' + user.uid).then(function(d) {
+    if (!d || !d.fields) { showVideoWaiting(); pollVideoReady(step); return; }
+    var p = fromFields(d.fields);
+    if (p.ownVideoUrl && p.partnerVideoUrl) {
+      onVideoReady(step, p);
+    } else {
+      showVideoWaiting();
+      setTimeout(function() { pollVideoReady(step); }, 30000);
+    }
+  }).catch(function() {
+    showVideoWaiting();
+    setTimeout(function() { pollVideoReady(step); }, 30000);
+  });
+}
+
+function pollVideoReady(step) {
+  if (!user || !user.uid) return;
+  fsGet('users/' + user.uid).then(function(d) {
+    if (!d || !d.fields) { setTimeout(function() { pollVideoReady(step); }, 30000); return; }
+    var p = fromFields(d.fields);
+    if (p.ownVideoUrl && p.partnerVideoUrl) {
+      onVideoReady(step, p);
+    } else {
+      setTimeout(function() { pollVideoReady(step); }, 30000);
+    }
+  }).catch(function() { setTimeout(function() { pollVideoReady(step); }, 30000); });
+}
+
+function showVideoWaiting() {
+  hide('journey-banner');
+  el('video-waiting-banner').style.display = 'block';
+}
+
+function onVideoReady(step, profileData) {
+  hide('video-waiting-banner');
+  showJourneyBanner(step);
+  // Send notification email once per person when videos become available
+  if (!profileData.videoEmailSent && user.email) {
+    sendNotificationEmail(user.email);
+    fsSet('users/' + user.uid, { videoEmailSent: true }).catch(function() {});
+  }
 }
 
 // ── PATH B: AI ASSISTED SCRIPT WRITING ──────────────────────
