@@ -42,8 +42,8 @@ exports.handler = async function(event) {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Configuration error' }) };
   }
 
-  // Step 2 (dual-script analysis) gets more tokens; all others get 4000
-  const maxTokens = step === '2' ? 8000 : 4000;
+  // Step 2 (dual-script analysis) and step b (Path B draft) get more tokens
+  const maxTokens = (step === '2' || step === 'b') ? 8000 : 4000;
 
   let apiResponse;
   try {

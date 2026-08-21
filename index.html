@@ -316,6 +316,31 @@ body {
 .s10-continue { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 13px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 1px; width: 100%; margin-top: 24px; -webkit-appearance: none; touch-action: manipulation; }
 .s10-continue:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
 
+/* ── PATH CHOICE SCREEN ──────────────────────────────────────── */
+#path-choice-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #2a2520; align-items: flex-start; justify-content: center; padding: 32px 24px 60px; overflow-y: auto; flex-direction: column; }
+.pc-wrap { width: 100%; max-width: 520px; margin: auto; }
+.pc-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 12px; text-align: center; }
+.pc-heading { font-family: 'Special Elite', cursive; font-size: 1.2rem; color: rgba(255,255,255,0.92); margin-bottom: 8px; text-align: center; }
+.pc-sub { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.48); font-style: italic; text-align: center; margin-bottom: 32px; line-height: 1.65; }
+.pc-cards { display: flex; flex-direction: column; gap: 16px; }
+.pc-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; padding: 24px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.pc-card:active { background: rgba(255,255,255,0.09); }
+.pc-card-label { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 8px; }
+.pc-card-title { font-family: 'Special Elite', cursive; font-size: 1rem; color: rgba(255,255,255,0.88); margin-bottom: 8px; }
+.pc-card-desc { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.48); line-height: 1.65; }
+.pc-card-b { border-color: rgba(184,160,112,0.22); }
+.pc-privacy { font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.22); text-align: center; margin-top: 24px; font-style: italic; }
+
+/* ── PATH B: INTAKE SCREEN ───────────────────────────────────── */
+#path-b-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #2a2520; flex-direction: column; }
+
+/* ── PATH B: HANDOFF BANNER ──────────────────────────────────── */
+#pb-handoff-banner { display: none; background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 28px 24px; margin-bottom: 16px; border-left: 4px solid var(--accent); }
+.pbh-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 12px; }
+.pbh-heading { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--ink); margin-bottom: 14px; }
+.pbh-body { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: var(--ink-light); line-height: 1.75; margin-bottom: 12px; }
+.pbh-dismiss { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; margin-top: 8px; -webkit-appearance: none; touch-action: manipulation; }
+
 /* ── STEP 11: CAP GLOBAL BRIDGE ───────────────────────────── */
 .s11-scroll { flex: 1; overflow-y: auto; padding: 32px 18px 60px; }
 .s11-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 10px; }
@@ -1054,6 +1079,17 @@ body {
     <button class="signout-btn" id="btn-signout">Sign Out</button>
   </div>
   <div id="coach-notes-container"></div>
+
+  <!-- PATH B: HANDOFF BANNER — shown above script page after AI draft generated -->
+  <div id="pb-handoff-banner">
+    <div class="pbh-eyebrow">Your AI Draft Is Ready</div>
+    <div class="pbh-heading">Here's what the AI built from your intake.</div>
+    <p class="pbh-body">This is a first draft, not a final one. The AI has captured the structure and emotional arc of your fight as you described it. Some of it will feel accurate. Some of it may not.</p>
+    <p class="pbh-body">Read through it before you change anything. Then edit it into something that actually sounds like the two of you. The goal isn't a perfect script — it's an honest one.</p>
+    <p class="pbh-body">The same submission process applies: when you're ready and the script feels true, answer the two questions below and submit. Your partner is doing the same thing privately.</p>
+    <button class="pbh-dismiss" onclick="pbDismissHandoff()">Got it — start editing</button>
+  </div>
+
   <div class="script-page">
     <div class="script-title-header" id="script-title-header">THE ONGOING ARGUMENT</div>
     <div class="privacy-tag">🔒 Your version — private until you share with Mitch</div>
@@ -1217,6 +1253,43 @@ body {
       <button class="s3-send" id="s3-send" onclick="s3Send()">Send</button>
     </div>
     <button class="s3-complete" id="s3-complete-btn" onclick="completeStep3()" style="display:none">Complete Step 3 — Continue to Step 4 ›</button>
+  </div>
+</div>
+
+<!-- PATH CHOICE SCREEN — private choice before script writing begins -->
+<div id="path-choice-screen">
+  <div class="pc-wrap">
+    <div class="pc-eyebrow">Script Writing</div>
+    <div class="pc-heading">How do you want to build your script?</div>
+    <p class="pc-sub">This is private. Your partner makes the same choice on their own.</p>
+    <div class="pc-cards">
+      <div class="pc-card" onclick="choosePathA()">
+        <div class="pc-card-label">Path A</div>
+        <div class="pc-card-title">Write it yourself</div>
+        <div class="pc-card-desc">Start with a blank script and build it line by line. You add each beat, each line of dialogue, each stage direction. This is the most direct version of the fight, in your own words, exactly as you remember it.</div>
+      </div>
+      <div class="pc-card pc-card-b" onclick="choosePathB()">
+        <div class="pc-card-label">Path B</div>
+        <div class="pc-card-title">Have the AI build a first draft</div>
+        <div class="pc-card-desc">Answer a series of questions about how the fight unfolds. The AI will generate a rough draft of the script from your answers. You'll edit that draft into something that actually sounds like the two of you before submitting.</div>
+      </div>
+    </div>
+    <div class="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
+  </div>
+</div>
+
+<!-- PATH B: AI INTAKE SCREEN -->
+<div id="path-b-screen">
+  <div class="s3-header">
+    <button class="s3-back" onclick="pbBack()" aria-label="Back">&#8592;</button>
+    <span class="s3-title">AI Script Intake</span>
+  </div>
+  <div class="s3-thread" id="pb-thread"></div>
+  <div class="s3-input-area">
+    <div class="s3-input-row">
+      <textarea class="s3-input" id="pb-input" placeholder="Your answer..." rows="1" onkeydown="pbKeyDown(event)" oninput="pbAutoGrow(this)"></textarea>
+      <button class="s3-send" id="pb-send" onclick="pbSend()">Send</button>
+    </div>
   </div>
 </div>
 
@@ -1563,6 +1636,11 @@ var pendingFightName = null; // carry fight name into auth
 var pendingJoinCoupleId = null; // coupleId extracted from /join/ URL
 var pendingJoinCode = null; // code extracted from /join/coupleId/code URL
 var pcLastJoinUrl = null; // last join URL used for resend
+
+// Path B intake state
+var pbAnswers = {};
+var pbState = null; // current question id
+var pbSending = false;
 
 // INIT — script is at bottom of body so DOM is ready; no window.onload needed
 (function() {
@@ -1989,7 +2067,11 @@ function loadNotes() {
 // SCRIPT
 function loadScript() {
   fsGet('scripts/' + user.uid).then(function(d) {
-    if (d.error) return;
+    if (d.error) {
+      // No script doc — new user, show path choice
+      checkPathChoice();
+      return;
+    }
     var s = fromFields(d.fields);
     if (s.scene) el('scene-input').value = s.scene;
     if (s.lines) {
@@ -1999,6 +2081,19 @@ function loadScript() {
         else addDir(l.text, true);
       });
       setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 50);
+      // Path B: show handoff banner if not yet dismissed
+      if (s.scriptPath === 'b' && !s.handoffSeen) {
+        if (s.q6aAnswer && el('step2-thinking') && !el('step2-thinking').value) {
+          el('step2-thinking').value = s.q6aAnswer;
+        }
+        if (s.q6bAnswer && el('step2-feeling') && !el('step2-feeling').value) {
+          el('step2-feeling').value = s.q6bAnswer;
+        }
+        pbShowHandoff();
+      }
+    } else if (!s.scriptPath) {
+      // Doc exists but no lines and no path chosen yet — show choice
+      checkPathChoice();
     }
   }).catch(function() {});
 }
@@ -3683,6 +3778,343 @@ function s3ShowTypingIn(threadId) {
 function s3RemoveTypingFrom(threadId) {
   var t = el(threadId + '-typing');
   if (t) t.parentNode.removeChild(t);
+}
+
+// ── PATH B: AI ASSISTED SCRIPT WRITING ──────────────────────
+
+var PB_QUESTIONS = {
+  q1:  'Is this a fight that happens the same way every time, or does it change? The same patterns, the same words, the same ending — or does it depend on circumstances, moods, what happened that day?',
+  q2:  'Walk me through it. Where does it tend to start — what\'s the setup, the moment before it begins?',
+  q2b: 'Tell me about a specific recent time it happened. Where did it start? What was going on that day?',
+  q3:  'Where does it usually happen? What\'s the physical space — kitchen, bedroom, car? Is one of those spaces more charged than others?',
+  q4:  'What sets it off? Not the topic — the moment. The specific trigger that tells you both: here we go again. Is it a tone of voice, a word, a facial expression, something that doesn\'t get done?',
+  q5:  'Walk me through it as it unfolds. Don\'t summarize — take me through it beat by beat. What happens first, and then what?',
+  q5fu:'I want to make sure I capture this fully. Tell me more — what happens in the middle of it? Where does it go from there?',
+  q5b: 'When you\'re in it, what are you feeling? Not what you\'re thinking — the physical feeling, the emotional charge. Where does it live in your body?',
+  q5c: 'Does it escalate, or does it tend to flatline? Does someone pull back, or does it keep building? How does it end — not resolve, just end?',
+  q5d: 'What does your partner do or say that lands hardest in the moment? A specific tone, a phrase, a look? The thing that makes it feel impossible to continue?',
+  q5e: 'Underneath all of it — underneath the argument — what do you think this fight is really about for you? What\'s the belief or the fear that\'s driving it?',
+  q6a: 'When you imagine your partner watching a version of this fight written as a script, what do you think the story they\'re telling themselves is? About your intentions, about what you want, about what you think of them?',
+  q6b: 'And what are you feeling in this fight that you don\'t think your partner sees or understands? The part that\'s real for you but doesn\'t seem to land.'
+};
+
+// State machine: after recording answer for pbState, return the next state
+function pbNextState(current, answer) {
+  if (current === 'q1') {
+    // Detect "same every time" vs "changes/depends"
+    var a = answer.toLowerCase();
+    var changes = /depend|chang|different|vari|sometime|it depend/.test(a);
+    return changes ? 'q2b' : 'q2';
+  }
+  if (current === 'q2' || current === 'q2b') return 'q3';
+  if (current === 'q3') return 'q4';
+  if (current === 'q4') return 'q5';
+  if (current === 'q5') {
+    // Thin answer check — fewer than ~50 non-space chars triggers follow-up
+    return answer.replace(/\s/g, '').length < 50 ? 'q5fu' : 'q5b';
+  }
+  if (current === 'q5fu') return 'q5b';
+  if (current === 'q5b') return 'q5c';
+  if (current === 'q5c') return 'q5d';
+  if (current === 'q5d') return 'q5e';
+  if (current === 'q5e') return 'q6a';
+  if (current === 'q6a') return 'q6b';
+  if (current === 'q6b') return 'done';
+  return 'done';
+}
+
+function checkPathChoice() {
+  showFlex('path-choice-screen');
+  document.body.style.overflow = 'hidden';
+}
+
+function choosePathA() {
+  el('path-choice-screen').style.display = 'none';
+  document.body.style.overflow = '';
+  // Mark path A so we don't re-prompt
+  fsSet('scripts/' + user.uid, { scriptPath: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
+}
+
+function choosePathB() {
+  el('path-choice-screen').style.display = 'none';
+  pbAnswers = {};
+  pbState = 'q1';
+  pbSending = false;
+  el('pb-thread').innerHTML = '';
+  el('pb-input').value = '';
+  el('path-b-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(function() { pbAskQuestion('q1'); }, 200);
+}
+
+function pbBack() {
+  el('path-b-screen').style.display = 'none';
+  document.body.style.overflow = 'hidden';
+  showFlex('path-choice-screen');
+}
+
+function pbAskQuestion(qid) {
+  var text = PB_QUESTIONS[qid];
+  if (!text) return;
+  s3ShowTypingIn('pb-thread');
+  setTimeout(function() {
+    s3RemoveTypingFrom('pb-thread');
+    pbAppendAI(text);
+    var inp = el('pb-input');
+    if (inp) { inp.disabled = false; inp.focus(); }
+    var btn = el('pb-send');
+    if (btn) btn.disabled = false;
+  }, 700);
+}
+
+function pbAppendAI(text) {
+  var thread = el('pb-thread');
+  var div = document.createElement('div');
+  div.className = 's3-msg s3-msg-ai';
+  div.innerHTML = '<div class="s3-bubble">' + text.replace(/\n/g, '<br>') + '</div>';
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function pbAppendUser(text) {
+  var thread = el('pb-thread');
+  var div = document.createElement('div');
+  div.className = 's3-msg s3-msg-user';
+  div.innerHTML = '<div class="s3-bubble">' + esc(text).replace(/\n/g, '<br>') + '</div>';
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function pbKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); pbSend(); }
+}
+
+function pbAutoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function pbSend() {
+  if (pbSending) return;
+  var inp = el('pb-input');
+  var answer = (inp.value || '').trim();
+  if (!answer) return;
+
+  pbAnswers[pbState] = answer;
+  pbAppendUser(answer);
+  inp.value = '';
+  inp.style.height = 'auto';
+  inp.disabled = true;
+  el('pb-send').disabled = true;
+  pbSending = true;
+
+  var next = pbNextState(pbState, answer);
+  pbState = next;
+
+  if (next === 'done') {
+    pbGenerateDraft();
+  } else {
+    pbSending = false;
+    pbAskQuestion(next);
+  }
+}
+
+function pbBuildPrompt() {
+  var name = (user && user.name) ? user.name : 'Person A';
+  var partner = (user && user.partner) ? user.partner : 'Person B';
+  var fight = (user && user.fight) ? user.fight : 'the argument';
+  var q2val = pbAnswers.q2 || pbAnswers.q2b || '';
+  var q2label = pbAnswers.q2 ? 'How it typically starts' : 'A specific recent instance — how it started';
+  var q5full = (pbAnswers.q5 || '') + (pbAnswers.q5fu ? '\n\nMore detail: ' + pbAnswers.q5fu : '');
+
+  return 'Write a rough-draft screenplay script of an argument between two partners. The argument is called "' + fight + '". ' + name + ' is Character A; ' + partner + ' is Character B.\n\n' +
+    'Here is everything about how this fight unfolds:\n\n' +
+    'Pattern: ' + (pbAnswers.q1 || '') + '\n\n' +
+    q2label + ': ' + q2val + '\n\n' +
+    'Physical setting: ' + (pbAnswers.q3 || '') + '\n\n' +
+    'What triggers it: ' + (pbAnswers.q4 || '') + '\n\n' +
+    'How it unfolds beat by beat: ' + q5full + '\n\n' +
+    'What I feel when I\'m in it: ' + (pbAnswers.q5b || '') + '\n\n' +
+    'How it escalates and ends: ' + (pbAnswers.q5c || '') + '\n\n' +
+    'What my partner does that lands hardest: ' + (pbAnswers.q5d || '') + '\n\n' +
+    'What this fight is really about for me underneath: ' + (pbAnswers.q5e || '') + '\n\n' +
+    'Format the script exactly as follows. Start with:\nSCENE: [brief location from the setting described above]\n\n' +
+    'For each line of dialogue:\n[CHARACTER NAME IN CAPS]\n([emotional beat or tone in parentheses])\n[What they say]\n\n' +
+    'For stage directions:\nDIRECTION: [brief description]\n\n' +
+    'Write 12-20 exchanges minimum. The beats and stage directions must reflect the emotional and physical reality described above — the feeling of escalation, the specific triggers, the body language, the charge in the room. ' +
+    'Use the actual names ' + name + ' (Character A) and ' + partner + ' (Character B) in all caps as character headers. ' +
+    'The script should reflect the tonal and emotional answers given — not just a factual retelling. ' +
+    'Output only the script itself, starting with SCENE:. No preamble, no commentary, no explanation.';
+}
+
+function pbGenerateDraft() {
+  pbAppendAI('Thank you. I have everything I need. Generating your draft now — this may take a moment.');
+  s3ShowTypingIn('pb-thread');
+
+  callAI([{ role: 'user', content: pbBuildPrompt() }], 'b').then(function(text) {
+    s3RemoveTypingFrom('pb-thread');
+    if (!text || text.length < 100) {
+      pbAppendAI('Something went wrong generating the draft. Please go back and try again.');
+      pbSending = false;
+      var btn = el('pb-send');
+      if (btn) btn.disabled = false;
+      return;
+    }
+    var name = (user && user.name) ? user.name : 'Person A';
+    var partner = (user && user.partner) ? user.partner : 'Person B';
+    var parsed = pbParseDraft(text, name, partner);
+    pbLoadDraftIntoTool(parsed);
+  }).catch(function(err) {
+    s3RemoveTypingFrom('pb-thread');
+    pbAppendAI('There was an error reaching the AI. Please go back and try again.');
+    pbSending = false;
+    var btn = el('pb-send');
+    if (btn) btn.disabled = false;
+  });
+}
+
+function pbParseDraft(text, nameA, nameB) {
+  var result = { scene: '', lines: [] };
+  var rawLines = text.split('\n');
+  var i = 0;
+  var nameAU = nameA.toUpperCase();
+  var nameBU = nameB.toUpperCase();
+
+  // Find SCENE: line
+  for (; i < rawLines.length; i++) {
+    var l = rawLines[i].trim();
+    if (/^SCENE:/i.test(l)) {
+      result.scene = l.replace(/^SCENE:\s*/i, '').trim();
+      i++;
+      break;
+    }
+  }
+
+  while (i < rawLines.length) {
+    var line = rawLines[i].trim();
+    if (!line) { i++; continue; }
+
+    // Stage direction
+    if (/^DIRECTION:/i.test(line)) {
+      result.lines.push({ type: 'direction', text: line.replace(/^DIRECTION:\s*/i, '').trim() });
+      i++;
+      continue;
+    }
+
+    // Parenthetical-only line at top level — treat as direction
+    if (line.startsWith('(') && line.endsWith(')') && !pbIsCharName(line, nameAU, nameBU)) {
+      result.lines.push({ type: 'direction', text: line.slice(1, -1).trim() });
+      i++;
+      continue;
+    }
+
+    // Character name line
+    var lineUpper = line.toUpperCase();
+    var isA = lineUpper === nameAU || lineUpper.startsWith(nameAU + ' ') || lineUpper.startsWith(nameAU + ':');
+    var isB = lineUpper === nameBU || lineUpper.startsWith(nameBU + ' ') || lineUpper.startsWith(nameBU + ':');
+
+    if (isA || isB) {
+      var charKey = isA ? 'A' : 'B';
+      i++;
+      var beat = '';
+      // Check for parenthetical beat
+      if (i < rawLines.length) {
+        var nextL = rawLines[i].trim();
+        if (nextL.startsWith('(') && nextL.endsWith(')')) {
+          beat = nextL.slice(1, -1).trim();
+          i++;
+        }
+      }
+      // Collect dialogue lines until blank or next char/direction
+      var dlLines = [];
+      while (i < rawLines.length) {
+        var dl = rawLines[i].trim();
+        if (!dl) { i++; break; }
+        var dlu = dl.toUpperCase();
+        if (dlu === nameAU || dlu === nameBU || /^DIRECTION:/i.test(dl) || /^SCENE:/i.test(dl)) break;
+        dlLines.push(dl);
+        i++;
+      }
+      var dialogue = dlLines.join(' ').trim();
+      if (dialogue) {
+        result.lines.push({ type: 'line', char: charKey, beat: beat, dialogue: dialogue });
+      }
+      continue;
+    }
+
+    // Fallback: lines starting with em-dash or dash as directions
+    if (line.charAt(0) === '—' || line.startsWith('- ')) {
+      result.lines.push({ type: 'direction', text: line.replace(/^[—\-]\s*/, '').trim() });
+    }
+    i++;
+  }
+
+  return result;
+}
+
+function pbIsCharName(line, nameAU, nameBU) {
+  var u = line.toUpperCase();
+  return u === nameAU || u === nameBU;
+}
+
+function pbLoadDraftIntoTool(parsed) {
+  el('lines-container').innerHTML = '';
+  el('scene-input').value = parsed.scene || '';
+
+  parsed.lines.forEach(function(l) {
+    if (l.type === 'line') addLine(l.char, l.beat, l.dialogue, true);
+    else addDir(l.text, true);
+  });
+
+  setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 50);
+
+  // Collect lines for Firebase
+  var lines = [];
+  document.querySelectorAll('#lines-container > div').forEach(function(e) {
+    if (e.dataset.type === 'line') {
+      lines.push({ type: 'line', char: e.dataset.char, beat: e.querySelector('.beat-input').value, dialogue: e.querySelector('.dialogue-input').value });
+    } else if (e.dataset.type === 'direction') {
+      lines.push({ type: 'direction', text: e.querySelector('.direction-input').value });
+    }
+  });
+
+  fsSet('scripts/' + user.uid, {
+    scene: parsed.scene || '',
+    lines: JSON.stringify(lines),
+    userId: user.uid,
+    updatedAt: new Date().toISOString(),
+    scriptPath: 'b',
+    q6aAnswer: pbAnswers.q6a || '',
+    q6bAnswer: pbAnswers.q6b || ''
+  }).then(function() {
+    // Pre-populate Step 2 fields
+    if (pbAnswers.q6a && el('step2-thinking') && !el('step2-thinking').value) {
+      el('step2-thinking').value = pbAnswers.q6a;
+      setTimeout(function() { ar(el('step2-thinking')); }, 50);
+    }
+    if (pbAnswers.q6b && el('step2-feeling') && !el('step2-feeling').value) {
+      el('step2-feeling').value = pbAnswers.q6b;
+      setTimeout(function() { ar(el('step2-feeling')); }, 50);
+    }
+    el('path-b-screen').style.display = 'none';
+    document.body.style.overflow = '';
+    pbShowHandoff();
+  }).catch(function() {
+    el('path-b-screen').style.display = 'none';
+    document.body.style.overflow = '';
+    pbShowHandoff();
+  });
+}
+
+function pbShowHandoff() {
+  el('pb-handoff-banner').style.display = 'block';
+  // Scroll to top of script screen
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function pbDismissHandoff() {
+  el('pb-handoff-banner').style.display = 'none';
+  fsSet('scripts/' + user.uid, { handoffSeen: true }).catch(function(){});
 }
 
 window.addEventListener('popstate', function(e) {
