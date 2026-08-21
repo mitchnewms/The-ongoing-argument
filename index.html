@@ -162,6 +162,24 @@ body {
 .al-coach-entry:last-child { border-bottom: none; }
 .al-coach-entry-text { font-size: 0.85rem; color: var(--ink); line-height: 1.5; }
 .al-coach-entry-time { font-size: 0.62rem; color: var(--ink-faint); margin-top: 2px; }
+
+/* ── COUPLE LINKING ─────────────────────────────────────────── */
+#couple-link-card { display: none; margin-top: 16px; }
+.cl-card { background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 24px 24px 20px; }
+.cl-hd { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+.cl-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; font-family: 'Courier Prime', monospace; }
+.cl-code { font-family: 'Special Elite', cursive; font-size: 2.2rem; letter-spacing: 0.35em; color: var(--ink); margin-bottom: 10px; }
+.cl-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--line); background: transparent; color: var(--accent); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+.cl-divider { font-size: 0.72rem; color: var(--ink-faint); font-style: italic; text-align: center; margin: 20px 0 16px; }
+.cl-input-row { display: flex; gap: 8px; }
+.cl-input { flex: 1; background: #fff; border: 1px solid var(--line); padding: 10px 12px; font-family: 'Courier Prime', monospace; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); outline: none; border-radius: 1px; -webkit-appearance: none; }
+.cl-input:focus { border-color: var(--accent); }
+.cl-link-btn { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.08em; padding: 10px 18px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; white-space: nowrap; -webkit-appearance: none; touch-action: manipulation; }
+.cl-error { font-size: 0.78rem; color: var(--red); font-style: italic; margin-top: 10px; min-height: 18px; }
+#couple-linked-status { display: none; margin-top: 16px; }
+.cl-linked { background: var(--paper); border-radius: 2px; padding: 14px 20px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+.cl-linked-icon { color: #5a8a5a; font-size: 1rem; font-family: 'Courier Prime', monospace; }
+.cl-linked-text { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-light); }
 </style>
 
 <style>
@@ -674,6 +692,29 @@ body {
       </div>
     </div>
   </div>
+
+  <!-- COUPLE LINKING -->
+  <div id="couple-link-card">
+    <div class="cl-card">
+      <div class="cl-hd">Link with Your Partner</div>
+      <div class="cl-label">Your code — share this with your partner</div>
+      <div class="cl-code" id="cl-code-display">——————</div>
+      <button class="cl-copy-btn" id="cl-copy-btn" onclick="clCopyCode()">Copy Code</button>
+      <div class="cl-divider">already have your partner's code?</div>
+      <div class="cl-input-row">
+        <input type="text" id="cl-partner-code" class="cl-input" placeholder="XXXXXX" maxlength="6" autocomplete="off" onkeydown="if(event.key==='Enter')clLinkPartner()" />
+        <button class="cl-link-btn" onclick="clLinkPartner()">Link</button>
+      </div>
+      <div id="cl-error" class="cl-error"></div>
+    </div>
+  </div>
+
+  <div id="couple-linked-status">
+    <div class="cl-linked">
+      <span class="cl-linked-icon">✓</span>
+      <span class="cl-linked-text" id="cl-linked-text">Linked with your partner</span>
+    </div>
+  </div>
 </div>
 
 <!-- AWARENESS LOG FAB — always accessible in script view -->
@@ -863,8 +904,10 @@ function createAccount() {
     }
     saveSession(d);
     user.name = name; user.partner = partner; user.fight = fight;
+    var coupleCode = generateCoupleCode();
+    user.coupleCode = coupleCode;
     localStorage.setItem('oa_user', JSON.stringify(user));
-    fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString() });
+    fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString(), coupleCode: coupleCode });
     afterLogin();
   }).catch(function() { el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account'; txt('ca-error', 'Connection error. Try again.'); });
 }
@@ -873,6 +916,7 @@ function signOut() {
   user = null; token = null;
   localStorage.removeItem('oa_user');
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
+  hide('couple-link-card'); hide('couple-linked-status');
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   switchTab('signin');
@@ -935,6 +979,20 @@ function fsList(col) {
   return fetch(DB + '/' + col, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.json(); });
 }
 
+function fsQuery(col, field, value) {
+  return fetch(DB + ':runQuery', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: col }],
+        where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } },
+        limit: 1
+      }
+    })
+  }).then(function(r) { return r.json(); });
+}
+
 function toFields(obj) {
   var f = {};
   for (var k in obj) {
@@ -977,7 +1035,11 @@ function loadProfile() {
     var na = el('input-name-a'); if (na) na.value = name !== 'Me' ? name : '';
     var nb = el('input-name-b'); if (nb) nb.value = partner !== 'Partner' ? partner : '';
     user.name = name; user.partner = partner; user.fight = fight;
+    if (p.coupleCode) user.coupleCode = p.coupleCode;
+    if (p.coupleId) user.coupleId = p.coupleId;
+    if (p.partnerId) user.partnerId = p.partnerId;
     localStorage.setItem('oa_user', JSON.stringify(user));
+    clUpdateLinkUI(p);
   }).catch(function() {});
 }
 
@@ -1323,6 +1385,86 @@ function loadClientAwarenessLog(uid, container) {
     block.innerHTML = html;
     container.appendChild(block);
   }).catch(function() {});
+}
+
+/* COUPLE LINKING */
+function generateCoupleCode() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code = '';
+  for (var i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function clUpdateLinkUI(profile) {
+  if (!profile || user.email === COACH) return;
+  if (profile.coupleId) {
+    clShowLinked(profile.partnerName || 'your partner');
+    return;
+  }
+  var code = profile.coupleCode || user.coupleCode;
+  if (!code) {
+    code = generateCoupleCode();
+    user.coupleCode = code;
+    localStorage.setItem('oa_user', JSON.stringify(user));
+    fsSet('users/' + user.uid, { coupleCode: code });
+  }
+  txt('cl-code-display', code);
+  el('couple-link-card').style.display = 'block';
+}
+
+function clShowLinked(partnerName) {
+  hide('couple-link-card');
+  txt('cl-linked-text', 'Linked with ' + partnerName);
+  el('couple-linked-status').style.display = 'block';
+}
+
+function clCopyCode() {
+  var code = (el('cl-code-display').textContent || '').trim();
+  if (!code) return;
+  var finish = function() {
+    var b = el('cl-copy-btn'); if (b) { b.textContent = 'Copied!'; setTimeout(function() { b.textContent = 'Copy Code'; }, 2000); }
+  };
+  if (navigator.clipboard) { navigator.clipboard.writeText(code).then(finish).catch(finish); return; }
+  var ta = document.createElement('textarea'); ta.value = code;
+  ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta); finish();
+}
+
+function clLinkPartner() {
+  var code = (val('cl-partner-code') || '').toUpperCase();
+  if (code.length !== 6) { txt('cl-error', 'Enter the 6-character code from your partner.'); return; }
+  if (user.coupleCode && code === user.coupleCode) { txt('cl-error', "That’s your own code — enter your partner’s code."); return; }
+  txt('cl-error', '');
+  var input = el('cl-partner-code'); var btn = document.querySelector('.cl-link-btn');
+  if (input) input.disabled = true; if (btn) btn.disabled = true;
+  fsQuery('users', 'coupleCode', code).then(function(results) {
+    if (input) input.disabled = false; if (btn) btn.disabled = false;
+    var doc = results && results[0] && results[0].document;
+    if (!doc) { txt('cl-error', 'Code not found. Check with your partner.'); return; }
+    var partner = fromFields(doc.fields);
+    var partnerId = doc.name.split('/').pop();
+    if (partnerId === user.uid) { txt('cl-error', "That’s your own code — enter your partner’s code."); return; }
+    if (partner.coupleId) { txt('cl-error', 'This code is already linked to another account.'); return; }
+    var fightName = user.fight || partner.fightName || 'The Ongoing Argument';
+    fsAdd('couples', {
+      partnerAId: partnerId, partnerBId: user.uid,
+      fightName: fightName, currentStep: '1', createdAt: new Date().toISOString()
+    }).then(function(coupleDoc) {
+      if (!coupleDoc || coupleDoc.error) { txt('cl-error', 'Could not link accounts. Try again.'); return; }
+      var coupleId = coupleDoc.name.split('/').pop();
+      return Promise.all([
+        fsSet('users/' + user.uid, { coupleId: coupleId, partnerId: partnerId }),
+        fsSet('users/' + partnerId, { coupleId: coupleId, partnerId: user.uid })
+      ]).then(function() {
+        user.coupleId = coupleId; user.partnerId = partnerId;
+        localStorage.setItem('oa_user', JSON.stringify(user));
+        clShowLinked(partner.name || 'your partner');
+      });
+    }).catch(function() { txt('cl-error', 'Connection error. Try again.'); });
+  }).catch(function() {
+    if (input) input.disabled = false; if (btn) btn.disabled = false;
+    txt('cl-error', 'Connection error. Try again.');
+  });
 }
 
 window.addEventListener('popstate', function(e) {
