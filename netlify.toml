@@ -2,6 +2,12 @@
   functions = "netlify/functions"
 
 [[redirects]]
+  from = "https://imaginative-starburst-a1bbd9.netlify.app/*"
+  to = "https://mitchnewman.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/join/*"
   to = "/index.html"
   status = 200
