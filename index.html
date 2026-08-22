@@ -1335,6 +1335,27 @@ h1, h2, h3,
 </head>
 <body>
 
+<!-- BETA PASSWORD GATE — REMOVE BEFORE LAUNCH -->
+<div id="beta-gate" style="position:fixed;inset:0;background:#F6F4F0;z-index:99999;display:flex;align-items:center;justify-content:center;">
+  <div style="max-width:340px;width:90%;padding:40px 32px;background:#fff;border:1px solid #E2DED8;border-radius:4px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+    <div style="font-family:'Lora',Georgia,serif;font-size:1.25rem;color:#111111;margin-bottom:6px;">The Ongoing Argument</div>
+    <div style="font-size:0.8rem;color:#888888;margin-bottom:28px;letter-spacing:0.04em;text-transform:uppercase;">Beta Access</div>
+    <input type="password" id="beta-pw-input" placeholder="Enter password" autocomplete="off"
+      style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid #E2DED8;border-radius:3px;font-size:0.95rem;color:#111111;background:#F6F4F0;margin-bottom:10px;font-family:inherit;"
+      onkeydown="if(event.key==='Enter')betaGateSubmit()" />
+    <div id="beta-pw-error" style="color:#C0392B;font-size:0.8rem;margin-bottom:10px;min-height:1em;"></div>
+    <button onclick="betaGateSubmit()" style="width:100%;padding:12px;background:#E06500;color:#fff;border:none;border-radius:3px;font-size:0.9rem;cursor:pointer;font-family:'Lora',Georgia,serif;letter-spacing:0.02em;">Enter</button>
+  </div>
+</div>
+<script>
+// BETA GATE — REMOVE BEFORE LAUNCH
+(function() {
+  if (sessionStorage.getItem('oa_beta') === '1') {
+    document.getElementById('beta-gate').style.display = 'none';
+  }
+})();
+</script>
+
 <!-- ENROLLMENT SCREENS -->
 
 <!-- Mutual Buy-In -->
@@ -1418,6 +1439,21 @@ h1, h2, h3,
     <div class="ce-error" id="ce-error"></div>
     <button class="ce-submit-btn" id="ce-submit-btn" onclick="submitPartnerCode()">Verify Code</button>
     <button class="ce-back" onclick="ceGoBack()">← Go back</button>
+  </div>
+</div>
+
+<!-- Partner B Commitment Screen — shown after code validation, before account creation -->
+<div id="pb-commit-screen" class="enroll-screen" style="display:none;">
+  <div class="bi-card">
+    <div class="bi-eyebrow">Before you create your account</div>
+    <div class="bi-body">
+      <p>Your partner has already committed to this process. This is where we check that you are in too — not because we doubt you, but because this only works when both people are genuinely here.</p>
+      <p>You are about to create an account and write your version of the fight. Privately. Honestly. Without your partner seeing it first.</p>
+      <p>This is not something you do because your partner signed up. This is something you do because you want to resolve the fight too.</p>
+      <p>Are you in this because you actually want to be?</p>
+    </div>
+    <button class="bi-cta" onclick="pbCommitConfirm()">Yes. I am in. Create My Account →</button>
+    <button class="bi-back" onclick="pbCommitBack()">← Go back</button>
   </div>
 </div>
 
@@ -1613,6 +1649,18 @@ h1, h2, h3,
     <div class="wb-inner">
       <div class="wb-heading">Your script is in.</div>
       <p class="wb-body">The AI is reading both scripts now. This takes some real thought, not a quick pass, so there is no need to keep checking. You will get an email the moment it is ready.</p>
+      <div class="wb-indicator">
+        <div class="wb-dot"></div><div class="wb-dot"></div><div class="wb-dot"></div>
+        <span class="wb-note">Waiting</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAITING FOR BOTH PARTNERS TO CONFIRM — shown until partnerAConfirmed && partnerBConfirmed -->
+  <div id="partner-waiting-banner" style="display:none;">
+    <div class="wb-inner">
+      <div class="wb-heading">Waiting for your partner.</div>
+      <p class="wb-body">Your partner needs to complete their side of the process before you can begin writing. Once they confirm, this screen will unlock.</p>
       <div class="wb-indicator">
         <div class="wb-dot"></div><div class="wb-dot"></div><div class="wb-dot"></div>
         <span class="wb-note">Waiting</span>
@@ -2208,6 +2256,17 @@ function showFlex(id) { el(id).style.display = 'flex'; }
 function txt(id, t) { var e = el(id); if (e) e.textContent = t; }
 function val(id) { var e = el(id); return e ? e.value.trim() : ''; }
 
+// BETA GATE — REMOVE BEFORE LAUNCH
+function betaGateSubmit() {
+  var pw = (el('beta-pw-input') || {}).value || '';
+  if (pw.trim().toLowerCase() === 'ongoing') {
+    sessionStorage.setItem('oa_beta', '1');
+    var g = el('beta-gate'); if (g) g.style.display = 'none';
+  } else {
+    txt('beta-pw-error', 'Incorrect password.');
+  }
+}
+
 var EYE_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 var EYE_CLOSED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 function togglePw(inputId, btn) {
@@ -2330,13 +2389,13 @@ function createAccount() {
         ]).then(function() { return coupleId; });
       }).then(function(coupleId) {
         if (!coupleId) return;
-        // TEMPORARY QA BYPASS — REMOVE BEFORE LAUNCH — bypasses Stripe payment gate
-        if (new URLSearchParams(window.location.search).get('qamode') === 'mitchtest') {
-          var qaCode = generateCoupleCode();
-          fsSet('couples/' + coupleId, { paidStatus: true, coupleCode: qaCode, paidAt: new Date().toISOString() })
-            .then(function() { showPaymentConfirm(qaCode, coupleId); });
-          return;
-        }
+        // BETA BYPASS — ALWAYS ON DURING BETA — MUST BE REMOVED BEFORE REAL LAUNCH
+        // Before launch: remove this block and restore real Stripe payment flow below.
+        var qaCode = generateCoupleCode();
+        fsSet('couples/' + coupleId, { paidStatus: true, coupleCode: qaCode, paidAt: new Date().toISOString(), partnerAConfirmed: true })
+          .then(function() { showPaymentConfirm(qaCode, coupleId); });
+        return;
+        // END BETA BYPASS — REMOVE ABOVE BLOCK BEFORE LAUNCH
         el('btn-create').textContent = 'Redirecting to payment…';
         return fetch('/.netlify/functions/stripe-session', {
           method: 'POST',
@@ -2416,7 +2475,7 @@ function afterLogin() {
     var coupleId = pendingCoupleId;
     var partnerAId = pendingPartnerAId;
     Promise.all([
-      fsSet('couples/' + coupleId, { partnerBId: user.uid }),
+      fsSet('couples/' + coupleId, { partnerBId: user.uid, partnerBConfirmed: true }),
       fsSet('users/' + user.uid, { coupleId: coupleId, partnerId: partnerAId })
     ]).then(function() {
       user.coupleId = coupleId; user.partnerId = partnerAId;
@@ -2994,17 +3053,14 @@ function pbAutoValidate() {
       errDiv.textContent = 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.';
       errDiv.style.display = 'block'; return;
     }
-    // Valid — proceed to account creation
+    // Valid — show commitment screen before account creation
     pendingCoupleId = pendingJoinCoupleId;
     pendingPartnerAId = couple.partnerAId || '';
     if (couple.fightName) pendingFightName = couple.fightName;
     hide('partner-b-intro-screen');
-    history.pushState({ screen: 'auth' }, '');
-    if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
-    var sub = el('form-create') && el('form-create').querySelector('.auth-sub');
-    if (sub) sub.textContent = 'Create your account to join the process.';
-    switchTab('create');
-    showFlex('auth-screen');
+    window._pbCommitSource = 'auto';
+    history.pushState({ screen: 'pb-commit' }, '');
+    showFlex('pb-commit-screen');
   }).catch(function() {
     btn.disabled = false; btn.textContent = 'I\'m in. Create My Account →';
     errDiv.textContent = 'Connection error. Please try again.';
@@ -3125,22 +3181,40 @@ function submitPartnerCode() {
       return;
     }
 
-    // Code valid — store context and show account creation
+    // Code valid — show commitment screen before account creation
     pendingCoupleId = match._id;
     pendingPartnerAId = match.partnerAId || '';
     if (match.fightName) { pendingFightName = match.fightName; }
 
     hide('code-entry-screen');
-    // Pre-fill fight name
-    if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
-    switchTab('create');
-    var sub = el('form-create') && el('form-create').querySelector('.auth-sub');
-    if (sub) sub.textContent = 'Create your account to join the process.';
-    showFlex('auth-screen');
+    window._pbCommitSource = 'code-entry';
+    history.pushState({ screen: 'pb-commit' }, '');
+    showFlex('pb-commit-screen');
   }).catch(function() {
     btn.disabled = false; btn.textContent = 'Verify Code';
     txt('ce-error', 'Connection error. Please try again.');
   });
+}
+
+function pbCommitConfirm() {
+  hide('pb-commit-screen');
+  if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
+  switchTab('create');
+  var sub = el('form-create') && el('form-create').querySelector('.auth-sub');
+  if (sub) sub.textContent = 'Create your account to join the process.';
+  history.pushState({ screen: 'auth' }, '');
+  showFlex('auth-screen');
+}
+
+function pbCommitBack() {
+  hide('pb-commit-screen');
+  if (window._pbCommitSource === 'code-entry') {
+    history.pushState({ screen: 'code-entry' }, '');
+    show('code-entry-screen');
+  } else {
+    history.pushState({ screen: 'partner-b-intro' }, '');
+    showFlex('partner-b-intro-screen');
+  }
 }
 
 /* Payment return handler */
@@ -3694,12 +3768,20 @@ var currentJourneyStep = null;
 
 function journeyRoute() {
   if (!user || !user.coupleId) return;
-  step2Init();
   fsGet('couples/' + user.coupleId).then(function(d) {
     if (!d || !d.fields) return;
     var couple = fromFields(d.fields);
     var step = String(couple.currentStep || '1');
     currentJourneyStep = step;
+    // Gate script writing until both partners have independently confirmed commitment
+    if (couple.partnerAConfirmed && couple.partnerBConfirmed) {
+      step2Init();
+      hide('partner-waiting-banner');
+    } else {
+      hide('step2-card');
+      var pwb = el('partner-waiting-banner');
+      if (pwb) pwb.style.display = 'block';
+    }
     if (step === '3' && couple.analysisReady) {
       showAnalysisBanner();
     } else if (step === '4' || step === '5') {
@@ -3712,7 +3794,7 @@ function journeyRoute() {
     if (step === '3') {
       el('s3-complete-btn').style.display = 'block';
     }
-  }).catch(function() {});
+  }).catch(function() { step2Init(); }); // fallback: show script tool if read fails
 }
 
 function showJourneyBanner(step) {
