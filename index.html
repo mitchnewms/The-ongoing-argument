@@ -81,7 +81,7 @@ body {
 .script-line { margin-bottom: 28px; text-align: center; position: relative; }
 .direction-line { margin-bottom: 28px; text-align: center; position: relative; }
 .char-name { display: block; font-family: 'Courier Prime', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); margin-bottom: 2px; }
-.char-name.char-b { color: var(--red); }
+.char-name.char-b { color: var(--ink); }
 .beat-input { display: block; font-family: 'Courier Prime', monospace; font-size: 0.8rem; font-style: italic; color: var(--ink-light); background: transparent; border: none; border-bottom: 1px dashed transparent; outline: none; text-align: center; width: 260px; margin: 0 auto 6px; padding: 2px 0; }
 .beat-input:focus { border-bottom-color: var(--line); }
 .beat-input::placeholder { color: var(--line); }
@@ -1353,6 +1353,46 @@ h1, h2, h3,
 .voice-btn-active { background: #E06500 !important; border-color: #E06500 !important; color: #fff !important; }
 .voice-btn-active svg { color: #fff; }
 .voice-unsupported { display: none !important; }
+
+/* 32. TOP BAR — logo placeholder and back button */
+/* LOGO PLACEHOLDER — replace the button with an <img> or SVG when the real logo is ready */
+.top-bar-logo {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #888888;
+  cursor: pointer;
+  background: none;
+  border: 1px solid #E2DED8;
+  border-radius: 6px;
+  padding: 7px 12px;
+  letter-spacing: 0.06em;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+.top-bar-logo:hover { border-color: #E06500; color: #E06500; }
+.top-bar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+/* nav-back-btn inherits signout-btn styling; hidden until there is somewhere to go back to */
+#nav-back-btn { display: none; }
+
+/* path-choice-screen home button — top-bar is hidden behind the overlay so this provides escape */
+.pc-home-btn {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  background: none;
+  border: none;
+  color: rgba(240,232,213,0.45);
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 6px 0;
+  font-family: 'Courier Prime', monospace;
+  letter-spacing: 0.04em;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+}
+.pc-home-btn:hover { color: rgba(240,232,213,0.9); }
 </style>
 
 </head>
@@ -1610,8 +1650,13 @@ h1, h2, h3,
 
 <div id="script-screen">
   <div class="top-bar">
+    <!-- LOGO PLACEHOLDER — swap this button for a real <img> or SVG logo when ready; keep onclick="navHome()" -->
+    <button class="top-bar-logo" onclick="navHome()" title="Home">TOA</button>
     <div class="top-bar-left"><span id="fight-title-display">The Ongoing Argument</span>Signed in as <span id="user-name-display" style="display:inline;font-style:normal;color:#f0e8d5;"></span></div>
-    <button class="signout-btn" id="btn-signout">Sign Out</button>
+    <div class="top-bar-right">
+      <button class="signout-btn" id="nav-back-btn" onclick="navBack()">← Back</button>
+      <button class="signout-btn" id="btn-signout">Sign Out</button>
+    </div>
   </div>
   <div id="coach-notes-container"></div>
 
@@ -1829,7 +1874,8 @@ h1, h2, h3,
 
 <!-- PATH CHOICE SCREEN — private choice before script writing begins -->
 <div id="path-choice-screen">
-  <div class="pc-wrap">
+  <div class="pc-wrap" style="position:relative;">
+    <button class="pc-home-btn" onclick="navHome()">← Home</button>
     <div class="pc-eyebrow">Script Writing</div>
     <div class="pc-heading">How do you want to build your script?</div>
     <p class="pc-sub">This is private. Your partner makes the same choice on their own.</p>
@@ -2288,6 +2334,47 @@ function betaGateSubmit() {
   } else {
     txt('beta-pw-error', 'Incorrect password.');
   }
+}
+
+// IN-APP NAVIGATION — back button and logo home button
+var appNavStack = [];
+
+function navPush(name) {
+  appNavStack.push(name);
+  updateNavBtns();
+}
+
+function navBack() {
+  if (appNavStack.length <= 1) return;
+  appNavStack.pop();
+  var prev = appNavStack[appNavStack.length - 1];
+  if (prev === 'path-choice') {
+    hide('path-b-screen');
+    document.body.style.overflow = 'hidden';
+    showFlex('path-choice-screen');
+  } else if (prev === 'script') {
+    hide('path-choice-screen');
+    hide('path-b-screen');
+    document.body.style.overflow = '';
+  }
+  updateNavBtns();
+}
+
+function navHome() {
+  // Logo home button: clear overlays and return the user to the script screen entry state.
+  // Does NOT sign the user out — just closes any overlay above the script tool.
+  appNavStack = [];
+  hide('path-choice-screen');
+  hide('path-b-screen');
+  document.body.style.overflow = '';
+  updateNavBtns();
+  var ss = el('script-screen');
+  if (ss) ss.scrollTop = 0;
+}
+
+function updateNavBtns() {
+  var btn = el('nav-back-btn');
+  if (btn) btn.style.display = appNavStack.length > 1 ? 'inline-block' : 'none';
 }
 
 var EYE_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -4605,6 +4692,7 @@ function pbNextState(current, answer) {
 }
 
 function checkPathChoice() {
+  if (appNavStack.indexOf('path-choice') === -1) navPush('path-choice');
   showFlex('path-choice-screen');
   document.body.style.overflow = 'hidden';
 }
@@ -4612,12 +4700,14 @@ function checkPathChoice() {
 function choosePathA() {
   el('path-choice-screen').style.display = 'none';
   document.body.style.overflow = '';
-  // Mark path A so we don't re-prompt
+  navPush('script');
+  // Mark path A so we don't re-prompt on return
   fsSet('scripts/' + user.uid, { scriptPath: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
 }
 
 function choosePathB() {
   el('path-choice-screen').style.display = 'none';
+  navPush('path-b-intake');
   pbAnswers = {};
   pbState = 'q1';
   pbSending = false;
@@ -4629,9 +4719,14 @@ function choosePathB() {
 }
 
 function pbBack() {
-  el('path-b-screen').style.display = 'none';
-  document.body.style.overflow = 'hidden';
-  showFlex('path-choice-screen');
+  // Pop path-b-intake off the stack; navBack() will restore path-choice-screen
+  if (appNavStack[appNavStack.length - 1] === 'path-b-intake') {
+    navBack();
+  } else {
+    el('path-b-screen').style.display = 'none';
+    document.body.style.overflow = 'hidden';
+    showFlex('path-choice-screen');
+  }
 }
 
 function pbAskQuestion(qid) {
@@ -4909,12 +5004,21 @@ window.addEventListener('popstate', function(e) {
     return;
   }
 
-  // If script tool or coach screen is visible, user is logged in — stay put
+  // If script tool or coach screen is visible, use in-app nav (back button / navBack)
+  // rather than letting the browser navigate away. path-choice-screen and path-b-screen
+  // are overlays — popstate on those should also stay in-app.
   var scriptEl = el('script-screen');
   var coachEl = el('coach-screen');
+  var pathChoiceEl = el('path-choice-screen');
+  var pathBEl = el('path-b-screen');
   var shown = function(e) { return e && (e.style.display === 'block' || e.style.display === 'flex'); };
-  if (shown(scriptEl) || shown(coachEl)) {
-    history.pushState({ screen: 'app' }, '');
+  if (shown(scriptEl) || shown(coachEl) || shown(pathChoiceEl) || shown(pathBEl)) {
+    // Try in-app back first; if there's nothing to pop, just re-anchor
+    if (appNavStack.length > 1) {
+      navBack();
+    } else {
+      history.pushState({ screen: 'app' }, '');
+    }
     return;
   }
 
