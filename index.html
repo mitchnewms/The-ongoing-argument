@@ -349,6 +349,7 @@ body {
 .pc-card-title { font-family: 'Special Elite', cursive; font-size: 1rem; color: rgba(255,255,255,0.88); margin-bottom: 8px; }
 .pc-card-desc { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.48); line-height: 1.65; }
 #path-choice-screen .pc-card-desc { color: var(--ink-light); }
+#path-choice-screen .pc-card-title { color: var(--ink); }
 .pc-card-b { border-color: rgba(184,160,112,0.22); }
 .pc-privacy { font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.22); text-align: center; margin-top: 24px; font-style: italic; }
 
@@ -876,6 +877,411 @@ body {
 .ce-submit-btn:active { background: #4a6a4a; }
 .ce-submit-btn:disabled { background: #8aaa8a; cursor: not-allowed; }
 .ce-back { background: none; border: none; color: var(--ink-faint); font-family: 'Courier Prime', monospace; font-size: 0.72rem; cursor: pointer; margin-top: 14px; display: block; text-align: center; width: 100%; padding: 8px; -webkit-appearance: none; }
+</style>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   VISUAL REFRESH — #E06500 orange, off-white bg, system sans
+   CSS-only override block. No HTML or JS changes.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 1. TOKEN RESET */
+:root {
+  --accent: #E06500;
+  --paper: #F6F4F0;
+  --paper-dark: #EDEBE4;
+  --ink: #111111;
+  --ink-light: #555555;
+  --ink-faint: #888888;
+  --line: #E2DED8;
+}
+
+/* 2. BASE — font sweep covers all elements that don't have explicit font-family */
+body {
+  background: #F6F4F0;
+  font-family: -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 15px;
+}
+/* Force system sans on every element, overriding Courier Prime / Special Elite / Lora */
+body, body * {
+  font-family: -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+}
+
+/* 3. AUTH SCREEN */
+.auth-header h1 {
+  font-size: clamp(1.5rem, 5vw, 2rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  color: #111111 !important;
+}
+.auth-header p { color: #888888 !important; font-style: normal !important; }
+.auth-card { border-radius: 10px !important; border-top-width: 3px !important; }
+.auth-tab { font-size: 0.82rem !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; }
+.auth-field label { font-size: 0.78rem !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; color: #555555 !important; }
+.auth-field input { font-size: 0.95rem !important; border-radius: 6px !important; }
+.auth-submit { font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: 0 !important; text-transform: none !important; border-radius: 6px !important; }
+.auth-submit:active { background: #C45800 !important; }
+.auth-submit:disabled { background: #F5C5A0 !important; }
+.auth-error { font-size: 0.85rem !important; font-style: normal !important; }
+.auth-sub { font-style: normal !important; color: #888888 !important; font-size: 0.85rem !important; }
+#btn-forgot { font-style: italic !important; }
+
+/* 4. TOP BAR */
+.top-bar-left { color: #111111 !important; font-weight: 700 !important; font-size: 0.95rem !important; }
+.top-bar-left span { color: #888888 !important; font-size: 0.78rem !important; font-style: normal !important; }
+.signout-btn { border-color: #E2DED8 !important; color: #888888 !important; font-size: 0.8rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; border-radius: 6px !important; }
+
+/* 5. SCRIPT PAGE */
+.script-page { border-radius: 10px !important; box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important; }
+.script-title-header { font-size: 1rem !important; font-weight: 800 !important; letter-spacing: 0.06em !important; }
+.privacy-tag { font-size: 0.78rem !important; color: #E06500 !important; font-style: normal !important; }
+.name-row-label { font-size: 0.72rem !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; color: #888888 !important; }
+.name-field label { font-size: 0.72rem !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; color: #888888 !important; }
+.scene-block label { font-size: 0.72rem !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; color: #888888 !important; }
+.char-name { font-size: 0.88rem !important; font-weight: 700 !important; letter-spacing: 0.06em !important; }
+.dialogue-input { font-size: 0.95rem !important; }
+.beat-input { font-size: 0.85rem !important; }
+.direction-input { font-size: 0.85rem !important; }
+.btn { font-size: 0.8rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; border-radius: 6px !important; padding: 10px 16px !important; }
+.action-btn { font-size: 0.88rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; border-radius: 6px !important; }
+.tbc span { font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+#status-msg { font-size: 0.8rem !important; font-style: normal !important; color: #888888 !important; }
+
+/* 6. STEP 2 CARD */
+.step2-hd { font-size: 1rem !important; font-weight: 800 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.step2-intro { font-style: normal !important; font-size: 0.88rem !important; color: #555555 !important; }
+.step2-q-label { font-style: normal !important; font-size: 0.9rem !important; color: #333333 !important; }
+.step2-textarea { font-size: 0.9rem !important; border-radius: 6px !important; }
+.step2-submit-btn { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.step2-submit-btn:disabled { background: #F5C5A0 !important; }
+
+/* 7. WAITING BANNERS + JOURNEY + ANALYSIS */
+.wb-heading { font-size: 1.05rem !important; font-weight: 800 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.wb-body { font-style: normal !important; font-size: 0.9rem !important; }
+.wb-note { font-style: normal !important; font-size: 0.78rem !important; }
+.ab-hd { font-size: 1.05rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.ab-sub { font-style: normal !important; font-size: 0.88rem !important; }
+.ab-btn { border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.jb-step { font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.jb-hd { font-size: 1.05rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.jb-sub { font-style: normal !important; font-size: 0.88rem !important; }
+.jb-btn { border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+
+/* 8. COUPLE LINKING */
+.cl-hd { font-size: 0.9rem !important; font-weight: 800 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.cl-label { font-size: 0.72rem !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; color: #888888 !important; }
+.cl-code { font-size: 2.2rem !important; font-weight: 800 !important; letter-spacing: 0.3em !important; }
+.cl-copy-btn { border-radius: 4px !important; font-size: 0.72rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.cl-divider { font-style: normal !important; font-size: 0.8rem !important; }
+.cl-link-btn { border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+
+/* 9. COACH SCREEN */
+.coach-title { color: #111111 !important; font-size: 1.4rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.coach-title span { color: #888888 !important; font-size: 0.8rem !important; font-style: normal !important; }
+.client-card { border-radius: 8px !important; box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important; }
+.client-name { font-size: 1.05rem !important; font-weight: 800 !important; }
+.coach-btn { border-radius: 6px !important; font-size: 0.8rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.notes-header { font-size: 0.88rem !important; font-weight: 800 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.loading { font-style: normal !important; color: #888888 !important; }
+
+/* 10. MODALS */
+.modal-box { border-radius: 10px !important; }
+.modal-top h3 { font-size: 1rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.modal-action-btn { border-radius: 6px !important; font-size: 0.82rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.send-note-btn { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.modal-scene { font-size: 0.88rem !important; font-weight: 700 !important; letter-spacing: 0.06em !important; }
+.modal-char { font-size: 0.85rem !important; font-weight: 700 !important; letter-spacing: 0.08em !important; }
+.modal-beat { font-size: 0.8rem !important; font-style: italic !important; }
+.modal-dialogue { font-size: 0.95rem !important; }
+.modal-direction { font-size: 0.82rem !important; font-style: italic !important; }
+.modal-tbc { font-size: 0.85rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.al-modal-top h3 { font-size: 1rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.al-save-btn { border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.al-cancel-btn { font-size: 0.82rem !important; }
+.al-log-toggle { font-size: 0.88rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.al-section-hd { font-size: 0.7rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.al-coach-hd { font-size: 0.88rem !important; font-weight: 800 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.al-coach-section-hd { font-size: 0.7rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.al-add-inline { font-size: 0.7rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; border-radius: 4px !important; }
+.al-type-btn { font-size: 0.7rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; border-radius: 4px !important; }
+.al-type-btn.al-active { border-color: #E06500 !important; color: #E06500 !important; background: #FEF0E4 !important; }
+.al-section-hd { color: #E06500 !important; }
+.al-coach-section-hd { color: #E06500 !important; }
+.al-coach-hd { color: #E06500 !important; }
+.al-modal-box { border-top-color: #E06500 !important; }
+.al-save-btn { background: #E06500 !important; }
+.al-save-btn:disabled { background: #F5C5A0 !important; }
+#al-entry-text:focus { border-color: #E06500 !important; }
+#al-fab { border-radius: 6px !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+
+/* 11. ENROLLMENT SCREENS — light bg already, update fonts and tighten */
+.sc-header h2 { color: #111111 !important; font-size: clamp(1.2rem, 4vw, 1.4rem) !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.sc-header p { color: #888888 !important; font-style: normal !important; }
+.sc-card { border-radius: 8px !important; }
+.sc-card-label { font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.06em !important; text-transform: uppercase !important; color: #888888 !important; }
+.sc-card-title { font-size: 1.1rem !important; font-weight: 800 !important; }
+.sc-card-desc { font-style: normal !important; font-size: 0.85rem !important; }
+.sc-card.sc-start { border-top-color: #E06500 !important; }
+.bi-eyebrow { font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.bi-body { font-style: normal !important; font-size: 0.95rem !important; }
+.bi-cta { border-radius: 6px !important; font-size: 0.92rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.bi-cta:active { background: #C45800 !important; }
+.bi-back { font-size: 0.82rem !important; }
+
+/* 12. PAYMENT CONFIRM — update hardcoded #C8822A */
+.pc-eyebrow { color: #E06500 !important; font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.pc-hd { font-size: 1.15rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.pc-sub { font-style: normal !important; font-size: 0.88rem !important; }
+.pc-code-label { font-size: 0.72rem !important; font-weight: 600 !important; letter-spacing: 0.1em !important; color: #888888 !important; }
+.pc-code { color: #E06500 !important; font-weight: 800 !important; }
+.pc-copy-btn { border-color: #E06500 !important; color: #E06500 !important; border-radius: 4px !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.pc-copy-btn:hover { background: #E06500 !important; }
+.pc-share-label { font-size: 0.72rem !important; font-weight: 600 !important; letter-spacing: 0.08em !important; color: #888888 !important; }
+.pc-share-url { font-size: 0.8rem !important; }
+.pc-share-copy-btn { border-radius: 4px !important; font-size: 0.72rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.pc-enter-btn { border-radius: 6px !important; font-size: 0.92rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.pc-email-label { font-size: 0.78rem !important; font-weight: 600 !important; letter-spacing: 0 !important; color: #555555 !important; }
+.pc-email-input { font-size: 0.92rem !important; border-radius: 6px !important; }
+.pc-email-input:focus { border-color: #E06500 !important; }
+.pc-send-btn { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.pc-email-status { font-style: normal !important; }
+.pc-resend-btn { color: #E06500 !important; font-size: 0.75rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.pc-card { border-top-color: #E06500 !important; border-radius: 10px !important; }
+
+/* 13. CODE ENTRY */
+.ce-eyebrow { font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; color: #5a7a5a !important; }
+.ce-hd { font-size: 1.1rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.ce-sub { font-style: normal !important; font-size: 0.88rem !important; }
+.ce-label { font-size: 0.78rem !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; color: #888888 !important; }
+.ce-input { font-size: clamp(1.4rem, 5vw, 1.8rem) !important; font-weight: 800 !important; border-radius: 6px !important; }
+.ce-error { font-style: normal !important; font-size: 0.85rem !important; }
+.ce-submit-btn { border-radius: 6px !important; font-size: 0.92rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.ce-back { font-size: 0.82rem !important; }
+
+/* 14. PARTNER B INTRO — flip dark text to dark on light bg */
+#partner-b-intro-screen { background: #F6F4F0 !important; color: #111111 !important; }
+.pb-hero-title { color: #111111 !important; font-size: clamp(1.5rem, 5vw, 1.8rem) !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.pb-hero-sub { color: #555555 !important; font-style: normal !important; font-size: 0.92rem !important; }
+.pb-body { color: #333333 !important; font-style: normal !important; font-size: 0.92rem !important; }
+.pb-reminder { background: rgba(224,101,0,0.06) !important; border-left-color: #E06500 !important; }
+.pb-reminder p { color: #444444 !important; font-style: normal !important; }
+.pb-video-placeholder-text { color: #AAAAAA !important; letter-spacing: 0 !important; text-transform: none !important; font-size: 0.82rem !important; }
+.pb-continue-btn { border-radius: 6px !important; font-size: 0.92rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.pb-continue-btn:active { background: #C45800 !important; }
+
+/* 15. PATH CHOICE SCREEN — flip to light */
+#path-choice-screen { background: #F6F4F0 !important; }
+.pc-eyebrow { font-size: 0.7rem !important; font-weight: 700 !important; letter-spacing: 0.18em !important; }
+.pc-heading {
+  font-size: clamp(1.3rem, 5vw, 1.75rem) !important;
+  font-weight: 800 !important;
+  color: #111111 !important;
+  letter-spacing: -0.025em !important;
+}
+.pc-sub { font-size: 0.9rem !important; color: #7A7468 !important; font-style: normal !important; }
+/* Override the dark card style — path-choice screen only */
+#path-choice-screen .pc-card {
+  background: #FFFFFF !important;
+  border: 1.5px solid #E2DED8 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+#path-choice-screen .pc-card:active { background: #F6F4F0 !important; }
+#path-choice-screen .pc-card-label {
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  color: #E06500 !important;
+  background: #FEF0E4 !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+#path-choice-screen .pc-card-title {
+  font-size: clamp(0.95rem, 3vw, 1.05rem) !important;
+  font-weight: 700 !important;
+  color: #111111 !important;
+  margin-top: 10px !important;
+}
+#path-choice-screen .pc-card-desc { font-size: 0.87rem !important; color: #6A6458 !important; }
+.pc-privacy { font-size: 0.8rem !important; color: #A89E92 !important; font-style: normal !important; }
+
+/* 16. PATH B SCREEN — flip to light */
+#path-b-screen { background: #F6F4F0 !important; }
+
+/* 17. STEP 3 (Mirror Moment) — flip to light */
+#step3-screen { background: #F6F4F0 !important; }
+.s3-header { border-bottom-color: #E2DED8 !important; }
+.s3-back { color: #AAAAAA !important; }
+.s3-back:hover { color: #555555 !important; }
+.s3-title { color: #AAAAAA !important; font-size: 0.82rem !important; font-weight: 600 !important; letter-spacing: 0.06em !important; text-transform: none !important; }
+.s3-msg-ai .s3-bubble {
+  background: #FFFFFF !important;
+  color: #111111 !important;
+  border-left: 3px solid #E06500 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+.s3-msg-user .s3-bubble {
+  background: #FEF0E4 !important;
+  color: #111111 !important;
+  border-right: 3px solid #E06500 !important;
+}
+.s3-typing .s3-bubble {
+  background: #FFFFFF !important;
+  border-left: 3px solid #E06500 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+.s3-dot { background: rgba(0,0,0,0.2) !important; }
+.s3-input-area { border-top-color: #E2DED8 !important; }
+.s3-input {
+  background: #FFFFFF !important;
+  border-color: #E2DED8 !important;
+  color: #111111 !important;
+  border-radius: 8px !important;
+}
+.s3-input:focus { border-color: #E06500 !important; }
+.s3-input::placeholder { color: #CCCCCC !important; }
+.s3-send {
+  background: #E06500 !important;
+  border-radius: 6px !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.s3-send:disabled { background: #F5C5A0 !important; }
+.s3-complete { color: #CCCCCC !important; }
+.s3-complete:hover { color: #888888 !important; }
+.s3-bubble { font-size: 0.92rem !important; }
+
+/* 18. STEPS 4–11 — flip to light */
+#step4-screen, #step5-screen, #step6-screen, #step7-screen,
+#step8-screen, #step9-screen, #step10-screen, #step11-screen {
+  background: #F6F4F0 !important;
+}
+
+/* 19. STEPS 4 & 5: VIDEO */
+.s45-intro { color: #333333 !important; border-bottom-color: #E2DED8 !important; font-size: 0.92rem !important; }
+.s45-video-ph { background: #EDEBE4 !important; border-color: #E2DED8 !important; }
+.s45-play-icon { color: #BBBBBB !important; }
+.s45-ph-label { color: #888888 !important; text-transform: none !important; letter-spacing: 0 !important; font-size: 0.82rem !important; font-weight: 700 !important; }
+.s45-ph-note { color: #AAAAAA !important; font-style: normal !important; }
+.s45-tx-hd { color: #E06500 !important; font-size: 0.7rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.s45-tx { background: #FFFFFF !important; border-left-color: #E06500 !important; border-radius: 0 8px 8px 0 !important; }
+.s45-tx-line { color: #333333 !important; font-size: 0.88rem !important; }
+.s45-tx-spk { color: #E06500 !important; font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.08em !important; }
+.s45-continue { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+
+/* 20. STEP 6: REFLECTIVE QUESTIONS */
+.s6-intro { color: #333333 !important; font-size: 0.92rem !important; }
+.s6-q-num { color: #E06500 !important; font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.s6-q-label { color: #444444 !important; font-size: 0.9rem !important; font-style: normal !important; }
+.s6-textarea { background: #FFFFFF !important; border-color: #E2DED8 !important; color: #111111 !important; border-radius: 6px !important; font-size: 0.92rem !important; }
+.s6-textarea:focus { border-color: #E06500 !important; }
+.s6-textarea::placeholder { color: #CCCCCC !important; }
+.s6-submit { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.s6-submit:disabled { background: #F5C5A0 !important; }
+.s6-ai-wrap { background: #FFFFFF !important; border-left-color: #E06500 !important; border-radius: 0 8px 8px 0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important; }
+.s6-ai-wrap p { color: #333333 !important; font-size: 0.92rem !important; }
+.s6-continue { background: transparent !important; border-color: #E2DED8 !important; color: #555555 !important; border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.s6-continue:hover { border-color: #E06500 !important; color: #E06500 !important; }
+
+/* 21. STEPS 7 & 8 */
+.s78-input-area { border-top-color: #E2DED8 !important; }
+.s7-log-btn { background: #FEF0E4 !important; border-color: rgba(224,101,0,0.3) !important; color: #555555 !important; border-radius: 6px !important; font-size: 0.78rem !important; font-weight: 600 !important; }
+.s7-complete-btn, .s8-complete-btn { color: #CCCCCC !important; font-size: 0.78rem !important; }
+.s7-complete-btn:hover, .s8-complete-btn:hover { color: #888888 !important; }
+.s78-send-row { }
+.s7-one-thing { border-top-color: #E2DED8 !important; }
+.s7-ot-label { color: #E06500 !important; font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.06em !important; text-transform: none !important; }
+.s7-ot-input { background: #FFFFFF !important; border-color: #E2DED8 !important; color: #111111 !important; border-radius: 6px !important; font-size: 0.92rem !important; }
+.s7-ot-input:focus { border-color: #E06500 !important; }
+.s7-ot-save { border-color: rgba(224,101,0,0.4) !important; color: #E06500 !important; border-radius: 6px !important; font-size: 0.78rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+
+/* 22. STEP 9: THE REWRITE */
+.s9-intro { color: #333333 !important; font-size: 0.92rem !important; }
+.s9-example-toggle { background: #FFFFFF !important; border-color: #E2DED8 !important; color: #555555 !important; border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 600 !important; }
+.s9-example-pane { background: #EDEBE4 !important; border-radius: 8px !important; }
+.s9-example-hd { color: #E06500 !important; border-bottom-color: #E2DED8 !important; font-size: 0.82rem !important; font-weight: 800 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.s9-example-txt { color: #444444 !important; font-size: 0.85rem !important; }
+.s9-divider { border-top-color: #E2DED8 !important; }
+.s9-rewrite-label { color: #E06500 !important; font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.s9-rewrite-area { background: #FFFFFF !important; border-color: #E2DED8 !important; color: #111111 !important; border-radius: 8px !important; font-size: 0.92rem !important; }
+.s9-rewrite-area:focus { border-color: #E06500 !important; }
+.s9-rewrite-area::placeholder { color: #CCCCCC !important; }
+.s9-checkin { background: #FEF0E4 !important; border-left-color: #E06500 !important; color: #555555 !important; border-radius: 0 6px 6px 0 !important; font-style: normal !important; font-size: 0.85rem !important; }
+.s9-input-area { border-top-color: #E2DED8 !important; }
+.s9-status { color: #AAAAAA !important; font-style: normal !important; font-size: 0.78rem !important; }
+.s9-submit { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.s9-submit:disabled { background: #F5C5A0 !important; }
+
+/* 23. STEP 10: AI FEEDBACK */
+.s10-waiting p { color: #888888 !important; font-style: normal !important; font-size: 0.9rem !important; }
+.s10-body p { color: #333333 !important; font-size: 0.92rem !important; }
+.s10-continue { background: transparent !important; border-color: #E2DED8 !important; color: #555555 !important; border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.s10-continue:hover { border-color: #E06500 !important; color: #E06500 !important; }
+
+/* 24. STEP 11: CAP GLOBAL BRIDGE */
+.s11-eyebrow { color: #E06500 !important; font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.s11-heading { color: #111111 !important; font-size: clamp(1.1rem, 4vw, 1.3rem) !important; font-weight: 800 !important; letter-spacing: -0.01em !important; }
+.s11-prose { color: #444444 !important; font-size: 0.92rem !important; }
+.s11-divider { border-top-color: #E2DED8 !important; }
+.s11-cap-card { background: #FEF0E4 !important; border-color: rgba(224,101,0,0.25) !important; border-radius: 10px !important; }
+.s11-cap-name { color: #111111 !important; font-size: 1.3rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.s11-cap-tagline { color: #E06500 !important; font-style: normal !important; font-size: 0.85rem !important; }
+.s11-cap-desc { color: #444444 !important; font-size: 0.88rem !important; }
+.s11-trial { color: #888888 !important; font-style: normal !important; }
+.s11-cap-btn { border-radius: 6px !important; font-size: 0.92rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.s11-email-section { background: #FFFFFF !important; border-radius: 8px !important; border: 1px solid #E2DED8 !important; }
+.s11-email-hd { color: #333333 !important; font-size: 0.9rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.s11-email-sub { color: #888888 !important; font-style: normal !important; font-size: 0.82rem !important; }
+.s11-email-input { background: #F6F4F0 !important; border-color: #E2DED8 !important; color: #111111 !important; border-radius: 6px !important; font-size: 0.92rem !important; }
+.s11-email-input:focus { border-color: #E06500 !important; }
+.s11-email-input::placeholder { color: #CCCCCC !important; }
+.s11-email-btn { background: rgba(224,101,0,0.5) !important; border-radius: 6px !important; font-size: 0.85rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.s11-email-btn:disabled { background: rgba(224,101,0,0.2) !important; }
+.s11-email-note { color: #AAAAAA !important; font-style: normal !important; }
+.s11-done p { color: #888888 !important; letter-spacing: 0 !important; font-size: 1rem !important; font-weight: 700 !important; }
+
+/* 25. LANDING PAGE — update accent, modernize font */
+.lp-line { font-size: clamp(1.5rem, 5vw, 2rem) !important; font-weight: 700 !important; }
+.lp-line.lp-gold { color: #E06500 !important; }
+.lp-step-n { color: #E06500 !important; }
+.lp-btn { background: #E06500 !important; border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.lp-btn:hover, .lp-btn:active { background: #C45800 !important; }
+.lp-btn:disabled { background: #F5C5A0 !important; }
+.lp-fight-input:focus { border-color: #E06500 !important; }
+.lp-fight-hd { font-size: clamp(1.3rem, 4vw, 1.75rem) !important; font-weight: 800 !important; }
+.lp-fight-sub { font-style: normal !important; }
+.lp-fight-eg { font-style: italic !important; }
+.lp-share-btn { border-color: #E06500 !important; color: #E06500 !important; border-radius: 6px !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.lp-share-btn:hover { background: #E06500 !important; color: white !important; }
+.lp-share-hd { font-size: 1rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.lp-share-sub { font-style: normal !important; font-size: 0.88rem !important; }
+.lp-share-corner { color: #E06500 !important; border-color: rgba(224,101,0,0.4) !important; background: rgba(246,244,240,0.92) !important; }
+.lp-share-corner:hover { border-color: #E06500 !important; }
+.lp-body { font-size: clamp(0.95rem, 2.5vw, 1.05rem) !important; line-height: 1.85 !important; }
+.lp-heading { font-size: clamp(1.5rem, 5vw, 2.2rem) !important; font-weight: 800 !important; }
+.lp-step-t { font-size: 0.95rem !important; line-height: 1.65 !important; }
+.lp-truth { font-size: clamp(0.92rem, 2.4vw, 1rem) !important; font-style: normal !important; line-height: 1.85 !important; }
+.lp-tagline { font-size: clamp(1rem, 3vw, 1.3rem) !important; font-style: normal !important; }
+.lp-commit-text { font-size: clamp(0.92rem, 2.5vw, 1rem) !important; line-height: 1.85 !important; }
+.lp-name { font-size: 0.75rem !important; }
+.lp-adviser-title { font-size: 0.72rem !important; }
+
+/* 26. PATH B HANDOFF BANNER */
+.pbh-eyebrow { font-size: 0.72rem !important; font-weight: 700 !important; letter-spacing: 0.08em !important; }
+.pbh-heading { font-size: 1rem !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.pbh-body { font-style: normal !important; font-size: 0.9rem !important; }
+.pbh-dismiss { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+
+/* 27. COACH NOTES */
+.coach-note .note-text { font-size: 0.92rem !important; }
+.coach-note .note-date { font-size: 0.72rem !important; }
+
+/* 28. STEP 2/3 header context if reused */
+#coach-status { font-style: normal !important; font-size: 0.8rem !important; }
+#step2-status { font-style: normal !important; font-size: 0.82rem !important; }
 </style>
 
 </head>
