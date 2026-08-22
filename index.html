@@ -413,13 +413,15 @@ body {
   transition: opacity 0.5s ease;
 }
 
-/* HERO */
+/* HERO — logo lockup, centered */
 .lp-hero {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: 72px 32px 96px;
 }
 
 /* Full-width hero photo — replace with <img> when you have a real photo */
@@ -634,6 +636,91 @@ body {
   margin-left: auto;
   margin-right: auto;
   text-wrap: balance;
+}
+
+/* LOGO LOCKUP */
+.lp-toa-mark {
+  display: inline-flex;
+  align-items: baseline;
+  border: 2.5px solid #1C1814;
+  border-radius: 10px;
+  padding: clamp(14px, 2.5vw, 26px) clamp(24px, 4.5vw, 58px) clamp(12px, 2vw, 22px);
+}
+.lp-toa-letters {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(52px, 10vw, 112px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #1C1814;
+  line-height: 1;
+}
+.lp-toa-o { color: #E06500; }
+.lp-toa-neck { width: 3px; height: clamp(14px, 2vw, 22px); background: #1C1814; margin: 0 auto; }
+.lp-toa-base { height: 5px; background: #1C1814; border-radius: 2px; width: clamp(48px, 6vw, 88px); margin: 0 auto; }
+.lp-wordmark {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(18px, 3.5vw, 40px);
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  color: #1C1814;
+  margin-top: clamp(20px, 3vw, 28px);
+  white-space: nowrap;
+}
+.lp-hero-tagline {
+  font-family: 'Lora', Georgia, serif;
+  font-weight: 700;
+  font-style: normal;
+  color: #E06500;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin-top: clamp(20px, 3vw, 28px);
+  max-width: 38ch;
+}
+
+/* STORY INTRO PHOTO BLOCK */
+.lp-story-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid #E0D8C8;
+}
+.lp-story-photo {
+  width: clamp(160px, 40vw, 220px);
+  height: clamp(160px, 40vw, 220px);
+  border-radius: 50%;
+  background: linear-gradient(160deg, #D8D0C0, #B8AE9E);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.lp-story-photo span {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  font-weight: 400;
+  color: rgba(90, 78, 60, 0.35);
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  user-select: none;
+}
+.lp-story-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #1C1814;
+  margin-bottom: 5px;
+  text-align: center;
+}
+.lp-story-title {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9A8870;
+  font-weight: 400;
+  text-align: center;
 }
 
 /* HIDDEN SECTIONS — shown by JS */
@@ -1316,7 +1403,10 @@ h1, h2, h3,
 .pbh-heading,
 .cl-hd,
 .s11-heading,
-.s11-cap-name {
+.s11-cap-name,
+.lp-toa-letters,
+.lp-wordmark,
+.lp-hero-tagline {
   font-family: 'Lora', Georgia, serif !important;
 }
 
@@ -1534,23 +1624,31 @@ h1, h2, h3,
 
   <!-- S1: HERO -->
   <section class="lp-hero">
-    <!-- PHOTO: Replace this div with your real photo. Two options:
-         Option A — swap the whole div: <img src="mitch.jpg" alt="Mitch Newman" class="lp-photo" style="object-fit:cover;object-position:center top;">
-         Option B — keep the div, remove the <span>, add <img src="mitch.jpg" alt="Mitch Newman"> inside it -->
-    <div class="lp-photo" aria-hidden="true"><span>MN</span></div>
-    <div class="lp-hero-body">
-      <div class="lp-name">Mitch Newman, M.A.</div>
-      <div class="lp-adviser-title">Relationship Adviser</div>
-      <div class="lp-hero-lines">
-        <span class="lp-line">The fight you keep having.</span>
-        <span class="lp-line">The one that never gets resolved.</span>
-        <span class="lp-line lp-gold">It's trying to get your attention.</span>
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <!-- LOGO MARK: When the final logo asset is ready, replace the block between these
+           comments with: <img src="toa-logo.svg" alt="The Ongoing Argument" style="max-width:min(480px,85vw);height:auto;">
+           and remove the .lp-toa-mark, .lp-toa-neck, and .lp-toa-base divs. -->
+      <div class="lp-toa-mark">
+        <div class="lp-toa-letters">T<span class="lp-toa-o">O</span>A</div>
       </div>
+      <div class="lp-toa-neck"></div>
+      <div class="lp-toa-base"></div>
+      <!-- END LOGO MARK SWAP ZONE -->
+      <div class="lp-wordmark"><span class="lp-toa-o">T</span>he <span class="lp-toa-o">O</span>ngoing <span class="lp-toa-o">A</span>rgument</div>
+      <div class="lp-hero-tagline">No fight is too big to have a happy ending.</div>
     </div>
   </section>
 
   <!-- S2: THE STORY -->
   <section class="lp-section">
+    <div class="lp-story-intro">
+      <!-- PHOTO: Replace this div with:
+           <img src="mitch-portrait.jpg" alt="Mitch Newman" class="lp-story-photo" style="object-fit:cover;object-position:top;">
+           Keep the .lp-story-intro wrapper and the name/title divs below. Remove the <span>MN</span>. -->
+      <div class="lp-story-photo" aria-hidden="true"><span>MN</span></div>
+      <div class="lp-story-name">Mitch Newman, M.A.</div>
+      <div class="lp-story-title">Relationship Adviser</div>
+    </div>
     <div class="lp-body">
       <p>When you write for a sitcom you have twenty two minutes.</p>
       <p>Twenty two minutes to set up a conflict, build it, and resolve it. Every week. Tell a story. Resolve the conflict. Done.</p>
@@ -1589,7 +1687,6 @@ h1, h2, h3,
   <!-- S5: CTA -->
   <div class="lp-cta">
     <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">Begin</button>
-    <div class="lp-tagline">No fight is too big to have a happy ending.</div>
   </div>
 
   <!-- S6: COMMITMENT STATEMENT — hidden until S5 button clicked -->
