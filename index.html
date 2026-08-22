@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>The Ongoing Argument</title>
+<!-- app-version-20260822001 — update this number on every deploy so the stale-version check can detect outdated cached pages -->
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
@@ -1370,6 +1371,8 @@ h1, h2, h3,
   -webkit-appearance: none;
   touch-action: manipulation;
   flex-shrink: 0;
+  text-decoration: none;
+  display: inline-block;
 }
 .top-bar-logo:hover { border-color: #E06500; color: #E06500; }
 .top-bar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -1397,6 +1400,12 @@ h1, h2, h3,
 
 </head>
 <body>
+
+<!-- STALE VERSION BANNER — shown automatically if a newer deploy is detected; never shown in normal use -->
+<div id="stale-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#E06500;color:#fff;text-align:center;padding:11px 16px;z-index:100000;font-family:'Lora',Georgia,serif;font-size:0.85rem;line-height:1.4;">
+  A newer version of this page is available.
+  <a href="/" style="color:#fff;font-weight:700;text-decoration:underline;margin-left:8px;">Reload to update →</a>
+</div>
 
 <!-- BETA PASSWORD GATE — REMOVE BEFORE LAUNCH -->
 <div id="beta-gate" style="position:fixed;inset:0;background:#F6F4F0;z-index:99999;display:flex;align-items:center;justify-content:center;">
@@ -1650,8 +1659,9 @@ h1, h2, h3,
 
 <div id="script-screen">
   <div class="top-bar">
-    <!-- LOGO PLACEHOLDER — swap this button for a real <img> or SVG logo when ready; keep onclick="navHome()" -->
-    <button class="top-bar-logo" onclick="navHome()" title="Home">TOA</button>
+    <!-- LOGO PLACEHOLDER — swap this element for a real <img> or SVG logo when ready; keep href="/" and onclick -->
+    <!-- The href="/" is an intentional escape hatch: if JS is broken/stale, clicking the logo does a hard reload -->
+    <a href="/" class="top-bar-logo" onclick="navHome(); return false;" title="Home">TOA</a>
     <div class="top-bar-left"><span id="fight-title-display">The Ongoing Argument</span>Signed in as <span id="user-name-display" style="display:inline;font-style:normal;color:#f0e8d5;"></span></div>
     <div class="top-bar-right">
       <button class="signout-btn" id="nav-back-btn" onclick="navBack()">← Back</button>
@@ -5071,6 +5081,26 @@ window.addEventListener('popstate', function(e) {
     if (s6) { setTimeout(function() { lpScrollTo(s6); }, 60); }
   }
 });
+
+// STALE VERSION CHECK — detects if the browser is serving a cached older version of this page.
+// On every page load, fetches the live HTML (bypassing cache) 4 seconds after startup and compares
+// the app-version comment. If different, shows the stale-banner prompting the user to reload.
+// REMEMBER: update the app-version comment in <head> with each deploy.
+(function() {
+  setTimeout(function() {
+    fetch('/?_v=' + Date.now(), { cache: 'no-store' })
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        var cur = document.documentElement.innerHTML.match(/app-version-(\d+)/);
+        var srv = html.match(/app-version-(\d+)/);
+        if (cur && srv && cur[1] !== srv[1]) {
+          var b = document.getElementById('stale-banner');
+          if (b) b.style.display = 'block';
+        }
+      })
+      .catch(function() {}); // fail silently — never block the app
+  }, 4000);
+}());
 </script>
 
 <!-- EmailJS credentials — update here only, used everywhere -->

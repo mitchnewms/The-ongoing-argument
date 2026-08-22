@@ -1,6 +1,18 @@
 [build]
   functions = "netlify/functions"
 
+# Prevent browsers from serving stale cached HTML after a deploy.
+# index.html must always be re-fetched; only the file itself is affected.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
 [[redirects]]
   from = "https://imaginative-starburst-a1bbd9.netlify.app/*"
   to = "https://mitchnewman.com/:splat"
