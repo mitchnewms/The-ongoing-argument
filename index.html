@@ -1012,7 +1012,7 @@ body, body * {
 .al-save-btn { background: #E06500 !important; }
 .al-save-btn:disabled { background: #F5C5A0 !important; }
 #al-entry-text:focus { border-color: #E06500 !important; }
-#al-fab { border-radius: 6px !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+#al-fab { border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; padding: 14px 22px !important; box-shadow: 0 4px 16px rgba(224,101,0,0.35) !important; }
 
 /* 11. ENROLLMENT SCREENS — light bg already, update fonts and tighten */
 .sc-header h2 { color: #111111 !important; font-size: clamp(1.2rem, 4vw, 1.4rem) !important; font-weight: 800 !important; letter-spacing: 0 !important; }
@@ -1330,6 +1330,29 @@ h1, h2, h3,
 .sc-header h2 {
   color: #E06500 !important;
 }
+
+/* 31. VOICE INPUT — mic button on dialogue lines */
+.voice-btn {
+  display: block;
+  margin: 4px auto 0;
+  background: none;
+  border: 1px solid #E2DED8;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  cursor: pointer;
+  color: #888888;
+  line-height: 0;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.voice-btn svg { width: 14px; height: 14px; display: block; margin: auto; }
+.voice-btn:hover { border-color: #E06500; color: #E06500; }
+.voice-btn-active { background: #E06500 !important; border-color: #E06500 !important; color: #fff !important; }
+.voice-btn-active svg { color: #fff; }
+.voice-unsupported { display: none !important; }
 </style>
 
 </head>
@@ -1604,7 +1627,7 @@ h1, h2, h3,
 
   <div class="script-page">
     <div class="script-title-header" id="script-title-header">THE ONGOING ARGUMENT</div>
-    <div class="privacy-tag">🔒 Your version — private until you share with Mitch</div>
+    <div class="privacy-tag">🔒 Your version — private until you share with <span id="privacy-partner-name">your partner</span></div>
     <div class="name-row">
       <div class="name-row-label">Add Names Here</div>
       <div class="name-field"><label for="input-name-a">Your name</label><input type="text" id="input-name-a" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
@@ -1621,7 +1644,7 @@ h1, h2, h3,
   </div>
   <div class="action-bar">
     <button class="action-btn" id="btn-save">Save Progress</button>
-    <button class="action-btn" id="btn-submit" style="background:var(--red);">Submit for Review</button>
+    <button class="action-btn" id="btn-submit" style="background:var(--accent);">Submit for Review</button>
   </div>
   <div id="status-msg"></div>
 
@@ -2724,17 +2747,73 @@ function addLine(char, beat, dialogue, silent) {
   var label = isB ? (user && user.partner ? user.partner : 'Partner') : (user && user.name ? user.name : 'Me');
   var div = document.createElement('div');
   div.className = 'script-line'; div.dataset.type = 'line'; div.dataset.char = char;
+  var micIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>';
   div.innerHTML = '<button class="delete-btn">✕</button>' +
     '<span class="char-name' + (isB ? ' char-b' : '') + '">' + label.toUpperCase() + '</span>' +
     '<input class="beat-input" placeholder="(sighs, quietly, laughing…)" value="' + esc(beat || '') + '" />' +
-    '<textarea class="dialogue-input" rows="1" placeholder="What they say…">' + esc(dialogue || '') + '</textarea>';
+    '<textarea class="dialogue-input" rows="1" placeholder="What they say…">' + esc(dialogue || '') + '</textarea>' +
+    '<button class="voice-btn" title="Speak this line">' + micIcon + '</button>';
 
 c.appendChild(div);
 div.querySelector('.delete-btn').addEventListener('click', function() { div.remove(); sched(); });
 div.querySelector('.beat-input').addEventListener('input', sched);
 div.querySelector('.dialogue-input').addEventListener('input', function() { ar(this); sched(); });
+var voiceBtn = div.querySelector('.voice-btn');
+if (voiceBtn) {
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+    voiceBtn.classList.add('voice-unsupported');
+  } else {
+    voiceBtn.addEventListener('click', function() { voiceInputToggle(voiceBtn); });
+  }
+}
 if (!silent) { div.querySelector('.dialogue-input').focus(); sched(); }
 setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 30);
+}
+
+var _voiceActiveBtn = null;
+
+function voiceInputToggle(btn) {
+  // Stop any active session first
+  if (_voiceActiveBtn && _voiceActiveBtn !== btn && _voiceActiveBtn._rec) {
+    _voiceActiveBtn._rec.stop();
+  }
+  if (btn._recActive) {
+    if (btn._rec) btn._rec.stop();
+    return;
+  }
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) return;
+  var textarea = btn.closest('.script-line').querySelector('.dialogue-input');
+  if (!textarea) return;
+  var rec = new SpeechRec();
+  rec.continuous = false;
+  rec.interimResults = true;
+  rec.lang = 'en-US';
+  btn._rec = rec;
+  btn._recActive = true;
+  _voiceActiveBtn = btn;
+  btn.classList.add('voice-btn-active');
+  var baseText = textarea.value.trim();
+  rec.onresult = function(e) {
+    var transcript = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    textarea.value = (baseText ? baseText + ' ' : '') + transcript;
+    ar(textarea);
+    sched();
+  };
+  rec.onend = function() {
+    btn._recActive = false;
+    btn.classList.remove('voice-btn-active');
+    if (_voiceActiveBtn === btn) _voiceActiveBtn = null;
+  };
+  rec.onerror = function() {
+    btn._recActive = false;
+    btn.classList.remove('voice-btn-active');
+    if (_voiceActiveBtn === btn) _voiceActiveBtn = null;
+  };
+  rec.start();
 }
 
 function addDir(text, silent) {
@@ -3424,6 +3503,8 @@ var step2SaveTimer = null;
 function step2Init() {
   if (!user || !user.coupleId) return;
   el('step2-card').style.display = 'block';
+  var partnerFirst = ((user.partner || user.partnerName || '').split(' ')[0]) || 'your partner';
+  txt('privacy-partner-name', partnerFirst);
   fsGet('scripts/' + user.uid).then(function(d) {
     if (!d || !d.fields) return;
     var s = fromFields(d.fields);
