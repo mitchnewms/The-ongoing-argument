@@ -357,6 +357,14 @@ body {
 /* ── PATH B: INTAKE SCREEN ───────────────────────────────────── */
 #path-b-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #2a2520; flex-direction: column; }
 
+/* ── PATH A: OPTIONAL WRITING GUIDE ─────────────────────────── */
+#path-a-guide { margin-bottom: 0; }
+.pa-guide-inner { max-width: 640px; margin: 24px auto 0; padding: 18px 24px 16px; border-left: 3px solid var(--line); }
+.pa-guide-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); font-family: system-ui, sans-serif; margin-bottom: 12px; }
+.pa-guide-list { list-style: none; padding: 0; margin: 0; }
+.pa-guide-list li { font-family: system-ui, sans-serif; font-size: 0.82rem; color: var(--ink-light); line-height: 1.6; padding: 4px 0; border-bottom: none; }
+.pa-guide-list li::before { content: '—'; margin-right: 8px; color: var(--ink-faint); }
+
 /* ── PATH B: HANDOFF BANNER ──────────────────────────────────── */
 #pb-handoff-banner { display: none; background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 28px 24px; margin-bottom: 16px; border-left: 4px solid var(--accent); }
 .pbh-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 12px; }
@@ -1730,6 +1738,24 @@ h1, h2, h3,
     <p class="pbh-body">Read through it before you change anything. Then edit it into something that actually sounds like the two of you. The goal isn't a perfect script — it's an honest one.</p>
     <p class="pbh-body">The same submission process applies: when you're ready and the script feels true, answer the two questions below and submit. Your partner is doing the same thing privately.</p>
     <button class="pbh-dismiss" onclick="pbDismissHandoff()">Got it — start editing</button>
+  </div>
+
+  <!-- PATH A: OPTIONAL WRITING GUIDE — shown only for Path A, not collected, not sent to AI -->
+  <div id="path-a-guide" style="display:none;">
+    <div class="pa-guide-inner">
+      <div class="pa-guide-label">Optional — before you start</div>
+      <ul class="pa-guide-list">
+        <li>What is this fight about?</li>
+        <li>What usually triggers it?</li>
+        <li>Where does it usually happen?</li>
+        <li>How does it typically start — the first thing said or done?</li>
+        <li>What gets said as it builds?</li>
+        <li>What are you feeling as it builds? Does it start as one thing and shift into another?</li>
+        <li>Is there a specific moment — a word, a tone, a look — where it gets more intense?</li>
+        <li>How does it pause? What interrupts it rather than resolves it?</li>
+        <li>What do you believe you're right about here?</li>
+      </ul>
+    </div>
   </div>
 
   <div class="script-page">
@@ -4713,43 +4739,34 @@ function onVideoReady(step, profileData) {
 // ── PATH B: AI ASSISTED SCRIPT WRITING ──────────────────────
 
 var PB_QUESTIONS = {
-  q1:  'Is this a fight that happens the same way every time, or does it change? The same patterns, the same words, the same ending — or does it depend on circumstances, moods, what happened that day?',
-  q2:  'Walk me through it. Where does it tend to start — what\'s the setup, the moment before it begins?',
-  q2b: 'Tell me about a specific recent time it happened. Where did it start? What was going on that day?',
-  q3:  'Where does it usually happen? What\'s the physical space — kitchen, bedroom, car? Is one of those spaces more charged than others?',
-  q4:  'What sets it off? Not the topic — the moment. The specific trigger that tells you both: here we go again. Is it a tone of voice, a word, a facial expression, something that doesn\'t get done?',
-  q5:  'Walk me through it as it unfolds. Don\'t summarize — take me through it beat by beat. What happens first, and then what?',
+  q1:  'What is this fight about?',
+  q2:  '', // filled dynamically after q1 answer — AI generates a trigger question with a topic-specific example
+  q3:  'Where did it happen last time, or where does it usually happen? This becomes the setting for your script.',
+  q4:  'Think of a specific time this happened. What\'s the moment you remember that started it — the first thing that was said or done?',
+  q5:  'Walk me through it. What gets said, back and forth, as it builds.',
   q5fu:'I want to make sure I capture this fully. Tell me more — what happens in the middle of it? Where does it go from there?',
-  q5b: 'When you\'re in it, what are you feeling? Not what you\'re thinking — the physical feeling, the emotional charge. Where does it live in your body?',
-  q5c: 'Does it escalate, or does it tend to flatline? Does someone pull back, or does it keep building? How does it end — not resolve, just end?',
-  q5d: 'What does your partner do or say that lands hardest in the moment? A specific tone, a phrase, a look? The thing that makes it feel impossible to continue?',
-  q5e: 'Underneath all of it — underneath the argument — what do you think this fight is really about for you? What\'s the belief or the fear that\'s driving it?',
-  q6a: 'When you imagine your partner watching a version of this fight written as a script, what do you think the story they\'re telling themselves is? About your intentions, about what you want, about what you think of them?',
-  q6b: 'And what are you feeling in this fight that you don\'t think your partner sees or understands? The part that\'s real for you but doesn\'t seem to land.'
+  q6:  'As you replay it, track the feeling from start to where it peaks. Does it start as frustration and build to anger? Shut down into silence? Spiral into tears? Naming the shift matters more than naming one word.',
+  q7:  'Is there a specific word, a “you” statement, a tone of judgment, that you notice tends to be the moment it gets worse — more emotional, tears, anger, shutting down?',
+  q8:  'What\'s the pause? The to be continued moment. Does one or both of you go quiet? Does someone leave the room? Do other people show up — kids, a phone call, a friend at the door?',
+  q9:  'Is there something your partner does — a look, a tone, a sigh, a certain kind of silence — that gets to you more than the words themselves?',
+  q9b: 'When they do that, what do you find yourself believing it means? Not what’s actually true, just what your gut tells you in that moment. “He doesn’t care.” “She’s checked out.” “I always have to be the one who tries.”',
+  q10: 'What do you believe you’re right about in this fight? What is it you think your partner doesn’t understand, won’t accept, or is simply getting wrong?'
 };
 
 // State machine: after recording answer for pbState, return the next state
 function pbNextState(current, answer) {
-  if (current === 'q1') {
-    // Detect "same every time" vs "changes/depends"
-    var a = answer.toLowerCase();
-    var changes = /depend|chang|different|vari|sometime|it depend/.test(a);
-    return changes ? 'q2b' : 'q2';
-  }
-  if (current === 'q2' || current === 'q2b') return 'q3';
+  if (current === 'q1') return 'q2'; // q2 is AI-generated in pbSend before asking
+  if (current === 'q2') return 'q3';
   if (current === 'q3') return 'q4';
   if (current === 'q4') return 'q5';
-  if (current === 'q5') {
-    // Thin answer check — fewer than ~50 non-space chars triggers follow-up
-    return answer.replace(/\s/g, '').length < 50 ? 'q5fu' : 'q5b';
-  }
-  if (current === 'q5fu') return 'q5b';
-  if (current === 'q5b') return 'q5c';
-  if (current === 'q5c') return 'q5d';
-  if (current === 'q5d') return 'q5e';
-  if (current === 'q5e') return 'q6a';
-  if (current === 'q6a') return 'q6b';
-  if (current === 'q6b') return 'done';
+  if (current === 'q5') return answer.replace(/\s/g, '').length < 50 ? 'q5fu' : 'q6';
+  if (current === 'q5fu') return 'q6';
+  if (current === 'q6') return 'q7';
+  if (current === 'q7') return 'q8';
+  if (current === 'q8') return 'q9';
+  if (current === 'q9') return 'q9b';
+  if (current === 'q9b') return 'q10';
+  if (current === 'q10') return 'done';
   return 'done';
 }
 
@@ -4763,6 +4780,7 @@ function choosePathA() {
   el('path-choice-screen').style.display = 'none';
   document.body.style.overflow = '';
   navPush('script');
+  el('path-a-guide').style.display = 'block';
   // Mark path A so we don't re-prompt on return
   fsSet('scripts/' + user.uid, { scriptPath: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
 }
@@ -4789,6 +4807,24 @@ function pbBack() {
     document.body.style.overflow = 'hidden';
     showFlex('path-choice-screen');
   }
+}
+
+function pbGenerateQ2(topic) {
+  s3ShowTypingIn('pb-thread');
+  var prompt = 'A person says their recurring argument with their partner is about: "' + topic + '". Write a single short question asking what usually triggers this specific fight — what kind of moment tends to set it off. Include exactly one brief, concrete example drawn directly from the topic they just mentioned (not a generic example). Warm, direct tone, like a coach asking. Two to three sentences max. Output only the question text itself, no preamble.';
+  callAI([{ role: 'user', content: prompt }], 'b').then(function(text) {
+    s3RemoveTypingFrom('pb-thread');
+    var q = (text || '').trim();
+    if (!q) q = 'What usually triggers it? Is there a specific kind of moment that tends to set it off?';
+    PB_QUESTIONS.q2 = q;
+    pbSending = false;
+    pbAskQuestion('q2');
+  }).catch(function() {
+    s3RemoveTypingFrom('pb-thread');
+    PB_QUESTIONS.q2 = 'What usually triggers it? Is there a specific kind of moment that tends to set it off?';
+    pbSending = false;
+    pbAskQuestion('q2');
+  });
 }
 
 function pbAskQuestion(qid) {
@@ -4851,6 +4887,9 @@ function pbSend() {
 
   if (next === 'done') {
     pbGenerateDraft();
+  } else if (next === 'q2') {
+    // Q2 is generated dynamically so the trigger example matches what they just said
+    pbGenerateQ2(answer);
   } else {
     pbSending = false;
     pbAskQuestion(next);
@@ -4861,25 +4900,25 @@ function pbBuildPrompt() {
   var name = (user && user.name) ? user.name : 'Person A';
   var partner = (user && user.partner) ? user.partner : 'Person B';
   var fight = (user && user.fight) ? user.fight : 'the argument';
-  var q2val = pbAnswers.q2 || pbAnswers.q2b || '';
-  var q2label = pbAnswers.q2 ? 'How it typically starts' : 'A specific recent instance — how it started';
   var q5full = (pbAnswers.q5 || '') + (pbAnswers.q5fu ? '\n\nMore detail: ' + pbAnswers.q5fu : '');
 
   return 'Write a rough-draft screenplay script of an argument between two partners. The argument is called "' + fight + '". ' + name + ' is Character A; ' + partner + ' is Character B.\n\n' +
     'Here is everything about how this fight unfolds:\n\n' +
-    'Pattern: ' + (pbAnswers.q1 || '') + '\n\n' +
-    q2label + ': ' + q2val + '\n\n' +
+    'What this fight is about: ' + (pbAnswers.q1 || '') + '\n\n' +
+    'What typically triggers it: ' + (pbAnswers.q2 || '') + '\n\n' +
     'Physical setting: ' + (pbAnswers.q3 || '') + '\n\n' +
-    'What triggers it: ' + (pbAnswers.q4 || '') + '\n\n' +
+    'The first moment — how it started last time: ' + (pbAnswers.q4 || '') + '\n\n' +
     'How it unfolds beat by beat: ' + q5full + '\n\n' +
-    'What I feel when I\'m in it: ' + (pbAnswers.q5b || '') + '\n\n' +
-    'How it escalates and ends: ' + (pbAnswers.q5c || '') + '\n\n' +
-    'What my partner does that lands hardest: ' + (pbAnswers.q5d || '') + '\n\n' +
-    'What this fight is really about for me underneath: ' + (pbAnswers.q5e || '') + '\n\n' +
+    'Emotional arc as it builds: ' + (pbAnswers.q6 || '') + '\n\n' +
+    'The moment it escalates — word, tone, or trigger that makes it worse: ' + (pbAnswers.q7 || '') + '\n\n' +
+    'The pause — how it stops without resolving: ' + (pbAnswers.q8 || '') + '\n\n' +
+    'What the partner does non-verbally that lands: ' + (pbAnswers.q9 || '') + '\n\n' +
+    'What they believe that non-verbal means about them: ' + (pbAnswers.q9b || '') + '\n\n' +
+    'What they believe they are right about: ' + (pbAnswers.q10 || '') + '\n\n' +
     'Format the script exactly as follows. Start with:\nSCENE: [brief location from the setting described above]\n\n' +
     'For each line of dialogue:\n[CHARACTER NAME IN CAPS]\n([emotional beat or tone in parentheses])\n[What they say]\n\n' +
     'For stage directions:\nDIRECTION: [brief description]\n\n' +
-    'Write 12-20 exchanges minimum. The beats and stage directions must reflect the emotional and physical reality described above — the feeling of escalation, the specific triggers, the body language, the charge in the room. ' +
+    'Write 12-20 exchanges minimum. The beats and stage directions must reflect the emotional and physical reality described above — the feeling of escalation, the specific triggers, the body language, the charge in the room. Reflect the pause (the to be continued moment) rather than a resolution — these fights do not end, they stop. ' +
     'Use the actual names ' + name + ' (Character A) and ' + partner + ' (Character B) in all caps as character headers. ' +
     'The script should reflect the tonal and emotional answers given — not just a factual retelling. ' +
     'Output only the script itself, starting with SCENE:. No preamble, no commentary, no explanation.';
