@@ -2871,12 +2871,6 @@ function loadScript() {
       setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 50);
       // Path B: show handoff banner if not yet dismissed
       if (s.scriptPath === 'b' && !s.handoffSeen) {
-        if (s.q6aAnswer && el('step2-thinking') && !el('step2-thinking').value) {
-          el('step2-thinking').value = s.q6aAnswer;
-        }
-        if (s.q6bAnswer && el('step2-feeling') && !el('step2-feeling').value) {
-          el('step2-feeling').value = s.q6bAnswer;
-        }
         pbShowHandoff();
       }
     } else if (!s.scriptPath) {
@@ -3748,6 +3742,22 @@ function checkPartnerAndAnalyze() {
   }).catch(function() { setTimeout(pollAnalysisReady, 30000); });
 }
 
+function buildIntakeBlock(name, data) {
+  var lines = ['--- ' + name + '\'s intake detail (Path B):'];
+  if (data.fightTopic) lines.push('What they say the fight is about: ' + data.fightTopic);
+  if (data.fightTrigger) lines.push('What triggers it: ' + data.fightTrigger);
+  if (data.startingMoment) lines.push('The moment that starts it: ' + data.startingMoment);
+  if (data.beatByBeat) lines.push('How it unfolds beat by beat: ' + data.beatByBeat);
+  if (data.emotionalArc) lines.push('Emotional arc as it builds: ' + data.emotionalArc);
+  if (data.intensifyingTrigger) lines.push('What marks the point it intensifies: ' + data.intensifyingTrigger);
+  if (data.pauseMoment) lines.push('How it pauses (not resolves): ' + data.pauseMoment);
+  if (data.nonverbalCue) lines.push('A nonverbal cue that affects them: ' + data.nonverbalCue);
+  if (data.nonverbalInterpretation) lines.push('What they believe that cue means: ' + data.nonverbalInterpretation);
+  if (data.righteousnessBelief) lines.push('What they believe they are right about: ' + data.righteousnessBelief);
+  lines.push('---');
+  return lines.join('\n');
+}
+
 function runStep2Analysis(partnerData) {
   txt('step2-status', 'Both scripts received. Analysis in progress — this may take up to a minute...');
   return fsGet('scripts/' + user.uid).then(function(d) {
@@ -3762,12 +3772,14 @@ function runStep2Analysis(partnerData) {
       myName + '\'s story about what ' + partnerName + ' is thinking:\n' +
       (myData.storyThinking || '(no answer provided)') + '\n\n' +
       myName + '\'s story about what ' + partnerName + ' is feeling:\n' +
-      (myData.storyFeeling || '(no answer provided)') + '\n\n' +
+      (myData.storyFeeling || '(no answer provided)') +
+      (myData.pathChosen === 'b' ? '\n\n' + buildIntakeBlock(myName, myData) : '') + '\n\n' +
       '— SCRIPT FROM ' + partnerName.toUpperCase() + ' —\n\n' + partnerText + '\n\n' +
       partnerName + '\'s story about what ' + myName + ' is thinking:\n' +
       (partnerData.storyThinking || '(no answer provided)') + '\n\n' +
       partnerName + '\'s story about what ' + myName + ' is feeling:\n' +
-      (partnerData.storyFeeling || '(no answer provided)');
+      (partnerData.storyFeeling || '(no answer provided)') +
+      (partnerData.pathChosen === 'b' ? '\n\n' + buildIntakeBlock(partnerName, partnerData) : '');
     return callAI([{ role: 'user', content: prompt }], '2').then(function(analysisText) {
       return fsSet('couples/' + user.coupleId, {
         analysis: analysisText,
@@ -4781,8 +4793,8 @@ function choosePathA() {
   document.body.style.overflow = '';
   navPush('script');
   el('path-a-guide').style.display = 'block';
-  // Mark path A so we don't re-prompt on return
-  fsSet('scripts/' + user.uid, { scriptPath: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
+  // Mark path A so we don't re-prompt on return; pathChosen stored for all users
+  fsSet('scripts/' + user.uid, { scriptPath: 'a', pathChosen: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
 }
 
 function choosePathB() {
@@ -5055,24 +5067,32 @@ function pbLoadDraftIntoTool(parsed) {
     }
   });
 
+  // Auto-populate scene direction from intake location answer (q3)
+  var sceneVal = parsed.scene || pbAnswers.q3 || '';
+  if (sceneVal && el('scene-input') && !el('scene-input').value) {
+    el('scene-input').value = sceneVal;
+  }
+
   fsSet('scripts/' + user.uid, {
-    scene: parsed.scene || '',
+    scene: sceneVal,
     lines: JSON.stringify(lines),
     userId: user.uid,
     updatedAt: new Date().toISOString(),
     scriptPath: 'b',
-    q6aAnswer: pbAnswers.q6a || '',
-    q6bAnswer: pbAnswers.q6b || ''
+    pathChosen: 'b',
+    // Path B intake answers — all eleven fields
+    fightTopic: pbAnswers.q1 || '',
+    fightTrigger: pbAnswers.q2 || '',
+    fightLocation: pbAnswers.q3 || '',
+    startingMoment: pbAnswers.q4 || '',
+    beatByBeat: (pbAnswers.q5 || '') + (pbAnswers.q5fu ? '\n\nMore detail: ' + pbAnswers.q5fu : ''),
+    emotionalArc: pbAnswers.q6 || '',
+    intensifyingTrigger: pbAnswers.q7 || '',
+    pauseMoment: pbAnswers.q8 || '',
+    nonverbalCue: pbAnswers.q9 || '',
+    nonverbalInterpretation: pbAnswers.q9b || '',
+    righteousnessBelief: pbAnswers.q10 || ''
   }).then(function() {
-    // Pre-populate Step 2 fields
-    if (pbAnswers.q6a && el('step2-thinking') && !el('step2-thinking').value) {
-      el('step2-thinking').value = pbAnswers.q6a;
-      setTimeout(function() { ar(el('step2-thinking')); }, 50);
-    }
-    if (pbAnswers.q6b && el('step2-feeling') && !el('step2-feeling').value) {
-      el('step2-feeling').value = pbAnswers.q6b;
-      setTimeout(function() { ar(el('step2-feeling')); }, 50);
-    }
     el('path-b-screen').style.display = 'none';
     document.body.style.overflow = '';
     pbShowHandoff();
