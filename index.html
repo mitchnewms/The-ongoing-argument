@@ -299,6 +299,20 @@ body {
 .s7-ot-save { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; background: transparent; border: 1px solid rgba(184,160,112,0.4); color: rgba(184,160,112,0.8); cursor: pointer; border-radius: 1px; margin-top: 6px; -webkit-appearance: none; touch-action: manipulation; }
 
 /* ── STEP 9: THE REWRITE ───────────────────────────────────── */
+/* Presence exercise phase */
+.s9-presence { flex: 1; overflow-y: auto; padding: 32px 20px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.s9-presence-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 8px; text-align: center; }
+.s9-presence-intro { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.6; text-align: center; margin-bottom: 28px; max-width: 380px; }
+.s9-door { width: 100%; max-width: 480px; min-height: 90px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(184,160,112,0.3); border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 20px; cursor: pointer; margin-bottom: 14px; text-align: center; transition: background 0.15s, border-color 0.15s; }
+.s9-door:not(.open):active { background: rgba(255,255,255,0.1); }
+.s9-door-tap { font-family: 'Courier Prime', monospace; font-size: 0.75rem; color: rgba(184,160,112,0.55); letter-spacing: 0.06em; }
+.s9-door-question { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.9); line-height: 1.6; display: none; }
+.s9-door.open { cursor: default; background: rgba(184,160,112,0.08); border-color: rgba(184,160,112,0.45); }
+.s9-door.open .s9-door-tap { display: none; }
+.s9-door.open .s9-door-question { display: block; }
+.s9-presence-begin { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; max-width: 480px; margin-top: 8px; -webkit-appearance: none; touch-action: manipulation; display: none; }
+/* Writing phase */
+.s9-writing { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .s9-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 20px; }
 .s9-intro { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.75; margin-bottom: 20px; }
 .s9-example-toggle { background: none; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-family: 'Courier Prime', monospace; font-size: 0.78rem; letter-spacing: 0.06em; padding: 10px 14px; border-radius: 1px; cursor: pointer; width: 100%; text-align: left; margin-bottom: 16px; -webkit-appearance: none; touch-action: manipulation; }
@@ -312,6 +326,11 @@ body {
 .s9-rewrite-area:focus { border-color: rgba(184,160,112,0.5); }
 .s9-rewrite-area::placeholder { color: rgba(255,255,255,0.15); }
 .s9-checkin { padding: 12px 16px; background: rgba(184,160,112,0.08); border-left: 2px solid rgba(184,160,112,0.35); margin: 12px 0; font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.55); font-style: italic; border-radius: 1px; min-height: 0; }
+/* Proofing state */
+.s9-proofing { margin-top: 20px; padding: 16px; background: rgba(184,160,112,0.07); border-left: 2px solid rgba(184,160,112,0.4); border-radius: 1px; }
+.s9-proofing-eyebrow { font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(184,160,112,0.7); font-family: 'Courier Prime', monospace; margin-bottom: 10px; }
+.s9-proofing-body p { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.78); line-height: 1.7; margin-bottom: 10px; }
+.s9-proofing-note { font-family: 'Courier Prime', monospace; font-size: 0.75rem; color: rgba(255,255,255,0.35); font-style: italic; margin-top: 12px; }
 .s9-input-area { padding: 12px 18px 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
 .s9-status { font-size: 0.72rem; color: rgba(255,255,255,0.3); font-style: italic; text-align: center; margin-top: 8px; min-height: 14px; }
 .s9-submit { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; }
@@ -322,6 +341,12 @@ body {
 .s10-waiting { text-align: center; padding: 60px 0; }
 .s10-waiting p { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.4); font-style: italic; }
 .s10-body p { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.75; margin-bottom: 14px; }
+.s10-video-section { margin-top: 36px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+.s10-video-eyebrow { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 8px; }
+.s10-video-note { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 16px; font-style: italic; }
+.s10-video-ph { background: rgba(0,0,0,0.35); border-radius: 4px; padding: 32px 20px; text-align: center; }
+.s10-video-ph-label { font-family: 'Special Elite', cursive; font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+.s10-video-ph-note { font-family: 'Courier Prime', monospace; font-size: 0.75rem; color: rgba(255,255,255,0.25); font-style: italic; }
 .s10-continue { font-family: 'Special Elite', cursive; font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 13px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 1px; width: 100%; margin-top: 24px; -webkit-appearance: none; touch-action: manipulation; }
 .s10-continue:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
 
@@ -1265,6 +1290,16 @@ body, body * {
 .s7-ot-save { border-color: rgba(224,101,0,0.4) !important; color: #E06500 !important; border-radius: 6px !important; font-size: 0.78rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
 
 /* 22. STEP 9: THE REWRITE */
+/* Presence exercise */
+.s9-presence-eyebrow { color: #AAAAAA !important; }
+.s9-presence-intro { color: #888888 !important; }
+.s9-door { background: #FFFFFF !important; border-color: #E2DED8 !important; border-radius: 10px !important; }
+.s9-door:not(.open):active { background: #FEF0E4 !important; border-color: rgba(224,101,0,0.35) !important; }
+.s9-door-tap { color: #CCCCCC !important; font-size: 0.8rem !important; }
+.s9-door-question { color: #111111 !important; font-size: 0.95rem !important; font-weight: 600 !important; }
+.s9-door.open { background: #FEF0E4 !important; border-color: rgba(224,101,0,0.3) !important; }
+.s9-presence-begin { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+/* Writing phase */
 .s9-intro { color: #333333 !important; font-size: 0.92rem !important; }
 .s9-example-toggle { background: #FFFFFF !important; border-color: #E2DED8 !important; color: #555555 !important; border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 600 !important; }
 .s9-example-pane { background: #EDEBE4 !important; border-radius: 8px !important; }
@@ -1276,6 +1311,11 @@ body, body * {
 .s9-rewrite-area:focus { border-color: #E06500 !important; }
 .s9-rewrite-area::placeholder { color: #CCCCCC !important; }
 .s9-checkin { background: #FEF0E4 !important; border-left-color: #E06500 !important; color: #555555 !important; border-radius: 0 6px 6px 0 !important; font-style: normal !important; font-size: 0.85rem !important; }
+/* Proofing state */
+.s9-proofing { background: #FEF0E4 !important; border-left-color: #E06500 !important; border-radius: 0 8px 8px 0 !important; }
+.s9-proofing-eyebrow { color: #E06500 !important; }
+.s9-proofing-body p { color: #333333 !important; font-size: 0.88rem !important; }
+.s9-proofing-note { color: #AAAAAA !important; font-style: normal !important; }
 .s9-input-area { border-top-color: #E2DED8 !important; }
 .s9-status { color: #AAAAAA !important; font-style: normal !important; font-size: 0.78rem !important; }
 .s9-submit { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
@@ -1284,6 +1324,12 @@ body, body * {
 /* 23. STEP 10: AI FEEDBACK */
 .s10-waiting p { color: #888888 !important; font-style: normal !important; font-size: 0.9rem !important; }
 .s10-body p { color: #333333 !important; font-size: 0.92rem !important; }
+.s10-video-section { border-top-color: #E2DED8 !important; }
+.s10-video-eyebrow { color: #E06500 !important; font-size: 0.7rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+.s10-video-note { color: #555555 !important; font-style: normal !important; font-size: 0.88rem !important; }
+.s10-video-ph { background: #EDEBE4 !important; border-radius: 8px !important; }
+.s10-video-ph-label { color: #888888 !important; font-size: 0.88rem !important; font-weight: 600 !important; letter-spacing: 0 !important; }
+.s10-video-ph-note { color: #AAAAAA !important; font-style: normal !important; }
 .s10-continue { background: transparent !important; border-color: #E2DED8 !important; color: #555555 !important; border-radius: 6px !important; font-size: 0.88rem !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
 .s10-continue:hover { border-color: #E06500 !important; color: #E06500 !important; }
 
@@ -2121,6 +2167,24 @@ h1, h2, h3,
     <button class="s3-back" onclick="closeStep9()">&#8592;</button>
     <span class="s3-title">Step 9 &mdash; The Rewrite</span>
   </div>
+
+  <!-- Phase 1: Presence exercise -->
+  <div id="s9-presence" class="s9-presence">
+    <div class="s9-presence-eyebrow">Before You Write</div>
+    <p class="s9-presence-intro">Answer each question together, out loud, to each other. Tap to reveal.</p>
+    <div id="s9-door-1" class="s9-door" onclick="s9OpenDoor(1)">
+      <span class="s9-door-tap">Tap to reveal the first question</span>
+      <span class="s9-door-question">What&rsquo;s something about me that you were drawn to when we first met that you still see in me today?</span>
+    </div>
+    <div id="s9-door-2" class="s9-door" style="display:none;" onclick="s9OpenDoor(2)">
+      <span class="s9-door-tap">Tap to reveal the second question</span>
+      <span class="s9-door-question">If we could create more of one feeling between us right now, what would you want it to be?</span>
+    </div>
+    <button class="s9-presence-begin" id="s9-presence-begin" onclick="s9BeginWriting()">Begin Writing</button>
+  </div>
+
+  <!-- Phase 2: Writing -->
+  <div id="s9-writing" class="s9-writing" style="display:none;">
   <div class="s9-scroll">
     <p class="s9-intro">Before you write a single word, read the Before and Better example below. A real fight. Two versions. See what is possible before you attempt your own.</p>
     <button class="s9-example-toggle" id="s9-example-toggle" onclick="s9ToggleExample()">&#9654; Read the Before &amp; Better Example</button>
@@ -2231,11 +2295,19 @@ Me too.</div>
     <div class="s9-checkin" id="s9-checkin" style="display:none"></div>
     <span class="s9-rewrite-label">Your Rewrite &mdash; write it differently this time</span>
     <textarea class="s9-rewrite-area" id="s9-rewrite-area" placeholder="Write the same fight differently. Together. Not perfectly. Honestly.&#10;&#10;Start with your setting. Then your first line..." oninput="s9AutoSave()"></textarea>
-    <div class="s9-input-area">
-      <button class="s9-submit" id="s9-submit-btn" onclick="submitRewrite()">Submit Our Rewrite</button>
-      <div class="s9-status" id="s9-status"></div>
+    <!-- Proofing feedback — shown after click one -->
+    <div id="s9-proofing" class="s9-proofing" style="display:none;">
+      <div class="s9-proofing-eyebrow">The AI has read your rewrite</div>
+      <div id="s9-proofing-body" class="s9-proofing-body"></div>
+      <p class="s9-proofing-note">Make any final edits above, then finalize when you&rsquo;re both ready.</p>
     </div>
   </div>
+  <div class="s9-input-area">
+    <button class="s9-submit" id="s9-submit-btn" onclick="submitRewrite()">Submit Our Rewrite</button>
+    <button class="s9-submit" id="s9-finalize-btn" onclick="finalizeRewrite()" style="display:none;">Finalize &amp; Submit</button>
+    <div class="s9-status" id="s9-status"></div>
+  </div>
+  </div><!-- end s9-writing -->
 </div>
 
 <!-- STEP 10: AI FEEDBACK ON REWRITE -->
@@ -2249,6 +2321,15 @@ Me too.</div>
       <p>Reading your rewrite&hellip;<br>Something worth reading is on its way.</p>
     </div>
     <div id="s10-body" class="s10-body" style="display:none"></div>
+    <!-- Rewrite avatar video -->
+    <div id="s10-video-section" class="s10-video-section" style="display:none;">
+      <div class="s10-video-eyebrow">Your Rewrite &mdash; Watch It Back</div>
+      <p class="s10-video-note">You wrote it differently. Now watch it back. The same care you saw in Steps 4 and 5, now applied to what you just built together.</p>
+      <div id="s10-video-container" class="s10-video-ph">
+        <div class="s10-video-ph-label">Avatar Video &mdash; Being Generated</div>
+        <div class="s10-video-ph-note" id="s10-video-ph-note">Usually ready in a few minutes.</div>
+      </div>
+    </div>
     <button class="s10-continue" id="s10-continue-btn" onclick="completeStep10()" style="display:none">Continue to Step 11 &#8250;</button>
   </div>
 </div>
@@ -4467,10 +4548,11 @@ function completeStep8() {
   advanceStep('9');
 }
 
-// ── STEP 9: THE REWRITE ───────────────────────────────────────
+/// ── STEP 9: THE REWRITE ───────────────────────────────────────
 var s9CheckinTimer = null;
 var s9CheckinIndex = 0;
 var s9SaveTimer = null;
+var s9PresenceDone = false;
 var S9_CHECKINS = [
   'Still here if you need me. If you find yourself reaching for an old line — check your Awareness Log first.',
   'Quick reminder. If a "you" statement sneaks in, try flipping it to an "I" statement. I\'m here if you want help with that.',
@@ -4481,14 +4563,61 @@ var S9_CHECKINS = [
 function openStep9() {
   el('step9-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  if (!user || !user.coupleId) return;
+  if (!user || !user.coupleId) {
+    s9ShowPhase(s9PresenceDone ? 'writing' : 'presence');
+    return;
+  }
   fsGet('couples/' + user.coupleId).then(function(d) {
-    if (d && d.fields) {
-      var couple = fromFields(d.fields);
-      if (couple.rewrite) el('s9-rewrite-area').value = couple.rewrite;
+    var couple = d && d.fields ? fromFields(d.fields) : {};
+    if (couple.rewrite) el('s9-rewrite-area').value = couple.rewrite;
+    // If proofing already ran (click one done), restore that state
+    if (couple.rewriteFeedbackReady && couple.rewriteFeedback && !couple.rewriteProofingComplete) {
+      s9ShowPhase('writing');
+      s9RestoreProofing(couple.rewriteFeedback);
+    } else {
+      s9ShowPhase(s9PresenceDone ? 'writing' : 'presence');
+      if (s9PresenceDone) s9CheckinTimer = setTimeout(s9NextCheckin, 3 * 60 * 1000);
     }
-  }).catch(function(){});
+  }).catch(function() {
+    s9ShowPhase(s9PresenceDone ? 'writing' : 'presence');
+  });
+}
+
+function s9ShowPhase(phase) {
+  if (phase === 'presence') {
+    el('s9-presence').style.display = 'flex';
+    el('s9-writing').style.display = 'none';
+  } else {
+    el('s9-presence').style.display = 'none';
+    el('s9-writing').style.display = 'flex';
+  }
+}
+
+function s9OpenDoor(n) {
+  var door = el('s9-door-' + n);
+  if (door.classList.contains('open')) return;
+  door.classList.add('open');
+  if (n === 1) {
+    // Show second door after a brief pause
+    setTimeout(function() { el('s9-door-2').style.display = 'flex'; }, 600);
+  } else if (n === 2) {
+    setTimeout(function() { el('s9-presence-begin').style.display = 'block'; }, 600);
+  }
+}
+
+function s9BeginWriting() {
+  s9PresenceDone = true;
+  s9ShowPhase('writing');
   s9CheckinTimer = setTimeout(s9NextCheckin, 3 * 60 * 1000);
+}
+
+function s9RestoreProofing(feedbackText) {
+  var body = el('s9-proofing-body');
+  var paras = feedbackText.split(/\n\n+/).filter(function(p) { return p.trim(); });
+  body.innerHTML = paras.map(function(p) { return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  el('s9-proofing').style.display = 'block';
+  el('s9-submit-btn').style.display = 'none';
+  el('s9-finalize-btn').style.display = 'block';
 }
 
 function closeStep9() {
@@ -4527,17 +4656,41 @@ function submitRewrite() {
     alert('Please write your rewrite before submitting. It looks like there isn\'t enough content yet.'); return;
   }
   var btn = el('s9-submit-btn');
-  btn.disabled = true; btn.textContent = 'Submitting...';
-  txt('s9-status', 'Saving your rewrite...');
+  btn.disabled = true; btn.textContent = 'Reading your rewrite...';
+  txt('s9-status', 'The AI is reviewing your rewrite...');
   if (s9CheckinTimer) { clearTimeout(s9CheckinTimer); s9CheckinTimer = null; }
   fsSet('couples/' + user.coupleId, {
     rewrite: text, rewriteSubmittedAt: new Date().toISOString()
   }).then(function() {
-    txt('s9-status', 'Rewrite saved. The AI is reading it now...');
     return runRewriteAnalysis(text);
+  }).then(function(feedbackText) {
+    // Show proofing feedback inline (click one complete)
+    s9RestoreProofing(feedbackText);
+    el('s9-proofing').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    txt('s9-status', '');
   }).catch(function() {
     btn.disabled = false; btn.textContent = 'Submit Our Rewrite';
-    txt('s9-status', 'Error saving. Please try again.');
+    txt('s9-status', 'Could not complete. Please try again.');
+  });
+}
+
+function finalizeRewrite() {
+  var text = (el('s9-rewrite-area').value || '').trim();
+  var btn = el('s9-finalize-btn');
+  btn.disabled = true; btn.textContent = 'Finalizing...';
+  txt('s9-status', 'Submitting for avatar generation...');
+  fsSet('couples/' + user.coupleId, {
+    rewrite: text,
+    rewriteProofingComplete: true,
+    rewriteConfirmedAt: new Date().toISOString(),
+    currentStep: '10'
+  }).then(function() {
+    closeStep9();
+    currentJourneyStep = '10';
+    showJourneyBanner('10');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Finalize & Submit';
+    txt('s9-status', 'Error. Please try again.');
   });
 }
 
@@ -4562,29 +4715,22 @@ function runRewriteAnalysis(rewriteText) {
   }).then(function(feedbackText) {
     return fsSet('couples/' + user.coupleId, {
       rewriteFeedback: feedbackText,
-      rewriteFeedbackReady: true,
-      currentStep: '10'
-    });
-  }).then(function() {
-    closeStep9();
-    currentJourneyStep = '10';
-    showJourneyBanner('10');
-  }).catch(function(err) {
-    var btn = el('s9-submit-btn');
-    btn.disabled = false; btn.textContent = 'Submit Our Rewrite';
-    txt('s9-status', 'Analysis could not complete. Please try again.');
-    console.error('Step 9 analysis error:', err);
+      rewriteFeedbackReady: true
+    }).then(function() { return feedbackText; });
   });
 }
 
 // ── STEP 10: AI FEEDBACK ─────────────────────────────────────
 var s10PollTimer = null;
+var s10VideoPollTimer = null;
+var s10VideoTimeout = null;
 
 function openStep10() {
   el('step10-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   el('s10-waiting').style.display = 'block';
   el('s10-body').style.display = 'none';
+  hide('s10-video-section');
   el('s10-continue-btn').style.display = 'none';
   checkRewriteFeedback();
 }
@@ -4593,6 +4739,8 @@ function closeStep10() {
   hide('step10-screen');
   document.body.style.overflow = '';
   if (s10PollTimer) { clearTimeout(s10PollTimer); s10PollTimer = null; }
+  if (s10VideoPollTimer) { clearTimeout(s10VideoPollTimer); s10VideoPollTimer = null; }
+  if (s10VideoTimeout) { clearTimeout(s10VideoTimeout); s10VideoTimeout = null; }
 }
 
 function checkRewriteFeedback() {
@@ -4614,6 +4762,34 @@ function renderS10Feedback(text) {
   body.innerHTML = paras.map(function(p) { return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
   el('s10-waiting').style.display = 'none';
   body.style.display = 'block';
+  // Show video section and start polling for rewrite video
+  showFlex('s10-video-section');
+  checkRewriteVideo();
+  // Fallback: show continue button after 15 minutes if video hasn't arrived
+  s10VideoTimeout = setTimeout(function() {
+    if (el('s10-continue-btn').style.display === 'none') {
+      el('s10-continue-btn').style.display = 'block';
+    }
+  }, 15 * 60 * 1000);
+}
+
+function checkRewriteVideo() {
+  if (!user || !user.coupleId) return;
+  fsGet('couples/' + user.coupleId).then(function(d) {
+    if (!d || !d.fields) { s10VideoPollTimer = setTimeout(checkRewriteVideo, 30000); return; }
+    var couple = fromFields(d.fields);
+    if (couple.rewriteVideoUrl) {
+      renderRewriteVideo(couple.rewriteVideoUrl);
+    } else {
+      s10VideoPollTimer = setTimeout(checkRewriteVideo, 30000);
+    }
+  }).catch(function() { s10VideoPollTimer = setTimeout(checkRewriteVideo, 30000); });
+}
+
+function renderRewriteVideo(url) {
+  if (s10VideoPollTimer) { clearTimeout(s10VideoPollTimer); s10VideoPollTimer = null; }
+  var container = el('s10-video-container');
+  container.innerHTML = '<video src="' + esc(url) + '" controls playsinline style="width:100%;border-radius:4px;"></video>';
   el('s10-continue-btn').style.display = 'block';
 }
 

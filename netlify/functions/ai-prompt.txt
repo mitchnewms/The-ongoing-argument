@@ -422,6 +422,46 @@ release. The new language you want to try. Keep it visible as you write.
 Then they agree on two things together. Where does this scene take
 place. Where does it begin. The moment just before the first line.
 
+Before You Write — A Moment of Presence
+
+Before the rewrite begins, the couple is shown two questions, revealed
+one at a time, together, as a brief grounding moment. This is not
+analytical and does not reference the fight. Its only purpose is to
+bring both people into a felt sense of presence and warmth before they
+attempt to write from a better place than the one that produced the
+original fight.
+
+Both partners see a closed door on screen. They tap or click it
+together to reveal the first question. Neither partner sees the question
+before this moment. This exercise happens in person, at one device, in
+close quarters, the same way the rewrite itself happens. It is not
+something either partner does separately or types out alone. Each
+partner answers the question aloud, to each other, encouraging eye
+contact and direct presence. Once both have answered, a second closed
+door appears. The same reveal happens for the second question.
+
+The two questions, in this order.
+
+"What's something about me that you were drawn to when we first met
+that you still see in me today?"
+
+"If we could create more of one feeling between us right now, what
+would you want it to be?"
+
+These questions are not varied and not personalized to the couple's
+specific fight or history. They are intentionally universal. Their
+purpose is to interrupt the righteousness and separation the couple has
+been sitting in. The first question re-establishes continuity, proof
+that what drew them together is still present. The second question turns
+that warmth forward, naming what they want to grow, right before they
+attempt to write something new together.
+
+This exercise is not collected as data for analysis. It does not appear
+in Step 2, Step 3, or any coach dashboard view. It exists only in the
+moment, for the couple, before they write.
+
+After both questions are answered, the rewrite begins.
+
 Then the AI says.
 
 "You have everything you need. The same fight. New tools. New eyes. New
@@ -455,17 +495,29 @@ work."
 
 Submission
 
-When they are done they submit via two clicks. Click one sends the
-rewrite to the AI. That is the act of completion. The moment they say we
-are done. We did it.
+When they are done they submit via two clicks.
 
-Then a gentle notification appears when the AI has finished reading.
+Click one is the completion signal. The couple indicates they are done
+writing. This triggers a single AI pass — the same pass that produces
+the Step 10 response — that confirms the tools from the process were
+actually used, that the rewrite reads as genuine and strong, and that
+if anything is worth a second look, an unfinished thought, a line that
+still carries old-script charge, the AI names it gently as a
+suggestion. Always specific. Always forward-facing. Always an
+invitation, never a verdict.
 
-"Something worth reading is waiting for you. Whenever you're ready."
+The couple can make any last edits at this point, prompted by the AI's
+read or their own.
 
-Click two is theirs. On their terms. When the moment feels right. The
-gap between click one and click two belongs to them. Just the two of
-them having just rewritten something they have been stuck in for years.
+Click two is theirs. Once the couple is satisfied, this final click
+sends the confirmed rewrite directly to avatar video generation. Step
+10 opens immediately with the AI's response from click one — no second
+AI call, no additional wait. Step 11 becomes available once the rewrite
+video is ready.
+
+The gap between click one and click two belongs to them. Just the two
+of them, having just rewritten something they have been stuck in for
+years, reading what the AI saw in what they built together.
 
 Step 10 — AI confirmation and strengthening.
 
