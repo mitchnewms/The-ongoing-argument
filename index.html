@@ -60,6 +60,18 @@ body {
 .auth-disclaimer-label { display: flex; align-items: flex-start; gap: 10px; font-family: 'Courier Prime', monospace; font-size: 0.83rem; color: var(--ink); cursor: pointer; line-height: 1.5; }
 .auth-disclaimer-label input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
 .auth-disclaimer-err { font-size: 0.78rem; color: var(--red); font-style: italic; margin-top: 8px; display: none; }
+/* Path choice framing note */
+.pc-scene-note { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.55); text-align: center; font-style: italic; margin: 20px 0 0; line-height: 1.65; }
+/* Scene length estimate */
+.scene-length-estimate { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.03em; color: var(--ink-faint); text-align: right; padding: 6px 0 2px; min-height: 20px; transition: color 0.25s; }
+.scene-length-estimate.sl-warning { color: #E06500; }
+.scene-length-estimate.sl-over { color: #E06500; }
+.script-page.scene-over-limit { background: rgba(224,101,0,0.04); transition: background 0.4s; }
+/* Scene length popups */
+#sl-nudge-popup, #sl-block-popup { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 300; align-items: center; justify-content: center; padding: 24px; }
+.sl-popup-box { background: var(--paper); border-radius: 3px; max-width: 380px; width: 100%; padding: 28px 24px 22px; box-shadow: 0 8px 40px rgba(0,0,0,0.4); border-top: 3px solid #E06500; }
+.sl-popup-body { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); line-height: 1.8; margin-bottom: 20px; }
+.sl-popup-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 28px; background: #E06500; color: white; border: none; border-radius: 2px; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; }
 .auth-loading { text-align: center; font-size: 0.8rem; color: var(--ink-faint); font-style: italic; margin-top: 8px; }
 
 #script-screen { display: none; width: 100%; max-width: 680px; }
@@ -1204,6 +1216,7 @@ body, body * {
 }
 #path-choice-screen .pc-card-desc { font-size: 0.87rem !important; color: #6A6458 !important; }
 .pc-privacy { font-size: 0.8rem !important; color: #A89E92 !important; font-style: normal !important; }
+.pc-scene-note { color: #7A7468 !important; font-style: normal !important; font-size: 0.9rem !important; margin-top: 24px !important; }
 
 /* 16. PATH B SCREEN — flip to light */
 #path-b-screen { background: #F6F4F0 !important; }
@@ -1833,6 +1846,7 @@ h1, h2, h3,
     </div>
     <div class="scene-block"><label>Scene / Location</label><input type="text" id="scene-input" placeholder="INT. KITCHEN — EVENING" /></div>
     <div id="lines-container"></div>
+    <div class="scene-length-estimate" id="scene-length-estimate"></div>
     <div class="add-bar">
       <button class="btn" id="btn-add-a">+ Me speaks</button>
       <button class="btn" id="btn-add-b">+ Partner speaks</button>
@@ -2048,6 +2062,7 @@ h1, h2, h3,
         <div class="pc-card-desc">Answer a series of questions about how the fight unfolds. The AI will generate a rough draft of the script from your answers. You'll edit that draft into something that actually sounds like the two of you before submitting.</div>
       </div>
     </div>
+    <p class="pc-scene-note">This isn't the whole night. It's the flashpoint — the minute or two where everything actually turned. Find that scene.</p>
     <div class="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
   </div>
 </div>
@@ -2398,6 +2413,22 @@ Me too.</div>
     <div class="s11-done">
       <p>You have done the work.</p>
     </div>
+  </div>
+</div>
+
+<!-- SCENE LENGTH: ONE-TIME NUDGE POPUP (appears once when first crossing 2:00 while writing) -->
+<div id="sl-nudge-popup">
+  <div class="sl-popup-box">
+    <div class="sl-popup-body">You're running a little past two minutes. That's alright — take a look and see what you can trim without losing the heart of what happened. Sometimes a line or two repeats the same point twice, those are usually the easiest to let go of.</div>
+    <button class="sl-popup-btn" onclick="el('sl-nudge-popup').style.display='none'">Got it</button>
+  </div>
+</div>
+
+<!-- SCENE LENGTH: SUBMISSION BLOCK POPUP (appears at submit time if still over 2:00) -->
+<div id="sl-block-popup">
+  <div class="sl-popup-box">
+    <div class="sl-popup-body" id="sl-block-body"></div>
+    <button class="sl-popup-btn" onclick="el('sl-block-popup').style.display='none'">Got it</button>
   </div>
 </div>
 
@@ -2993,7 +3024,7 @@ function loadScript() {
         if (l.type === 'line') addLine(l.char, l.beat, l.dialogue, true);
         else addDir(l.text, true);
       });
-      setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 50);
+      setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); updateSceneEstimate(); }, 50);
       // Path B: show handoff banner if not yet dismissed
       if (s.scriptPath === 'b' && !s.handoffSeen) {
         pbShowHandoff();
@@ -3005,7 +3036,55 @@ function loadScript() {
   }).catch(function() {});
 }
 
-function sched() { clearTimeout(saveTimer); saveTimer = setTimeout(saveScript, 2000); }
+function sched() { clearTimeout(saveTimer); saveTimer = setTimeout(saveScript, 2000); updateSceneEstimate(); }
+
+var sceneLengthOverWarningShown = false;
+
+function estimateSceneLength() {
+  var totalWords = 0;
+  document.querySelectorAll('#lines-container > div').forEach(function(e) {
+    if (e.dataset.type === 'line') {
+      var ta = e.querySelector('.dialogue-input');
+      var text = (ta ? ta.value : '').trim();
+      if (text) totalWords += text.split(/\s+/).filter(Boolean).length;
+    }
+  });
+  var totalSeconds = Math.round((totalWords / 120) * 60);
+  var mins = Math.floor(totalSeconds / 60);
+  var secs = totalSeconds % 60;
+  return { words: totalWords, totalSeconds: totalSeconds, mins: mins, secs: secs, formatted: mins + ':' + (secs < 10 ? '0' : '') + secs };
+}
+
+function updateSceneEstimate() {
+  var est = estimateSceneLength();
+  var display = el('scene-length-estimate');
+  if (!display) return;
+  if (est.words === 0) { display.textContent = ''; display.className = 'scene-length-estimate'; return; }
+  display.textContent = 'Estimated scene length: ' + est.formatted;
+  var page = document.querySelector('.script-page');
+  if (est.totalSeconds > 120) {
+    display.className = 'scene-length-estimate sl-over';
+    if (page) page.classList.add('scene-over-limit');
+    if (!sceneLengthOverWarningShown) {
+      sceneLengthOverWarningShown = true;
+      var nudge = el('sl-nudge-popup'); if (nudge) nudge.style.display = 'flex';
+    }
+  } else if (est.totalSeconds >= 105) {
+    display.className = 'scene-length-estimate sl-warning';
+    if (page) page.classList.remove('scene-over-limit');
+  } else {
+    display.className = 'scene-length-estimate';
+    if (page) page.classList.remove('scene-over-limit');
+  }
+}
+
+function showSceneLengthBlockPopup(est) {
+  var overageWords = Math.max(0, est.words - 240);
+  var overageChars = overageWords * 6;
+  var body = el('sl-block-body');
+  if (body) body.textContent = 'Your scene is running about ' + est.formatted + '. Try trimming around ' + overageWords + ' words — roughly ' + overageChars + ' characters — to bring it back under two minutes. Look for the parts that repeat the same point twice, those are usually the easiest to cut.';
+  var popup = el('sl-block-popup'); if (popup) popup.style.display = 'flex';
+}
 
 function saveScript() {
   if (!user || user.email === COACH) return;
@@ -3858,6 +3937,8 @@ function step2AutoSave() {
 }
 
 function submitScript() {
+  var est = estimateSceneLength();
+  if (est.totalSeconds > 120) { showSceneLengthBlockPopup(est); return; }
   var thinking = (el('step2-thinking').value || '').trim();
   var feeling = (el('step2-feeling').value || '').trim();
   if (!thinking || !feeling) {
@@ -5006,7 +5087,7 @@ var PB_QUESTIONS = {
   q2:  '', // filled dynamically after q1 answer — AI generates a trigger question with a topic-specific example
   q3:  'Where did it happen last time, or where does it usually happen? This becomes the setting for your script.',
   q4:  'Think of a specific time this happened. What\'s the moment you remember that started it — the first thing that was said or done?',
-  q5:  'Walk me through it. What gets said, back and forth, as it builds.',
+  q5:  'Walk me through it. What gets said, back and forth, as it builds.\n\nDon\'t tell us the whole evening. Tell us the minute or two where it turned.',
   q5fu:'I want to make sure I capture this fully. Tell me more — what happens in the middle of it? Where does it go from there?',
   q6:  'As you replay it, track the feeling from start to where it peaks. Does it start as frustration and build to anger? Shut down into silence? Spiral into tears? Naming the shift matters more than naming one word.',
   q7:  'Is there a specific word, a “you” statement, a tone of judgment, that you notice tends to be the moment it gets worse — more emotional, tears, anger, shutting down?',
@@ -5040,6 +5121,7 @@ function checkPathChoice() {
 }
 
 function choosePathA() {
+  sceneLengthOverWarningShown = false;
   el('path-choice-screen').style.display = 'none';
   document.body.style.overflow = '';
   navPush('script');
@@ -5306,7 +5388,8 @@ function pbLoadDraftIntoTool(parsed) {
     else addDir(l.text, true);
   });
 
-  setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); }, 50);
+  sceneLengthOverWarningShown = false;
+  setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); updateSceneEstimate(); }, 50);
 
   // Collect lines for Firebase
   var lines = [];
