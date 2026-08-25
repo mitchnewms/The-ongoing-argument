@@ -52,6 +52,14 @@ body {
 .auth-submit:active { background: #7a5c10; }
 .auth-submit:disabled { background: #b8a070; cursor: not-allowed; }
 .auth-error { font-size: 0.85rem; color: var(--red); margin-top: 12px; font-style: italic; min-height: 24px; text-align: center; }
+/* Disclaimer */
+.auth-disclaimer { margin-top: 20px; margin-bottom: 4px; }
+.auth-disclaimer-box { max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: 2px; padding: 14px 16px; font-size: 0.8rem; line-height: 1.75; color: var(--ink-light); background: #fafaf8; margin-bottom: 12px; }
+.auth-disclaimer-box p { margin: 0 0 10px; }
+.auth-disclaimer-box p:last-child { margin-bottom: 0; }
+.auth-disclaimer-label { display: flex; align-items: flex-start; gap: 10px; font-family: 'Courier Prime', monospace; font-size: 0.83rem; color: var(--ink); cursor: pointer; line-height: 1.5; }
+.auth-disclaimer-label input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.auth-disclaimer-err { font-size: 0.78rem; color: var(--red); font-style: italic; margin-top: 8px; display: none; }
 .auth-loading { text-align: center; font-size: 0.8rem; color: var(--ink-faint); font-style: italic; margin-top: 8px; }
 
 #script-screen { display: none; width: 100%; max-width: 680px; }
@@ -1757,6 +1765,17 @@ h1, h2, h3,
       <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><div class="pw-wrap"><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /><button type="button" class="pw-eye" onclick="togglePw('ca-pass',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
       <div class="auth-field"><label for="ca-pass-confirm">Confirm Password</label><div class="pw-wrap"><input type="password" id="ca-pass-confirm" placeholder="••••••••" autocomplete="new-password" /><button type="button" class="pw-eye" onclick="togglePw('ca-pass-confirm',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div id="ca-pass-match-err" class="field-error">Passwords do not match. Please try again.</div></div>
       <div class="auth-field"><label for="ca-fight">The Fight — what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
+      <div class="auth-disclaimer">
+        <div class="auth-disclaimer-box">
+          <p>The Ongoing Argument is a coaching platform. It is designed to support more effective communication, ownership of feelings, personal responsibility, and a genuine desire to strengthen the integrity within yourself and within your relationship.</p>
+          <p>This is not therapy, counseling, psychoanalysis, mental health treatment, or substance abuse treatment, and it is not a substitute for any of those. Mitch Newman is a relationship adviser and coach, not a licensed therapist, psychologist, psychiatrist, or medical professional. This process does not diagnose or treat any mental health condition.</p>
+          <p>If you are currently experiencing physical, emotional, or psychological abuse in your relationship, or dealing with untreated substance abuse, this process is not equipped to address that safely, and we encourage you to seek support from a licensed therapist, counselor, or a domestic violence professional instead.</p>
+          <p>If anything shared during this process suggests a need for professional support beyond what coaching can offer, that will be named to you directly, with care, and you will be encouraged to seek it.</p>
+          <p>By checking the box below, you confirm you have read this and agree to proceed.</p>
+        </div>
+        <label class="auth-disclaimer-label"><input type="checkbox" id="ca-disclaimer-check"> I have read and agree to the disclaimer above.</label>
+        <div class="auth-disclaimer-err" id="ca-disclaimer-err">Please read and agree to the disclaimer to continue.</div>
+      </div>
       <button type="button" class="auth-submit" id="btn-create" onclick="createAccount()">Create Account</button>
       <div class="auth-error" id="ca-error" role="alert"></div>
     </div>
@@ -1966,6 +1985,10 @@ h1, h2, h3,
   </div>
   <div id="clients-list"><div class="loading">Loading clients…</div></div>
   <div id="coach-status"></div>
+  <div id="coach-requests-section" style="margin-top: 32px; padding: 0 24px 32px;">
+    <div style="font-family: 'Special Elite', cursive; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--line);">Safety Pattern — Coach Requests</div>
+    <div id="coach-requests-list"><div class="loading" style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Loading…</div></div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="script-modal">
@@ -2611,6 +2634,7 @@ function createAccount() {
   txt('ca-error', '');
   el('ca-email-match-err').style.display = 'none';
   el('ca-pass-match-err').style.display = 'none';
+  el('ca-disclaimer-err').style.display = 'none';
   if (!name) { txt('ca-error', 'Please enter your name.'); return; }
   if (!partner) { txt('ca-error', "Please enter your partner's name."); return; }
   if (!email) { txt('ca-error', 'Please enter your email.'); return; }
@@ -2618,6 +2642,7 @@ function createAccount() {
   if (!pass || pass.length < 6) { txt('ca-error', 'Password needs at least 6 characters.'); return; }
   if (pass !== passConfirm) { el('ca-pass-match-err').style.display = 'block'; el('ca-pass-confirm').focus(); return; }
   if (!fight) { txt('ca-error', 'Please name the fight.'); return; }
+  if (!el('ca-disclaimer-check').checked) { el('ca-disclaimer-err').style.display = 'block'; el('ca-disclaimer-err').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return; }
   el('btn-create').disabled = true;
   el('btn-create').textContent = 'Creating account…';
   post(AUTH + ':signUp?key=' + API_KEY, { email: email, password: pass, returnSecureToken: true })
@@ -2643,7 +2668,7 @@ function createAccount() {
     if (enrollMode === 'join' && pendingCoupleId && pendingPartnerAId) {
       // Partner B: save user doc then afterLogin handles linking
       el('btn-create').textContent = 'Linking you in…';
-      fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString() })
+      fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString(), disclaimerAgreedAt: new Date().toISOString() })
       .then(function() { afterLogin(); })
       .catch(function() { afterLogin(); });
     } else {
@@ -2664,7 +2689,7 @@ function createAccount() {
         user.coupleId = coupleId;
         localStorage.setItem('oa_user', JSON.stringify(user));
         return Promise.all([
-          fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString(), coupleId: coupleId }),
+          fsSet('users/' + user.uid, { email: email, name: name, partnerName: partner, fightName: fight, role: 'client', createdAt: new Date().toISOString(), coupleId: coupleId, disclaimerAgreedAt: new Date().toISOString() }),
         ]).then(function() { return coupleId; });
       }).then(function(coupleId) {
         if (!coupleId) return;
@@ -2889,7 +2914,26 @@ function callAI(messages, step) {
   }).then(function(r) {
     if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'AI error'); });
     return r.json();
-  }).then(function(d) { return d.text || ''; });
+  }).then(function(d) {
+    var text = d.text || '';
+    if (text.indexOf('[[LOG_PROMPT]]') !== -1) {
+      text = text.replace(/\[\[LOG_PROMPT\]\]/g, '').trim();
+      setTimeout(function() { if (typeof openLogModal === 'function') openLogModal(''); }, 400);
+    }
+    if (text.indexOf('[[COACH_FLAG: Safety Pattern]]') !== -1) {
+      text = text.replace(/\[\[COACH_FLAG: Safety Pattern\]\]/g, '').trim();
+      if (user && user.coupleId) {
+        fsAdd('coachFlags', {
+          coupleId: user.coupleId,
+          triggeredBy: user.name || '',
+          triggeredByUid: user.uid || '',
+          step: step || '',
+          timestamp: new Date().toISOString()
+        }).catch(function() {});
+      }
+    }
+    return text;
+  });
 }
 
 // PROFILE
@@ -3117,6 +3161,37 @@ card.querySelector('.nb').addEventListener('click', function() { openNote(client
 c.appendChild(card);
 });
 }).catch(function() { el('clients-list').innerHTML = '<div class="loading">Error loading. Try refreshing.</div>'; });
+loadCoachRequests();
+}
+
+function loadCoachRequests() {
+  var listEl = el('coach-requests-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Loading…</div>';
+  fsList('coachFlags').then(function(d) {
+    if (!d.documents || !d.documents.length) {
+      listEl.innerHTML = '<div style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">No safety pattern flags yet.</div>';
+      return;
+    }
+    var flags = d.documents.map(function(doc) {
+      var p = fromFields(doc.fields); return p;
+    }).sort(function(a, b) { return (b.timestamp || '').localeCompare(a.timestamp || ''); });
+    listEl.innerHTML = '';
+    flags.forEach(function(f) {
+      var row = document.createElement('div');
+      row.style.cssText = 'padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;';
+      var ts = f.timestamp ? new Date(f.timestamp).toLocaleString() : '';
+      var stepLabel = f.step ? 'Step ' + f.step : '';
+      row.innerHTML = '<div>' +
+        '<div style="font-size:0.9rem;color:var(--ink);font-weight:600;">' + esc(f.triggeredBy || 'Unknown') + '</div>' +
+        '<div style="font-size:0.75rem;color:var(--ink-faint);margin-top:2px;">' + esc(stepLabel) + (stepLabel && ts ? ' · ' : '') + esc(ts) + '</div>' +
+        '</div>' +
+        '<span style="background:var(--accent);color:white;font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap;flex-shrink:0;">Safety Pattern</span>';
+      listEl.appendChild(row);
+    });
+  }).catch(function() {
+    listEl.innerHTML = '<div style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Could not load flags.</div>';
+  });
 }
 
 function viewScript(uid, name, fight) {
