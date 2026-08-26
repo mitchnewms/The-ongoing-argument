@@ -356,6 +356,31 @@ body {
 .s9-submit { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; }
 .s9-submit:disabled { background: rgba(184,160,112,0.35); cursor: default; }
 
+/* ── STEP 9: PRACTICE ROUND ──────────────────────────────── */
+.s9-practice { flex: 1; overflow-y: auto; padding: 32px 20px 24px; display: flex; flex-direction: column; align-items: center; }
+.s9-pr-body { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; }
+.s9-pr-eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 16px; text-align: center; }
+.s9-pr-context-note { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.65; text-align: center; margin-bottom: 22px; }
+.s9-pr-line-block { background: rgba(255,255,255,0.05); border: 1.5px solid rgba(184,160,112,0.3); border-radius: 2px; padding: 20px; margin-bottom: 18px; }
+.s9-pr-char-name { font-family: 'Special Elite', cursive; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(184,160,112,0.7); margin-bottom: 6px; }
+.s9-pr-beat { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: rgba(255,255,255,0.4); font-style: italic; margin-bottom: 8px; }
+.s9-pr-dialogue { font-family: 'Courier Prime', monospace; font-size: 0.92rem; color: rgba(255,255,255,0.9); line-height: 1.6; }
+.s9-pr-reflection { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.75; margin-bottom: 24px; border-left: 2px solid rgba(184,160,112,0.35); padding-left: 14px; }
+.s9-pr-scenario-q { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.65; margin-bottom: 18px; }
+.s9-pr-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.s9-pr-option { background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 2px; padding: 14px 16px; font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.78); line-height: 1.5; cursor: pointer; text-align: left; width: 100%; -webkit-appearance: none; touch-action: manipulation; transition: background 0.15s, border-color 0.15s; }
+.s9-pr-option:not(:disabled):active { background: rgba(184,160,112,0.1); }
+.s9-pr-option.s9-pr-chosen { background: rgba(184,160,112,0.1); border-color: rgba(184,160,112,0.45); }
+.s9-pr-option.s9-pr-correct { background: rgba(0,160,80,0.1); border-color: rgba(0,160,80,0.45); }
+.s9-pr-option.s9-pr-wrong { background: rgba(200,60,60,0.1); border-color: rgba(200,60,60,0.35); opacity: 0.7; }
+.s9-pr-consequence { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.55); line-height: 1.7; margin-bottom: 18px; padding: 12px 14px; background: rgba(184,160,112,0.06); border-left: 2px solid rgba(184,160,112,0.3); border-radius: 1px; }
+.s9-pr-consequence.s9-pr-good { border-left-color: rgba(0,160,80,0.5); }
+.s9-pr-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; width: 100%; -webkit-appearance: none; touch-action: manipulation; margin-top: auto; }
+.s9-pr-btn:disabled { background: rgba(184,160,112,0.35); cursor: default; }
+.s9-pr-loading-text { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 60px; }
+.s9-pr-error { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(200,80,80,0.8); text-align: center; margin-top: 60px; line-height: 1.65; }
+.s9-pr-complete-msg { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.7); line-height: 1.85; text-align: center; margin-bottom: 32px; margin-top: 16px; }
+
 /* ── STEP 10: AI FEEDBACK ON REWRITE ──────────────────────── */
 .s10-scroll { flex: 1; overflow-y: auto; padding: 28px 18px 80px; }
 .s10-waiting { text-align: center; padding: 60px 0; }
@@ -1342,6 +1367,27 @@ body, body * {
 .s9-submit { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
 .s9-submit:disabled { background: #F5C5A0 !important; }
 
+/* 22b. STEP 9: PRACTICE ROUND */
+.s9-pr-eyebrow { color: #AAAAAA !important; }
+.s9-pr-context-note { color: #888888 !important; }
+.s9-pr-line-block { background: #FFFFFF !important; border-color: #E2DED8 !important; border-radius: 10px !important; }
+.s9-pr-char-name { color: #E06500 !important; }
+.s9-pr-beat { color: #AAAAAA !important; font-style: normal !important; }
+.s9-pr-dialogue { color: #111111 !important; font-size: 0.95rem !important; font-weight: 600 !important; }
+.s9-pr-reflection { color: #555555 !important; border-left-color: #E06500 !important; background: #FEF0E4 !important; border-radius: 0 6px 6px 0 !important; font-size: 0.88rem !important; font-style: normal !important; }
+.s9-pr-scenario-q { color: #333333 !important; font-size: 0.92rem !important; }
+.s9-pr-option { background: #FFFFFF !important; border-color: #E2DED8 !important; color: #333333 !important; border-radius: 8px !important; font-size: 0.88rem !important; }
+.s9-pr-option.s9-pr-chosen { background: #FEF0E4 !important; border-color: rgba(224,101,0,0.35) !important; }
+.s9-pr-option.s9-pr-correct { background: rgba(0,140,70,0.07) !important; border-color: rgba(0,140,70,0.4) !important; }
+.s9-pr-option.s9-pr-wrong { background: #FFF0F0 !important; border-color: rgba(200,60,60,0.3) !important; }
+.s9-pr-consequence { background: #FEF0E4 !important; border-left-color: #E06500 !important; color: #555555 !important; border-radius: 0 6px 6px 0 !important; font-size: 0.85rem !important; }
+.s9-pr-consequence.s9-pr-good { border-left-color: rgba(0,140,70,0.5) !important; background: rgba(0,140,70,0.05) !important; }
+.s9-pr-btn { border-radius: 6px !important; font-size: 0.9rem !important; font-weight: 700 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.s9-pr-btn:disabled { background: #F5C5A0 !important; }
+.s9-pr-loading-text { color: #888888 !important; }
+.s9-pr-error { color: rgba(180,40,40,0.9) !important; }
+.s9-pr-complete-msg { color: #444444 !important; }
+
 /* 23. STEP 10: AI FEEDBACK */
 .s10-waiting p { color: #888888 !important; font-style: normal !important; font-size: 0.9rem !important; }
 .s10-body p { color: #333333 !important; font-size: 0.92rem !important; }
@@ -2219,6 +2265,11 @@ h1, h2, h3,
       <span class="s9-door-question">If we could create more of one feeling between us right now, what would you want it to be?</span>
     </div>
     <button class="s9-presence-begin" id="s9-presence-begin" onclick="s9BeginWriting()">Begin Writing</button>
+  </div>
+
+  <!-- Phase 1.5: Practice Round -->
+  <div id="s9-practice" class="s9-practice" style="display:none;">
+    <div id="s9-pr-body" class="s9-pr-body"></div>
   </div>
 
   <!-- Phase 2: Writing -->
@@ -4709,6 +4760,13 @@ var s9CheckinTimer = null;
 var s9CheckinIndex = 0;
 var s9SaveTimer = null;
 var s9PresenceDone = false;
+var s9PracticeDone = false;
+var s9PracticeContent = null;
+var s9PracticeState = 'pass1';
+var s9PracticeScenarioIdx = 0;
+var s9PracticeAnswers = [];
+var s9PracticeMyLine = null;
+var s9PracticePartnerLine = null;
 var S9_CHECKINS = [
   'Still here if you need me. If you find yourself reaching for an old line — check your Awareness Log first.',
   'Quick reminder. If a "you" statement sneaks in, try flipping it to an "I" statement. I\'m here if you want help with that.',
@@ -4720,31 +4778,42 @@ function openStep9() {
   el('step9-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   if (!user || !user.coupleId) {
-    s9ShowPhase(s9PresenceDone ? 'writing' : 'presence');
+    if (!s9PresenceDone) { s9ShowPhase('presence'); }
+    else if (!s9PracticeDone) { s9StartPractice(); }
+    else { s9ShowPhase('writing'); }
     return;
   }
   fsGet('couples/' + user.coupleId).then(function(d) {
     var couple = d && d.fields ? fromFields(d.fields) : {};
     if (couple.rewrite) el('s9-rewrite-area').value = couple.rewrite;
-    // If proofing already ran (click one done), restore that state
     if (couple.rewriteFeedbackReady && couple.rewriteFeedback && !couple.rewriteProofingComplete) {
       s9ShowPhase('writing');
       s9RestoreProofing(couple.rewriteFeedback);
+    } else if (couple.practiceRoundCompletedAt || s9PracticeDone) {
+      s9PresenceDone = true; s9PracticeDone = true;
+      s9ShowPhase('writing');
+      if (!couple.rewrite) s9CheckinTimer = setTimeout(s9NextCheckin, 3 * 60 * 1000);
+    } else if (s9PresenceDone) {
+      s9StartPractice();
     } else {
-      s9ShowPhase(s9PresenceDone ? 'writing' : 'presence');
-      if (s9PresenceDone) s9CheckinTimer = setTimeout(s9NextCheckin, 3 * 60 * 1000);
+      s9ShowPhase('presence');
     }
   }).catch(function() {
-    s9ShowPhase(s9PresenceDone ? 'writing' : 'presence');
+    if (!s9PresenceDone) { s9ShowPhase('presence'); }
+    else if (!s9PracticeDone) { s9StartPractice(); }
+    else { s9ShowPhase('writing'); }
   });
 }
 
 function s9ShowPhase(phase) {
+  el('s9-presence').style.display = 'none';
+  el('s9-practice').style.display = 'none';
+  el('s9-writing').style.display = 'none';
   if (phase === 'presence') {
     el('s9-presence').style.display = 'flex';
-    el('s9-writing').style.display = 'none';
+  } else if (phase === 'practice') {
+    el('s9-practice').style.display = 'flex';
   } else {
-    el('s9-presence').style.display = 'none';
     el('s9-writing').style.display = 'flex';
   }
 }
@@ -4761,10 +4830,228 @@ function s9OpenDoor(n) {
   }
 }
 
-function s9BeginWriting() {
-  s9PresenceDone = true;
+function s9StartPractice() {
+  s9PracticeState = 'pass1';
+  s9PracticeScenarioIdx = 0;
+  s9PracticeAnswers = [];
+  s9PracticeContent = null;
+  s9PracticeMyLine = null;
+  s9PracticePartnerLine = null;
+  s9ShowPhase('practice');
+  var body = el('s9-pr-body');
+  body.innerHTML = '<div class="s9-pr-eyebrow">Practice Round</div><p class="s9-pr-loading-text">Preparing your practice round\u2026</p>';
+
+  if (!user || !user.uid) { s9RenderPracticeError('Not signed in.'); return; }
+
+  Promise.all([
+    fsGet('scripts/' + user.uid),
+    fsGet('step7/' + user.uid)
+  ]).then(function(results) {
+    var scriptData = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
+    var step7Data = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var lines = [];
+    if (scriptData.lines) {
+      lines = typeof scriptData.lines === 'string' ? JSON.parse(scriptData.lines) : scriptData.lines;
+    }
+    lines.forEach(function(l) {
+      if (l.type === 'line' && l.dialogue && l.dialogue.trim()) {
+        if (!s9PracticeMyLine && l.char === 'A') s9PracticeMyLine = l;
+        if (!s9PracticePartnerLine && l.char === 'B') s9PracticePartnerLine = l;
+      }
+    });
+    var prompt = s9BuildPracticePrompt(s9PracticeMyLine, s9PracticePartnerLine, step7Data, scriptData.scene);
+    return callAI([{ role: 'user', content: prompt }], '9');
+  }).then(function(text) {
+    s9PracticeContent = s9ParsePracticeContent(text);
+    s9RenderPractice();
+  }).catch(function() {
+    s9RenderPracticeError('Something went wrong. Tap below to try again.');
+  });
+}
+
+function s9BuildPracticePrompt(myLine, partnerLine, step7Data, scene) {
+  var myLineText = myLine ? ((myLine.beat ? '(' + myLine.beat + ') ' : '') + myLine.dialogue) : '(no line found)';
+  var partnerLineText = partnerLine ? ((partnerLine.beat ? '(' + partnerLine.beat + ') ' : '') + partnerLine.dialogue) : '(no line found)';
+  var oneThing = step7Data.oneThing || '(not captured)';
+  var personName = (user && user.name) || 'them';
+  var sceneCtx = scene ? 'Scene context: ' + scene + '\n\n' : '';
+  return 'You are preparing a practice round for ' + personName + ' in Step 9 of The Ongoing Argument.\n\n' +
+    sceneCtx +
+    'THEIR OWN LINE (Pass One \u2014 they wrote this for themselves):\n' + myLineText + '\n\n' +
+    'THEIR PARTNER\'S LINE (Pass Two \u2014 they wrote this for their partner):\n' + partnerLineText + '\n\n' +
+    'THE ONE THING they identified as their own pattern in Step 7:\n' + oneThing + '\n\n' +
+    'Generate the following content in this EXACT format. Include nothing outside the tags.\n\n' +
+    '[PASS1_REFLECTION]\n(2-3 sentences. Invite them to sit with their own line. What is it really doing? What is it reaching for? What does it cost?)\n[/PASS1_REFLECTION]\n\n' +
+    '[PASS2_REFLECTION]\n(2-3 sentences. Invite them to read their partner\'s line from inside the partner\'s experience. What might be underneath it?)\n[/PASS2_REFLECTION]\n\n' +
+    'Then generate exactly 2 multiple-choice scenarios tied to their identified pattern. Each in this format:\n\n' +
+    '[SCENARIO]\nQ: (a realistic in-the-moment situation tied to their pattern)\nA: (a defensive or escalating response)\nB: (a step toward accountability or openness)\nC: (a deflecting or avoidant response)\nD: (a partially aware but still protective response)\nCORRECT: B\nFEEDBACK_A: (1-2 sentences on where A leads)\nFEEDBACK_B: (1-2 sentences affirming this \u2014 what it opens)\nFEEDBACK_C: (1-2 sentences on where C leads)\nFEEDBACK_D: (1-2 sentences on where D leads)\n[/SCENARIO]\n\n[SCENARIO]\n(second scenario, same format)\n[/SCENARIO]';
+}
+
+function s9ParsePracticeContent(text) {
+  var result = { pass1Reflection: '', pass2Reflection: '', scenarios: [] };
+  var m1 = text.match(/\[PASS1_REFLECTION\]([\s\S]*?)\[\/PASS1_REFLECTION\]/);
+  if (m1) result.pass1Reflection = m1[1].trim();
+  var m2 = text.match(/\[PASS2_REFLECTION\]([\s\S]*?)\[\/PASS2_REFLECTION\]/);
+  if (m2) result.pass2Reflection = m2[1].trim();
+  var re = /\[SCENARIO\]([\s\S]*?)\[\/SCENARIO\]/g;
+  var sm;
+  while ((sm = re.exec(text)) !== null) {
+    var b = sm[1];
+    var sc = { question: '', options: {}, correct: 'B', feedback: {} };
+    var qm = b.match(/^Q:\s*(.+)/m); sc.question = qm ? qm[1].trim() : '';
+    ['A','B','C','D'].forEach(function(k) {
+      var om = b.match(new RegExp('^' + k + ':\\s*(.+)', 'm')); sc.options[k] = om ? om[1].trim() : '';
+      var fm = b.match(new RegExp('FEEDBACK_' + k + ':\\s*([^\n]+(?:\n(?!(?:FEEDBACK_|CORRECT:|[A-D]:))[^\n]+)*)', 'm'));
+      sc.feedback[k] = fm ? fm[1].trim() : '';
+    });
+    var cm = b.match(/^CORRECT:\s*([A-D])/m); sc.correct = cm ? cm[1] : 'B';
+    result.scenarios.push(sc);
+  }
+  return result;
+}
+
+function s9RenderPractice() {
+  var body = el('s9-pr-body');
+  if (!body) return;
+  if (s9PracticeState === 'pass1') {
+    var ln = s9PracticeMyLine;
+    var ref = s9PracticeContent ? s9PracticeContent.pass1Reflection : '';
+    var charName = (user && user.name) ? user.name.toUpperCase() : 'YOU';
+    body.innerHTML =
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Pass One</div>' +
+      '<p class="s9-pr-context-note">This is a line from your own script &mdash; one you wrote for yourself.<br>Read it. Sit with it for a moment.</p>' +
+      (ln ?
+        '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(charName) + '</div>' +
+        (ln.beat ? '<div class="s9-pr-beat">(' + esc(ln.beat) + ')</div>' : '') +
+        '<div class="s9-pr-dialogue">' + esc(ln.dialogue) + '</div></div>'
+        : '<div class="s9-pr-line-block"><div class="s9-pr-dialogue">(No line found in your script)</div></div>') +
+      (ref ? '<div class="s9-pr-reflection">' + esc(ref).replace(/\n/g, '<br>') + '</div>' : '') +
+      '<button class="s9-pr-btn" onclick="s9PracticeAdvance()">I\'ve sat with this &rarr;</button>';
+
+  } else if (s9PracticeState === 'pass2') {
+    var ln2 = s9PracticePartnerLine;
+    var ref2 = s9PracticeContent ? s9PracticeContent.pass2Reflection : '';
+    var pName = (user && user.partner) ? user.partner.toUpperCase() : 'YOUR PARTNER';
+    body.innerHTML =
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Pass Two</div>' +
+      '<p class="s9-pr-context-note">This is how you wrote your partner\'s line.<br>Read it from inside their experience &mdash; what might be underneath it?</p>' +
+      (ln2 ?
+        '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(pName) + '</div>' +
+        (ln2.beat ? '<div class="s9-pr-beat">(' + esc(ln2.beat) + ')</div>' : '') +
+        '<div class="s9-pr-dialogue">' + esc(ln2.dialogue) + '</div></div>'
+        : '<div class="s9-pr-line-block"><div class="s9-pr-dialogue">(No partner line found in your script)</div></div>') +
+      (ref2 ? '<div class="s9-pr-reflection">' + esc(ref2).replace(/\n/g, '<br>') + '</div>' : '') +
+      '<button class="s9-pr-btn" onclick="s9PracticeAdvance()">I\'ve sat with this &rarr;</button>';
+
+  } else if (s9PracticeState === 'scenario') {
+    s9RenderScenario();
+
+  } else if (s9PracticeState === 'complete') {
+    body.innerHTML =
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Complete</div>' +
+      '<p class="s9-pr-complete-msg">You\'ve done the work to get here.<br><br>The rewrite is yours now.<br>Use what you just noticed.</p>' +
+      '<button class="s9-pr-btn" onclick="s9FinishPractice()">Begin the Rewrite &rarr;</button>';
+  }
+}
+
+function s9RenderScenario() {
+  var body = el('s9-pr-body');
+  if (!s9PracticeContent || !s9PracticeContent.scenarios.length) {
+    s9PracticeState = 'complete'; s9RenderPractice(); return;
+  }
+  var sc = s9PracticeContent.scenarios[s9PracticeScenarioIdx];
+  if (!sc) { s9PracticeState = 'complete'; s9RenderPractice(); return; }
+  var num = s9PracticeScenarioIdx + 1;
+  var total = s9PracticeContent.scenarios.length;
+  var optsHtml = '<div class="s9-pr-options">';
+  ['A','B','C','D'].forEach(function(k) {
+    optsHtml += '<button class="s9-pr-option" id="s9-pr-opt-' + k + '" onclick="s9PracticeSelectOption(\'' + k + '\')">' + k + '. ' + esc(sc.options[k] || '') + '</button>';
+  });
+  optsHtml += '</div>';
+  body.innerHTML =
+    '<div class="s9-pr-eyebrow">Practice Round &middot; Part Two &middot; ' + num + ' of ' + total + '</div>' +
+    '<p class="s9-pr-scenario-q">' + esc(sc.question) + '</p>' +
+    optsHtml +
+    '<div id="s9-pr-feedback" class="s9-pr-consequence" style="display:none;"></div>' +
+    '<button id="s9-pr-next-btn" class="s9-pr-btn" style="display:none;margin-top:16px;" onclick="s9PracticeScenarioNext()">Continue &rarr;</button>';
+}
+
+function s9PracticeSelectOption(key) {
+  var sc = s9PracticeContent && s9PracticeContent.scenarios[s9PracticeScenarioIdx];
+  if (!sc) return;
+  var isCorrect = key === sc.correct;
+  ['A','B','C','D'].forEach(function(k) {
+    var btn = el('s9-pr-opt-' + k);
+    if (!btn) return;
+    btn.disabled = true;
+    if (k === key) btn.classList.add(isCorrect ? 's9-pr-correct' : 's9-pr-wrong');
+    if (!isCorrect && k === sc.correct) btn.classList.add('s9-pr-correct');
+  });
+  var fb = el('s9-pr-feedback');
+  if (fb) {
+    fb.textContent = sc.feedback[key] || '';
+    fb.className = 's9-pr-consequence' + (isCorrect ? ' s9-pr-good' : '');
+    fb.style.display = 'block';
+  }
+  s9PracticeAnswers.push({ question: sc.question, chosen: key, correct: sc.correct, wasCorrect: isCorrect });
+  var nb = el('s9-pr-next-btn');
+  if (nb) {
+    var isLast = s9PracticeScenarioIdx >= s9PracticeContent.scenarios.length - 1;
+    nb.textContent = isLast ? 'Finish Practice \u2192' : 'Continue \u2192';
+    nb.style.display = 'block';
+  }
+}
+
+function s9PracticeScenarioNext() {
+  s9PracticeScenarioIdx++;
+  if (!s9PracticeContent || s9PracticeScenarioIdx >= s9PracticeContent.scenarios.length) {
+    s9PracticeState = 'complete'; s9RenderPractice();
+  } else {
+    s9RenderScenario();
+  }
+}
+
+function s9PracticeAdvance() {
+  if (s9PracticeState === 'pass1') {
+    s9PracticeState = 'pass2'; s9RenderPractice();
+  } else if (s9PracticeState === 'pass2') {
+    if (s9PracticeContent && s9PracticeContent.scenarios && s9PracticeContent.scenarios.length) {
+      s9PracticeState = 'scenario'; s9PracticeScenarioIdx = 0; s9RenderPractice();
+    } else {
+      s9PracticeState = 'complete'; s9RenderPractice();
+    }
+  }
+}
+
+function s9FinishPractice() {
+  s9PracticeDone = true;
+  if (user && user.coupleId) {
+    fsSet('couples/' + user.coupleId, { practiceRoundCompletedAt: new Date().toISOString() }).catch(function(){});
+  }
+  if (user && user.uid) {
+    fsSet('practice/' + user.uid, {
+      pass1LineShown: s9PracticeMyLine ? s9PracticeMyLine.dialogue : '',
+      pass2LineShown: s9PracticePartnerLine ? s9PracticePartnerLine.dialogue : '',
+      scenarioResponses: JSON.stringify(s9PracticeAnswers),
+      completedAt: new Date().toISOString()
+    }).catch(function(){});
+  }
   s9ShowPhase('writing');
   s9CheckinTimer = setTimeout(s9NextCheckin, 3 * 60 * 1000);
+}
+
+function s9RenderPracticeError(msg) {
+  var body = el('s9-pr-body');
+  if (!body) return;
+  body.innerHTML =
+    '<div class="s9-pr-eyebrow">Practice Round</div>' +
+    '<p class="s9-pr-error">' + esc(msg) + '</p>' +
+    '<button class="s9-pr-btn" style="margin-top:28px;" onclick="s9StartPractice()">Try again</button>';
+}
+
+function s9BeginWriting() {
+  s9PresenceDone = true;
+  s9StartPractice();
 }
 
 function s9RestoreProofing(feedbackText) {
