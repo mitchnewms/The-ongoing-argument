@@ -380,6 +380,14 @@ body {
 .s9-pr-loading-text { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 60px; }
 .s9-pr-error { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(200,80,80,0.8); text-align: center; margin-top: 60px; line-height: 1.65; }
 .s9-pr-complete-msg { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.7); line-height: 1.85; text-align: center; margin-bottom: 32px; margin-top: 16px; }
+.s9-pr-healthy-label { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(184,160,112,0.55); font-family: 'Courier Prime', monospace; margin-bottom: 8px; margin-top: 20px; }
+.s9-pr-healthy-response { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.72); line-height: 1.75; margin-bottom: 20px; padding: 14px 16px; background: rgba(184,160,112,0.07); border-left: 2px solid rgba(184,160,112,0.4); border-radius: 1px; }
+.s9-pr-attempt-label { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 10px; margin-top: 20px; }
+.s9-pr-attempt-input { width: 100%; min-height: 80px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 2px; padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.88); outline: none; resize: vertical; line-height: 1.6; margin-bottom: 14px; display: block; -webkit-appearance: none; }
+.s9-pr-attempt-input:focus { border-color: rgba(184,160,112,0.5); }
+.s9-pr-attempt-input::placeholder { color: rgba(255,255,255,0.2); }
+.s9-pr-feedback-text { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.65); line-height: 1.75; margin-bottom: 24px; padding: 14px 16px; background: rgba(184,160,112,0.07); border-left: 2px solid rgba(184,160,112,0.35); border-radius: 1px; }
+.s9-pr-framing { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(255,255,255,0.4); line-height: 1.7; text-align: center; margin-bottom: 22px; font-style: italic; }
 
 /* ── STEP 10: AI FEEDBACK ON REWRITE ──────────────────────── */
 .s10-scroll { flex: 1; overflow-y: auto; padding: 28px 18px 80px; }
@@ -702,6 +710,11 @@ body {
 
 .lp-btn:hover, .lp-btn:active { background: #A86A1E; }
 .lp-btn:disabled { background: #C8A870; cursor: default; }
+.lp-btn-solo { display: block; width: 100%; max-width: 380px; margin: 14px auto 0; padding: 16px 24px; background: transparent; color: #7A6E60; font-family: system-ui, -apple-system, sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; border: 1.5px solid #C8C0B0; cursor: pointer; border-radius: 1px; -webkit-appearance: none; appearance: none; touch-action: manipulation; transition: border-color 0.15s, color 0.15s; }
+.lp-btn-solo:hover, .lp-btn-solo:active { border-color: #9A8870; color: #4A3E30; }
+.lp-fork-beat { font-family: 'Lora', Georgia, serif; font-size: clamp(1rem, 2.8vw, 1.15rem); line-height: 1.9; color: #3A3028; max-width: 54ch; margin: 0 auto; }
+.lp-fork-beat p { margin-bottom: 1.4em; }
+.lp-fork-beat p:last-child { margin-bottom: 0; }
 
 .lp-tagline {
   font-family: 'Lora', Georgia, serif;
@@ -1387,6 +1400,16 @@ body, body * {
 .s9-pr-loading-text { color: #888888 !important; }
 .s9-pr-error { color: rgba(180,40,40,0.9) !important; }
 .s9-pr-complete-msg { color: #444444 !important; }
+.s9-pr-healthy-label { color: #AAAAAA !important; }
+.s9-pr-healthy-response { color: #555555 !important; border-left-color: #E06500 !important; background: #FEF0E4 !important; border-radius: 0 6px 6px 0 !important; font-size: 0.88rem !important; }
+.s9-pr-attempt-label { color: #888888 !important; font-style: normal !important; }
+.s9-pr-attempt-input { background: #FFFFFF !important; border-color: #E2DED8 !important; color: #111111 !important; border-radius: 8px !important; font-size: 0.9rem !important; }
+.s9-pr-attempt-input:focus { border-color: #E06500 !important; }
+.s9-pr-attempt-input::placeholder { color: #CCCCCC !important; }
+.s9-pr-feedback-text { color: #555555 !important; border-left-color: #E06500 !important; background: #FEF0E4 !important; border-radius: 0 6px 6px 0 !important; font-size: 0.88rem !important; }
+.s9-pr-framing { color: #888888 !important; font-style: normal !important; font-size: 0.85rem !important; }
+.lp-btn-solo { border-radius: 6px !important; font-size: 0.82rem !important; font-weight: 600 !important; letter-spacing: 0 !important; }
+.lp-fork-beat { color: #3A3028 !important; }
 
 /* 23. STEP 10: AI FEEDBACK */
 .s10-waiting p { color: #888888 !important; font-style: normal !important; font-size: 0.9rem !important; }
@@ -1736,6 +1759,16 @@ h1, h2, h3,
     </div>
   </section>
 
+  <!-- S2b: SOLO FORK BEAT — emotional framing, no buttons here -->
+  <section class="lp-section">
+    <div class="lp-fork-beat">
+      <p>This is a couples process. That&rsquo;s what it&rsquo;s built for, and that&rsquo;s where it has the power to change things long term.</p>
+      <p>But if right now, your partner isn&rsquo;t in a place to do this with you, that doesn&rsquo;t stop you.</p>
+      <p>It just means you&rsquo;re starting with you.</p>
+      <p>There&rsquo;s real value in that. A chance to understand yourself better, and your partner better, even on your own. And often, what shifts in you has a way of shifting what&rsquo;s possible between you &mdash; sometimes more than either of you would expect.</p>
+    </div>
+  </section>
+
   <!-- S3: HOW IT WORKS -->
   <section class="lp-section">
     <div class="lp-heading">How It Works</div>
@@ -1762,7 +1795,8 @@ h1, h2, h3,
 
   <!-- S5: CTA -->
   <div class="lp-cta">
-    <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">Begin</button>
+    <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">Start as a couple</button>
+    <button class="lp-btn-solo" id="lp-btn-solo" onclick="lpRevealCommitment()">Start on your own</button>
   </div>
 
   <!-- S6: COMMITMENT STATEMENT — hidden until S5 button clicked -->
@@ -4762,11 +4796,13 @@ var s9SaveTimer = null;
 var s9PresenceDone = false;
 var s9PracticeDone = false;
 var s9PracticeContent = null;
-var s9PracticeState = 'pass1';
+var s9PracticeState = 'pass1-show';
 var s9PracticeScenarioIdx = 0;
 var s9PracticeAnswers = [];
 var s9PracticeMyLine = null;
 var s9PracticePartnerLine = null;
+var s9PracticePass1Attempt = '';
+var s9PracticePass2Attempt = '';
 var S9_CHECKINS = [
   'Still here if you need me. If you find yourself reaching for an old line — check your Awareness Log first.',
   'Quick reminder. If a "you" statement sneaks in, try flipping it to an "I" statement. I\'m here if you want help with that.',
@@ -4831,12 +4867,14 @@ function s9OpenDoor(n) {
 }
 
 function s9StartPractice() {
-  s9PracticeState = 'pass1';
+  s9PracticeState = 'pass1-show';
   s9PracticeScenarioIdx = 0;
   s9PracticeAnswers = [];
   s9PracticeContent = null;
   s9PracticeMyLine = null;
   s9PracticePartnerLine = null;
+  s9PracticePass1Attempt = '';
+  s9PracticePass2Attempt = '';
   s9ShowPhase('practice');
   var body = el('s9-pr-body');
   body.innerHTML = '<div class="s9-pr-eyebrow">Practice Round</div><p class="s9-pr-loading-text">Preparing your practice round\u2026</p>';
@@ -4870,29 +4908,46 @@ function s9StartPractice() {
 }
 
 function s9BuildPracticePrompt(myLine, partnerLine, step7Data, scene) {
-  var myLineText = myLine ? ((myLine.beat ? '(' + myLine.beat + ') ' : '') + myLine.dialogue) : '(no line found)';
-  var partnerLineText = partnerLine ? ((partnerLine.beat ? '(' + partnerLine.beat + ') ' : '') + partnerLine.dialogue) : '(no line found)';
   var oneThing = step7Data.oneThing || '(not captured)';
+  var recentMessages = '';
+  if (step7Data.messages) {
+    try {
+      var msgs = typeof step7Data.messages === 'string' ? JSON.parse(step7Data.messages) : step7Data.messages;
+      var last4 = msgs.slice(-4).map(function(m) { return (m.role === 'user' ? 'Person: ' : 'Coach: ') + m.content; }).join('\n');
+      if (last4) recentMessages = '\nRecent Step 7 conversation (for tool context):\n' + last4 + '\n';
+    } catch(e) {}
+  }
   var personName = (user && user.name) || 'them';
   var sceneCtx = scene ? 'Scene context: ' + scene + '\n\n' : '';
+
+  var p1dialogue = myLine ? myLine.dialogue : '(no line found)';
+  var p1beat = myLine && myLine.beat ? myLine.beat : 'none';
+  var p2dialogue = partnerLine ? partnerLine.dialogue : '(no line found)';
+  var p2beat = partnerLine && partnerLine.beat ? partnerLine.beat : 'none';
+
   return 'You are preparing a practice round for ' + personName + ' in Step 9 of The Ongoing Argument.\n\n' +
     sceneCtx +
-    'THEIR OWN LINE (Pass One \u2014 they wrote this for themselves):\n' + myLineText + '\n\n' +
-    'THEIR PARTNER\'S LINE (Pass Two \u2014 they wrote this for their partner):\n' + partnerLineText + '\n\n' +
-    'THE ONE THING they identified as their own pattern in Step 7:\n' + oneThing + '\n\n' +
+    'PASS ONE LINE (their own line, as they wrote it for themselves):\nDialogue: ' + p1dialogue + '\nBeat: ' + p1beat + '\n\n' +
+    'PASS TWO LINE (partner\'s line, as they wrote it for their partner):\nDialogue: ' + p2dialogue + '\nBeat: ' + p2beat + '\n\n' +
+    'THE ONE THING they identified in Step 7:\n' + oneThing + recentMessages + '\n\n' +
+
+    'INTENSITY RULE: If a beat describes high-intensity action (screaming, slamming, crying, throwing), the healthy response shown must prioritize de-escalation \u2014 reflect the feeling, take ownership, make no request yet. If the beat is lower-intensity (quietly, sighs, pauses, looks away), the healthy response can use fuller structure: reflect the feeling, then move toward a request or offer.\n\n' +
+
+    'LANGUAGE RULES: The healthy responses must never use you-language directed at the partner, the words "right" or "wrong," "should," "fix," "you made me feel," or "boundaries." They must use I-language, we-language, curiosity, ownership, and request-over-demand framing.\n\n' +
+
     'Generate the following content in this EXACT format. Include nothing outside the tags.\n\n' +
-    '[PASS1_REFLECTION]\n(2-3 sentences. Invite them to sit with their own line. What is it really doing? What is it reaching for? What does it cost?)\n[/PASS1_REFLECTION]\n\n' +
-    '[PASS2_REFLECTION]\n(2-3 sentences. Invite them to read their partner\'s line from inside the partner\'s experience. What might be underneath it?)\n[/PASS2_REFLECTION]\n\n' +
-    'Then generate exactly 2 multiple-choice scenarios tied to their identified pattern. Each in this format:\n\n' +
-    '[SCENARIO]\nQ: (a realistic in-the-moment situation tied to their pattern)\nA: (a defensive or escalating response)\nB: (a step toward accountability or openness)\nC: (a deflecting or avoidant response)\nD: (a partially aware but still protective response)\nCORRECT: B\nFEEDBACK_A: (1-2 sentences on where A leads)\nFEEDBACK_B: (1-2 sentences affirming this \u2014 what it opens)\nFEEDBACK_C: (1-2 sentences on where C leads)\nFEEDBACK_D: (1-2 sentences on where D leads)\n[/SCENARIO]\n\n[SCENARIO]\n(second scenario, same format)\n[/SCENARIO]';
+    '[PASS1_RESPONSE]\n(A 1-2 sentence healthy partner response to Pass One\'s line. A loving, grounded partner hearing this line \u2014 what would they say back? Calibrate to beat intensity per the rule above.)\n[/PASS1_RESPONSE]\n\n' +
+    '[PASS2_RESPONSE]\n(A 1-2 sentence healthy person response to Pass Two\'s line. The person themselves responding to their partner\'s line. Calibrate to beat intensity per the rule above.)\n[/PASS2_RESPONSE]\n\n' +
+    'Then generate exactly 2-3 multiple-choice scenarios tied to the tool or pattern inferred from Step 7 data above. Each scenario in this format:\n\n' +
+    '[SCENARIO]\nQ: (a realistic in-the-moment situation tied to their pattern)\nA: (a response \u2014 one of these must be the "best" answer: names an actual felt emotion like hurt, frustrated, scared, sad \u2014 NOT an interpretation like overlooked or disrespected)\nB: (another response)\nC: (another response)\nD: (another response)\nCORRECT: (A, B, C, or D \u2014 whichever best option names an actual feeling, not an interpretation)\nFEEDBACK_A: (consequence-based: 1-2 sentences on what tends to happen with this response, no right/wrong language)\nFEEDBACK_B: (same)\nFEEDBACK_C: (same)\nFEEDBACK_D: (same)\n[/SCENARIO]\n\n(repeat for 2nd and optionally 3rd scenario)';
 }
 
 function s9ParsePracticeContent(text) {
-  var result = { pass1Reflection: '', pass2Reflection: '', scenarios: [] };
-  var m1 = text.match(/\[PASS1_REFLECTION\]([\s\S]*?)\[\/PASS1_REFLECTION\]/);
-  if (m1) result.pass1Reflection = m1[1].trim();
-  var m2 = text.match(/\[PASS2_REFLECTION\]([\s\S]*?)\[\/PASS2_REFLECTION\]/);
-  if (m2) result.pass2Reflection = m2[1].trim();
+  var result = { pass1Response: '', pass2Response: '', scenarios: [] };
+  var m1 = text.match(/\[PASS1_RESPONSE\]([\s\S]*?)\[\/PASS1_RESPONSE\]/);
+  if (m1) result.pass1Response = m1[1].trim();
+  var m2 = text.match(/\[PASS2_RESPONSE\]([\s\S]*?)\[\/PASS2_RESPONSE\]/);
+  if (m2) result.pass2Response = m2[1].trim();
   var re = /\[SCENARIO\]([\s\S]*?)\[\/SCENARIO\]/g;
   var sm;
   while ((sm = re.exec(text)) !== null) {
@@ -4913,35 +4968,96 @@ function s9ParsePracticeContent(text) {
 function s9RenderPractice() {
   var body = el('s9-pr-body');
   if (!body) return;
-  if (s9PracticeState === 'pass1') {
+
+  if (s9PracticeState === 'pass1-show') {
     var ln = s9PracticeMyLine;
-    var ref = s9PracticeContent ? s9PracticeContent.pass1Reflection : '';
     var charName = (user && user.name) ? user.name.toUpperCase() : 'YOU';
+    var healthyResp = s9PracticeContent ? s9PracticeContent.pass1Response : '';
     body.innerHTML =
-      '<div class="s9-pr-eyebrow">Practice Round &middot; Pass One</div>' +
-      '<p class="s9-pr-context-note">This is a line from your own script &mdash; one you wrote for yourself.<br>Read it. Sit with it for a moment.</p>' +
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Part One &middot; Pass One</div>' +
+      '<p class="s9-pr-context-note">This is a line you wrote for yourself. Here&rsquo;s what a healthy partner might say back.</p>' +
       (ln ?
         '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(charName) + '</div>' +
         (ln.beat ? '<div class="s9-pr-beat">(' + esc(ln.beat) + ')</div>' : '') +
         '<div class="s9-pr-dialogue">' + esc(ln.dialogue) + '</div></div>'
         : '<div class="s9-pr-line-block"><div class="s9-pr-dialogue">(No line found in your script)</div></div>') +
-      (ref ? '<div class="s9-pr-reflection">' + esc(ref).replace(/\n/g, '<br>') + '</div>' : '') +
-      '<button class="s9-pr-btn" onclick="s9PracticeAdvance()">I\'ve sat with this &rarr;</button>';
+      (healthyResp ? '<div class="s9-pr-healthy-label">A healthy partner response</div><div class="s9-pr-healthy-response">' + esc(healthyResp).replace(/\n/g, '<br>') + '</div>' : '') +
+      '<button class="s9-pr-btn" onclick="s9PracticePass1ToInput()">Now try saying your line differently \u2192</button>';
 
-  } else if (s9PracticeState === 'pass2') {
-    var ln2 = s9PracticePartnerLine;
-    var ref2 = s9PracticeContent ? s9PracticeContent.pass2Reflection : '';
-    var pName = (user && user.partner) ? user.partner.toUpperCase() : 'YOUR PARTNER';
+  } else if (s9PracticeState === 'pass1-input') {
+    var ln = s9PracticeMyLine;
+    var charName = (user && user.name) ? user.name.toUpperCase() : 'YOU';
     body.innerHTML =
-      '<div class="s9-pr-eyebrow">Practice Round &middot; Pass Two</div>' +
-      '<p class="s9-pr-context-note">This is how you wrote your partner\'s line.<br>Read it from inside their experience &mdash; what might be underneath it?</p>' +
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Part One &middot; Pass One</div>' +
+      (ln ?
+        '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(charName) + '</div>' +
+        (ln.beat ? '<div class="s9-pr-beat">(' + esc(ln.beat) + ')</div>' : '') +
+        '<div class="s9-pr-dialogue">' + esc(ln.dialogue) + '</div></div>'
+        : '') +
+      '<p class="s9-pr-attempt-label">How might you say this differently &mdash; staying in your own experience, without blame or judgment?</p>' +
+      '<textarea id="s9-pr-attempt-1" class="s9-pr-attempt-input" placeholder="Write your version here\u2026"></textarea>' +
+      '<button class="s9-pr-btn" onclick="s9PracticeSubmitPass1()">Submit \u2192</button>';
+    var ta = el('s9-pr-attempt-1');
+    if (ta && s9PracticePass1Attempt) ta.value = s9PracticePass1Attempt;
+    if (ta) setTimeout(function() { ta.focus(); }, 80);
+
+  } else if (s9PracticeState === 'pass1-feedback') {
+    var ln = s9PracticeMyLine;
+    var charName = (user && user.name) ? user.name.toUpperCase() : 'YOU';
+    body.innerHTML =
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Part One &middot; Pass One</div>' +
+      (ln ?
+        '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(charName) + '</div>' +
+        (ln.beat ? '<div class="s9-pr-beat">(' + esc(ln.beat) + ')</div>' : '') +
+        '<div class="s9-pr-dialogue">' + esc(ln.dialogue) + '</div></div>'
+        : '') +
+      '<div id="s9-pr-fb1-body" class="s9-pr-feedback-text">Thinking\u2026</div>' +
+      '<button id="s9-pr-fb1-btn" class="s9-pr-btn" style="display:none;" onclick="s9PracticeToPass2()">Continue \u2192</button>';
+
+  } else if (s9PracticeState === 'pass2-show') {
+    var ln2 = s9PracticePartnerLine;
+    var pName = (user && user.partner) ? user.partner.toUpperCase() : 'YOUR PARTNER';
+    var healthyResp2 = s9PracticeContent ? s9PracticeContent.pass2Response : '';
+    body.innerHTML =
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Part One &middot; Pass Two</div>' +
+      '<p class="s9-pr-context-note">This is how you wrote your partner&rsquo;s line. Here&rsquo;s what a healthy response from you might sound like.</p>' +
       (ln2 ?
         '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(pName) + '</div>' +
         (ln2.beat ? '<div class="s9-pr-beat">(' + esc(ln2.beat) + ')</div>' : '') +
         '<div class="s9-pr-dialogue">' + esc(ln2.dialogue) + '</div></div>'
         : '<div class="s9-pr-line-block"><div class="s9-pr-dialogue">(No partner line found in your script)</div></div>') +
-      (ref2 ? '<div class="s9-pr-reflection">' + esc(ref2).replace(/\n/g, '<br>') + '</div>' : '') +
-      '<button class="s9-pr-btn" onclick="s9PracticeAdvance()">I\'ve sat with this &rarr;</button>';
+      (healthyResp2 ? '<div class="s9-pr-healthy-label">A healthy response</div><div class="s9-pr-healthy-response">' + esc(healthyResp2).replace(/\n/g, '<br>') + '</div>' : '') +
+      '<button class="s9-pr-btn" onclick="s9PracticePass2ToInput()">Now try responding differently \u2192</button>';
+
+  } else if (s9PracticeState === 'pass2-input') {
+    var ln2 = s9PracticePartnerLine;
+    var pName = (user && user.partner) ? user.partner.toUpperCase() : 'YOUR PARTNER';
+    body.innerHTML =
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Part One &middot; Pass Two</div>' +
+      (ln2 ?
+        '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(pName) + '</div>' +
+        (ln2.beat ? '<div class="s9-pr-beat">(' + esc(ln2.beat) + ')</div>' : '') +
+        '<div class="s9-pr-dialogue">' + esc(ln2.dialogue) + '</div></div>'
+        : '') +
+      '<p class="s9-pr-attempt-label">How might you respond to this &mdash; staying in your own experience, without blame or judgment?</p>' +
+      '<textarea id="s9-pr-attempt-2" class="s9-pr-attempt-input" placeholder="Write your response here\u2026"></textarea>' +
+      '<button class="s9-pr-btn" onclick="s9PracticeSubmitPass2()">Submit \u2192</button>';
+    var ta2 = el('s9-pr-attempt-2');
+    if (ta2 && s9PracticePass2Attempt) ta2.value = s9PracticePass2Attempt;
+    if (ta2) setTimeout(function() { ta2.focus(); }, 80);
+
+  } else if (s9PracticeState === 'pass2-feedback') {
+    var ln2 = s9PracticePartnerLine;
+    var pName = (user && user.partner) ? user.partner.toUpperCase() : 'YOUR PARTNER';
+    body.innerHTML =
+      '<div class="s9-pr-eyebrow">Practice Round &middot; Part One &middot; Pass Two</div>' +
+      (ln2 ?
+        '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(pName) + '</div>' +
+        (ln2.beat ? '<div class="s9-pr-beat">(' + esc(ln2.beat) + ')</div>' : '') +
+        '<div class="s9-pr-dialogue">' + esc(ln2.dialogue) + '</div></div>'
+        : '') +
+      '<div id="s9-pr-fb2-body" class="s9-pr-feedback-text">Thinking\u2026</div>' +
+      '<button id="s9-pr-fb2-btn" class="s9-pr-btn" style="display:none;" onclick="s9PracticeToScenarios()">Continue \u2192</button>';
 
   } else if (s9PracticeState === 'scenario') {
     s9RenderScenario();
@@ -4954,6 +5070,66 @@ function s9RenderPractice() {
   }
 }
 
+function s9PracticePass1ToInput() { s9PracticeState = 'pass1-input'; s9RenderPractice(); }
+function s9PracticePass2ToInput() { s9PracticeState = 'pass2-input'; s9RenderPractice(); }
+
+function s9PracticeSubmitPass1() {
+  var ta = el('s9-pr-attempt-1');
+  var attempt = (ta ? ta.value : '').trim();
+  if (attempt.length < 3) { if (ta) ta.focus(); return; }
+  s9PracticePass1Attempt = attempt;
+  s9PracticeState = 'pass1-feedback';
+  s9RenderPractice();
+  var prompt = s9BuildFeedbackPrompt(s9PracticeMyLine, s9PracticeContent && s9PracticeContent.pass1Response, attempt, false);
+  callAI([{ role: 'user', content: prompt }], '9').then(function(text) {
+    var fb = el('s9-pr-fb1-body');
+    if (fb) { fb.innerHTML = esc(text).replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>'); }
+    var btn = el('s9-pr-fb1-btn'); if (btn) btn.style.display = 'block';
+  }).catch(function() {
+    var fb = el('s9-pr-fb1-body'); if (fb) fb.textContent = 'Something went wrong. You can continue.';
+    var btn = el('s9-pr-fb1-btn'); if (btn) btn.style.display = 'block';
+  });
+}
+
+function s9PracticeSubmitPass2() {
+  var ta = el('s9-pr-attempt-2');
+  var attempt = (ta ? ta.value : '').trim();
+  if (attempt.length < 3) { if (ta) ta.focus(); return; }
+  s9PracticePass2Attempt = attempt;
+  s9PracticeState = 'pass2-feedback';
+  s9RenderPractice();
+  var prompt = s9BuildFeedbackPrompt(s9PracticePartnerLine, s9PracticeContent && s9PracticeContent.pass2Response, attempt, true);
+  callAI([{ role: 'user', content: prompt }], '9').then(function(text) {
+    var fb = el('s9-pr-fb2-body');
+    if (fb) { fb.innerHTML = esc(text).replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>'); }
+    var btn = el('s9-pr-fb2-btn'); if (btn) btn.style.display = 'block';
+  }).catch(function() {
+    var fb = el('s9-pr-fb2-body'); if (fb) fb.textContent = 'Something went wrong. You can continue.';
+    var btn = el('s9-pr-fb2-btn'); if (btn) btn.style.display = 'block';
+  });
+}
+
+function s9BuildFeedbackPrompt(line, healthyResponse, attempt, isPass2) {
+  var dialogue = line ? line.dialogue : '';
+  var beat = line && line.beat ? line.beat : 'none';
+  var passLabel = isPass2 ? 'their partner\'s line (as they wrote it)' : 'their own line';
+  return 'You are giving brief practice feedback in Step 9 of The Ongoing Argument.\n\n' +
+    'The line (' + passLabel + '):\nDialogue: ' + dialogue + '\nBeat: ' + beat + '\n\n' +
+    'A healthy response was shown to them:\n"' + (healthyResponse || '') + '"\n\n' +
+    'They tried:\n"' + attempt + '"\n\n' +
+    'Give a consequence-based reflection in 2-3 sentences. Name what the response does well. If a phrase could read as escalating (a "you" statement, a "should," a judgment word), name what tends to happen when that kind of phrasing is used in real life, and offer what a closer alternative might sound like \u2014 framed as what tends to open the door rather than close it. Do not use right/wrong language. Never use: you-language directed at either person, should, fix, "you made me feel," or "boundaries."';
+}
+
+function s9PracticeToPass2() { s9PracticeState = 'pass2-show'; s9RenderPractice(); }
+
+function s9PracticeToScenarios() {
+  if (s9PracticeContent && s9PracticeContent.scenarios && s9PracticeContent.scenarios.length) {
+    s9PracticeState = 'scenario'; s9PracticeScenarioIdx = 0; s9RenderPractice();
+  } else {
+    s9PracticeState = 'complete'; s9RenderPractice();
+  }
+}
+
 function s9RenderScenario() {
   var body = el('s9-pr-body');
   if (!s9PracticeContent || !s9PracticeContent.scenarios.length) {
@@ -4963,37 +5139,37 @@ function s9RenderScenario() {
   if (!sc) { s9PracticeState = 'complete'; s9RenderPractice(); return; }
   var num = s9PracticeScenarioIdx + 1;
   var total = s9PracticeContent.scenarios.length;
+  var framingHtml = (num === 1) ? '<p class="s9-pr-framing">These are situations you may or may not run into. There&rsquo;s no perfect answer here, just pick the response that feels closest to owning your experience without judgment or blame.</p>' : '';
   var optsHtml = '<div class="s9-pr-options">';
   ['A','B','C','D'].forEach(function(k) {
-    optsHtml += '<button class="s9-pr-option" id="s9-pr-opt-' + k + '" onclick="s9PracticeSelectOption(\'' + k + '\')">' + k + '. ' + esc(sc.options[k] || '') + '</button>';
+    if (sc.options[k]) optsHtml += '<button class="s9-pr-option" id="s9-pr-opt-' + k + '" onclick="s9PracticeSelectOption(\'' + k + '\')">' + k + '. ' + esc(sc.options[k]) + '</button>';
   });
   optsHtml += '</div>';
   body.innerHTML =
     '<div class="s9-pr-eyebrow">Practice Round &middot; Part Two &middot; ' + num + ' of ' + total + '</div>' +
+    framingHtml +
     '<p class="s9-pr-scenario-q">' + esc(sc.question) + '</p>' +
     optsHtml +
     '<div id="s9-pr-feedback" class="s9-pr-consequence" style="display:none;"></div>' +
-    '<button id="s9-pr-next-btn" class="s9-pr-btn" style="display:none;margin-top:16px;" onclick="s9PracticeScenarioNext()">Continue &rarr;</button>';
+    '<button id="s9-pr-next-btn" class="s9-pr-btn" style="display:none;margin-top:16px;" onclick="s9PracticeScenarioNext()">Continue \u2192</button>';
 }
 
 function s9PracticeSelectOption(key) {
   var sc = s9PracticeContent && s9PracticeContent.scenarios[s9PracticeScenarioIdx];
   if (!sc) return;
-  var isCorrect = key === sc.correct;
   ['A','B','C','D'].forEach(function(k) {
     var btn = el('s9-pr-opt-' + k);
     if (!btn) return;
     btn.disabled = true;
-    if (k === key) btn.classList.add(isCorrect ? 's9-pr-correct' : 's9-pr-wrong');
-    if (!isCorrect && k === sc.correct) btn.classList.add('s9-pr-correct');
+    if (k === key) btn.classList.add('s9-pr-chosen');
   });
   var fb = el('s9-pr-feedback');
   if (fb) {
     fb.textContent = sc.feedback[key] || '';
-    fb.className = 's9-pr-consequence' + (isCorrect ? ' s9-pr-good' : '');
+    fb.className = 's9-pr-consequence';
     fb.style.display = 'block';
   }
-  s9PracticeAnswers.push({ question: sc.question, chosen: key, correct: sc.correct, wasCorrect: isCorrect });
+  s9PracticeAnswers.push({ question: sc.question, chosen: key, correct: sc.correct });
   var nb = el('s9-pr-next-btn');
   if (nb) {
     var isLast = s9PracticeScenarioIdx >= s9PracticeContent.scenarios.length - 1;
@@ -5011,18 +5187,6 @@ function s9PracticeScenarioNext() {
   }
 }
 
-function s9PracticeAdvance() {
-  if (s9PracticeState === 'pass1') {
-    s9PracticeState = 'pass2'; s9RenderPractice();
-  } else if (s9PracticeState === 'pass2') {
-    if (s9PracticeContent && s9PracticeContent.scenarios && s9PracticeContent.scenarios.length) {
-      s9PracticeState = 'scenario'; s9PracticeScenarioIdx = 0; s9RenderPractice();
-    } else {
-      s9PracticeState = 'complete'; s9RenderPractice();
-    }
-  }
-}
-
 function s9FinishPractice() {
   s9PracticeDone = true;
   if (user && user.coupleId) {
@@ -5032,6 +5196,10 @@ function s9FinishPractice() {
     fsSet('practice/' + user.uid, {
       pass1LineShown: s9PracticeMyLine ? s9PracticeMyLine.dialogue : '',
       pass2LineShown: s9PracticePartnerLine ? s9PracticePartnerLine.dialogue : '',
+      practiceResponses: JSON.stringify([
+        { pass: 1, lineDialogue: s9PracticeMyLine ? s9PracticeMyLine.dialogue : '', personAttempt: s9PracticePass1Attempt },
+        { pass: 2, lineDialogue: s9PracticePartnerLine ? s9PracticePartnerLine.dialogue : '', personAttempt: s9PracticePass2Attempt }
+      ]),
       scenarioResponses: JSON.stringify(s9PracticeAnswers),
       completedAt: new Date().toISOString()
     }).catch(function(){});
