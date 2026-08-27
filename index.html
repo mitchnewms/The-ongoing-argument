@@ -269,10 +269,18 @@ body {
 
 /* ── SHARED FULL-SCREEN STEP SCREENS ──────────────────────── */
 /* Steps 4-11 use position:fixed overlay with dark bg, same as #step3-screen */
-#step4-screen,#step5-screen,#step6-screen,#step7-screen,#step8-screen,#step9-screen,#step10-screen,#step11-screen {
+#step4-screen,#step5-screen,#step6-screen,#step7-screen,#step8-screen,#step9-screen,#step10-screen,#step11-screen,#solo-closing-screen {
   display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   z-index: 200; background: #2a2520; flex-direction: column;
 }
+#solo-closing-screen { background: #F6F4F0; overflow-y: auto; }
+.solo-closing-inner { max-width: 520px; margin: 0 auto; padding: 64px 24px 100px; display: flex; flex-direction: column; align-items: center; }
+.solo-closing-eyebrow { font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 40px; text-align: center; }
+.solo-closing-text { font-family: 'Lora', Georgia, serif; font-size: clamp(1rem, 2.8vw, 1.15rem); line-height: 2.0; color: rgba(255,255,255,0.82); text-align: center; margin-bottom: 56px; }
+.solo-closing-text p { margin-bottom: 1.6em; }
+.solo-closing-text p:last-child { margin-bottom: 0; }
+.solo-closing-divider { width: 40px; height: 1px; background: rgba(184,160,112,0.35); margin: 40px auto; }
+.solo-closing-cap { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(255,255,255,0.4); line-height: 1.75; text-align: center; max-width: 380px; }
 
 /* ── STEPS 4 & 5: VIDEO PLACEHOLDER ──────────────────────── */
 .s45-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 40px; }
@@ -1309,6 +1317,11 @@ body, body * {
 #step8-screen, #step9-screen, #step10-screen, #step11-screen {
   background: #F6F4F0 !important;
 }
+#solo-closing-screen { background: #F6F4F0 !important; }
+.solo-closing-eyebrow { color: #AAAAAA !important; }
+.solo-closing-text { color: #3A3028 !important; }
+.solo-closing-cap { color: #888888 !important; }
+.solo-closing-divider { background: #E2DED8 !important; }
 
 /* 19. STEPS 4 & 5: VIDEO */
 .s45-intro { color: #333333 !important; border-bottom-color: #E2DED8 !important; font-size: 0.92rem !important; }
@@ -1796,7 +1809,7 @@ h1, h2, h3,
   <!-- S5: CTA -->
   <div class="lp-cta">
     <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">Start as a couple</button>
-    <button class="lp-btn-solo" id="lp-btn-solo" onclick="lpRevealCommitment()">Start on your own</button>
+    <button class="lp-btn-solo" id="lp-btn-solo" onclick="lpRevealCommitmentSolo()">Start on your own</button>
   </div>
 
   <!-- S6: COMMITMENT STATEMENT — hidden until S5 button clicked -->
@@ -2501,6 +2514,20 @@ Me too.</div>
   </div>
 </div>
 
+<!-- SOLO CLOSING SCREEN -->
+<div id="solo-closing-screen">
+  <div class="solo-closing-inner">
+    <div class="solo-closing-eyebrow">The Ongoing Argument</div>
+    <div class="solo-closing-text">
+      <p>You may find it appropriate and helpful if your partner is willing to witness what you&rsquo;ve done.</p>
+      <p>Regardless, you have the capacity now within you to begin to change.</p>
+      <p>To respond and not react. To find solutions instead of feeding a story. To move your Self from righteousness to happiness.</p>
+    </div>
+    <div class="solo-closing-divider"></div>
+    <div class="solo-closing-cap">Community At Play &mdash; where the work continues. A community that helps you remember when you forget.</div>
+  </div>
+</div>
+
 <!-- SCENE LENGTH: ONE-TIME NUDGE POPUP (appears once when first crossing 2:00 while writing) -->
 <div id="sl-nudge-popup">
   <div class="sl-popup-box">
@@ -2555,6 +2582,7 @@ var scriptTarget = null;
 
 // Enrollment flow
 var enrollMode = null; // 'start' | 'join'
+var soloEnrollMode = false; // true when "Start on your own" chosen
 var pendingCoupleId = null; // set for Partner B (from URL or code lookup)
 var pendingPartnerAId = null; // set after code verified
 var pendingFightName = null; // carry fight name into auth
@@ -2752,7 +2780,7 @@ function createAccount() {
   el('ca-pass-match-err').style.display = 'none';
   el('ca-disclaimer-err').style.display = 'none';
   if (!name) { txt('ca-error', 'Please enter your name.'); return; }
-  if (!partner) { txt('ca-error', "Please enter your partner's name."); return; }
+  if (!soloEnrollMode && !partner) { txt('ca-error', "Please enter your partner's name."); return; }
   if (!email) { txt('ca-error', 'Please enter your email.'); return; }
   if (email !== emailConfirm) { el('ca-email-match-err').style.display = 'block'; el('ca-email-confirm').focus(); return; }
   if (!pass || pass.length < 6) { txt('ca-error', 'Password needs at least 6 characters.'); return; }
@@ -2778,8 +2806,22 @@ function createAccount() {
       return;
     }
     saveSession(d);
-    user.name = name; user.partner = partner; user.fight = fight;
+    user.name = name; user.partner = partner || ''; user.fight = fight;
     localStorage.setItem('oa_user', JSON.stringify(user));
+
+    if (soloEnrollMode) {
+      // Solo account: no couple doc, no partner, accountType: 'solo'
+      el('btn-create').textContent = 'Setting up…';
+      user.accountType = 'solo';
+      localStorage.setItem('oa_user', JSON.stringify(user));
+      fsSet('users/' + user.uid, {
+        email: email, name: name, fightName: fight,
+        accountType: 'solo', soloCurrentStep: '1',
+        role: 'client', createdAt: new Date().toISOString(),
+        disclaimerAgreedAt: new Date().toISOString()
+      }).then(function() { afterLogin(); }).catch(function() { afterLogin(); });
+      return;
+    }
 
     if (enrollMode === 'join' && pendingCoupleId && pendingPartnerAId) {
       // Partner B: save user doc then afterLogin handles linking
@@ -2839,7 +2881,7 @@ function createAccount() {
 function signOut() {
   user = null; token = null;
   localStorage.removeItem('oa_user');
-  enrollMode = null; pendingCoupleId = null; pendingPartnerAId = null;
+  enrollMode = null; soloEnrollMode = false; pendingCoupleId = null; pendingPartnerAId = null;
   pendingFightName = null; pendingJoinCoupleId = null; pendingJoinCode = null; pcLastJoinUrl = null;
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-link-card'); hide('couple-linked-status');
@@ -2848,7 +2890,7 @@ function signOut() {
   hide('buyin-screen');
   hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
   ['step3-screen','step4-screen','step5-screen','step6-screen',
-   'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen'].forEach(function(id){ hide(id); });
+   'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen','solo-closing-screen'].forEach(function(id){ hide(id); });
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   el('step2-thinking').value = ''; el('step2-feeling').value = '';
@@ -3070,7 +3112,10 @@ function loadProfile() {
     if (p.coupleCode) user.coupleCode = p.coupleCode;
     if (p.coupleId) user.coupleId = p.coupleId;
     if (p.partnerId) user.partnerId = p.partnerId;
+    if (p.accountType) user.accountType = p.accountType;
+    if (p.soloCurrentStep) user.soloCurrentStep = p.soloCurrentStep;
     localStorage.setItem('oa_user', JSON.stringify(user));
+    if (user.accountType === 'solo') { soloJourneyRoute(); return; }
     clUpdateLinkUI(p);
   }).catch(function() {});
 }
@@ -3410,8 +3455,14 @@ function lpRevealCommitment() {
   void s6.offsetWidth;
   s6.classList.add('lp-in');
   el('lp-btn-begin').disabled = true;
+  var solo = el('lp-btn-solo'); if (solo) solo.disabled = true;
   history.pushState({ lp: 'commitment' }, '');
   setTimeout(function() { lpScrollTo(s6); }, 60);
+}
+
+function lpRevealCommitmentSolo() {
+  soloEnrollMode = true;
+  lpRevealCommitment();
 }
 
 function lpRevealFight() {
@@ -3445,6 +3496,15 @@ function lpProceed() {
     history.pushState({ screen: 'buyin' }, '');
     var bi = el('buyin-screen');
     bi.style.display = 'flex';
+    if (soloEnrollMode) {
+      var partnerRow = el('ca-partner') && el('ca-partner').closest('.auth-field');
+      if (partnerRow) partnerRow.style.display = 'none';
+      var sub = document.querySelector('#form-create .auth-sub');
+      if (sub) sub.textContent = 'Set up your private script space.';
+      var fightLabel = el('ca-fight') && el('ca-fight').previousElementSibling;
+      if (fightLabel) fightLabel.textContent = 'The fight — what do you call it?';
+      var btn = el('btn-create'); if (btn) btn.textContent = 'Create Account';
+    }
   }, 500);
 }
 
@@ -4040,6 +4100,7 @@ function submitScript() {
     submittedAt: new Date().toISOString()
   }).then(function() {
     step2ShowSubmittedState();
+    if (user.accountType === 'solo') { return runSoloAnalysis(); }
     return checkPartnerAndAnalyze();
   }).catch(function() {
     btn.disabled = false;
@@ -4400,6 +4461,7 @@ function showJourneyBanner(step) {
 
 function openJourneyStep() {
   var step = currentJourneyStep;
+  if (step && step.indexOf('solo-') === 0) { openJourneyStepSolo(step.replace('solo-', '')); return; }
   if (step === '4') openStep4();
   else if (step === '5') openStep5();
   else if (step === '6') openStep6();
@@ -4416,6 +4478,158 @@ function advanceStep(newStep) {
     currentJourneyStep = newStep;
     if (JOURNEY_STEPS[newStep]) showJourneyBanner(newStep);
   });
+}
+
+// ── SOLO PATHWAY ─────────────────────────────────────────────
+
+var SOLO_JOURNEY_STEPS = {
+  '2': { label: 'Step 2', title: 'Your Analysis', sub: 'What the AI found in your script.', btn: 'Read My Analysis' },
+  '3': { label: 'Step 3', title: 'Your Story on Screen', sub: 'Watch your conflict performed.', btn: 'Watch My Script' },
+  '4': { label: 'Step 4', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
+  '5': { label: 'Step 5', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
+  '6': { label: 'Step 6', title: 'You\'ve Done the Work', sub: '', btn: 'Read This' }
+};
+
+function soloJourneyRoute() {
+  if (!user || !user.uid) return;
+  var step = user.soloCurrentStep || '1';
+  currentJourneyStep = step;
+  hide('partner-waiting-banner');
+  if (step === '1') {
+    step2Init();
+    hide('journey-banner');
+    hide('analysis-banner');
+  } else if (step === '2') {
+    fsGet('solo-analysis/' + user.uid).then(function(d) {
+      if (d && d.fields) {
+        var sa = fromFields(d.fields);
+        if (sa.analysisReady) { showSoloJourneyBanner('2'); return; }
+      }
+      el('step1-waiting-banner').style.display = 'block';
+      hide('step2-card');
+      setTimeout(pollSoloAnalysisReady, 30000);
+    }).catch(function() {
+      el('step1-waiting-banner').style.display = 'block';
+      hide('step2-card');
+      setTimeout(pollSoloAnalysisReady, 30000);
+    });
+  } else if (SOLO_JOURNEY_STEPS[step]) {
+    step2Init();
+    showSoloJourneyBanner(step);
+  }
+}
+
+function showSoloJourneyBanner(step) {
+  var cfg = SOLO_JOURNEY_STEPS[step];
+  if (!cfg) return;
+  txt('jb-step', cfg.label);
+  txt('jb-title', cfg.title);
+  txt('jb-sub', cfg.sub);
+  txt('jb-btn', cfg.btn);
+  currentJourneyStep = 'solo-' + step;
+  el('journey-banner').style.display = 'block';
+}
+
+function openJourneyStepSolo(step) {
+  if (step === '2') openSoloAnalysis();
+  else if (step === '3') checkVideoReady('solo-3');
+  else if (step === '4') openStep7();
+  else if (step === '5') openStep9();
+  else if (step === '6') openSoloClosing();
+}
+
+function soloAdvanceStep(newStep) {
+  if (!user || !user.uid) return;
+  user.soloCurrentStep = newStep;
+  localStorage.setItem('oa_user', JSON.stringify(user));
+  fsSet('users/' + user.uid, { soloCurrentStep: newStep }).catch(function(){});
+  if (SOLO_JOURNEY_STEPS[newStep]) showSoloJourneyBanner(newStep);
+}
+
+function openSoloAnalysis() {
+  fsGet('solo-analysis/' + user.uid).then(function(d) {
+    if (!d || !d.fields) { s3StartDelivery(); return; }
+    var sa = fromFields(d.fields);
+    if (sa.analysis) {
+      el('step3-screen').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      s3RenderSoloAnalysis(sa.analysis);
+    } else {
+      s3StartDelivery();
+    }
+  }).catch(function() { s3StartDelivery(); });
+}
+
+function s3RenderSoloAnalysis(analysisText) {
+  var body = el('s3-analysis-body');
+  if (!body) return;
+  var paras = analysisText.split(/\n\n+/).filter(function(p) { return p.trim(); });
+  body.innerHTML = paras.map(function(p) { return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  var completeBtn = el('s3-complete-btn');
+  if (completeBtn) {
+    completeBtn.style.display = 'block';
+    completeBtn.onclick = function() {
+      hide('step3-screen'); document.body.style.overflow = '';
+      soloAdvanceStep('3');
+    };
+  }
+}
+
+function openSoloClosing() {
+  el('solo-closing-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSoloClosing() {
+  hide('solo-closing-screen');
+  document.body.style.overflow = '';
+}
+
+function runSoloAnalysis() {
+  var myName = (user.name || 'Me').split(' ')[0];
+  return fsGet('scripts/' + user.uid).then(function(d) {
+    var myData = fromFields(d.fields || {});
+    var scriptText = scriptDataToText(myData, myName, 'their partner');
+    var prompt = myName + ' is working through The Ongoing Argument solo pathway. Their partner is not participating. This is their script of a recurring conflict, written privately from their own perspective.\n\n' +
+      '--- SCRIPT FROM ' + myName.toUpperCase() + ' ---\n\n' + scriptText + '\n\n' +
+      myName + '\'s story about what their partner is thinking:\n' + (myData.storyThinking || '(no answer provided)') + '\n\n' +
+      myName + '\'s story about what their partner is feeling:\n' + (myData.storyFeeling || '(no answer provided)') + '\n\n' +
+      'Analyze this script from the inside of ' + myName + '\'s experience. Do NOT compare two scripts — only one was written. Surface:\n' +
+      '- The pattern ' + myName + ' is expressing in their lines (their language, their dynamic, what their choices reveal about how they show up in this conflict)\n' +
+      '- What they appear to be reaching for — what do they want but cannot quite say?\n' +
+      '- What this pattern costs them — what does it get them, and what does it take from them?\n' +
+      '- One specific pattern they carry into this conflict that they may not be fully aware of\n\n' +
+      'Do not mention a partner perspective beyond what ' + myName + ' projected. Do not use right/wrong language. Write in second person directly to ' + myName + '. Warm, honest, reflective. 3-4 paragraphs.';
+    return callAI([{ role: 'user', content: prompt }], '2');
+  }).then(function(analysisText) {
+    return fsSet('solo-analysis/' + user.uid, {
+      analysis: analysisText,
+      analysisReady: true,
+      analysisAt: new Date().toISOString()
+    }).then(function() {
+      soloAdvanceStep('2');
+      hide('step1-waiting-banner');
+      showSoloJourneyBanner('2');
+    });
+  }).catch(function() {
+    txt('step2-status', 'Analysis could not complete. Please refresh and try again.');
+  });
+}
+
+function pollSoloAnalysisReady() {
+  if (!user || !user.uid || user.accountType !== 'solo') return;
+  fsGet('solo-analysis/' + user.uid).then(function(d) {
+    if (d && d.fields) {
+      var sa = fromFields(d.fields);
+      if (sa.analysisReady) {
+        hide('step1-waiting-banner');
+        soloAdvanceStep('2');
+        showSoloJourneyBanner('2');
+        return;
+      }
+    }
+    setTimeout(pollSoloAnalysisReady, 30000);
+  }).catch(function() { setTimeout(pollSoloAnalysisReady, 30000); });
 }
 
 // ── STEP 3: COMPLETE ─────────────────────────────────────────
@@ -4590,24 +4804,27 @@ function s7StartDelivery() {
   s3ShowTypingIn('s7-thread');
   var myName = (user.name || 'Me').split(' ')[0];
   var partnerName = user.partner || 'your partner';
+  var isSolo = user.accountType === 'solo';
   Promise.all([
     fsGet('scripts/' + user.uid),
-    fsGet('couples/' + user.coupleId),
+    isSolo ? fsGet('solo-analysis/' + user.uid) : fsGet('couples/' + user.coupleId),
     fsGet('step6/' + user.uid)
   ]).then(function(results) {
     var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
-    var couple = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var analysisDoc = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
     var step6 = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
-    var setupPrompt = 'You are now beginning Step 7 — Individual Work — with ' + myName + '.\n\n' +
+    var analysisText = isSolo ? (analysisDoc.analysis || '(none)') : (analysisDoc.analysis || '(none)');
+    var analysisLabel = isSolo ? '--- INDIVIDUAL ANALYSIS ---' : '--- COUPLE\'S ANALYSIS (from Step 2) ---';
+    var setupPrompt = 'You are now beginning Step 7 — Individual Work — with ' + myName + '.' + (isSolo ? ' This person is using the solo pathway — their partner is not participating.' : '') + '\n\n' +
       'Here is all the context you need:\n\n' +
-      '--- COUPLE\'S ANALYSIS (from Step 2) ---\n' + (couple.analysis || '(none)') + '\n\n' +
+      analysisLabel + '\n' + analysisText + '\n\n' +
       '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
       '--- ' + myName.toUpperCase() + '\'S REFLECTIONS (Step 6) ---\n' +
       'Q1: ' + (step6.q1 || '(not answered)') + '\n' +
       'Q2: ' + (step6.q2 || '(not answered)') + '\n' +
       'Q3: ' + (step6.q3 || '(not answered)') + '\n' +
       'Q4: ' + (step6.q4 || '(not answered)') + '\n\n' +
-      'Begin Step 7 with ' + myName + '. Start with the Language Awareness Work — turn attention to the actual words on the page. Not who they want to be in the argument. Who they want to be in the exchange that would turn it from a confrontation into a conversation. Identify specific words and phrases from their script that might be landing as attacks, carrying old charge, or projecting a belief onto ' + partnerName + '. Prompt them to consider new language. When insight surfaces, invite them to add it to their Awareness Log. Eventually guide them to "The One Thing" — one concrete thing they are willing to try differently next time. Follow the Step 7 guidelines from your training exactly.';
+      'Begin Step 7 with ' + myName + '. Start with the Language Awareness Work — turn attention to the actual words on the page. Not who they want to be in the argument. Who they want to be in the exchange that would turn it from a confrontation into a conversation. Identify specific words and phrases from their script that might be landing as attacks, carrying old charge, or projecting a belief onto ' + (isSolo ? 'their partner' : partnerName) + '. Prompt them to consider new language. When insight surfaces, invite them to add it to their Awareness Log. Eventually guide them to "The One Thing" — one concrete thing they are willing to try differently next time. Follow the Step 7 guidelines from your training exactly.';
     s7Messages = [{ role: 'user', content: setupPrompt }];
     return callAI(s7Messages, '7');
   }).then(function(text) {
@@ -4682,6 +4899,7 @@ function saveOneThingAndComplete() {
   var oneThing = (el('s7-ot-input').value || '').trim();
   fsSet('step7/' + user.uid, { oneThing: oneThing, messages: JSON.stringify(s7Messages), savedAt: new Date().toISOString() }).catch(function(){});
   closeStep7();
+  if (user && user.accountType === 'solo') { soloAdvanceStep('5'); return; }
   advanceStep('8');
 }
 
@@ -4813,6 +5031,12 @@ var S9_CHECKINS = [
 function openStep9() {
   el('step9-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  if (user && user.accountType === 'solo') {
+    s9PresenceDone = true;
+    if (!s9PracticeDone) { s9StartPractice(); }
+    else { s9ShowPhase('writing'); }
+    return;
+  }
   if (!user || !user.coupleId) {
     if (!s9PresenceDone) { s9ShowPhase('presence'); }
     else if (!s9PracticeDone) { s9StartPractice(); }
@@ -5065,8 +5289,8 @@ function s9RenderPractice() {
   } else if (s9PracticeState === 'complete') {
     body.innerHTML =
       '<div class="s9-pr-eyebrow">Practice Round &middot; Complete</div>' +
-      '<p class="s9-pr-complete-msg">You\'ve done the work to get here.<br><br>The rewrite is yours now.<br>Use what you just noticed.</p>' +
-      '<button class="s9-pr-btn" onclick="s9FinishPractice()">Begin the Rewrite &rarr;</button>';
+      '<p class="s9-pr-complete-msg">You\'ve done the work to get here.<br><br>' + (user && user.accountType === 'solo' ? 'Take what you noticed with you.' : 'The rewrite is yours now.<br>Use what you just noticed.') + '</p>' +
+      '<button class="s9-pr-btn" onclick="s9FinishPractice()">' + (user && user.accountType === 'solo' ? 'Finish &rarr;' : 'Begin the Rewrite &rarr;') + '</button>';
   }
 }
 
@@ -5204,6 +5428,12 @@ function s9FinishPractice() {
       completedAt: new Date().toISOString()
     }).catch(function(){});
   }
+  if (user && user.accountType === 'solo') {
+    soloAdvanceStep('6');
+    closeStep9();
+    openSoloClosing();
+    return;
+  }
   s9ShowPhase('writing');
   s9CheckinTimer = setTimeout(s9NextCheckin, 3 * 60 * 1000);
 }
@@ -5262,6 +5492,7 @@ function s9NextCheckin() {
 }
 
 function submitRewrite() {
+  if (!user || !user.coupleId) return;
   var text = (el('s9-rewrite-area').value || '').trim();
   if (!text || text.length < 50) {
     alert('Please write your rewrite before submitting. It looks like there isn\'t enough content yet.'); return;
@@ -5286,6 +5517,7 @@ function submitRewrite() {
 }
 
 function finalizeRewrite() {
+  if (!user || !user.coupleId) return;
   var text = (el('s9-rewrite-area').value || '').trim();
   var btn = el('s9-finalize-btn');
   btn.disabled = true; btn.textContent = 'Finalizing...';
@@ -5492,10 +5724,12 @@ function sendAnalysisReadyNotifications() {
 
 function checkVideoReady(step) {
   if (!user || !user.uid) { showVideoWaiting(); return; }
+  var isSolo = user.accountType === 'solo';
   fsGet('users/' + user.uid).then(function(d) {
     if (!d || !d.fields) { showVideoWaiting(); pollVideoReady(step); return; }
     var p = fromFields(d.fields);
-    if (p.ownVideoUrl && p.partnerVideoUrl) {
+    var ready = isSolo ? !!p.ownVideoUrl : (p.ownVideoUrl && p.partnerVideoUrl);
+    if (ready) {
       onVideoReady(step, p);
     } else {
       showVideoWaiting();
@@ -5509,10 +5743,12 @@ function checkVideoReady(step) {
 
 function pollVideoReady(step) {
   if (!user || !user.uid) return;
+  var isSolo = user.accountType === 'solo';
   fsGet('users/' + user.uid).then(function(d) {
     if (!d || !d.fields) { setTimeout(function() { pollVideoReady(step); }, 30000); return; }
     var p = fromFields(d.fields);
-    if (p.ownVideoUrl && p.partnerVideoUrl) {
+    var ready = isSolo ? !!p.ownVideoUrl : (p.ownVideoUrl && p.partnerVideoUrl);
+    if (ready) {
       onVideoReady(step, p);
     } else {
       setTimeout(function() { pollVideoReady(step); }, 30000);
