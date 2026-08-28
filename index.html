@@ -269,11 +269,29 @@ body {
 
 /* ── SHARED FULL-SCREEN STEP SCREENS ──────────────────────── */
 /* Steps 4-11 use position:fixed overlay with dark bg, same as #step3-screen */
-#step4-screen,#step5-screen,#step6-screen,#step7-screen,#step8-screen,#step9-screen,#step10-screen,#step11-screen,#solo-closing-screen {
+#step4-screen,#step5-screen,#step6-screen,#step7-screen,#step8-screen,#step9-screen,#step10-screen,#step11-screen,#solo-closing-screen,#takeaway-screen {
   display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   z-index: 200; background: #2a2520; flex-direction: column;
 }
 #solo-closing-screen { background: #F6F4F0; overflow-y: auto; }
+#takeaway-screen { background: #F6F4F0; overflow-y: auto; display: block; }
+.tl-inner { max-width: 580px; margin: 0 auto; padding: 48px 24px 100px; }
+.tl-eyebrow { font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 16px; }
+.tl-page-title { font-family: 'Lora', Georgia, serif; font-size: clamp(1.3rem, 4vw, 1.7rem); color: rgba(255,255,255,0.9); margin-bottom: 40px; line-height: 1.3; }
+.tl-loading-state { font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.4); font-style: italic; padding: 20px 0; }
+.tl-section { margin-bottom: 36px; }
+.tl-section-label { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.tl-tier-eyebrow { font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(184,160,112,0.45); font-family: 'Courier Prime', monospace; margin-bottom: 4px; }
+.tl-list { list-style: none; padding: 0; margin: 0 0 16px 0; }
+.tl-item { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.72); line-height: 1.7; padding: 8px 0 8px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); position: relative; }
+.tl-item::before { content: '—'; position: absolute; left: 0; color: rgba(184,160,112,0.5); }
+.tl-item:last-child { border-bottom: none; }
+.tl-subgroup-label { font-family: 'Courier Prime', monospace; font-size: 0.75rem; color: rgba(184,160,112,0.6); font-style: italic; margin: 18px 0 10px; }
+.tl-framing { font-family: 'Lora', Georgia, serif; font-size: 0.88rem; color: rgba(255,255,255,0.55); line-height: 1.85; margin-bottom: 20px; font-style: italic; }
+.tl-divider { width: 40px; height: 1px; background: rgba(184,160,112,0.25); margin: 32px 0; }
+.tl-actions { display: flex; gap: 10px; margin-top: 40px; flex-wrap: wrap; align-items: center; }
+.tl-action-btn { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.5); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
+.tl-continue-btn { font-family: 'Courier Prime', monospace; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 24px; background: #E06500; color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; margin-left: auto; }
 .solo-closing-inner { max-width: 520px; margin: 0 auto; padding: 64px 24px 100px; display: flex; flex-direction: column; align-items: center; }
 .solo-closing-eyebrow { font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 40px; text-align: center; }
 .solo-closing-text { font-family: 'Lora', Georgia, serif; font-size: clamp(1rem, 2.8vw, 1.15rem); line-height: 2.0; color: rgba(255,255,255,0.82); text-align: center; margin-bottom: 56px; }
@@ -1321,6 +1339,19 @@ body, body * {
 .solo-closing-eyebrow { color: #AAAAAA !important; }
 .solo-closing-text { color: #3A3028 !important; }
 .solo-closing-cap { color: #888888 !important; }
+#takeaway-screen { background: #F6F4F0 !important; }
+.tl-eyebrow { color: #AAAAAA !important; }
+.tl-page-title { color: #1A1410 !important; }
+.tl-loading-state { color: #AAAAAA !important; }
+.tl-section-label { color: #AAAAAA !important; border-bottom-color: #E2DED8 !important; }
+.tl-tier-eyebrow { color: #BBBBBB !important; }
+.tl-item { color: #3A3028 !important; border-bottom-color: #EEE9E3 !important; }
+.tl-item::before { color: #E06500 !important; }
+.tl-subgroup-label { color: #888888 !important; font-style: italic !important; }
+.tl-framing { color: #888888 !important; font-style: italic !important; }
+.tl-divider { background: #E2DED8 !important; }
+.tl-action-btn { color: #888888 !important; border-color: #D5CFC8 !important; border-radius: 6px !important; text-transform: none !important; letter-spacing: 0 !important; font-size: 0.82rem !important; }
+.tl-continue-btn { background: #E06500 !important; border-radius: 6px !important; font-size: 0.9rem !important; text-transform: none !important; letter-spacing: 0 !important; font-weight: 700 !important; }
 .solo-closing-divider { background: #E2DED8 !important; }
 
 /* 19. STEPS 4 & 5: VIDEO */
@@ -2514,6 +2545,77 @@ Me too.</div>
   </div>
 </div>
 
+<!-- TAKEAWAY SCREEN -->
+<div id="takeaway-screen">
+  <div class="tl-inner">
+    <div class="tl-eyebrow">The Ongoing Argument</div>
+    <h2 class="tl-page-title">Your Takeaways</h2>
+
+    <div id="tl-loading" class="tl-loading-state">Preparing your list&hellip;</div>
+
+    <div id="tl-content" style="display:none">
+
+      <!-- Tier 1: Personalized To Do -->
+      <div id="tl-section-todo" class="tl-section">
+        <div class="tl-tier-eyebrow">Personalized to you and this argument</div>
+        <div class="tl-section-label">To Do</div>
+        <ul id="tl-todo-personal" class="tl-list"></ul>
+      </div>
+
+      <!-- Tier 2: Personalized To Be -->
+      <div id="tl-section-tobe" class="tl-section">
+        <div class="tl-tier-eyebrow">Personalized to you and this argument</div>
+        <div class="tl-section-label">To Be</div>
+        <ul id="tl-tobe-personal" class="tl-list"></ul>
+      </div>
+
+      <div class="tl-divider"></div>
+
+      <!-- Tier 3: Fixed standard -->
+      <div class="tl-section">
+        <div class="tl-framing">These aren&rsquo;t just things to remember for this one exercise. You&rsquo;re going to have communication breakdowns again, with this person, and with others. This is what you take with you, something to come back to and pull from, so you stay in the energy of it, so the remembering stays alive, for the next time an upset shows up, yours or theirs.</div>
+
+        <div class="tl-section-label">To Do</div>
+        <ul class="tl-list">
+          <li class="tl-item">Notice your energy shifting before you speak. That&rsquo;s the moment to pause, not push through.</li>
+          <li class="tl-item">Know the difference between a reaction and a response. We want response, not reaction.</li>
+          <li class="tl-item">If you need a minute, take it. Ask for it out loud. &ldquo;I need five minutes to clear my head, then I want to come back to this, is that okay?&rdquo;</li>
+          <li class="tl-item">Reflect and ask a clarifying question. &ldquo;I want to make sure I heard you right, are you saying&hellip;&rdquo; This isn&rsquo;t about defending, it&rsquo;s about understanding their experience, even if it&rsquo;s not your own.</li>
+          <li class="tl-item">Remember, this is a conversation, not a confrontation.</li>
+          <li class="tl-item">Don&rsquo;t take the bait.</li>
+        </ul>
+
+        <div class="tl-subgroup-label">If you&rsquo;re the one bringing something up:</div>
+        <ul class="tl-list">
+          <li class="tl-item">Come to your partner, don&rsquo;t come at them.</li>
+          <li class="tl-item">Use I-language. You&rsquo;re having a feeling, an experience. Avoid you-language that can land as judgment or blame.</li>
+          <li class="tl-item">Try starting with &ldquo;the story I tell myself is&hellip;&rdquo; Starting there keeps you in your own experience instead of making a claim about your partner, so they can hear it as information, not an attack.</li>
+          <li class="tl-item">Keep it simple. &ldquo;I&rsquo;d like to talk to you about something that&rsquo;s come up for me. Is this a good time?&rdquo;</li>
+          <li class="tl-item">Be okay if the answer is no. If you genuinely want to be heard, you want your partner to have ears on their heart, truly present enough to receive it, not just physically there.</li>
+        </ul>
+
+        <div class="tl-section-label" style="margin-top:20px">To Be</div>
+        <ul class="tl-list">
+          <li class="tl-item">Present</li>
+          <li class="tl-item">Patient</li>
+          <li class="tl-item">Compassionate</li>
+          <li class="tl-item">Empathetic</li>
+          <li class="tl-item">Curious</li>
+          <li class="tl-item">Committed to not taking the bait</li>
+          <li class="tl-item">Committed to checking in and seeing your part in the situation, and if you discover you&rsquo;re contributing, willing to own it</li>
+        </ul>
+      </div>
+
+    </div><!-- end tl-content -->
+
+    <div class="tl-actions">
+      <button class="tl-action-btn" onclick="tlPrint()">Print</button>
+      <button class="tl-action-btn" id="tl-copy-btn" onclick="tlCopy()">Copy</button>
+      <button class="tl-continue-btn" onclick="tlContinue()">Continue &rarr;</button>
+    </div>
+  </div>
+</div>
+
 <!-- SOLO CLOSING SCREEN -->
 <div id="solo-closing-screen">
   <div class="solo-closing-inner">
@@ -2890,7 +2992,7 @@ function signOut() {
   hide('buyin-screen');
   hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
   ['step3-screen','step4-screen','step5-screen','step6-screen',
-   'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen','solo-closing-screen'].forEach(function(id){ hide(id); });
+   'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen','solo-closing-screen','takeaway-screen'].forEach(function(id){ hide(id); });
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   el('step2-thinking').value = ''; el('step2-feeling').value = '';
@@ -4586,6 +4688,129 @@ function closeSoloClosing() {
   document.body.style.overflow = '';
 }
 
+// ── TAKEAWAY SCREEN ──────────────────────────────────────────
+var tlFromPath = '';
+
+function openTakeawayScreen() {
+  tlFromPath = (user && user.accountType === 'solo') ? 'solo' : 'couple';
+  el('takeaway-screen').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  hide('tl-content');
+  show('tl-loading');
+  generatePersonalizedTakeaways();
+}
+
+function closeTakeawayScreen() {
+  hide('takeaway-screen');
+  document.body.style.overflow = '';
+}
+
+function generatePersonalizedTakeaways() {
+  if (!user || !user.uid) { tlShowContent([], []); return; }
+  var isSolo = user.accountType === 'solo';
+  var analysisPromise = isSolo ? fsGet('solo-analysis/' + user.uid) : (user.coupleId ? fsGet('couples/' + user.coupleId) : Promise.resolve(null));
+  Promise.all([
+    fsList('awarenessLog'),
+    analysisPromise,
+    fsGet('scripts/' + user.uid)
+  ]).then(function(results) {
+    var logDocs = (results[0] && results[0].documents) ? results[0].documents : [];
+    var entries = logDocs.map(function(d) { return fromFields(d.fields); })
+      .filter(function(e) { return e.userId === user.uid; });
+    var wordsToRelease = entries.filter(function(e) { return e.entryType === 'wordsToRelease'; }).map(function(e) { return e.content; });
+    var newLanguage = entries.filter(function(e) { return e.entryType === 'newLanguage'; }).map(function(e) { return e.content; });
+    var selfAwareness = entries.filter(function(e) { return e.entryType === 'selfAwareness'; }).map(function(e) { return e.content; });
+    var analysisDoc = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var analysisText = analysisDoc.analysis || '';
+    if (!wordsToRelease.length && !newLanguage.length && !selfAwareness.length && !analysisText) {
+      tlShowContent([], []);
+      return Promise.resolve(null);
+    }
+    var prompt = 'You are generating a personalized takeaway list for someone who has just completed The Ongoing Argument process — a structured conflict-resolution exercise.\n\n';
+    if (analysisText) prompt += '--- THEIR SCRIPT ANALYSIS ---\n' + analysisText + '\n\n';
+    if (wordsToRelease.length) prompt += '--- WORDS AND PATTERNS THEY NOTED TO RELEASE ---\n' + wordsToRelease.join('\n') + '\n\n';
+    if (newLanguage.length) prompt += '--- NEW LANGUAGE THEY WANT TO TRY ---\n' + newLanguage.join('\n') + '\n\n';
+    if (selfAwareness.length) prompt += '--- WHAT THEY NOTICED ABOUT THEMSELVES ---\n' + selfAwareness.join('\n') + '\n\n';
+    prompt += 'Generate a personalized takeaway list with two sections.\n\nSection 1 — TO DO: 3 to 5 specific, actionable items drawn from their actual patterns, language, and behaviors identified in their analysis and awareness log. These should feel specific to this person, not generic advice.\n\nSection 2 — TO BE: 3 to 5 inner states or qualities to cultivate, drawn from their specific self-awareness notes and what their analysis revealed about their internal patterns. Short phrases, not full sentences.\n\nFormat your response exactly like this:\n[TODO]\n- item one\n- item two\n[/TODO]\n[TOBE]\n- item one\n- item two\n[/TOBE]\n\nNo intro text, no explanations outside the tags.';
+    return callAI([{ role: 'user', content: prompt }], 'takeaway');
+  }).then(function(text) {
+    if (!text) return;
+    var todoItems = [], tobeItems = [];
+    var todoMatch = text.match(/\[TODO\]([\s\S]*?)\[\/TODO\]/);
+    var tobeMatch = text.match(/\[TOBE\]([\s\S]*?)\[\/TOBE\]/);
+    if (todoMatch) todoItems = todoMatch[1].trim().split('\n').map(function(l) { return l.replace(/^[-*•]\s*/, '').trim(); }).filter(Boolean);
+    if (tobeMatch) tobeItems = tobeMatch[1].trim().split('\n').map(function(l) { return l.replace(/^[-*•]\s*/, '').trim(); }).filter(Boolean);
+    tlShowContent(todoItems, tobeItems);
+  }).catch(function() { tlShowContent([], []); });
+}
+
+function tlShowContent(todoItems, tobeItems) {
+  var todoSection = el('tl-section-todo');
+  var tobeSection = el('tl-section-tobe');
+  if (todoItems && todoItems.length) {
+    el('tl-todo-personal').innerHTML = todoItems.map(function(item) { return '<li class="tl-item">' + esc(item) + '</li>'; }).join('');
+  } else {
+    if (todoSection) todoSection.style.display = 'none';
+  }
+  if (tobeItems && tobeItems.length) {
+    el('tl-tobe-personal').innerHTML = tobeItems.map(function(item) { return '<li class="tl-item">' + esc(item) + '</li>'; }).join('');
+  } else {
+    if (tobeSection) tobeSection.style.display = 'none';
+  }
+  hide('tl-loading');
+  show('tl-content');
+}
+
+function tlContinue() {
+  closeTakeawayScreen();
+  if (tlFromPath === 'solo') {
+    openSoloClosing();
+  } else {
+    advanceStep('11');
+  }
+}
+
+function tlPrint() { window.print(); }
+
+function tlCopy() {
+  var lines = ['YOUR TAKEAWAYS — The Ongoing Argument', ''];
+  var todoItems = el('tl-todo-personal') ? el('tl-todo-personal').querySelectorAll('.tl-item') : [];
+  if (todoItems.length) {
+    lines.push('TO DO — Personalized');
+    todoItems.forEach(function(li) { lines.push('— ' + li.textContent.trim()); });
+    lines.push('');
+  }
+  var tobeItems = el('tl-tobe-personal') ? el('tl-tobe-personal').querySelectorAll('.tl-item') : [];
+  if (tobeItems.length) {
+    lines.push('TO BE — Personalized');
+    tobeItems.forEach(function(li) { lines.push('— ' + li.textContent.trim()); });
+    lines.push('');
+  }
+  lines.push('———', '');
+  lines.push('These aren’t just things to remember for this one exercise. You’re going to have communication breakdowns again, with this person, and with others. This is what you take with you, something to come back to and pull from, so you stay in the energy of it, so the remembering stays alive, for the next time an upset shows up, yours or theirs.', '');
+  lines.push('TO DO');
+  lines.push('— Notice your energy shifting before you speak. That’s the moment to pause, not push through.');
+  lines.push('— Know the difference between a reaction and a response. We want response, not reaction.');
+  lines.push('— If you need a minute, take it. Ask for it out loud. “I need five minutes to clear my head, then I want to come back to this, is that okay?”');
+  lines.push('— Reflect and ask a clarifying question. “I want to make sure I heard you right, are you saying…” This isn’t about defending, it’s about understanding their experience, even if it’s not your own.');
+  lines.push('— Remember, this is a conversation, not a confrontation.');
+  lines.push('— Don’t take the bait.', '');
+  lines.push('If you’re the one bringing something up:');
+  lines.push('— Come to your partner, don’t come at them.');
+  lines.push('— Use I-language. You’re having a feeling, an experience. Avoid you-language that can land as judgment or blame.');
+  lines.push('— Try starting with “the story I tell myself is…” Starting there keeps you in your own experience instead of making a claim about your partner, so they can hear it as information, not an attack.');
+  lines.push('— Keep it simple. “I’d like to talk to you about something that’s come up for me. Is this a good time?”');
+  lines.push('— Be okay if the answer is no. If you genuinely want to be heard, you want your partner to have ears on their heart, truly present enough to receive it, not just physically there.', '');
+  lines.push('TO BE');
+  lines.push('— Present', '— Patient', '— Compassionate', '— Empathetic', '— Curious', '— Committed to not taking the bait', '— Committed to checking in and seeing your part in the situation, and if you discover you’re contributing, willing to own it');
+  var text = lines.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      var btn = el('tl-copy-btn'); if (btn) { btn.textContent = 'Copied'; setTimeout(function() { btn.textContent = 'Copy'; }, 2000); }
+    }).catch(function() {});
+  }
+}
+
 function runSoloAnalysis() {
   var myName = (user.name || 'Me').split(' ')[0];
   return fsGet('scripts/' + user.uid).then(function(d) {
@@ -5433,7 +5658,7 @@ function s9FinishPractice() {
   if (user && user.accountType === 'solo') {
     soloAdvanceStep('6');
     closeStep9();
-    openSoloClosing();
+    openTakeawayScreen();
     return;
   }
   s9ShowPhase('writing');
@@ -5642,7 +5867,7 @@ function renderRewriteVideo(url) {
 
 function completeStep10() {
   closeStep10();
-  advanceStep('11');
+  openTakeawayScreen();
 }
 
 // ── STEP 11: CAP GLOBAL BRIDGE ────────────────────────────────
