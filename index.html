@@ -4050,10 +4050,12 @@ function clLinkPartner() {
 var step2SaveTimer = null;
 
 function step2Init() {
-  if (!user || !user.coupleId) return;
+  if (!user) return;
   el('step2-card').style.display = 'block';
-  var partnerFirst = ((user.partner || user.partnerName || '').split(' ')[0]) || 'your partner';
-  txt('privacy-partner-name', partnerFirst);
+  if (user.accountType !== 'solo') {
+    var partnerFirst = ((user.partner || user.partnerName || '').split(' ')[0]) || 'your partner';
+    txt('privacy-partner-name', partnerFirst);
+  }
   fsGet('scripts/' + user.uid).then(function(d) {
     if (!d || !d.fields) return;
     var s = fromFields(d.fields);
@@ -4514,7 +4516,6 @@ function soloJourneyRoute() {
       setTimeout(pollSoloAnalysisReady, 30000);
     });
   } else if (SOLO_JOURNEY_STEPS[step]) {
-    step2Init();
     showSoloJourneyBanner(step);
   }
 }
@@ -4908,6 +4909,7 @@ var s8Messages = [];
 var s8Sending = false;
 
 function openStep8() {
+  if (!user || !user.coupleId) return;
   el('step8-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   fsGet('step8/' + user.uid).then(function(d) {
@@ -5538,6 +5540,7 @@ function finalizeRewrite() {
 }
 
 function runRewriteAnalysis(rewriteText) {
+  if (!user || !user.coupleId) return Promise.reject('no coupleId');
   return Promise.all([
     fsGet('scripts/' + user.uid),
     user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
@@ -5569,6 +5572,7 @@ var s10VideoPollTimer = null;
 var s10VideoTimeout = null;
 
 function openStep10() {
+  if (!user || !user.coupleId) return;
   el('step10-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   el('s10-waiting').style.display = 'block';
