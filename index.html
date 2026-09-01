@@ -3218,6 +3218,8 @@ function signOut() {
   s8Messages = []; if (el('s8-thread')) el('s8-thread').innerHTML = '';
   if (s9CheckinTimer) { clearTimeout(s9CheckinTimer); s9CheckinTimer = null; }
   if (s10PollTimer) { clearTimeout(s10PollTimer); s10PollTimer = null; }
+  if (idleCheckTimer) { clearInterval(idleCheckTimer); idleCheckTimer = null; }
+  idleCheckInShown = false; pbCommitmentShown = false; commitmentCallback = null;
   currentJourneyStep = null;
   switchTab('signin');
 }
@@ -6602,9 +6604,15 @@ function pbShowHandoff() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+var pbCommitmentShown = false;
+
 function pbDismissHandoff() {
   el('pb-handoff-banner').style.display = 'none';
   fsSet('scripts/' + user.uid, { handoffSeen: true }).catch(function(){});
+  if (!pbCommitmentShown) {
+    pbCommitmentShown = true;
+    openCommitmentPrompt(null);
+  }
 }
 
 window.addEventListener('popstate', function(e) {
@@ -6765,16 +6773,21 @@ function warmupSaveAndProceed() {
       completedAt: new Date().toISOString()
     }).catch(function() {});
   }
-  openCommitmentPrompt();
+  checkPathChoice();
 }
 
-function openCommitmentPrompt() {
+var commitmentCallback = null;
+
+function openCommitmentPrompt(callback) {
+  commitmentCallback = callback || null;
   el('commitment-modal').style.display = 'flex';
 }
 
 function closeCommitmentPrompt() {
   el('commitment-modal').style.display = 'none';
-  checkPathChoice();
+  var cb = commitmentCallback;
+  commitmentCallback = null;
+  if (cb) cb();
 }
 
 function buildWarmupBlock(name, warmupDoc) {
@@ -6817,11 +6830,11 @@ function lsSelectSpeaker(which) {
 function landingStripComplete() {
   var location = (el('ls-location').value || '').trim();
   var opening = (el('ls-opening').value || '').trim();
+  var capturedSpeaker = lsSpeaker;
   closeLandingStrip();
-  el('path-a-guide').style.display = 'block';
   if (location) el('scene-input').value = location;
   if (opening) {
-    addLine(lsSpeaker, '', opening, false);
+    addLine(capturedSpeaker, '', opening, false);
     setTimeout(function() {
       updateSceneEstimate();
       var ta = document.querySelector('#lines-container textarea');
@@ -6829,11 +6842,12 @@ function landingStripComplete() {
     }, 50);
   }
   if (location || opening) saveScript();
+  openCommitmentPrompt(function() { el('path-a-guide').style.display = 'block'; });
 }
 
 function landingStripSkip() {
   closeLandingStrip();
-  el('path-a-guide').style.display = 'block';
+  openCommitmentPrompt(function() { el('path-a-guide').style.display = 'block'; });
 }
 
 // ── IDLE CHECK-IN ─────────────────────────────────────────────
