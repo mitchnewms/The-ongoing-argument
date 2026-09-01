@@ -1756,6 +1756,50 @@ h1, h2, h3,
   -webkit-appearance: none; touch-action: manipulation;
 }
 .ic-dismiss:active { background: #F6F4F0; }
+
+/* ── FEEDBACK SCREEN ─────────────────────────────────────────── */
+#feedback-screen {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 240; background: #F6F4F0; overflow-y: auto; flex-direction: column;
+  align-items: center; padding: 48px 24px 80px;
+}
+.fb-inner { width: 100%; max-width: 500px; }
+.fb-eyebrow { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: #AAAAAA; font-family: 'Courier Prime', monospace; margin-bottom: 20px; }
+.fb-heading { font-size: clamp(1.15rem, 4.5vw, 1.5rem); font-weight: 800; color: #111111; letter-spacing: -0.02em; margin-bottom: 8px; }
+.fb-sub { font-size: 0.88rem; color: #7A7468; margin-bottom: 36px; line-height: 1.6; }
+.fb-question { margin-bottom: 8px; }
+.fb-q-text { font-size: 0.95rem; font-weight: 700; color: #111111; margin-bottom: 14px; line-height: 1.5; }
+.fb-thumbs { display: flex; gap: 12px; margin-bottom: 12px; }
+.fb-thumb {
+  flex: 1; padding: 13px 10px; border: 1.5px solid #D5CFC8; border-radius: 6px;
+  background: #FFFFFF; color: #444444; font-size: 0.88rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: 'Courier Prime', monospace;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-appearance: none;
+  transition: border-color 0.12s, background 0.12s;
+}
+.fb-thumb.fb-up-selected { border-color: #2E7D32; background: #F0FBF0; color: #2E7D32; font-weight: 700; }
+.fb-thumb.fb-down-selected { border-color: #C0392B; background: #FDF4F3; color: #C0392B; font-weight: 700; }
+.fb-comment-box { display: none; margin-top: 2px; margin-bottom: 10px; }
+.fb-comment-label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #AAAAAA; font-family: 'Courier Prime', monospace; margin-bottom: 6px; display: block; }
+.fb-comment-input {
+  width: 100%; background: #FFFFFF; border: 1.5px solid #D5CFC8; border-radius: 6px;
+  padding: 10px 12px; font-family: 'Courier Prime', monospace; font-size: 0.88rem;
+  color: #111111; outline: none; resize: vertical; min-height: 64px; -webkit-appearance: none;
+  box-sizing: border-box;
+}
+.fb-comment-input:focus { border-color: #E06500; }
+.fb-divider { border: none; border-top: 1px solid #E8E2DA; margin: 12px 0 22px; }
+.fb-submit {
+  width: 100%; padding: 16px; font-size: 0.95rem; font-weight: 700;
+  background: #E06500; color: #FFFFFF; border: none; border-radius: 6px;
+  cursor: pointer; font-family: 'Courier Prime', monospace; margin-bottom: 14px;
+  -webkit-appearance: none; touch-action: manipulation; display: block;
+}
+.fb-submit:active { background: #C45800; }
+.fb-submit:disabled { background: #CCCCCC; cursor: default; }
+.fb-skip { display: block; text-align: center; font-size: 0.8rem; color: #AAAAAA; cursor: pointer; background: none; border: none; font-family: 'Courier Prime', monospace; -webkit-tap-highlight-color: transparent; }
+.fb-skip:hover { color: #888888; }
 </style>
 
 </head>
@@ -2241,6 +2285,10 @@ h1, h2, h3,
   <div id="coach-requests-section" style="margin-top: 32px; padding: 0 24px 32px;">
     <div style="font-family: 'Special Elite', cursive; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--line);">Safety Pattern — Coach Requests</div>
     <div id="coach-requests-list"><div class="loading" style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Loading…</div></div>
+  </div>
+  <div id="coach-feedback-section" style="margin-top: 32px; padding: 0 24px 48px;">
+    <div style="font-family: 'Special Elite', cursive; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--line);">End-of-Process Feedback</div>
+    <div id="coach-feedback-list"><div class="loading" style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Loading…</div></div>
   </div>
 </div>
 
@@ -2745,6 +2793,69 @@ Me too.</div>
   </div>
 </div>
 
+<!-- FEEDBACK SCREEN — shown at end of process before closing -->
+<div id="feedback-screen">
+  <div class="fb-inner">
+    <div class="fb-eyebrow">Before You Go</div>
+    <div class="fb-heading">A few quick questions.</div>
+    <div class="fb-sub">You just did something hard. Help us make it better for the next person.</div>
+
+    <div class="fb-question">
+      <div class="fb-q-text">Did the analysis feel accurate to your actual situation?</div>
+      <div class="fb-thumbs">
+        <button class="fb-thumb" id="fb-q1-up" onclick="fbVote(1,'up')">👍 Yes</button>
+        <button class="fb-thumb" id="fb-q1-down" onclick="fbVote(1,'down')">👎 Not really</button>
+      </div>
+      <div class="fb-comment-box" id="fb-q1-comment">
+        <label class="fb-comment-label" id="fb-q1-label">Tell us more (optional)</label>
+        <textarea class="fb-comment-input" id="fb-q1-text" placeholder="Anything you want us to know…"></textarea>
+      </div>
+    </div>
+    <hr class="fb-divider">
+
+    <div class="fb-question">
+      <div class="fb-q-text">Did the tool you were given feel right for where you are?</div>
+      <div class="fb-thumbs">
+        <button class="fb-thumb" id="fb-q2-up" onclick="fbVote(2,'up')">👍 Yes</button>
+        <button class="fb-thumb" id="fb-q2-down" onclick="fbVote(2,'down')">👎 Not really</button>
+      </div>
+      <div class="fb-comment-box" id="fb-q2-comment">
+        <label class="fb-comment-label" id="fb-q2-label">Tell us more (optional)</label>
+        <textarea class="fb-comment-input" id="fb-q2-text" placeholder="Anything you want us to know…"></textarea>
+      </div>
+    </div>
+    <hr class="fb-divider">
+
+    <div class="fb-question">
+      <div class="fb-q-text">Was the process clear and easy to follow?</div>
+      <div class="fb-thumbs">
+        <button class="fb-thumb" id="fb-q3-up" onclick="fbVote(3,'up')">👍 Yes</button>
+        <button class="fb-thumb" id="fb-q3-down" onclick="fbVote(3,'down')">👎 Not really</button>
+      </div>
+      <div class="fb-comment-box" id="fb-q3-comment">
+        <label class="fb-comment-label" id="fb-q3-label">Tell us more (optional)</label>
+        <textarea class="fb-comment-input" id="fb-q3-text" placeholder="What was confusing or could be clearer?"></textarea>
+      </div>
+    </div>
+    <hr class="fb-divider">
+
+    <div class="fb-question">
+      <div class="fb-q-text">Would you recommend this to someone you care about?</div>
+      <div class="fb-thumbs">
+        <button class="fb-thumb" id="fb-q4-up" onclick="fbVote(4,'up')">👍 Yes</button>
+        <button class="fb-thumb" id="fb-q4-down" onclick="fbVote(4,'down')">👎 Not sure</button>
+      </div>
+      <div class="fb-comment-box" id="fb-q4-comment">
+        <label class="fb-comment-label" id="fb-q4-label">Tell us more (optional)</label>
+        <textarea class="fb-comment-input" id="fb-q4-text" placeholder="Anything you want us to know…"></textarea>
+      </div>
+    </div>
+
+    <button class="fb-submit" id="fb-submit-btn" onclick="submitFeedback()">Submit Feedback</button>
+    <button class="fb-skip" onclick="skipFeedback()">Skip — continue</button>
+  </div>
+</div>
+
 <!-- WARM-UP QUESTIONS SCREEN — shown once before path choice for new users -->
 <div id="warmup-screen">
   <div class="wu-inner">
@@ -2980,8 +3091,9 @@ function val(id) { var e = el(id); return e ? e.value.trim() : ''; }
 
 // BETA GATE — REMOVE BEFORE LAUNCH
 function betaGateSubmit() {
+  var BETA_CODES = ['ongoing', 'beta001', 'beta002', 'beta003', 'beta004', 'beta005'];
   var pw = (el('beta-pw-input') || {}).value || '';
-  if (pw.trim().toLowerCase() === 'ongoing') {
+  if (BETA_CODES.indexOf(pw.trim().toLowerCase()) !== -1) {
     sessionStorage.setItem('oa_beta', '1');
     var g = el('beta-gate'); if (g) g.style.display = 'none';
   } else {
@@ -3208,7 +3320,7 @@ function signOut() {
   hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
   ['step3-screen','step4-screen','step5-screen','step6-screen',
    'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen','solo-closing-screen','takeaway-screen',
-   'warmup-screen','commitment-modal','landing-strip-screen','idle-checkin-modal'].forEach(function(id){ hide(id); });
+   'warmup-screen','commitment-modal','landing-strip-screen','idle-checkin-modal','feedback-screen'].forEach(function(id){ hide(id); });
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   el('step2-thinking').value = ''; el('step2-feeling').value = '';
@@ -3702,6 +3814,7 @@ c.appendChild(card);
 });
 }).catch(function() { el('clients-list').innerHTML = '<div class="loading">Error loading. Try refreshing.</div>'; });
 loadCoachRequests();
+loadFeedback();
 }
 
 function loadCoachRequests() {
@@ -3731,6 +3844,42 @@ function loadCoachRequests() {
     });
   }).catch(function() {
     listEl.innerHTML = '<div style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Could not load flags.</div>';
+  });
+}
+
+function loadFeedback() {
+  var listEl = el('coach-feedback-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Loading…</div>';
+  fsList('feedback').then(function(d) {
+    if (!d.documents || !d.documents.length) {
+      listEl.innerHTML = '<div style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">No feedback submitted yet.</div>';
+      return;
+    }
+    var entries = d.documents.map(function(doc) {
+      var p = fromFields(doc.fields); p._id = doc.name.split('/').pop(); return p;
+    }).sort(function(a, b) { return (b.submittedAt || '').localeCompare(a.submittedAt || ''); });
+    listEl.innerHTML = '';
+    var qLabels = ['Analysis accurate?', 'Tool assignment right?', 'Process clear?', 'Would recommend?'];
+    entries.forEach(function(f) {
+      var row = document.createElement('div');
+      row.style.cssText = 'padding: 14px 0; border-bottom: 1px solid var(--line);';
+      var ts = f.submittedAt ? new Date(f.submittedAt).toLocaleString() : '';
+      var typeBadge = f.accountType === 'solo' ? 'Solo' : 'Couples';
+      var qs = [1,2,3,4].map(function(n) {
+        var vote = f['q' + n] || '—';
+        var comment = f['q' + n + 'Comment'] || '';
+        var icon = vote === 'up' ? '👍' : vote === 'down' ? '👎' : '—';
+        var commentHtml = comment ? '<span style="font-size:0.75rem;color:var(--ink-light);margin-left:6px;">— ' + esc(comment) + '</span>' : '';
+        return '<div style="font-size:0.78rem;color:var(--ink-light);margin-bottom:3px;"><span style="font-weight:600;color:var(--ink);">' + qLabels[n-1] + '</span> ' + icon + commentHtml + '</div>';
+      }).join('');
+      row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">' +
+        '<span style="font-size:0.75rem;color:var(--ink-faint);">' + esc(f.userId || f._id) + ' · ' + typeBadge + '</span>' +
+        '<span style="font-size:0.72rem;color:var(--ink-faint);">' + esc(ts) + '</span></div>' + qs;
+      listEl.appendChild(row);
+    });
+  }).catch(function() {
+    listEl.innerHTML = '<div style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Could not load feedback.</div>';
   });
 }
 
@@ -4745,8 +4894,8 @@ function s3SaveConversation() {
 
 // ── JOURNEY ROUTING ─────────────────────────────────────────
 var JOURNEY_STEPS = {
-  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'Two neutral avatars will perform your words. For now, read your transcript. Watch as an observer, not a participant.', btn: 'Watch My Script' },
-  '5': { label: 'Step 5', title: 'Watch Your Partner\'s Script', sub: 'The same fight from a completely different experience. Back to back. Without having to say a word to each other yet.', btn: 'Watch Partner\'s Script' },
+  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'The video performance is coming soon. Skip ahead — your reflective questions are ready.', btn: 'Continue to Reflective Questions' },
+  '5': { label: 'Step 5', title: 'Watch Your Partner\'s Script', sub: 'The video performance is coming soon. Skip ahead.', btn: 'Continue to Next Step' },
   '6': { label: 'Step 6', title: 'Reflective Questions', sub: 'Four questions. Private answers. In your own words, without your partner\'s influence. This is where insight becomes clarity.', btn: 'Answer the Questions' },
   '7': { label: 'Step 7', title: 'Your Individual Work', sub: 'Before the two of you can work together effectively, each person must do their own work first. There is no authentic we unless it starts with an I.', btn: 'Begin Individual Work' },
   '8': { label: 'Step 8', title: 'NVC Together', sub: 'Now equipped individually, you come back together to practice a new way of communicating. Out of story and into solution.', btn: 'Begin NVC Practice' },
@@ -4777,7 +4926,7 @@ function journeyRoute() {
       showAnalysisBanner();
     } else if (step === '4' || step === '5') {
       hide('analysis-banner');
-      checkVideoReady(step);
+      showJourneyBanner(step);
     } else if (JOURNEY_STEPS[step]) {
       showJourneyBanner(step);
       hide('analysis-banner');
@@ -4802,8 +4951,7 @@ function showJourneyBanner(step) {
 function openJourneyStep() {
   var step = currentJourneyStep;
   if (step && step.indexOf('solo-') === 0) { openJourneyStepSolo(step.replace('solo-', '')); return; }
-  if (step === '4') openStep4();
-  else if (step === '5') openStep5();
+  if (step === '4' || step === '5') advanceStep('6');
   else if (step === '6') openStep6();
   else if (step === '7') openStep7();
   else if (step === '8') openStep8();
@@ -4824,7 +4972,7 @@ function advanceStep(newStep) {
 
 var SOLO_JOURNEY_STEPS = {
   '2': { label: 'Step 2', title: 'Your Analysis', sub: 'What the AI found in your script.', btn: 'Read My Analysis' },
-  '3': { label: 'Step 3', title: 'Your Story on Screen', sub: 'Watch your conflict performed.', btn: 'Watch My Script' },
+  '3': { label: 'Step 3', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead — your tool is ready.', btn: 'Continue to Your Tool' },
   '4': { label: 'Step 4', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
   '5': { label: 'Step 5', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
   '6': { label: 'Step 6', title: 'You\'ve Done the Work', sub: '', btn: 'Read This' }
@@ -4871,7 +5019,7 @@ function showSoloJourneyBanner(step) {
 
 function openJourneyStepSolo(step) {
   if (step === '2') openSoloAnalysis();
-  else if (step === '3') checkVideoReady('solo-3');
+  else if (step === '3') soloAdvanceStep('4');
   else if (step === '4') openStep7();
   else if (step === '5') openStep9();
   else if (step === '6') openSoloClosing();
@@ -4922,6 +5070,84 @@ function openSoloClosing() {
 function closeSoloClosing() {
   hide('solo-closing-screen');
   document.body.style.overflow = '';
+}
+
+// ── FEEDBACK SCREEN ───────────────────────────────────────────
+var feedbackCallback = null;
+var fbVotes = { 1: null, 2: null, 3: null, 4: null };
+var fbUpLabels = {
+  1: 'What felt most accurate?',
+  2: 'What about it felt right?',
+  3: 'What worked well?',
+  4: 'Who would you send this to?'
+};
+var fbDownLabels = {
+  1: 'What felt off or inaccurate?',
+  2: 'What would have fit better?',
+  3: 'What was confusing or unclear?',
+  4: 'What would have to change?'
+};
+
+function openFeedbackScreen(callback) {
+  feedbackCallback = callback || null;
+  fbVotes = { 1: null, 2: null, 3: null, 4: null };
+  [1,2,3,4].forEach(function(n) {
+    var up = el('fb-q' + n + '-up'), dn = el('fb-q' + n + '-down');
+    if (up) { up.classList.remove('fb-up-selected','fb-down-selected'); }
+    if (dn) { dn.classList.remove('fb-up-selected','fb-down-selected'); }
+    var cb = el('fb-q' + n + '-comment'); if (cb) cb.style.display = 'none';
+    var ta = el('fb-q' + n + '-text'); if (ta) ta.value = '';
+  });
+  var btn = el('fb-submit-btn'); if (btn) { btn.disabled = false; btn.textContent = 'Submit Feedback'; }
+  el('feedback-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  window.scrollTo(0, 0);
+}
+
+function closeFeedbackScreen() {
+  hide('feedback-screen');
+  document.body.style.overflow = '';
+  var cb = feedbackCallback; feedbackCallback = null;
+  if (cb) cb();
+}
+
+function fbVote(q, direction) {
+  fbVotes[q] = direction;
+  var upBtn = el('fb-q' + q + '-up');
+  var dnBtn = el('fb-q' + q + '-down');
+  var commentBox = el('fb-q' + q + '-comment');
+  var commentLabel = el('fb-q' + q + '-label');
+  if (upBtn) { upBtn.classList.remove('fb-up-selected','fb-down-selected'); }
+  if (dnBtn) { dnBtn.classList.remove('fb-up-selected','fb-down-selected'); }
+  if (direction === 'up') {
+    if (upBtn) upBtn.classList.add('fb-up-selected');
+    if (commentLabel) commentLabel.textContent = (fbUpLabels[q] || 'Anything you\'d add?') + ' (optional)';
+  } else {
+    if (dnBtn) dnBtn.classList.add('fb-down-selected');
+    if (commentLabel) commentLabel.textContent = (fbDownLabels[q] || 'Tell us more…') + ' (optional)';
+  }
+  if (commentBox) commentBox.style.display = 'block';
+}
+
+function skipFeedback() {
+  closeFeedbackScreen();
+}
+
+function submitFeedback() {
+  var btn = el('fb-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  var data = {
+    userId: user ? user.uid : '',
+    accountType: user ? (user.accountType || 'couples') : '',
+    q1: fbVotes[1] || '', q1Comment: (el('fb-q1-text') ? el('fb-q1-text').value.trim() : ''),
+    q2: fbVotes[2] || '', q2Comment: (el('fb-q2-text') ? el('fb-q2-text').value.trim() : ''),
+    q3: fbVotes[3] || '', q3Comment: (el('fb-q3-text') ? el('fb-q3-text').value.trim() : ''),
+    q4: fbVotes[4] || '', q4Comment: (el('fb-q4-text') ? el('fb-q4-text').value.trim() : ''),
+    submittedAt: new Date().toISOString()
+  };
+  fsSet('feedback/' + (user ? user.uid : 'unknown'), data)
+    .then(function() { closeFeedbackScreen(); })
+    .catch(function() { closeFeedbackScreen(); });
 }
 
 // ── TAKEAWAY SCREEN ──────────────────────────────────────────
@@ -4999,11 +5225,13 @@ function tlShowContent(todoItems, tobeItems) {
 
 function tlContinue() {
   closeTakeawayScreen();
-  if (tlFromPath === 'solo') {
-    openSoloClosing();
-  } else {
-    advanceStep('11');
-  }
+  openFeedbackScreen(function() {
+    if (tlFromPath === 'solo') {
+      openSoloClosing();
+    } else {
+      advanceStep('11');
+    }
+  });
 }
 
 function tlPrint() { window.print(); }
