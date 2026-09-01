@@ -1641,6 +1641,121 @@ h1, h2, h3,
   touch-action: manipulation;
 }
 .pc-home-btn:hover { color: rgba(240,232,213,0.9); }
+
+/* ── WARM-UP SCREEN ──────────────────────────────────────────── */
+#warmup-screen {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 210; background: #F6F4F0; overflow-y: auto; flex-direction: column;
+  align-items: center; padding: 48px 24px 80px;
+}
+.wu-inner { width: 100%; max-width: 520px; }
+.wu-eyebrow { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: #AAAAAA; font-family: 'Courier Prime', monospace; margin-bottom: 20px; }
+.wu-heading { font-size: clamp(1.15rem, 4.5vw, 1.5rem); font-weight: 800; color: #111111; letter-spacing: -0.02em; margin-bottom: 8px; }
+.wu-sub { font-size: 0.88rem; color: #7A7468; margin-bottom: 28px; line-height: 1.6; }
+.wu-step { display: none; }
+.wu-step.wu-active { display: block; }
+.wu-q { font-size: 1rem; font-weight: 700; color: #111111; margin-bottom: 16px; line-height: 1.5; }
+.wu-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+.wu-chip {
+  padding: 9px 16px; border: 1.5px solid #D5CFC8; border-radius: 24px;
+  background: #FFFFFF; color: #444444; font-size: 0.88rem;
+  font-family: 'Courier Prime', monospace; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  -webkit-appearance: none; transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+.wu-chip.wu-chip-selected { border-color: #E06500; background: #FEF0E4; color: #C45800; font-weight: 700; }
+.wu-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
+.wu-dot { width: 7px; height: 7px; border-radius: 50%; background: #D5CFC8; flex-shrink: 0; transition: background 0.2s, width 0.2s; }
+.wu-dot.wu-dot-active { background: #E06500; width: 20px; border-radius: 4px; }
+.wu-dot.wu-dot-done { background: #E06500; opacity: 0.35; }
+.wu-progress-label { font-size: 0.7rem; color: #AAAAAA; letter-spacing: 0.1em; font-family: 'Courier Prime', monospace; margin-left: 4px; }
+.wu-btn {
+  width: 100%; padding: 16px; font-size: 0.95rem; font-weight: 700;
+  background: #E06500; color: #FFFFFF; border: none; border-radius: 6px;
+  cursor: pointer; font-family: 'Courier Prime', monospace;
+  -webkit-appearance: none; touch-action: manipulation;
+}
+.wu-btn:active { background: #C45800; }
+.wu-skip { display: block; text-align: center; margin-top: 16px; font-size: 0.8rem; color: #AAAAAA; cursor: pointer; background: none; border: none; font-family: 'Courier Prime', monospace; -webkit-tap-highlight-color: transparent; }
+.wu-skip:hover { color: #888888; }
+
+/* ── COMMITMENT MODAL ─────────────────────────────────────────── */
+#commitment-modal {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 220; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 24px;
+}
+.cm-box {
+  background: #FFFFFF; border-radius: 12px; max-width: 420px; width: 100%;
+  padding: 36px 28px 28px; box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+}
+.cm-heading { font-size: 1.2rem; font-weight: 800; color: #111111; margin-bottom: 14px; line-height: 1.35; }
+.cm-body { font-size: 0.9rem; color: #3A3028; line-height: 1.75; margin-bottom: 24px; }
+.cm-body p { margin: 0 0 10px; }
+.cm-body p:last-child { margin-bottom: 0; }
+.cm-btn {
+  width: 100%; padding: 16px; font-size: 0.95rem; font-weight: 700;
+  background: #E06500; color: #FFFFFF; border: none; border-radius: 6px;
+  cursor: pointer; font-family: 'Courier Prime', monospace;
+  -webkit-appearance: none; touch-action: manipulation;
+}
+.cm-btn:active { background: #C45800; }
+
+/* ── LANDING STRIP SCREEN (Path A) ───────────────────────────── */
+#landing-strip-screen {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 210; background: #F6F4F0; overflow-y: auto; flex-direction: column;
+  align-items: center; padding: 48px 24px 80px;
+}
+.ls-inner { width: 100%; max-width: 520px; }
+.ls-eyebrow { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: #AAAAAA; font-family: 'Courier Prime', monospace; margin-bottom: 20px; }
+.ls-heading { font-size: clamp(1.1rem, 4vw, 1.4rem); font-weight: 800; color: #111111; letter-spacing: -0.02em; margin-bottom: 10px; }
+.ls-sub { font-size: 0.88rem; color: #7A7468; margin-bottom: 32px; line-height: 1.6; }
+.ls-field { margin-bottom: 22px; }
+.ls-label { display: block; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #AAAAAA; margin-bottom: 8px; font-family: 'Courier Prime', monospace; }
+.ls-input {
+  width: 100%; background: #FFFFFF; border: 1.5px solid #D5CFC8; border-radius: 6px;
+  padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.95rem;
+  color: #111111; outline: none; -webkit-appearance: none;
+}
+.ls-input:focus { border-color: #E06500; }
+.ls-input::placeholder { color: #CCCCCC; }
+.ls-speaker-row { display: flex; gap: 10px; }
+.ls-speaker-btn {
+  flex: 1; padding: 12px; border: 1.5px solid #D5CFC8; border-radius: 6px;
+  background: #FFFFFF; color: #444444; font-size: 0.88rem;
+  font-family: 'Courier Prime', monospace; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  -webkit-appearance: none; font-weight: 500; transition: border-color 0.12s, background 0.12s;
+}
+.ls-speaker-btn.ls-selected { border-color: #E06500; background: #FEF0E4; color: #C45800; font-weight: 700; }
+.ls-btn {
+  width: 100%; padding: 16px; font-size: 0.95rem; font-weight: 700;
+  background: #E06500; color: #FFFFFF; border: none; border-radius: 6px;
+  cursor: pointer; font-family: 'Courier Prime', monospace; margin-bottom: 12px;
+  -webkit-appearance: none; touch-action: manipulation; display: block;
+}
+.ls-btn:active { background: #C45800; }
+.ls-skip { display: block; text-align: center; font-size: 0.8rem; color: #AAAAAA; cursor: pointer; background: none; border: none; font-family: 'Courier Prime', monospace; -webkit-tap-highlight-color: transparent; }
+.ls-skip:hover { color: #888888; }
+
+/* ── IDLE CHECK-IN MODAL ──────────────────────────────────────── */
+#idle-checkin-modal {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 230; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; padding: 24px;
+}
+.ic-box {
+  background: #FFFFFF; border-radius: 12px; max-width: 360px; width: 100%;
+  padding: 28px 24px 22px; box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  border-top: 3px solid #E06500;
+}
+.ic-body { font-size: 0.92rem; color: #3A3028; line-height: 1.75; margin-bottom: 20px; font-family: 'Courier Prime', monospace; font-style: italic; }
+.ic-dismiss {
+  width: 100%; padding: 14px; font-size: 0.88rem; font-weight: 600;
+  background: transparent; color: #888888; border: 1.5px solid #D5CFC8; border-radius: 6px;
+  cursor: pointer; font-family: 'Courier Prime', monospace;
+  -webkit-appearance: none; touch-action: manipulation;
+}
+.ic-dismiss:active { background: #F6F4F0; }
 </style>
 
 </head>
@@ -2630,6 +2745,105 @@ Me too.</div>
   </div>
 </div>
 
+<!-- WARM-UP QUESTIONS SCREEN — shown once before path choice for new users -->
+<div id="warmup-screen">
+  <div class="wu-inner">
+    <div class="wu-eyebrow">Before You Begin</div>
+    <div class="wu-heading">A few quick questions.</div>
+    <div class="wu-sub">Take a moment before you start writing. Select everything that applies — there are no wrong answers.</div>
+    <div class="wu-progress">
+      <div class="wu-dot wu-dot-active" id="wu-dot-1"></div>
+      <div class="wu-dot" id="wu-dot-2"></div>
+      <div class="wu-dot" id="wu-dot-3"></div>
+      <span class="wu-progress-label" id="wu-progress-label">1 of 3</span>
+    </div>
+    <div class="wu-step wu-active" id="wu-step-1">
+      <div class="wu-q">When you and your partner have this particular fight, how do you typically feel?</div>
+      <div class="wu-chips">
+        <button class="wu-chip" onclick="warmupToggleChip('q1','Unheard',this)">Unheard</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q1','Dismissed',this)">Dismissed</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q1','Disrespected',this)">Disrespected</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q1','Attacked',this)">Attacked</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q1','Exhausted',this)">Exhausted</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q1','Invisible',this)">Invisible</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q1','Frustrated',this)">Frustrated</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q1','Alone',this)">Alone</button>
+      </div>
+    </div>
+    <div class="wu-step" id="wu-step-2">
+      <div class="wu-q">What do you want from doing this process?</div>
+      <div class="wu-chips">
+        <button class="wu-chip" onclick="warmupToggleChip('q2','I want things to change',this)">I want things to change</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q2','I want to stop having this same fight',this)">I want to stop having this same fight</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q2','I want to feel heard',this)">I want to feel heard</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q2','I want them to understand my side',this)">I want them to understand my side</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q2',&quot;I don't know yet&quot;,this)">I don't know yet</button>
+      </div>
+    </div>
+    <div class="wu-step" id="wu-step-3">
+      <div class="wu-q">What do you think needs to shift for this fight to stop happening?</div>
+      <div class="wu-chips">
+        <button class="wu-chip" onclick="warmupToggleChip('q3','Their attitude',this)">Their attitude</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q3','The way we communicate',this)">The way we communicate</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q3','How much they listen',this)">How much they listen</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q3','How much respect there is',this)">How much respect there is</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q3','How we handle stress together',this)">How we handle stress together</button>
+        <button class="wu-chip" onclick="warmupToggleChip('q3',&quot;I'm not sure&quot;,this)">I'm not sure</button>
+      </div>
+    </div>
+    <button class="wu-btn" id="wu-next-btn" onclick="warmupNextStep()">Next →</button>
+    <button class="wu-skip" onclick="warmupSkip()">Skip this step</button>
+  </div>
+</div>
+
+<!-- COMMITMENT PROMPT MODAL — shown after warm-up before path choice -->
+<div id="commitment-modal">
+  <div class="cm-box">
+    <div class="cm-heading">One thing before you start writing.</div>
+    <div class="cm-body">
+      <p>This works best in one sitting. Not because you have to rush — there's no timer — but because the script you write is most honest when you're still close to the feeling.</p>
+      <p>If you need to stop, your progress saves automatically. But try to finish once you start.</p>
+    </div>
+    <button class="cm-btn" onclick="closeCommitmentPrompt()">I'm Ready — Begin Writing</button>
+  </div>
+</div>
+
+<!-- LANDING STRIP SCREEN — Path A only, sets up scene before blank canvas -->
+<div id="landing-strip-screen">
+  <div class="ls-inner">
+    <div class="ls-eyebrow">Path A — Write It Yourself</div>
+    <div class="ls-heading">Let's set the scene.</div>
+    <div class="ls-sub">A few quick details to get you started. You can change any of these once you're inside.</div>
+    <div class="ls-field">
+      <label class="ls-label" for="ls-location">Where does this fight usually happen?</label>
+      <input type="text" id="ls-location" class="ls-input" placeholder="e.g. The kitchen, The car, The bedroom" autocomplete="off" />
+    </div>
+    <div class="ls-field">
+      <label class="ls-label">Who usually starts it?</label>
+      <div class="ls-speaker-row">
+        <button class="ls-speaker-btn ls-selected" id="ls-speaker-a" onclick="lsSelectSpeaker('A')">Me</button>
+        <button class="ls-speaker-btn" id="ls-speaker-b" onclick="lsSelectSpeaker('B')">My partner</button>
+      </div>
+    </div>
+    <div class="ls-field">
+      <label class="ls-label" for="ls-opening">What's usually the first thing said?</label>
+      <input type="text" id="ls-opening" class="ls-input" placeholder="e.g. You never listen to me." autocomplete="off" />
+    </div>
+    <div class="ls-actions">
+      <button class="ls-btn" onclick="landingStripComplete()">Start Writing →</button>
+      <button class="ls-skip" onclick="landingStripSkip()">Skip — start with a blank script</button>
+    </div>
+  </div>
+</div>
+
+<!-- IDLE CHECK-IN MODAL — shown once after ~9 min inactivity on script screen -->
+<div id="idle-checkin-modal">
+  <div class="ic-box">
+    <div class="ic-body">Just checking in — is there anything I can do to support you right now?</div>
+    <button class="ic-dismiss" onclick="closeIdleCheckin()">I'm good — keep going</button>
+  </div>
+</div>
+
 <!-- SCENE LENGTH: ONE-TIME NUDGE POPUP (appears once when first crossing 2:00 while writing) -->
 <div id="sl-nudge-popup">
   <div class="sl-popup-box">
@@ -2992,7 +3206,8 @@ function signOut() {
   hide('buyin-screen');
   hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
   ['step3-screen','step4-screen','step5-screen','step6-screen',
-   'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen','solo-closing-screen','takeaway-screen'].forEach(function(id){ hide(id); });
+   'step7-screen','step8-screen','step9-screen','step10-screen','step11-screen','solo-closing-screen','takeaway-screen',
+   'warmup-screen','commitment-modal','landing-strip-screen','idle-checkin-modal'].forEach(function(id){ hide(id); });
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   el('step2-thinking').value = ''; el('step2-feeling').value = '';
@@ -3075,6 +3290,7 @@ function afterLogin() {
     el('al-fab').style.display = 'block';
     show('script-screen');
     loadProfile(); loadScript(); loadNotes();
+    startIdleDetection();
   }
 }
 
@@ -3244,8 +3460,18 @@ function loadNotes() {
 function loadScript() {
   fsGet('scripts/' + user.uid).then(function(d) {
     if (d.error) {
-      // No script doc — new user, show path choice
-      checkPathChoice();
+      // No script doc — new user; gate behind warm-up if not yet done
+      if (user && user.uid) {
+        fsGet('warmup/' + user.uid).then(function(w) {
+          if (w && w.fields && fromFields(w.fields).completed) {
+            checkPathChoice();
+          } else {
+            openWarmupScreen();
+          }
+        }).catch(function() { checkPathChoice(); });
+      } else {
+        checkPathChoice();
+      }
       return;
     }
     var s = fromFields(d.fields);
@@ -4247,14 +4473,21 @@ function buildIntakeBlock(name, data) {
 
 function runStep2Analysis(partnerData) {
   txt('step2-status', 'Both scripts received. Analysis in progress — this may take up to a minute...');
-  return fsGet('scripts/' + user.uid).then(function(d) {
+  return Promise.all([
+    fsGet('scripts/' + user.uid),
+    fsGet('warmup/' + user.uid).catch(function() { return null; })
+  ]).then(function(results) {
+    var d = results[0];
+    var warmupDoc = results[1];
     var myData = fromFields(d.fields || {});
     var myName = user.name || 'Partner A';
     var partnerName = user.partner || 'Partner B';
     var fightName = user.fight || 'The Ongoing Argument';
     var myText = scriptDataToText(myData, myName, partnerName);
     var partnerText = scriptDataToText(partnerData, partnerName, myName);
+    var warmupBlock = buildWarmupBlock(myName, warmupDoc);
     var prompt = 'The couple\'s fight is called: ' + fightName + '\n\n' +
+      warmupBlock +
       '— SCRIPT FROM ' + myName.toUpperCase() + ' —\n\n' + myText + '\n\n' +
       myName + '\'s story about what ' + partnerName + ' is thinking:\n' +
       (myData.storyThinking || '(no answer provided)') + '\n\n' +
@@ -4813,10 +5046,17 @@ function tlCopy() {
 
 function runSoloAnalysis() {
   var myName = (user.name || 'Me').split(' ')[0];
-  return fsGet('scripts/' + user.uid).then(function(d) {
+  return Promise.all([
+    fsGet('scripts/' + user.uid),
+    fsGet('warmup/' + user.uid).catch(function() { return null; })
+  ]).then(function(results) {
+    var d = results[0];
+    var warmupDoc = results[1];
     var myData = fromFields(d.fields || {});
     var scriptText = scriptDataToText(myData, myName, 'their partner');
+    var warmupBlock = buildWarmupBlock(myName, warmupDoc);
     var prompt = myName + ' is working through The Ongoing Argument solo pathway. Their partner is not participating. This is their script of a recurring conflict, written privately from their own perspective.\n\n' +
+      warmupBlock +
       '--- SCRIPT FROM ' + myName.toUpperCase() + ' ---\n\n' + scriptText + '\n\n' +
       myName + '\'s story about what their partner is thinking:\n' + (myData.storyThinking || '(no answer provided)') + '\n\n' +
       myName + '\'s story about what their partner is feeling:\n' + (myData.storyFeeling || '(no answer provided)') + '\n\n' +
@@ -6043,11 +6283,10 @@ function checkPathChoice() {
 function choosePathA() {
   sceneLengthOverWarningShown = false;
   el('path-choice-screen').style.display = 'none';
-  document.body.style.overflow = '';
   navPush('script');
-  el('path-a-guide').style.display = 'block';
   // Mark path A so we don't re-prompt on return; pathChosen stored for all users
   fsSet('scripts/' + user.uid, { scriptPath: 'a', pathChosen: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
+  openLandingStrip();
 }
 
 function choosePathB() {
@@ -6466,6 +6705,169 @@ window.addEventListener('popstate', function(e) {
       .catch(function() {}); // fail silently — never block the app
   }, 4000);
 }());
+
+// ── WARM-UP QUESTIONS ────────────────────────────────────────
+
+var warmupAnswers = { q1: [], q2: [], q3: [] };
+var warmupStep = 1;
+
+function openWarmupScreen() {
+  warmupAnswers = { q1: [], q2: [], q3: [] };
+  document.querySelectorAll('.wu-chip').forEach(function(c) { c.classList.remove('wu-chip-selected'); });
+  showWarmupStep(1);
+  el('warmup-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWarmupScreen() {
+  el('warmup-screen').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function warmupToggleChip(question, value, chipEl) {
+  var arr = warmupAnswers[question];
+  var idx = arr.indexOf(value);
+  if (idx === -1) { arr.push(value); chipEl.classList.add('wu-chip-selected'); }
+  else { arr.splice(idx, 1); chipEl.classList.remove('wu-chip-selected'); }
+}
+
+function showWarmupStep(step) {
+  warmupStep = step;
+  [1, 2, 3].forEach(function(n) {
+    var s = el('wu-step-' + n);
+    if (s) s.className = 'wu-step' + (n === step ? ' wu-active' : '');
+    var d = el('wu-dot-' + n);
+    if (d) d.className = 'wu-dot' + (n < step ? ' wu-dot-done' : (n === step ? ' wu-dot-active' : ''));
+  });
+  var lbl = el('wu-progress-label');
+  if (lbl) lbl.textContent = step + ' of 3';
+  var btn = el('wu-next-btn');
+  if (btn) btn.textContent = step < 3 ? 'Next →' : 'Continue →';
+}
+
+function warmupNextStep() {
+  if (warmupStep < 3) { showWarmupStep(warmupStep + 1); return; }
+  warmupSaveAndProceed();
+}
+
+function warmupSkip() {
+  warmupSaveAndProceed();
+}
+
+function warmupSaveAndProceed() {
+  closeWarmupScreen();
+  if (user && user.uid) {
+    fsSet('warmup/' + user.uid, {
+      completed: true,
+      q1: warmupAnswers.q1.join('|'),
+      q2: warmupAnswers.q2.join('|'),
+      q3: warmupAnswers.q3.join('|'),
+      completedAt: new Date().toISOString()
+    }).catch(function() {});
+  }
+  openCommitmentPrompt();
+}
+
+function openCommitmentPrompt() {
+  el('commitment-modal').style.display = 'flex';
+}
+
+function closeCommitmentPrompt() {
+  el('commitment-modal').style.display = 'none';
+  checkPathChoice();
+}
+
+function buildWarmupBlock(name, warmupDoc) {
+  if (!warmupDoc || !warmupDoc.fields) return '';
+  var wu = fromFields(warmupDoc.fields);
+  if (!wu.q1 && !wu.q2 && !wu.q3) return '';
+  var lines = ['--- ' + name + '\'s emotional context (answered before writing their script) ---'];
+  if (wu.q1) lines.push('How they typically feel in this fight: ' + wu.q1.replace(/\|/g, ', '));
+  if (wu.q2) lines.push('What they want from this process: ' + wu.q2.replace(/\|/g, ', '));
+  if (wu.q3) lines.push('What they think needs to shift: ' + wu.q3.replace(/\|/g, ', '));
+  lines.push('---\n\n');
+  return lines.join('\n');
+}
+
+// ── LANDING STRIP (Path A) ────────────────────────────────────
+
+var lsSpeaker = 'A';
+
+function openLandingStrip() {
+  lsSpeaker = 'A';
+  el('ls-location').value = '';
+  el('ls-opening').value = '';
+  el('ls-speaker-a').className = 'ls-speaker-btn ls-selected';
+  el('ls-speaker-b').className = 'ls-speaker-btn';
+  el('landing-strip-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLandingStrip() {
+  el('landing-strip-screen').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function lsSelectSpeaker(which) {
+  lsSpeaker = which;
+  el('ls-speaker-a').className = 'ls-speaker-btn' + (which === 'A' ? ' ls-selected' : '');
+  el('ls-speaker-b').className = 'ls-speaker-btn' + (which === 'B' ? ' ls-selected' : '');
+}
+
+function landingStripComplete() {
+  var location = (el('ls-location').value || '').trim();
+  var opening = (el('ls-opening').value || '').trim();
+  closeLandingStrip();
+  el('path-a-guide').style.display = 'block';
+  if (location) el('scene-input').value = location;
+  if (opening) {
+    addLine(lsSpeaker, '', opening, false);
+    setTimeout(function() {
+      updateSceneEstimate();
+      var ta = document.querySelector('#lines-container textarea');
+      if (ta) ar(ta);
+    }, 50);
+  }
+  if (location || opening) saveScript();
+}
+
+function landingStripSkip() {
+  closeLandingStrip();
+  el('path-a-guide').style.display = 'block';
+}
+
+// ── IDLE CHECK-IN ─────────────────────────────────────────────
+
+var idleCheckInShown = false;
+var idleLastActivity = Date.now();
+var idleCheckTimer = null;
+
+function idleResetActivity() {
+  idleLastActivity = Date.now();
+}
+
+function startIdleDetection() {
+  if (idleCheckTimer) { clearInterval(idleCheckTimer); idleCheckTimer = null; }
+  idleCheckInShown = false;
+  idleLastActivity = Date.now();
+  ['mousemove', 'keydown', 'touchstart', 'click'].forEach(function(evt) {
+    document.addEventListener(evt, idleResetActivity, { passive: true });
+  });
+  idleCheckTimer = setInterval(function() {
+    if (idleCheckInShown) { clearInterval(idleCheckTimer); idleCheckTimer = null; return; }
+    var ss = el('script-screen');
+    if (!ss || ss.style.display === 'none') return;
+    if (Date.now() - idleLastActivity >= 9 * 60 * 1000) {
+      idleCheckInShown = true;
+      clearInterval(idleCheckTimer); idleCheckTimer = null;
+      el('idle-checkin-modal').style.display = 'flex';
+    }
+  }, 60 * 1000);
+}
+
+function closeIdleCheckin() {
+  el('idle-checkin-modal').style.display = 'none';
+}
 </script>
 
 <!-- EmailJS credentials — update here only, used everywhere -->
