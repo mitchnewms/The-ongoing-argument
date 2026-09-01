@@ -2801,7 +2801,7 @@ Me too.</div>
     <div class="fb-sub">You just did something hard. Help us make it better for the next person.</div>
 
     <div class="fb-question">
-      <div class="fb-q-text">Did the analysis feel accurate to your actual situation?</div>
+      <div class="fb-q-text">Do you feel seen and heard in this process?</div>
       <div class="fb-thumbs">
         <button class="fb-thumb" id="fb-q1-up" onclick="fbVote(1,'up')">👍 Yes</button>
         <button class="fb-thumb" id="fb-q1-down" onclick="fbVote(1,'down')">👎 Not really</button>
@@ -2814,7 +2814,7 @@ Me too.</div>
     <hr class="fb-divider">
 
     <div class="fb-question">
-      <div class="fb-q-text">Did the tool you were given feel right for where you are?</div>
+      <div class="fb-q-text">Does this tool feel useful?</div>
       <div class="fb-thumbs">
         <button class="fb-thumb" id="fb-q2-up" onclick="fbVote(2,'up')">👍 Yes</button>
         <button class="fb-thumb" id="fb-q2-down" onclick="fbVote(2,'down')">👎 Not really</button>
@@ -2827,20 +2827,20 @@ Me too.</div>
     <hr class="fb-divider">
 
     <div class="fb-question">
-      <div class="fb-q-text">Was the process clear and easy to follow?</div>
+      <div class="fb-q-text">Did that feedback seem reasonable and applicable to you?</div>
       <div class="fb-thumbs">
         <button class="fb-thumb" id="fb-q3-up" onclick="fbVote(3,'up')">👍 Yes</button>
         <button class="fb-thumb" id="fb-q3-down" onclick="fbVote(3,'down')">👎 Not really</button>
       </div>
       <div class="fb-comment-box" id="fb-q3-comment">
         <label class="fb-comment-label" id="fb-q3-label">Tell us more (optional)</label>
-        <textarea class="fb-comment-input" id="fb-q3-text" placeholder="What was confusing or could be clearer?"></textarea>
+        <textarea class="fb-comment-input" id="fb-q3-text" placeholder="What felt off or didn't apply?"></textarea>
       </div>
     </div>
     <hr class="fb-divider">
 
     <div class="fb-question">
-      <div class="fb-q-text">Would you recommend this to someone you care about?</div>
+      <div class="fb-q-text">Is this something you'll actually utilize moving forward?</div>
       <div class="fb-thumbs">
         <button class="fb-thumb" id="fb-q4-up" onclick="fbVote(4,'up')">👍 Yes</button>
         <button class="fb-thumb" id="fb-q4-down" onclick="fbVote(4,'down')">👎 Not sure</button>
@@ -2851,8 +2851,8 @@ Me too.</div>
       </div>
     </div>
 
+    <div id="fb-validation-msg" style="display:none;font-size:0.8rem;color:#C0392B;font-family:'Courier Prime',monospace;margin-bottom:10px;">Please answer all four questions to continue.</div>
     <button class="fb-submit" id="fb-submit-btn" onclick="submitFeedback()">Submit Feedback</button>
-    <button class="fb-skip" onclick="skipFeedback()">Skip — continue</button>
   </div>
 </div>
 
@@ -5099,6 +5099,7 @@ function openFeedbackScreen(callback) {
     var ta = el('fb-q' + n + '-text'); if (ta) ta.value = '';
   });
   var btn = el('fb-submit-btn'); if (btn) { btn.disabled = false; btn.textContent = 'Submit Feedback'; }
+  var vm = el('fb-validation-msg'); if (vm) vm.style.display = 'none';
   el('feedback-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   window.scrollTo(0, 0);
@@ -5134,6 +5135,12 @@ function skipFeedback() {
 }
 
 function submitFeedback() {
+  var validationMsg = el('fb-validation-msg');
+  if (!fbVotes[1] || !fbVotes[2] || !fbVotes[3] || !fbVotes[4]) {
+    if (validationMsg) validationMsg.style.display = 'block';
+    return;
+  }
+  if (validationMsg) validationMsg.style.display = 'none';
   var btn = el('fb-submit-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
   var data = {
