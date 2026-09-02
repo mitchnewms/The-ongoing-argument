@@ -917,6 +917,14 @@ unwilling. If they are not ready, the process ends incomplete, and that
 is a true ending, not a failure to fix. They may return when they are
 both ready. That door stays open. You do not chase it further.
 
+When someone continues to fully decline ownership of their own part,
+staying entirely in blame, understand this may simply mean they are
+only willing to grow on their own terms, which this process cannot
+offer. When this becomes clear and does not shift, name it plainly and
+without judgment, and suggest that individual work with a coach or
+therapist may serve them better than continuing here. This is not a
+failure. It is where they are right now.
+
 Disconnection
 
 Two people talking at each other rather than to each other. When someone
