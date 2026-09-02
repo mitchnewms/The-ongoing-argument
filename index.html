@@ -741,6 +741,7 @@ body {
 .lp-fork-beat { font-family: 'Lora', Georgia, serif; font-size: clamp(1rem, 2.8vw, 1.15rem); line-height: 1.9; color: #3A3028; max-width: 54ch; margin: 0 auto; }
 .lp-fork-beat p { margin-bottom: 1.4em; }
 .lp-fork-beat p:last-child { margin-bottom: 0; }
+.lp-solo-note { font-family: 'Lora', Georgia, serif; font-size: clamp(0.88rem, 2.2vw, 0.95rem); font-style: italic; color: #7A7468; line-height: 1.7; margin-top: 24px; }
 
 .lp-tagline {
   font-family: 'Lora', Georgia, serif;
@@ -1985,13 +1986,14 @@ h1, h2, h3,
       <li class="lp-step"><span class="lp-step-n">7.</span><span class="lp-step-t">Learn a new language. Out of blame. Out of confrontation. Into conversation.</span></li>
       <li class="lp-step"><span class="lp-step-n">8.</span><span class="lp-step-t">Rewrite the script together. So you both win. And so does the relationship.</span></li>
     </ol>
+    <p class="lp-solo-note">Doing this on your own? Every step still applies &mdash; you&rsquo;re just doing your part of it first.</p>
   </section>
 
   <!-- S4: THE TRUTH -->
   <section class="lp-section">
     <div class="lp-truth">
       <p>It is no coincidence that you found each other. We often seek the one person who will ultimately challenge us to reconsider the parts of ourselves we fear the most by activating those parts. And in kind and in reaction we then know exactly what to say to share that gift back for them. And I do mean gift. Change. Healing. Both tend to sting a bit before we get to the good parts.</p>
-      <p>Here is what is important to know. Most couples want the same things. What differs is how they were each taught to achieve them. The fight is not evidence that something is broken. It is evidence that something needs to be broken open to reveal one's greatest capacity for loving. Underneath every ongoing argument is an unmet need that has never been named and clearly not met.</p>
+      <p>Here is what is important to know. Most people want the same things. What differs is how they were each taught to achieve them. The fight is not evidence that something is broken. It is evidence that something needs to be broken open to reveal one's greatest capacity for loving. Underneath every ongoing argument is an unmet need that has never been named and clearly not met.</p>
       <p>Name it. Meet it. And watch what magic becomes possible.</p>
     </div>
   </section>
@@ -2002,10 +2004,10 @@ h1, h2, h3,
     <button class="lp-btn-solo" id="lp-btn-solo" onclick="lpRevealCommitmentSolo()">Start on your own</button>
   </div>
 
-  <!-- S6: COMMITMENT STATEMENT — hidden until S5 button clicked -->
+  <!-- S6: COMMITMENT STATEMENT — hidden until S5 button clicked; content branches by path -->
   <div id="lp-s6">
     <div class="lp-cta">
-      <div class="lp-commit-text">
+      <div class="lp-commit-text lp-commit-couples">
         <p>Before you start there is one thing worth knowing.</p>
         <p>This process is designed to be engaging, enlightening, and at times challenging. It will bring things to the surface. That is the point.</p>
         <p>It requires both of you to be fully present. Individually committed. And genuinely willing to do the work. Not perfectly. But honestly.</p>
@@ -2013,15 +2015,23 @@ h1, h2, h3,
         <p>If at any point you find yourself questioning your commitment to the process that is important information worth paying attention to.</p>
         <p>Are you both committed and willing?</p>
       </div>
-      <button class="lp-btn" id="lp-btn-commit" onclick="lpRevealFight()">Yes. Let's do this.</button>
+      <div class="lp-commit-text lp-commit-solo" style="display:none;">
+        <p>Before you start there is one thing worth knowing.</p>
+        <p>This process is designed to be engaging, enlightening, and at times challenging. It will bring things to the surface. That is the point.</p>
+        <p>It requires you to be fully present. Committed. And genuinely willing to do the work. Not perfectly. But honestly.</p>
+        <p>This is not therapy. It is coaching. It works when you are fully engaged.</p>
+        <p>If at any point you find yourself questioning your commitment to the process that is important information worth paying attention to.</p>
+        <p>Are you committed and willing?</p>
+      </div>
+      <button class="lp-btn" id="lp-btn-commit" onclick="lpRevealFight()">Yes. Let&rsquo;s do this.</button>
     </div>
   </div>
 
   <!-- S7: NAME THE FIGHT — hidden until S6 button clicked -->
   <div id="lp-s7">
     <div class="lp-cta">
-      <div class="lp-fight-hd">What do you both call this fight?</div>
-      <div class="lp-fight-sub">The one you both know. Agree on a name together. Right now.</div>
+      <div class="lp-fight-hd" id="lp-fight-hd">What do you both call this fight?</div>
+      <div class="lp-fight-sub" id="lp-fight-sub">The one you both know. Agree on a name together. Right now.</div>
       <div class="lp-fight-eg">The Money Thing. The Way You Talk To Me. The Kids. The Job.</div>
       <div class="lp-fight-err" id="lp-fight-err"></div>
       <input type="text" class="lp-fight-input" id="lp-fight-input" placeholder="Give it a name." autocomplete="off" onkeydown="if(event.key==='Enter')lpProceed()" />
@@ -3942,10 +3952,18 @@ function lpRevealCommitment() {
 
 function lpRevealCommitmentSolo() {
   soloEnrollMode = true;
+  var couplesCopy = document.querySelector('.lp-commit-couples');
+  var soloCopy = document.querySelector('.lp-commit-solo');
+  if (couplesCopy) couplesCopy.style.display = 'none';
+  if (soloCopy) soloCopy.style.display = 'block';
   lpRevealCommitment();
 }
 
 function lpRevealFight() {
+  if (soloEnrollMode) {
+    txt('lp-fight-hd', 'What do you call this fight?');
+    txt('lp-fight-sub', 'The one you keep having. Name it. Right now.');
+  }
   var s7 = el('lp-s7');
   s7.style.display = 'block';
   void s7.offsetWidth;
@@ -3973,17 +3991,23 @@ function lpProceed() {
   setTimeout(function() {
     hide('landing-screen');
     lp.style.opacity = '';
-    history.pushState({ screen: 'buyin' }, '');
-    var bi = el('buyin-screen');
-    bi.style.display = 'flex';
     if (soloEnrollMode) {
-      var partnerRow = el('ca-partner') && el('ca-partner').closest('.auth-field');
+      // Individual path: skip buyin-screen entirely — go straight to account creation
+      var partnerRow = el('ca-partner') ? el('ca-partner').closest('.auth-field') : null;
       if (partnerRow) partnerRow.style.display = 'none';
       var sub = document.querySelector('#form-create .auth-sub');
       if (sub) sub.textContent = 'Set up your private script space.';
-      var fightLabel = el('ca-fight') && el('ca-fight').previousElementSibling;
+      var fightLabel = el('ca-fight') ? el('ca-fight').previousElementSibling : null;
       if (fightLabel) fightLabel.textContent = 'The fight — what do you call it?';
       var btn = el('btn-create'); if (btn) btn.textContent = 'Create Account';
+      if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
+      history.pushState({ screen: 'auth' }, '');
+      switchTab('create');
+      showFlex('auth-screen');
+    } else {
+      history.pushState({ screen: 'buyin' }, '');
+      var bi = el('buyin-screen');
+      bi.style.display = 'flex';
     }
   }, 500);
 }
@@ -6921,6 +6945,16 @@ window.addEventListener('popstate', function(e) {
     if (s6) { s6.style.display = 'none'; s6.classList.remove('lp-in'); }
     var btnBegin = el('lp-btn-begin');
     if (btnBegin) { btnBegin.disabled = false; }
+    var btnSolo = el('lp-btn-solo');
+    if (btnSolo) { btnSolo.disabled = false; }
+    // Reset commitment content to couples version for clean re-entry
+    var couplesCopy = document.querySelector('.lp-commit-couples');
+    var soloCopy = document.querySelector('.lp-commit-solo');
+    if (couplesCopy) couplesCopy.style.display = 'block';
+    if (soloCopy) soloCopy.style.display = 'none';
+    // Reset fight heading to couples version
+    txt('lp-fight-hd', 'What do you both call this fight?');
+    txt('lp-fight-sub', 'The one you both know. Agree on a name together. Right now.');
     lpEl.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (lpState === 'commitment') {
     if (s7) { s7.style.display = 'none'; s7.classList.remove('lp-in'); }
