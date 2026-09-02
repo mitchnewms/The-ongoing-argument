@@ -1799,8 +1799,6 @@ h1, h2, h3,
 }
 .fb-submit:active { background: #C45800; }
 .fb-submit:disabled { background: #CCCCCC; cursor: default; }
-.fb-skip { display: block; text-align: center; font-size: 0.8rem; color: #AAAAAA; cursor: pointer; background: none; border: none; font-family: 'Courier Prime', monospace; -webkit-tap-highlight-color: transparent; }
-.fb-skip:hover { color: #888888; }
 </style>
 
 </head>
@@ -5154,9 +5152,6 @@ function fbVote(q, direction) {
   if (commentBox) commentBox.style.display = 'block';
 }
 
-function skipFeedback() {
-  closeFeedbackScreen();
-}
 
 function submitFeedback() {
   var validationMsg = el('fb-validation-msg');
