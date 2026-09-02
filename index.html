@@ -501,6 +501,11 @@ body {
 .s11-email-note { font-size: 0.65rem; color: rgba(255,255,255,0.2); font-style: italic; margin-top: 8px; }
 .s11-done { text-align: center; padding: 32px 0 0; }
 .s11-done p { font-family: 'Special Elite', cursive; font-size: 1rem; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; }
+.s11-coach-section { border-top: 1px solid rgba(255,255,255,0.07); padding: 20px 0 0; margin-top: 20px; }
+.s11-coach-hd { font-family: 'Special Elite', cursive; font-size: 0.88rem; color: rgba(255,255,255,0.5); margin-bottom: 6px; letter-spacing: 0.02em; }
+.s11-coach-body { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(255,255,255,0.32); line-height: 1.65; margin-bottom: 12px; }
+.s11-coach-btn { font-family: 'Courier Prime', monospace; font-size: 0.78rem; background: transparent; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.42); padding: 8px 14px; cursor: pointer; border-radius: 2px; -webkit-appearance: none; touch-action: manipulation; }
+.s11-coach-confirm { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(184,160,112,0.6); font-style: italic; }
 </style>
 
 <style>
@@ -1354,6 +1359,11 @@ body, body * {
 .tl-action-btn { color: #888888 !important; border-color: #D5CFC8 !important; border-radius: 6px !important; text-transform: none !important; letter-spacing: 0 !important; font-size: 0.82rem !important; }
 .tl-continue-btn { background: #E06500 !important; border-radius: 6px !important; font-size: 0.9rem !important; text-transform: none !important; letter-spacing: 0 !important; font-weight: 700 !important; }
 .solo-closing-divider { background: #E2DED8 !important; }
+#solo-closing-screen .s11-coach-section { border-top-color: #E2DED8 !important; text-align: center; max-width: 380px; margin-left: auto; margin-right: auto; }
+#solo-closing-screen .s11-coach-hd { color: #666666 !important; letter-spacing: 0 !important; }
+#solo-closing-screen .s11-coach-body { color: #999999 !important; font-style: normal !important; }
+#solo-closing-screen .s11-coach-btn { border-color: #CCCCCC !important; color: #777777 !important; border-radius: 6px !important; }
+#solo-closing-screen .s11-coach-confirm { color: #888888 !important; font-style: normal !important; }
 
 /* 19. STEPS 4 & 5: VIDEO */
 .s45-intro { color: #333333 !important; border-bottom-color: #E2DED8 !important; font-size: 0.92rem !important; }
@@ -1489,6 +1499,11 @@ body, body * {
 .s11-email-btn:disabled { background: rgba(224,101,0,0.2) !important; }
 .s11-email-note { color: #AAAAAA !important; font-style: normal !important; }
 .s11-done p { color: #888888 !important; letter-spacing: 0 !important; font-size: 1rem !important; font-weight: 700 !important; }
+.s11-coach-section { border-top-color: #E2DED8 !important; }
+.s11-coach-hd { color: #666666 !important; font-size: 0.88rem !important; letter-spacing: 0 !important; }
+.s11-coach-body { color: #999999 !important; font-style: normal !important; font-size: 0.82rem !important; }
+.s11-coach-btn { border-color: #CCCCCC !important; color: #777777 !important; border-radius: 6px !important; font-size: 0.82rem !important; }
+.s11-coach-confirm { color: #888888 !important; font-style: normal !important; }
 
 /* 25. LANDING PAGE — update accent, modernize font */
 .lp-line { font-size: clamp(1.5rem, 5vw, 2rem) !important; font-weight: 700 !important; }
@@ -2710,6 +2725,12 @@ Me too.</div>
       </div>
       <div class="s11-email-note" id="s11-email-note">Email notifications will be enabled once EmailJS is connected. Your email will be saved securely.</div>
     </div>
+    <div class="s11-coach-section" id="s11-coach-section" style="display:none">
+      <div class="s11-coach-hd">Want to go deeper?</div>
+      <p class="s11-coach-body">If you&rsquo;d like more personal, one on one support beyond this process, let us know and we&rsquo;ll reach out.</p>
+      <button class="s11-coach-btn" id="s11-coach-btn" onclick="s11CoachConnect()">Yes, connect me with someone.</button>
+      <div class="s11-coach-confirm" id="s11-coach-confirm" style="display:none">Thanks, we&rsquo;ll be in touch.</div>
+    </div>
     <div class="s11-done">
       <p>You have done the work.</p>
     </div>
@@ -2798,6 +2819,12 @@ Me too.</div>
     </div>
     <div class="solo-closing-divider"></div>
     <div class="solo-closing-cap">Community At Play &mdash; where the work continues. A community that helps you remember when you forget.</div>
+    <div class="s11-coach-section" id="sc-coach-section" style="display:none">
+      <div class="s11-coach-hd">Want to go deeper?</div>
+      <p class="s11-coach-body">If you&rsquo;d like more personal, one on one support beyond this process, let us know and we&rsquo;ll reach out.</p>
+      <button class="s11-coach-btn" id="sc-coach-btn" onclick="scCoachConnect()">Yes, connect me with someone.</button>
+      <div class="s11-coach-confirm" id="sc-coach-confirm" style="display:none">Thanks, we&rsquo;ll be in touch.</div>
+    </div>
   </div>
 </div>
 
@@ -5087,6 +5114,13 @@ function s3RenderSoloAnalysis(analysisText) {
 function openSoloClosing() {
   el('solo-closing-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  el('sc-coach-section').style.display = 'block';
+  fsGet('step11/' + user.uid).then(function(d) {
+    if (d && d.fields && fromFields(d.fields).coachConnectedAt) {
+      el('sc-coach-btn').style.display = 'none';
+      el('sc-coach-confirm').style.display = 'block';
+    }
+  }).catch(function(){});
 }
 
 function closeSoloClosing() {
@@ -6371,11 +6405,28 @@ function completeStep10() {
 function openStep11() {
   el('step11-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  // Mark this user as having reached Step 11
+  fsSet('step11/' + user.uid, { reachedAt: new Date().toISOString() }).catch(function(){});
   fsGet('step11/' + user.uid).then(function(d) {
-    if (!d || !d.fields) return;
-    var s = fromFields(d.fields);
+    var s = (d && d.fields) ? fromFields(d.fields) : {};
     if (s.email) { el('s11-email-input').value = s.email; el('s11-email-btn').disabled = true; el('s11-email-btn').textContent = 'Saved ✓'; }
+    if (s.coachConnectedAt) { s11ShowCoachConfirmed(); }
+    // Show coach section: always for solo, only once both partners reached for coupled
+    if (user.accountType === 'solo' || !user.partnerId) {
+      el('s11-coach-section').style.display = 'block';
+    } else {
+      fsGet('step11/' + user.partnerId).then(function(pd) {
+        if (pd && pd.fields && fromFields(pd.fields).reachedAt) {
+          el('s11-coach-section').style.display = 'block';
+        }
+      }).catch(function(){});
+    }
   }).catch(function(){});
+}
+
+function s11ShowCoachConfirmed() {
+  el('s11-coach-btn').style.display = 'none';
+  el('s11-coach-confirm').style.display = 'block';
 }
 
 function closeStep11() { hide('step11-screen'); document.body.style.overflow = ''; }
@@ -6399,6 +6450,42 @@ function s11SaveEmail() {
     btn.disabled = false; btn.textContent = 'Save';
     txt('s11-email-note', 'Could not save email. Please try again.');
   });
+}
+
+function s11CoachConnect() { coachConnectAction('s11-coach-btn', 's11-coach-confirm'); }
+function scCoachConnect() { coachConnectAction('sc-coach-btn', 'sc-coach-confirm'); }
+
+function coachConnectAction(btnId, confirmId) {
+  if (!user) return;
+  var btn = el(btnId);
+  btn.disabled = true;
+  var record = {
+    uid: user.uid || '',
+    name: user.name || '',
+    email: user.email || '',
+    accountType: user.accountType || '',
+    timestamp: new Date().toISOString()
+  };
+  if (user.coupleId) record.coupleId = user.coupleId;
+  fsAdd('coachInterest', record).catch(function(){});
+  fsSet('step11/' + user.uid, { coachConnectedAt: new Date().toISOString() }).catch(function(){});
+  // Email Mitch
+  if (typeof emailjs !== 'undefined') {
+    var serviceId = window.EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
+    var coachTemplateId = window.EMAILJS_COACH_TEMPLATE_ID || 'YOUR_COACH_TEMPLATE_ID';
+    var publicKey = window.EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+    emailjs.init({ publicKey: publicKey });
+    emailjs.send(serviceId, coachTemplateId, {
+      name: record.name,
+      email: record.email,
+      account_type: record.accountType,
+      uid: record.uid,
+      couple_id: record.coupleId || '',
+      timestamp: record.timestamp
+    }).catch(function(err) { console.error('Coach interest email error:', err); });
+  }
+  btn.style.display = 'none';
+  el(confirmId).style.display = 'block';
 }
 
 // ── SHARED TYPING INDICATOR HELPERS ──────────────────────────
@@ -7154,6 +7241,7 @@ function closeIdleCheckin() {
 window.EMAILJS_SERVICE_ID        = 'service_k0ocp9f';
 window.EMAILJS_TEMPLATE_ID       = 'template_hregqk5';
 window.EMAILJS_NOTIFY_TEMPLATE_ID = 'template_ocptuqm';
+window.EMAILJS_COACH_TEMPLATE_ID  = 'YOUR_COACH_TEMPLATE_ID';
 window.EMAILJS_PUBLIC_KEY        = '1HSruQu2MRIfbUF0B';
 </script>
 
