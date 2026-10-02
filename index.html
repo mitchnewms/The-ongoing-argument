@@ -6615,6 +6615,7 @@ var PB_QUESTIONS = {
   q5fu:'I want to make sure I capture this fully. Tell me more — what happens in the middle of it? Where does it go from there?',
   q6:  'As you replay it, track the feeling from start to where it peaks. Does it start as frustration and build to anger? Shut down into silence? Spiral into tears? Naming the shift matters more than naming one word.',
   q7:  'Is there a specific word, a “you” statement, a tone of judgment, that you notice tends to be the moment it gets worse — more emotional, tears, anger, shutting down?',
+  q7b: 'Are there lines both of you know by heart in this fight — things that get said in almost every version of it? What does your partner say that you brace for? What do you say that you hear yourself saying again? Even a fragment or a tone is enough.',
   q8:  'What\'s the pause? The to be continued moment. Does one or both of you go quiet? Does someone leave the room? Do other people show up — kids, a phone call, a friend at the door?',
   q9:  'Is there something your partner does — a look, a tone, a sigh, a certain kind of silence — that gets to you more than the words themselves?',
   q9b: 'When they do that, what do you find yourself believing it means? Not what’s actually true, just what your gut tells you in that moment. “He doesn’t care.” “She’s checked out.” “I always have to be the one who tries.”',
@@ -6630,7 +6631,8 @@ function pbNextState(current, answer) {
   if (current === 'q5') return answer.replace(/\s/g, '').length < 50 ? 'q5fu' : 'q6';
   if (current === 'q5fu') return 'q6';
   if (current === 'q6') return 'q7';
-  if (current === 'q7') return 'q8';
+  if (current === 'q7') return 'q7b';
+  if (current === 'q7b') return 'q8';
   if (current === 'q8') return 'q9';
   if (current === 'q9') return 'q9b';
   if (current === 'q9b') return 'q10';
@@ -6782,6 +6784,7 @@ function pbBuildPrompt() {
     'How it unfolds beat by beat: ' + q5full + '\n\n' +
     'Emotional arc as it builds: ' + (pbAnswers.q6 || '') + '\n\n' +
     'The moment it escalates — word, tone, or trigger that makes it worse: ' + (pbAnswers.q7 || '') + '\n\n' +
+    'Recurring lines both know by heart — actual phrases that get said in almost every version of this fight: ' + (pbAnswers.q7b || '') + '\n\n' +
     'The pause — how it stops without resolving: ' + (pbAnswers.q8 || '') + '\n\n' +
     'What the partner does non-verbally that lands: ' + (pbAnswers.q9 || '') + '\n\n' +
     'What they believe that non-verbal means about them: ' + (pbAnswers.q9b || '') + '\n\n' +
@@ -6789,7 +6792,7 @@ function pbBuildPrompt() {
     'Format the script exactly as follows. Start with:\nSCENE: [brief location from the setting described above]\n\n' +
     'For each line of dialogue:\n[CHARACTER NAME IN CAPS]\n([emotional beat or tone in parentheses])\n[What they say]\n\n' +
     'For stage directions:\nDIRECTION: [brief description]\n\n' +
-    'Write 12-20 exchanges minimum. The beats and stage directions must reflect the emotional and physical reality described above — the feeling of escalation, the specific triggers, the body language, the charge in the room. Reflect the pause (the to be continued moment) rather than a resolution — these fights do not end, they stop. ' +
+    'Write 12-20 exchanges minimum. The beats and stage directions must reflect the emotional and physical reality described above — the feeling of escalation, the specific triggers, the body language, the charge in the room. If recurring lines were provided, use them verbatim as dialogue — these are the actual words and must appear in the script, not paraphrased. Reflect the pause (the to be continued moment) rather than a resolution — these fights do not end, they stop. ' +
     'Use the actual names ' + name + ' (Character A) and ' + partner + ' (Character B) in all caps as character headers. ' +
     'The script should reflect the tonal and emotional answers given — not just a factual retelling. ' +
     'Output only the script itself, starting with SCENE:. No preamble, no commentary, no explanation.';
