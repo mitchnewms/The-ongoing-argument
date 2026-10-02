@@ -249,8 +249,11 @@ body {
 .s3-dot:nth-child(2) { animation-delay: 0.2s; }
 .s3-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes s3pulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); } 40% { opacity: 1; transform: scale(1); } }
-.s3-input-area { padding: 12px 18px 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
-.s3-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.s3-input-area { padding: 0 0 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.pb-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 18px 8px; }
+.pb-chip { font-family: 'Courier Prime', monospace; font-size: 0.75rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.55); padding: 5px 11px; border-radius: 100px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; white-space: nowrap; transition: background 0.1s; }
+.pb-chip:active { background: rgba(255,255,255,0.14); }
+.s3-input-row { padding: 0 18px; display: flex; gap: 10px; align-items: flex-end; }
 .s3-input { flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.88); outline: none; resize: none; border-radius: 2px; line-height: 1.55; max-height: 120px; -webkit-appearance: none; }
 .s3-input:focus { border-color: rgba(184,160,112,0.5); }
 .s3-input::placeholder { color: rgba(255,255,255,0.25); }
@@ -1315,6 +1318,8 @@ body, body * {
 }
 .s3-dot { background: rgba(0,0,0,0.2) !important; }
 .s3-input-area { border-top-color: #E2DED8 !important; }
+.pb-chip { background: rgba(0,0,0,0.04) !important; border-color: #D8D2C8 !important; color: #6A5E52 !important; }
+.pb-chip:active { background: rgba(0,0,0,0.09) !important; }
 .s3-input {
   background: #FFFFFF !important;
   border-color: #E2DED8 !important;
@@ -2382,6 +2387,7 @@ h1, h2, h3,
   </div>
   <div class="s3-thread" id="pb-thread"></div>
   <div class="s3-input-area">
+    <div id="pb-chips" class="pb-chips" style="display:none"></div>
     <div class="s3-input-row">
       <textarea class="s3-input" id="pb-input" placeholder="Your answer..." rows="1" onkeydown="pbKeyDown(event)" oninput="pbAutoGrow(this)"></textarea>
       <button class="s3-send" id="pb-send" onclick="pbSend()">Send</button>
@@ -6583,6 +6589,37 @@ function onVideoReady(step, profileData) {
 
 // ── PATH B: AI ASSISTED SCRIPT WRITING ──────────────────────
 
+var PB_CHIPS = {
+  q6: ['Frustration → anger','Hurt → silence','Anxiety → tears','One attacks, one shuts down','Both go quiet','Spirals fast'],
+  q8: ['One of us goes quiet','Someone leaves the room','Kids interrupt','Phone or distraction','It just stops','One of us walks away'],
+  q9: ['Rolls their eyes','Goes completely silent','Sighs heavily','Crosses their arms','Looks away','Checks their phone','Leaves the room','Makes a face','Shuts down','Turns away from me'],
+  q9b: ["They think I'm wrong","I'm being judged","They've already given up","I'm too much","They don't care","They don't respect me","This is my fault","I always do this","I'll never get through to them","I'm alone in this"]
+};
+
+function pbShowChips(qid) {
+  var chips = PB_CHIPS[qid];
+  var container = el('pb-chips');
+  if (!chips || !container) { if (container) container.style.display = 'none'; return; }
+  container.innerHTML = chips.map(function(c) {
+    return '<button class="pb-chip" onclick="pbChipClick(' + JSON.stringify(c) + ')">' + esc(c) + '</button>';
+  }).join('');
+  container.style.display = 'flex';
+}
+
+function pbHideChips() {
+  var container = el('pb-chips');
+  if (container) { container.style.display = 'none'; container.innerHTML = ''; }
+}
+
+function pbChipClick(text) {
+  var inp = el('pb-input');
+  if (!inp || inp.disabled) return;
+  var current = inp.value.trim();
+  inp.value = current ? current + ', ' + text : text;
+  pbAutoGrow(inp);
+  inp.focus();
+}
+
 var PB_QUESTIONS = {
   q1:  'What is this fight about?',
   q2:  '', // filled dynamically after q1 answer — AI generates a trigger question with a topic-specific example
@@ -6675,10 +6712,12 @@ function pbGenerateQ2(topic) {
 function pbAskQuestion(qid) {
   var text = PB_QUESTIONS[qid];
   if (!text) return;
+  pbHideChips();
   s3ShowTypingIn('pb-thread');
   setTimeout(function() {
     s3RemoveTypingFrom('pb-thread');
     pbAppendAI(text);
+    pbShowChips(qid);
     var inp = el('pb-input');
     if (inp) { inp.disabled = false; inp.focus(); }
     var btn = el('pb-send');
@@ -6721,6 +6760,7 @@ function pbSend() {
 
   pbAnswers[pbState] = answer;
   pbAppendUser(answer);
+  pbHideChips();
   inp.value = '';
   inp.style.height = 'auto';
   inp.disabled = true;
