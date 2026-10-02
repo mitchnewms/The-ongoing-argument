@@ -453,12 +453,10 @@ body {
 .pc-cards { display: flex; flex-direction: column; gap: 16px; }
 .pc-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; padding: 24px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .pc-card:active { background: rgba(255,255,255,0.09); }
-.pc-card-label { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(184,160,112,0.6); font-family: 'Courier Prime', monospace; margin-bottom: 8px; }
 .pc-card-title { font-family: 'Special Elite', cursive; font-size: 1rem; color: rgba(255,255,255,0.88); margin-bottom: 8px; }
 .pc-card-desc { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.48); line-height: 1.65; }
 #path-choice-screen .pc-card-desc { color: var(--ink-light); }
 #path-choice-screen .pc-card-title { color: var(--ink); }
-.pc-card-b { border-color: rgba(184,160,112,0.22); }
 .pc-privacy { font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.22); text-align: center; margin-top: 24px; font-style: italic; }
 
 /* ── PATH B: INTAKE SCREEN ───────────────────────────────────── */
@@ -1271,16 +1269,6 @@ body, body * {
   box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
 }
 #path-choice-screen .pc-card:active { background: #F6F4F0 !important; }
-#path-choice-screen .pc-card-label {
-  font-size: 0.7rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.1em !important;
-  color: #E06500 !important;
-  background: #FEF0E4 !important;
-  padding: 3px 8px !important;
-  border-radius: 4px !important;
-  display: inline-block !important;
-}
 #path-choice-screen .pc-card-title {
   font-size: clamp(0.95rem, 3vw, 1.05rem) !important;
   font-weight: 700 !important;
@@ -2364,14 +2352,12 @@ h1, h2, h3,
     <p class="pc-sub">This is private. Your partner makes the same choice on their own.</p>
     <div class="pc-cards">
       <div class="pc-card" onclick="choosePathA()">
-        <div class="pc-card-label">Path A</div>
         <div class="pc-card-title">Write it yourself</div>
-        <div class="pc-card-desc">Start with a blank script and build it line by line. You add each beat, each line of dialogue, each stage direction. This is the most direct version of the fight, in your own words, exactly as you remember it.</div>
+        <div class="pc-card-desc">Start with a blank page. You set the scene and write each line of dialogue exactly as you remember it, in your own words.</div>
       </div>
-      <div class="pc-card pc-card-b" onclick="choosePathB()">
-        <div class="pc-card-label">Path B</div>
-        <div class="pc-card-title">Have the AI build a first draft</div>
-        <div class="pc-card-desc">Answer a series of questions about how the fight unfolds. The AI will generate a rough draft of the script from your answers. You'll edit that draft into something that actually sounds like the two of you before submitting.</div>
+      <div class="pc-card" onclick="choosePathB()">
+        <div class="pc-card-title">Get AI assistance</div>
+        <div class="pc-card-desc">Answer a few questions about how the fight unfolds. The AI builds a first draft from your answers. You edit it until it sounds like the two of you.</div>
       </div>
     </div>
     <p class="pc-scene-note">This isn't the whole night. It's the flashpoint — the minute or two where everything actually turned. Find that scene.</p>
