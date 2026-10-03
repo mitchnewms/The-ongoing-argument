@@ -6725,13 +6725,8 @@ function choosePathA() {
   el('path-choice-screen').style.display = 'none';
   navPush('script');
   fsSet('scripts/' + user.uid, { scriptPath: 'a', pathChosen: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
-  var hasLines = document.querySelectorAll('#lines-container > div').length > 0;
-  if (!hasLines) {
-    showFlex('script-tutorial-screen');
-    runScriptDemo();
-  } else {
-    openLandingStrip();
-  }
+  showFlex('script-tutorial-screen');
+  runScriptDemo();
 }
 
 var _demoTimers = [];
