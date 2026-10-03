@@ -3096,6 +3096,17 @@ var pbAnswers = {};
 var pbState = null; // current question id
 var pbSending = false;
 
+// Block backspace from triggering browser back navigation when not in a text field
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Backspace') {
+    var tag = document.activeElement ? document.activeElement.tagName : '';
+    var editable = document.activeElement && document.activeElement.isContentEditable;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && !editable) {
+      e.preventDefault();
+    }
+  }
+});
+
 // INIT — script is at bottom of body so DOM is ready; no window.onload needed
 (function() {
   // Detect /join/:coupleId/:coupleCode URL (Netlify rewrites to index.html)
