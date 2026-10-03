@@ -1744,6 +1744,8 @@ h1, h2, h3,
   -webkit-appearance: none; touch-action: manipulation; display: block;
 }
 .ls-btn:active { background: #C45800; }
+.ls-back { background: none; border: none; color: #AAAAAA; font-family: 'Courier Prime', monospace; font-size: 0.82rem; cursor: pointer; padding: 0; margin-bottom: 20px; display: block; -webkit-tap-highlight-color: transparent; }
+.ls-back:hover { color: #E06500; }
 .ls-skip { display: block; text-align: center; font-size: 0.8rem; color: #AAAAAA; cursor: pointer; background: none; border: none; font-family: 'Courier Prime', monospace; -webkit-tap-highlight-color: transparent; }
 .ls-skip:hover { color: #888888; }
 
@@ -2974,6 +2976,7 @@ Me too.</div>
 <!-- LANDING STRIP SCREEN — Path A only, sets up scene before blank canvas -->
 <div id="landing-strip-screen">
   <div class="ls-inner">
+    <button class="ls-back" onclick="hide('landing-strip-screen'); showFlex('path-choice-screen');">← Back</button>
     <div class="ls-eyebrow">Path A — Write It Yourself</div>
     <div class="ls-heading">Let's set the scene.</div>
     <div class="ls-sub">A few quick details to get you started. You can change any of these once you're inside.</div>
@@ -3002,6 +3005,7 @@ Me too.</div>
 <!-- SCRIPT TUTORIAL SCREEN — shown once before Path A blank editor -->
 <div id="script-tutorial-screen">
   <div class="st-inner">
+    <button class="ls-back" onclick="_demoTimers.forEach(clearTimeout); hide('script-tutorial-screen'); showFlex('path-choice-screen');">← Back</button>
     <div class="st-eyebrow">Script Writing</div>
     <div class="st-heading">Here's how it works.</div>
     <div class="st-sub">Watch the script come together. Yours works the same way.</div>
@@ -3095,6 +3099,9 @@ var pcLastJoinUrl = null; // last join URL used for resend
 var pbAnswers = {};
 var pbState = null; // current question id
 var pbSending = false;
+
+// Clear old tutorial flag so animated demo shows for returning users
+try { localStorage.removeItem('oa_script_tutorial_seen'); } catch(e) {}
 
 // Block backspace from triggering browser back navigation when not in a text field
 document.addEventListener('keydown', function(e) {
