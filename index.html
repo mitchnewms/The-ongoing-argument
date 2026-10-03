@@ -3174,7 +3174,7 @@ function togglePw(inputId, btn) {
   var isHidden = inp.type === 'password';
   inp.type = isHidden ? 'text' : 'password';
   btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
-  btn.innerHTML = isHidden ? EYE_CLOSED : EYE_OPEN;
+  btn.innerHTML = isHidden ? EYE_OPEN : EYE_CLOSED;
 }
 
 function switchTab(tab) {
