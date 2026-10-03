@@ -3246,8 +3246,9 @@ function togglePw(inputId, btn) {
   if (!inp) return;
   var isHidden = inp.type === 'password';
   var val = inp.value;
-  inp.type = isHidden ? 'text' : 'password';
-  inp.value = val; // force iOS Safari to visually refresh the field
+  inp.setAttribute('type', isHidden ? 'text' : 'password');
+  inp.value = val;
+  try { inp.setSelectionRange(val.length, val.length); } catch(e) {}
   btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
   btn.innerHTML = isHidden ? EYE_CLOSED : EYE_OPEN;
 }
