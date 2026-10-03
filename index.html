@@ -3216,6 +3216,7 @@ function navBack() {
   var prev = appNavStack[appNavStack.length - 1];
   if (prev === 'path-choice') {
     hide('path-b-screen');
+    hide('script-tutorial-screen');
     document.body.style.overflow = 'hidden';
     showFlex('path-choice-screen');
   } else if (prev === 'script') {
@@ -3691,6 +3692,10 @@ function loadScript() {
       return;
     }
     var s = fromFields(d.fields);
+    // Returning user — ensure nav stack is set so Back button appears
+    if (appNavStack.indexOf('path-choice') === -1) navPush('path-choice');
+    if (appNavStack.indexOf('script') === -1) navPush('script');
+    updateNavBtns();
     if (s.scene) el('scene-input').value = s.scene;
     if (s.lines) {
       var lines = typeof s.lines === 'string' ? JSON.parse(s.lines) : s.lines;
