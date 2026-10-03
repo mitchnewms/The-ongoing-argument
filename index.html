@@ -97,10 +97,10 @@ body {
 .name-field input:focus { border-bottom-color: var(--accent); }
 .scene-block { margin-bottom: 24px; text-align: center; }
 .scene-block label { display: block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
-#scene-input { background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 6px 8px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); outline: none; text-align: center; width: 100%; max-width: 460px; }
+#scene-input { background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 6px 8px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); outline: none; text-align: left; width: 100%; }
 #lines-container { margin-bottom: 16px; }
 .script-line { margin-bottom: 28px; text-align: center; position: relative; }
-.direction-line { margin-bottom: 28px; text-align: center; position: relative; }
+.direction-line { margin-bottom: 28px; text-align: left; position: relative; }
 .char-name { display: block; font-family: 'Courier Prime', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); margin-bottom: 2px; }
 .char-name.char-b { color: var(--ink); }
 .beat-input { display: block; font-family: 'Courier Prime', monospace; font-size: 0.8rem; font-style: italic; color: var(--ink-light); background: transparent; border: none; border-bottom: 1px dashed transparent; outline: none; text-align: center; width: 260px; margin: 0 auto 6px; padding: 2px 0; }
@@ -108,7 +108,7 @@ body {
 .beat-input::placeholder { color: var(--line); }
 .dialogue-input { display: block; background: transparent; border: none; border-bottom: 1px solid var(--line); padding: 5px 8px; font-family: 'Courier Prime', monospace; font-size: 0.95rem; color: var(--ink); outline: none; resize: none; min-height: 36px; line-height: 1.65; text-align: center; width: 100%; max-width: 400px; margin: 0 auto; overflow: hidden; }
 .dialogue-input::placeholder { color: var(--line); }
-.direction-input { background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 5px 8px; font-family: 'Courier Prime', monospace; font-size: 0.82rem; font-style: italic; color: var(--ink-light); outline: none; text-align: center; width: 100%; max-width: 500px; }
+.direction-input { background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 5px 8px; font-family: 'Courier Prime', monospace; font-size: 0.82rem; font-style: italic; color: var(--ink-light); outline: none; text-align: left; width: 100%; }
 .direction-input::placeholder { color: var(--line); }
 .delete-btn { position: absolute; top: 0; right: 0; background: none; border: none; cursor: pointer; color: var(--line); font-size: 0.7rem; padding: 4px 6px; -webkit-appearance: none; touch-action: manipulation; }
 .add-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
@@ -1761,14 +1761,14 @@ h1, h2, h3,
 .st-element { margin-bottom: 24px; }
 .st-element:last-child { margin-bottom: 0; }
 .st-badge { display: inline-block; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; font-family: 'Courier Prime', monospace; background: #E06500; color: white; padding: 3px 8px; border-radius: 3px; margin-bottom: 8px; }
-.st-scene { font-family: 'Courier Prime', monospace; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #111111; text-align: center; padding-bottom: 10px; border-bottom: 1px dashed #D4C9B0; }
+.st-scene { font-family: 'Courier Prime', monospace; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #111111; text-align: left; padding-bottom: 10px; border-bottom: 1px dashed #D4C9B0; }
 .st-line { margin-bottom: 22px; text-align: center; }
 .st-line:last-child { margin-bottom: 0; }
 .st-char { display: block; font-family: 'Courier Prime', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #111111; margin-bottom: 2px; }
 .st-beat { display: block; font-family: 'Courier Prime', monospace; font-size: 0.78rem; font-style: italic; color: #888888; margin-bottom: 4px; }
 .st-dialogue { display: block; font-family: 'Courier Prime', monospace; font-size: 0.92rem; color: #111111; line-height: 1.65; border-bottom: 1px solid #E2DED8; padding-bottom: 4px; max-width: 340px; margin: 0 auto; }
 .st-dir-wrap { margin-bottom: 22px; }
-.st-dir { font-family: 'Courier Prime', monospace; font-size: 0.82rem; font-style: italic; color: #888888; text-align: center; border-bottom: 1px dashed #D4C9B0; padding-bottom: 6px; max-width: 400px; margin: 0 auto; }
+.st-dir { font-family: 'Courier Prime', monospace; font-size: 0.82rem; font-style: italic; color: #888888; text-align: left; border-bottom: 1px dashed #D4C9B0; padding-bottom: 6px; }
 .st-btn { display: block; width: 100%; padding: 18px; background: #E06500; color: white; border: none; border-radius: 4px; font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; margin-bottom: 14px; }
 .st-btn:active { background: #C45800; }
 .st-again { display: block; text-align: center; font-size: 0.78rem; color: #AAAAAA; cursor: pointer; background: none; border: none; font-family: 'Courier Prime', monospace; }
