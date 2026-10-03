@@ -6717,7 +6717,7 @@ function choosePathA() {
   navPush('script');
   fsSet('scripts/' + user.uid, { scriptPath: 'a', pathChosen: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
   var seen = false;
-  try { seen = localStorage.getItem('oa_script_tutorial_seen'); } catch(e) {}
+  try { seen = localStorage.getItem('oa_script_tutorial_v2'); } catch(e) {}
   if (!seen) {
     showFlex('script-tutorial-screen');
     runScriptDemo();
@@ -6798,7 +6798,7 @@ function runScriptDemo() {
 function dismissScriptTutorial() {
   _demoTimers.forEach(clearTimeout);
   _demoTimers = [];
-  try { localStorage.setItem('oa_script_tutorial_seen', '1'); } catch(e) {}
+  try { localStorage.setItem('oa_script_tutorial_v2', '1'); } catch(e) {}
   hide('script-tutorial-screen');
   openLandingStrip();
 }
