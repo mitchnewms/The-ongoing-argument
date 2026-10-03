@@ -1757,21 +1757,22 @@ h1, h2, h3,
 .st-eyebrow { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: #E06500; font-family: 'Courier Prime', monospace; margin-bottom: 16px; }
 .st-heading { font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 800; color: #111111; letter-spacing: -0.02em; margin-bottom: 8px; line-height: 1.2; }
 .st-sub { font-size: 0.88rem; color: #7A7468; margin-bottom: 28px; line-height: 1.6; }
-.st-script { background: #FFFFFF; border: 1px solid #E2DED8; border-radius: 4px; padding: 28px 20px 20px; margin-bottom: 28px; }
-.st-element { margin-bottom: 24px; }
-.st-element:last-child { margin-bottom: 0; }
-.st-badge { display: inline-block; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; font-family: 'Courier Prime', monospace; background: #E06500; color: white; padding: 3px 8px; border-radius: 3px; margin-bottom: 8px; }
-.st-scene { font-family: 'Courier Prime', monospace; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #111111; text-align: left; padding-bottom: 10px; border-bottom: 1px dashed #D4C9B0; }
-.st-line { margin-bottom: 22px; text-align: center; }
-.st-line:last-child { margin-bottom: 0; }
-.st-char { display: block; font-family: 'Courier Prime', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #111111; margin-bottom: 2px; }
-.st-beat { display: block; font-family: 'Courier Prime', monospace; font-size: 0.78rem; font-style: italic; color: #888888; margin-bottom: 4px; }
-.st-dialogue { display: block; font-family: 'Courier Prime', monospace; font-size: 0.92rem; color: #111111; line-height: 1.65; border-bottom: 1px solid #E2DED8; padding-bottom: 4px; max-width: 340px; margin: 0 auto; }
-.st-dir-wrap { margin-bottom: 22px; }
-.st-dir { font-family: 'Courier Prime', monospace; font-size: 0.82rem; font-style: italic; color: #888888; text-align: left; border-bottom: 1px dashed #D4C9B0; padding-bottom: 6px; }
-.st-btn { display: block; width: 100%; padding: 18px; background: #E06500; color: white; border: none; border-radius: 4px; font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; margin-bottom: 14px; }
+.st-demo { background: #FFFFFF; border: 1px solid #E2DED8; border-radius: 4px; padding: 20px 16px 14px; margin-bottom: 24px; min-height: 160px; }
+.st-demo-scene-row { margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px dashed #D4C9B0; }
+.st-demo-scene-label { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; font-family: 'Courier Prime', monospace; color: #AAAAAA; margin-bottom: 4px; }
+.st-demo-scene-val { font-family: 'Courier Prime', monospace; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #111111; min-height: 22px; }
+.st-demo-cursor { color: #E06500; animation: stBlink 1s step-end infinite; }
+@keyframes stBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.st-demo-line { margin-bottom: 20px; text-align: center; }
+.st-demo-char { font-family: 'Courier Prime', monospace; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.16em; color: #111111; margin-bottom: 2px; }
+.st-demo-beat { font-family: 'Courier Prime', monospace; font-size: 0.76rem; font-style: italic; color: #888888; margin-bottom: 4px; }
+.st-demo-dialogue { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: #111111; line-height: 1.6; border-bottom: 1px solid #E2DED8; padding-bottom: 3px; min-height: 20px; max-width: 320px; margin: 0 auto; }
+.st-demo-dir-line { font-family: 'Courier Prime', monospace; font-size: 0.8rem; font-style: italic; color: #888888; border-bottom: 1px dashed #D4C9B0; padding-bottom: 4px; margin-bottom: 20px; min-height: 20px; }
+.st-demo-add-row { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; border-top: 1px solid #E2DED8; }
+.st-demo-add-btn { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.04em; border: 1px solid #D4C9B0; background: #FAFAF8; color: #777777; border-radius: 4px; padding: 6px 10px; cursor: default; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.st-demo-add-btn.st-demo-pulse { background: #E06500 !important; color: white !important; border-color: #E06500 !important; }
+.st-btn { display: block; width: 100%; padding: 18px; background: #E06500; color: white; border: none; border-radius: 4px; font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .st-btn:active { background: #C45800; }
-.st-again { display: block; text-align: center; font-size: 0.78rem; color: #AAAAAA; cursor: pointer; background: none; border: none; font-family: 'Courier Prime', monospace; }
 
 /* ── IDLE CHECK-IN MODAL ──────────────────────────────────────── */
 #idle-checkin-modal {
@@ -3002,50 +3003,21 @@ Me too.</div>
 <div id="script-tutorial-screen">
   <div class="st-inner">
     <div class="st-eyebrow">Script Writing</div>
-    <div class="st-heading">Here's what a script looks like.</div>
-    <div class="st-sub">Your script has three types of elements. Here's a short example.</div>
-    <div class="st-script">
-
-      <div class="st-element">
-        <div class="st-badge">Scene / Location</div>
-        <div class="st-scene">INT. KITCHEN — MORNING</div>
+    <div class="st-heading">Here's how it works.</div>
+    <div class="st-sub">Watch the script come together. Yours works the same way.</div>
+    <div class="st-demo" id="st-demo">
+      <div class="st-demo-scene-row">
+        <div class="st-demo-scene-label">Scene / Location</div>
+        <div class="st-demo-scene-val"><span id="d-scene-text"></span><span class="st-demo-cursor" id="d-cursor-scene">|</span></div>
       </div>
-
-      <div class="st-element">
-        <div class="st-badge">Character line</div>
-        <div class="st-line">
-          <span class="st-char">ALEX</span>
-          <span class="st-beat">(frustrated)</span>
-          <span class="st-dialogue">You said you were going to call them back.</span>
-        </div>
-        <div class="st-line">
-          <span class="st-char">JAMIE</span>
-          <span class="st-dialogue">I know. I just haven't had a chance.</span>
-        </div>
-        <div class="st-line">
-          <span class="st-char">ALEX</span>
-          <span class="st-dialogue">That was three days ago.</span>
-        </div>
+      <div id="d-lines-container"></div>
+      <div class="st-demo-add-row">
+        <button class="st-demo-add-btn" id="d-btn-you">+ You speak</button>
+        <button class="st-demo-add-btn" id="d-btn-partner">+ Partner speaks</button>
+        <button class="st-demo-add-btn" id="d-btn-dir">+ Direction / Scene shift</button>
       </div>
-
-      <div class="st-element">
-        <div class="st-badge">Direction / Scene shift</div>
-        <div class="st-dir">— Jamie turns away, opens the fridge. —</div>
-      </div>
-
-      <div class="st-line">
-        <span class="st-char">JAMIE</span>
-        <span class="st-dialogue">I said I'd handle it.</span>
-      </div>
-      <div class="st-line">
-        <span class="st-char">ALEX</span>
-        <span class="st-dialogue">That's what you said last week.</span>
-      </div>
-      <div class="st-dir">— Silence. Alex leaves the room. —</div>
-
     </div>
     <button class="st-btn" onclick="dismissScriptTutorial()">Got it — start writing →</button>
-    <button class="st-again" onclick="dismissScriptTutorial()">Don't show this again</button>
   </div>
 </div>
 
@@ -6737,12 +6709,84 @@ function choosePathA() {
   try { seen = localStorage.getItem('oa_script_tutorial_seen'); } catch(e) {}
   if (!seen) {
     showFlex('script-tutorial-screen');
+    runScriptDemo();
   } else {
     openLandingStrip();
   }
 }
 
+var _demoTimers = [];
+var _demoLineN = 0;
+
+function runScriptDemo() {
+  _demoTimers.forEach(clearTimeout);
+  _demoTimers = [];
+  _demoLineN = 0;
+  var sceneEl = el('d-scene-text'), sceneCursor = el('d-cursor-scene'), linesC = el('d-lines-container');
+  if (!sceneEl || !linesC) return;
+  sceneEl.textContent = '';
+  if (sceneCursor) sceneCursor.style.display = 'inline';
+  linesC.innerHTML = '';
+  var nameA = (user && user.name) ? user.name : 'You';
+  var nameB = (user && user.partner) ? user.partner : 'Partner';
+  var bA = el('d-btn-you'); if (bA) bA.textContent = '+ ' + nameA + ' speaks';
+  var bB = el('d-btn-partner'); if (bB) bB.textContent = '+ ' + nameB + ' speaks';
+
+  function dt(ms, fn) { var id = setTimeout(fn, ms); _demoTimers.push(id); }
+  function typeIn(tId, cId, text, spd) {
+    var span = el(tId), cur = el(cId);
+    if (!span) return;
+    span.textContent = '';
+    if (cur) cur.style.display = 'inline';
+    var i = 0;
+    function next() {
+      if (i < text.length) {
+        span.textContent += text[i++];
+        _demoTimers.push(setTimeout(next, spd + Math.random() * 22));
+      } else { if (cur) cur.style.display = 'none'; }
+    }
+    next();
+  }
+  function pulse(id) {
+    var b = el(id); if (!b) return;
+    b.classList.add('st-demo-pulse');
+    _demoTimers.push(setTimeout(function() { b.classList.remove('st-demo-pulse'); }, 550));
+  }
+  function addDir(text) {
+    var n = ++_demoLineN;
+    var div = document.createElement('div');
+    div.className = 'st-demo-dir-line';
+    div.innerHTML = '<span id="ddl' + n + '"></span><span class="st-demo-cursor" id="ddlc' + n + '">|</span>';
+    linesC.appendChild(div);
+    typeIn('ddl' + n, 'ddlc' + n, text, 38);
+  }
+  function addLine(name, beat, dialogue) {
+    var n = ++_demoLineN;
+    var div = document.createElement('div');
+    div.className = 'st-demo-line';
+    div.innerHTML = '<div class="st-demo-char">' + name.toUpperCase() + '</div>' +
+      (beat ? '<div class="st-demo-beat">' + beat + '</div>' : '') +
+      '<div class="st-demo-dialogue"><span id="ddg' + n + '"></span><span class="st-demo-cursor" id="ddgc' + n + '">|</span></div>';
+    linesC.appendChild(div);
+    typeIn('ddg' + n, 'ddgc' + n, dialogue, 44);
+  }
+
+  dt(400,  function() { typeIn('d-scene-text', 'd-cursor-scene', 'INT. BEDROOM — NIGHT', 55); });
+  dt(2400, function() { pulse('d-btn-dir'); });
+  dt(3000, function() { addDir('— ' + nameB + ' walks in carrying her phone. —'); });
+  dt(5400, function() { pulse('d-btn-you'); });
+  dt(6000, function() { addLine(nameA, '(sighs)', "You said you'd be home at seven."); });
+  dt(9200, function() { pulse('d-btn-partner'); });
+  dt(9800, function() { addLine(nameB, '', 'I texted you.'); });
+  dt(11600, function() { pulse('d-btn-you'); });
+  dt(12200, function() { addLine(nameA, '', "That's not the same thing."); });
+  dt(14800, function() { addDir('— Silence. —'); });
+  dt(17200, function() { runScriptDemo(); });
+}
+
 function dismissScriptTutorial() {
+  _demoTimers.forEach(clearTimeout);
+  _demoTimers = [];
   try { localStorage.setItem('oa_script_tutorial_seen', '1'); } catch(e) {}
   hide('script-tutorial-screen');
   openLandingStrip();
