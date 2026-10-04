@@ -6731,7 +6731,9 @@ function choosePathA() {
   el('path-choice-screen').style.display = 'none';
   navPush('script');
   fsSet('scripts/' + user.uid, { scriptPath: 'a', pathChosen: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
-  showFlex('script-tutorial-screen');
+  var tut = el('script-tutorial-screen');
+  if (!tut) { openLandingStrip(); return; }
+  tut.style.cssText = 'display:flex !important; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:#F6F4F0; overflow-y:auto; flex-direction:column; align-items:center; padding:48px 24px 80px;';
   runScriptDemo();
 }
 
