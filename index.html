@@ -2409,6 +2409,10 @@ h1, h2, h3,
     <div class="pc-eyebrow">Script Writing</div>
     <div class="pc-heading">Just tell me what happened.</div>
     <p class="pc-sub">Talk or type, the way you'd tell a friend. You don't need to write a script. The AI shapes it into one for you.</p>
+    <div id="pc-resume" style="display:none; margin: 0 0 18px; padding: 16px; background: #FFF3C4; border-radius: 10px; text-align: center;">
+      <div style="font-size:0.92rem; color:#4A3F10; margin-bottom:10px;">You have an unfinished story. Your answers are saved on this device.</div>
+      <button type="button" class="pbd-btn pbd-primary" style="width:100%;" onclick="pbResume()">Pick up where you left off</button>
+    </div>
     <p class="pc-breath">Take a breath. You're telling the story, not reliving it.</p>
     <div class="pc-inputs" id="pc-inputs">
       <button type="button" class="pc-input-btn pc-input-mic" id="pc-btn-talk" onclick="startStory('voice')">
@@ -3300,6 +3304,7 @@ function navBack() {
     hide('script-tutorial-screen');
     document.body.style.overflow = 'hidden';
     showFlex('path-choice-screen');
+    pcSyncResume();
   } else if (prev === 'story') {
     hide('path-b-screen');
     document.body.style.overflow = 'hidden';
@@ -3505,6 +3510,7 @@ function createAccount() {
 function signOut() {
   user = null; token = null;
   localStorage.removeItem('oa_user');
+  try { localStorage.removeItem('oa_pb_progress'); } catch (e) {}
   enrollMode = null; soloEnrollMode = false; pendingCoupleId = null; pendingPartnerAId = null;
   pendingFightName = null; pendingJoinCoupleId = null; pendingJoinCode = null; pendingCodeToUse = null; pcLastJoinUrl = null;
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
@@ -3737,7 +3743,18 @@ function aiRequest(messages, step, retried) {
 
 function callAI(messages, step) {
   return aiRequest(messages, step, false).then(function(r) {
-    if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'AI error'); });
+    if (!r.ok) {
+      return r.text().then(function(t) {
+        var body = {};
+        try { body = JSON.parse(t); } catch (x) {}
+        var err = new Error(body.error || ('AI error ' + r.status));
+        err.status = r.status;
+        err.code = body.code || '';
+        err.detail = String(t || '').slice(0, 300);
+        window._lastAIError = { status: err.status, code: err.code, detail: err.detail, step: step || '' };
+        throw err;
+      });
+    }
     return r.json();
   }).then(function(d) {
     var text = d.text || '';
@@ -6785,6 +6802,7 @@ function pbNextRaw(current, answer) {
 function checkPathChoice() {
   if (appNavStack.indexOf('path-choice') === -1) navPush('path-choice');
   showFlex('path-choice-screen');
+  pcSyncResume();
   document.body.style.overflow = 'hidden';
 }
 
@@ -6919,6 +6937,7 @@ function storyDone() {
   var text = ta ? ta.value.trim() : '';
   if (!text) { storyRenderControls(); return; }
   pbStory.text = text;
+  pbSaveProgress('extract');
   hide('story-screen');
   choosePathB();
 }
@@ -7078,20 +7097,24 @@ function pbNorm(t) {
 }
 
 // Accept an extracted passage only if it really appears in the retelling.
+var pbExtractDebug = { raw: '', accepted: [], rejected: [] };
+
 function pbParseExtraction(text, retelling) {
   var out = {};
+  pbExtractDebug = { raw: String(text || ''), accepted: [], rejected: [] };
   var m = String(text || '').match(/\{[\s\S]*\}/);
-  if (!m) return out;
+  if (!m) { pbExtractDebug.rejected.push('reply contained no JSON'); return out; }
   var obj;
-  try { obj = JSON.parse(m[0]); } catch (e) { return out; }
+  try { obj = JSON.parse(m[0]); } catch (e) { pbExtractDebug.rejected.push('reply JSON could not be read'); return out; }
   var hay = ' ' + pbNorm(retelling) + ' ';
   Object.keys(PB_EXTRACT_MAP).forEach(function(k) {
     var v = (typeof obj[k] === 'string') ? obj[k].trim() : '';
-    if (v.length < 4) return;
-    var parts = v.split(/\.\.\.|…/).map(pbNorm).filter(function(x) { return x.length >= 4; });
-    if (!parts.length) return;
+    if (v.length < 4) { pbExtractDebug.rejected.push(k + ': empty'); return; }
+    var parts = v.split(/\.\.\.|\u2026/).map(pbNorm).filter(function(x) { return x.length >= 4; });
+    if (!parts.length) { pbExtractDebug.rejected.push(k + ': too short'); return; }
     var ok = parts.every(function(x) { return hay.indexOf(' ' + x + ' ') !== -1; });
-    if (ok) out[PB_EXTRACT_MAP[k]] = v;
+    if (ok) { out[PB_EXTRACT_MAP[k]] = v; pbExtractDebug.accepted.push(k); }
+    else pbExtractDebug.rejected.push(k + ': not found word-for-word in the story');
   });
   return out;
 }
@@ -7110,27 +7133,43 @@ function pbFirstState() {
 function pbBeginFromStory() {
   var run = pbRun;
   pbSending = true;
+  pbSaveProgress('extract');
   var inp = el('pb-input'); if (inp) inp.disabled = true;
   var sb = el('pb-send'); if (sb) sb.disabled = true;
   pbAppendAI('Thank you for telling me. Give me a moment to read it.');
   s3ShowTypingIn('pb-thread');
   callAI([{ role: 'user', content: pbExtractPrompt(pbStory.text) }], 'b').then(function(text) {
-    return pbParseExtraction(text, pbStory.text);
-  }).catch(function() {
-    return {};
-  }).then(function(found) {
+    return { ok: true, found: pbParseExtraction(text, pbStory.text) };
+  }).catch(function(err) {
+    return { ok: false, err: err };
+  }).then(function(res) {
     if (run !== pbRun) return;
     s3RemoveTypingFrom('pb-thread');
-    pbApplyExtraction(found);
-    pbAppendAI(Object.keys(found).length
-      ? 'I have what happened. A few questions now about what it was like for you.'
-      : 'Now a few questions, one at a time.');
+    var askAll = function() { pbApplyExtraction({}); pbAppendAI('Now a few questions, one at a time.'); pbGoTo(pbFirstState()); };
+    if (!res.ok) {
+      pbShowRetry("I couldn't read your story just now, so I haven't used it yet. " + pbReason(res.err) + ' Your story is saved.',
+        function() { pbBeginFromStory(); }, 'Ask me the questions instead', askAll,
+        'status: ' + (res.err && res.err.status) + '\ncode: ' + (res.err && res.err.code) + '\n' + ((res.err && (res.err.detail || res.err.message)) || ''));
+      return;
+    }
+    pbApplyExtraction(res.found);
+    var n = Object.keys(res.found).length;
+    if (n) {
+      pbAppendAI('I have what happened. A few questions now about what it was like for you.');
+    } else {
+      var d = pbExtractDebug;
+      pbShowRetry("I read your story but couldn't match any part of it to my questions, so I'll ask them all. You can try reading it again instead.",
+        function() { pbBeginFromStory(); }, 'Ask me the questions', askAll,
+        'rejected: ' + (d.rejected.join('; ') || 'none') + '\n\nwhat the AI returned:\n' + d.raw.slice(0, 1500));
+      return;
+    }
     pbGoTo(pbFirstState());
   });
 }
 
 function pbGoTo(state) {
   pbState = state;
+  pbSaveProgress(state);
   if (state === 'done') { pbGenerateDraft(); }
   else if (state === 'q2') { pbGenerateQ2(pbAnswers.q1 || pbStory.text); }
   else { pbSending = false; pbAskQuestion(state); }
@@ -7257,29 +7296,32 @@ function pbBuildPrompt() {
     'Output only the script itself, starting with SCENE:. No preamble, no commentary, no explanation.';
 }
 
-function pbGenerateDraft() {
-  pbAppendAI('Thank you. I have everything I need. Generating your draft now — this may take a moment.');
+function pbGenerateDraft(isRetry) {
+  pbAppendAI(isRetry ? 'Trying again. This may take a moment.' : 'Thank you. I have everything I need. Generating your draft now — this may take a moment.');
   s3ShowTypingIn('pb-thread');
+  var retry = function() { pbGenerateDraft(true); };
 
   callAI([{ role: 'user', content: pbBuildPrompt() }], 'b').then(function(text) {
     s3RemoveTypingFrom('pb-thread');
     if (!text || text.length < 100) {
-      pbAppendAI('Something went wrong generating the draft. Please go back and try again.');
+      pbShowRetry('The AI sent back something too short to be a script. Your answers are saved.', retry, null, null, 'reply length: ' + (text || '').length);
       pbSending = false;
-      var btn = el('pb-send');
-      if (btn) btn.disabled = false;
       return;
     }
     var name = (user && user.name) ? user.name : 'Person A';
     var partner = (user && user.partner) ? user.partner : 'Person B';
     var parsed = pbParseDraft(text, name, partner);
+    if (!parsed.lines.length) {
+      pbShowRetry("The AI answered, but I couldn't turn it into script lines. Your answers are saved.", retry, null, null, text.slice(0, 1500));
+      pbSending = false;
+      return;
+    }
     pbLoadDraftIntoTool(parsed);
   }).catch(function(err) {
     s3RemoveTypingFrom('pb-thread');
-    pbAppendAI('There was an error reaching the AI. Please go back and try again.');
+    pbShowRetry('There was an error reaching the AI. ' + pbReason(err) + ' Your answers are saved.', retry, null, null,
+      'status: ' + (err && err.status) + '\ncode: ' + (err && err.code) + '\n' + ((err && (err.detail || err.message)) || ''));
     pbSending = false;
-    var btn = el('pb-send');
-    if (btn) btn.disabled = false;
   });
 }
 
@@ -7398,6 +7440,7 @@ function pbLoadDraftIntoTool(parsed) {
   pbIsPathB = true;
   pbSyncDraftActions();
   pbSaveRetelling();
+  pbClearProgress();
 
   fsSet('scripts/' + user.uid, {
     scene: sceneVal,
@@ -7593,9 +7636,9 @@ function aiEditApply() {
     aiEditClose();
     aiEditShowResult(changed, d.removed, sceneChanged);
     sched();
-  }).catch(function() {
+  }).catch(function(err) {
     aiEditBusy = false;
-    txt('ai-edit-status', 'There was an error reaching the AI. Nothing changed. Please try again.');
+    txt('ai-edit-status', 'There was an error reaching the AI. ' + pbReason(err) + ' Nothing changed, and your request is still here. Press the button to try again.');
     aiEditRender();
   });
 }
@@ -7691,6 +7734,113 @@ function pbSaveRetelling() {
   if (!STORE_RETELLING || !user || !pbStory.text) return;
   var method = (pbStory.voice && pbStory.typed) ? 'mixed' : (pbStory.voice ? 'voice' : 'typed');
   fsSet('private/' + user.uid, { initialRetelling: pbStory.text, inputMethod: method }).catch(function() {});
+}
+
+// ---- AI errors: say what happened, keep the person's answers, offer Retry ----
+function pbReason(err) {
+  var code = (err && err.code) || '';
+  var status = err && err.status;
+  var why;
+  if (code === 'unauthorized' || status === 401) why = 'Your sign-in may have expired. Reload the page and sign in again.';
+  else if (code === 'anthropic_429' || code === 'anthropic_529' || status === 429) why = 'The AI is busy right now.';
+  else if (status === 504 || status === 502 && !code) why = 'The AI took too long to answer.';
+  else if (code === 'config') why = 'The AI is not set up correctly on the server.';
+  else if (!status) why = 'The connection to the AI dropped.';
+  else why = 'The AI service returned an error.';
+  var tag = code || (status ? 'http_' + status : 'network');
+  return why + ' (' + tag + ')';
+}
+
+function pbShowRetry(message, onRetry, secondaryLabel, onSecondary, details) {
+  var thread = el('pb-thread');
+  if (!thread) return;
+  var row = document.createElement('div');
+  row.className = 's3-msg s3-msg-ai';
+  var bubble = document.createElement('div');
+  bubble.className = 's3-bubble';
+  bubble.appendChild(document.createTextNode(message));
+  if (details) {
+    var d = document.createElement('details');
+    d.style.marginTop = '10px';
+    var sm = document.createElement('summary');
+    sm.textContent = 'Details for troubleshooting';
+    sm.style.cursor = 'pointer';
+    var pre = document.createElement('pre');
+    pre.style.cssText = 'white-space:pre-wrap;word-break:break-word;font-size:0.72rem;margin:8px 0 0;max-height:200px;overflow:auto;';
+    pre.textContent = details;
+    d.appendChild(sm); d.appendChild(pre);
+    bubble.appendChild(d);
+  }
+  var btns = document.createElement('div');
+  btns.className = 'pbd-row';
+  btns.style.marginTop = '12px';
+  function add(label, primary, fn) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pbd-btn' + (primary ? ' pbd-primary' : '');
+    b.textContent = label;
+    b.onclick = function() { row.remove(); fn(); };
+    btns.appendChild(b);
+  }
+  add('Retry', true, onRetry);
+  if (secondaryLabel && onSecondary) add(secondaryLabel, false, onSecondary);
+  bubble.appendChild(btns);
+  row.appendChild(bubble);
+  thread.appendChild(row);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+// ---- Keep interview progress on this device so a reload never means starting over ----
+var PB_PROGRESS_KEY = 'oa_pb_progress';
+
+function pbSaveProgress(state) {
+  try {
+    if (!user) return;
+    localStorage.setItem(PB_PROGRESS_KEY, JSON.stringify({
+      uid: user.uid, story: pbStory.text, voice: !!pbStory.voice, typed: !!pbStory.typed,
+      answers: pbAnswers, skip: pbSkip, state: state || pbState, at: Date.now()
+    }));
+  } catch (e) {}
+}
+
+function pbLoadProgress() {
+  try {
+    var pr = JSON.parse(localStorage.getItem(PB_PROGRESS_KEY) || 'null');
+    if (!pr || !user || pr.uid !== user.uid || !pr.story) return null;
+    if (Date.now() - (pr.at || 0) > 7 * 24 * 3600 * 1000) return null;
+    return pr;
+  } catch (e) { return null; }
+}
+
+function pbClearProgress() {
+  try { localStorage.removeItem(PB_PROGRESS_KEY); } catch (e) {}
+}
+
+function pcSyncResume() {
+  var box = el('pc-resume');
+  if (!box) return;
+  box.style.display = (pbLoadProgress() && !scriptHasContent()) ? 'block' : 'none';
+}
+
+function pbResume() {
+  var pr = pbLoadProgress();
+  if (!pr) { pcSyncResume(); return; }
+  pbStory = { text: pr.story, voice: !!pr.voice, typed: !!pr.typed };
+  el('path-choice-screen').style.display = 'none';
+  navPush('path-b-intake');
+  pbAnswers = pr.answers || {};
+  pbSkip = pr.skip || {};
+  pbSending = false;
+  pbRun++;
+  el('pb-thread').innerHTML = '';
+  el('pb-input').value = '';
+  el('path-b-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  pbAppendAI('Welcome back. Your story and answers are saved. Picking up where you left off.');
+  var st = pr.state;
+  if (st === 'extract' || !st) pbBeginFromStory();
+  else if (st === 'done') pbGenerateDraft(true);
+  else pbGoTo(st);
 }
 
 function pbShowHandoff() {

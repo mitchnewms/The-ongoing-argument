@@ -73,34 +73,35 @@ exports.handler = async function(event) {
   // Only signed-in users may use the AI. This runs before anything else is parsed or paid for.
   const who = await verifyFirebaseUser(event);
   if (who === 'unavailable') {
-    return { statusCode: 503, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Sign-in check unavailable. Please try again.' }) };
+    return { statusCode: 503, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Sign-in check unavailable. Please try again.', code: 'auth_unavailable' }) };
   }
   if (!who) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Please sign in to use this.' }) };
+    console.warn('AI request rejected: missing or invalid sign-in token');
+    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Please sign in to use this.', code: 'unauthorized' }) };
   }
 
   if ((event.body || '').length > MAX_BODY_CHARS) {
-    return { statusCode: 413, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Request too large' }) };
+    return { statusCode: 413, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Request too large', code: 'too_large' }) };
   }
 
   let body;
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON', code: 'bad_request' }) };
   }
 
   const { messages, step } = body;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES ||
       !messages.every(function(m) { return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'; })) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'messages required' }) };
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'messages required', code: 'bad_request' }) };
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.error('ANTHROPIC_API_KEY not set');
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Configuration error' }) };
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Configuration error', code: 'config' }) };
   }
 
   // Step 2 (dual-script analysis) and step b (Path B draft) get more tokens
@@ -124,20 +125,20 @@ exports.handler = async function(event) {
     });
   } catch (err) {
     console.error('Fetch error:', err.message);
-    return { statusCode: 502, headers: CORS_HEADERS, body: JSON.stringify({ error: 'AI service unreachable' }) };
+    return { statusCode: 502, headers: CORS_HEADERS, body: JSON.stringify({ error: 'AI service unreachable', code: 'anthropic_unreachable' }) };
   }
 
   if (!apiResponse.ok) {
     const errText = await apiResponse.text().catch(() => '');
     console.error('Anthropic API error', apiResponse.status, errText.slice(0, 200));
-    return { statusCode: 502, headers: CORS_HEADERS, body: JSON.stringify({ error: 'AI service error' }) };
+    return { statusCode: 502, headers: CORS_HEADERS, body: JSON.stringify({ error: 'AI service error', code: 'anthropic_' + apiResponse.status }) };
   }
 
   let data;
   try {
     data = await apiResponse.json();
   } catch {
-    return { statusCode: 502, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid AI response' }) };
+    return { statusCode: 502, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid AI response', code: 'bad_response' }) };
   }
 
   const text = (data.content && data.content[0] && data.content[0].text) || '';
