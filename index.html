@@ -1285,11 +1285,11 @@ body, body * {
 .pc-input-btn:focus-visible, .pc-quiet-link:focus-visible, .story-mic:focus-visible { outline: 2px solid #E06500; outline-offset: 2px; }
 .pc-mic-note { text-align: center; font-size: 0.8rem; color: #A89E92; margin: 12px 0 0; }
 .pc-quiet-link { display: block; margin: 22px auto 0; background: none; border: none; padding: 8px; color: #8A8478; font-family: inherit; font-size: 0.88rem; text-decoration: underline; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-#story-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #F6F4F0; flex-direction: column; align-items: center; padding: 32px 24px 60px; overflow-y: auto; }
+#story-screen, #ai-edit-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #F6F4F0; flex-direction: column; align-items: center; padding: 32px 24px 60px; overflow-y: auto; }
 .story-wrap { width: 100%; max-width: 520px; margin: auto; }
 .story-prompt { text-align: center; font-size: 0.95rem; color: #5A5448; line-height: 1.6; margin: 0 0 18px; }
-#story-text { display: block; width: 100%; min-height: 220px; resize: vertical; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; padding: 14px; font-family: 'Courier Prime', monospace; font-size: 1rem; line-height: 1.6; color: #111111; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
-#story-text:focus { outline: none; border-color: #E06500; }
+#story-text, #ai-edit-text { display: block; width: 100%; min-height: 220px; resize: vertical; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; padding: 14px; font-family: 'Courier Prime', monospace; font-size: 1rem; line-height: 1.6; color: #111111; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
+#story-text:focus, #ai-edit-text:focus { outline: none; border-color: #E06500; }
 .story-status { min-height: 22px; margin: 10px 0 0; font-size: 0.82rem; color: #7A7468; text-align: center; }
 .story-controls { display: flex; gap: 12px; margin-top: 14px; }
 .story-mic { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; color: #111111; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -1300,6 +1300,21 @@ body, body * {
 .story-continue:disabled { opacity: 0.45; cursor: default; }
 .story-continue:active { background: #C45800; }
 @media (prefers-reduced-motion: reduce) { .story-mic.story-mic-live svg { animation: none; } }
+#ai-edit-text { min-height: 130px; }
+.ai-changed { background: #FFF3C4 !important; box-shadow: -4px 0 0 #E06500; border-radius: 2px; }
+#scene-input.ai-changed-field { background: #FFF3C4 !important; }
+#pb-draft-actions { display: none; margin: 18px 0 6px; padding: 18px 16px; background: #FFFFFF; border: 1px solid #E2DED8; border-radius: 10px; }
+.pbd-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.pbd-btn { flex: 1 1 140px; min-height: 48px; border-radius: 10px; border: 1.5px solid #E2DED8; background: #FFFFFF; color: #111111; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.pbd-btn.pbd-primary { background: #E06500; border-color: #E06500; color: #FFFFFF; }
+.pbd-btn:focus-visible, .pbd-link:focus-visible { outline: 2px solid #E06500; outline-offset: 2px; }
+.pbd-link { display: block; margin: 14px auto 0; background: none; border: none; padding: 8px; color: #8A8478; font-family: inherit; font-size: 0.86rem; text-decoration: underline; cursor: pointer; touch-action: manipulation; }
+#ai-edit-result { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: #FFF3C4; color: #4A3F10; font-size: 0.88rem; line-height: 1.5; }
+#ai-edit-result button { background: none; border: none; padding: 4px 6px; color: #8A4A00; font-family: inherit; font-size: 0.88rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+#pb-confirm { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 400; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 24px; }
+.pbc-box { width: 100%; max-width: 420px; background: #FFFFFF; border-radius: 12px; padding: 24px; box-sizing: border-box; }
+.pbc-title { font-size: 1.05rem; font-weight: 800; color: #111111; margin-bottom: 8px; }
+.pbc-body { font-size: 0.92rem; color: #5A5448; line-height: 1.6; margin-bottom: 18px; }
 
 /* 16. PATH B SCREEN — flip to light */
 #path-b-screen { background: #F6F4F0 !important; }
@@ -2159,11 +2174,9 @@ h1, h2, h3,
 
   <!-- PATH B: HANDOFF BANNER — shown above script page after AI draft generated -->
   <div id="pb-handoff-banner">
-    <div class="pbh-eyebrow">Your Draft Is Ready</div>
-    <div class="pbh-heading">The AI got it to about 85%. The rest is yours.</div>
-    <p class="pbh-body">Go through it line by line. For each exchange, ask yourself: is this the right word? Is this the right order? Does this actually sound like the two of you?</p>
-    <p class="pbh-body">Change what doesn't fit. Add what's missing. Cut anything the AI invented that isn't true. If a line is close but not quite right, rewrite it until it is.</p>
-    <p class="pbh-body">When you're done, it should feel like it came from you — not from a questionnaire. That's when it's ready to submit.</p>
+    <div class="pbh-eyebrow">Your Draft</div>
+    <div class="pbh-heading">Here's your draft. Tap any line to change it.</div>
+    <p class="pbh-body">It's built from your own words. Go through it line by line, change what doesn't fit, and cut anything that isn't true. Nothing is submitted until you approve it as yours.</p>
     <button class="pbh-dismiss" onclick="pbDismissHandoff()">Got it — start editing</button>
   </div>
 
@@ -2196,6 +2209,15 @@ h1, h2, h3,
     <div class="scene-block"><label>Scene / Location</label><input type="text" id="scene-input" placeholder="INT. KITCHEN — EVENING" /></div>
     <div id="lines-container"></div>
     <div class="scene-length-estimate" id="scene-length-estimate"></div>
+    <div id="pb-draft-actions">
+      <div class="pbd-row">
+        <button type="button" class="pbd-btn" onclick="pbEditMyself()">Edit it myself</button>
+        <button type="button" class="pbd-btn pbd-primary" onclick="openAiEdit()">Edit with AI</button>
+      </div>
+      <div id="ai-edit-result" role="status" aria-live="polite"></div>
+      <button type="button" class="pbd-link" id="pb-blank-link" onclick="pbStartBlankAsk()">Prefer to write it from scratch? Start blank.</button>
+      <button type="button" class="pbd-link" id="pb-restore-link" style="display:none" onclick="pbRestoreAsk()">Bring back my AI draft</button>
+    </div>
     <div class="add-bar">
       <button class="btn" id="btn-add-a">+ Me speaks</button>
       <button class="btn" id="btn-add-b">+ Partner speaks</button>
@@ -2423,6 +2445,37 @@ h1, h2, h3,
       <button type="button" class="story-continue" id="story-continue" onclick="storyDone()" disabled>Continue</button>
     </div>
     <p class="pc-mic-note" id="story-mic-note">Only the words are saved. No audio is recorded.</p>
+  </div>
+</div>
+
+<!-- EDIT WITH AI -->
+<div id="ai-edit-screen">
+  <div class="story-wrap">
+    <button class="ls-back" onclick="aiEditClose()">← Back to my script</button>
+    <div class="pc-eyebrow">Edit with AI</div>
+    <div class="pc-heading">What would you like changed?</div>
+    <p class="story-prompt">Describe the change, by talking or typing. The AI changes only what you ask for, and every line it touches is highlighted.</p>
+    <textarea id="ai-edit-text" placeholder="For example: in the third line, change &quot;never&quot; to &quot;always&quot;." aria-label="Describe the change" autocomplete="off"></textarea>
+    <p class="story-status" id="ai-edit-status" role="status" aria-live="polite"></p>
+    <div class="story-controls">
+      <button type="button" class="story-mic" id="ai-edit-mic" onclick="aiEditDict.toggle()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        <span id="ai-edit-mic-label">Talk</span>
+      </button>
+      <button type="button" class="story-continue" id="ai-edit-apply" onclick="aiEditApply()" disabled>Make this change</button>
+    </div>
+    <p class="pc-mic-note" id="ai-edit-mic-note">Only the words are saved. No audio is recorded.</p>
+  </div>
+</div>
+
+<div id="pb-confirm" role="dialog" aria-modal="true" aria-labelledby="pbc-title">
+  <div class="pbc-box">
+    <div class="pbc-title" id="pbc-title"></div>
+    <div class="pbc-body" id="pbc-body"></div>
+    <div class="pbd-row">
+      <button type="button" class="pbd-btn" id="pbc-no"></button>
+      <button type="button" class="pbd-btn pbd-primary" id="pbc-yes"></button>
+    </div>
   </div>
 </div>
 
@@ -3037,7 +3090,7 @@ Me too.</div>
 <!-- SCRIPT TUTORIAL SCREEN — shown once before Path A blank editor -->
 <div id="script-tutorial-screen">
   <div class="st-inner">
-    <button class="ls-back" onclick="_demoTimers.forEach(clearTimeout); hide('script-tutorial-screen'); showFlex('path-choice-screen');">← Back</button>
+    <button class="ls-back" onclick="tutorialBack()">← Back</button>
     <div class="st-eyebrow">Script Writing</div>
     <div class="st-heading">Here's how it works.</div>
     <div class="st-sub">Watch the script come together. Yours works the same way.</div>
@@ -3756,6 +3809,8 @@ function loadScript() {
     if (appNavStack.indexOf('script') === -1) navPush('script');
     updateNavBtns();
     if (s.scene) el('scene-input').value = s.scene;
+    pbIsPathB = (s.scriptPath === 'b');
+    if (s.draftBackup) { try { window._pbDraftBackup = typeof s.draftBackup === 'string' ? JSON.parse(s.draftBackup) : s.draftBackup; } catch(e) {} }
     if (s.lines) {
       var lines = typeof s.lines === 'string' ? JSON.parse(s.lines) : s.lines;
       lines.forEach(function(l) {
@@ -3771,10 +3826,11 @@ function loadScript() {
       // Doc exists but no lines and no path chosen yet — show choice
       checkPathChoice();
     }
+    pbSyncDraftActions();
   }).catch(function() {});
 }
 
-function sched() { clearTimeout(saveTimer); saveTimer = setTimeout(saveScript, 2000); updateSceneEstimate(); }
+function sched() { clearTimeout(saveTimer); saveTimer = setTimeout(saveScript, 2000); updateSceneEstimate(); if (typeof pbSyncDraftActions === 'function') pbSyncDraftActions(); }
 
 var sceneLengthOverWarningShown = false;
 
@@ -4706,6 +4762,7 @@ function checkPartnerAndAnalyze() {
 
 function buildIntakeBlock(name, data) {
   var lines = ['--- ' + name + '\'s intake detail (Path B):'];
+  if (data.initialRetelling) lines.push('Their own retelling, as first told: ' + data.initialRetelling);
   if (data.fightTopic) lines.push('What they say the fight is about: ' + data.fightTopic);
   if (data.fightTrigger) lines.push('What triggers it: ' + data.fightTrigger);
   if (data.startingMoment) lines.push('The moment that starts it: ' + data.startingMoment);
@@ -6683,11 +6740,17 @@ var PB_QUESTIONS = {
 
 // State machine: after recording answer for pbState, return the next state
 function pbNextState(current, answer) {
+  var n = pbNextRaw(current, answer);
+  while (n !== 'done' && pbSkip[n]) n = pbNextRaw(n, '');
+  return n;
+}
+
+function pbNextRaw(current, answer) {
   if (current === 'q1') return 'q2'; // q2 is AI-generated in pbSend before asking
   if (current === 'q2') return 'q3';
   if (current === 'q3') return 'q4';
   if (current === 'q4') return 'q5';
-  if (current === 'q5') return answer.replace(/\s/g, '').length < 50 ? 'q5fu' : 'q6';
+  if (current === 'q5') return (!pbSkip.q5 && answer.replace(/\s/g, '').length < 50) ? 'q5fu' : 'q6';
   if (current === 'q5fu') return 'q6';
   if (current === 'q6') return 'q7';
   if (current === 'q7') return 'q7b';
@@ -6705,26 +6768,107 @@ function checkPathChoice() {
   document.body.style.overflow = 'hidden';
 }
 
-// STORY (free-form retelling by voice or typing)
-var pbStory = { text: '', voice: false, typed: false };
-var _story = { rec: null, want: false, live: false, base: '', startedAt: 0, quickEnds: 0 };
+// DICTATION (continuous speech to text; new speech is appended, never replaces)
+function createDictation(taId, hooks) {
+  hooks = hooks || {};
+  var st = { rec: null, want: false, live: false, base: '', startedAt: 0, quickEnds: 0 };
+  function box() { return el(taId); }
+  function say(m) { if (hooks.onStatus) hooks.onStatus(m || ''); }
+  function changed() { if (hooks.onChange) hooks.onChange(); }
+  function join(base, add) { add = (add || '').trim(); if (!base) return add; return add ? base + ' ' + add : base; }
+  function start() {
+    var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var ta = box();
+    if (!SpeechRec || !ta) return;
+    if (st.rec) { try { st.rec.abort(); } catch(e) {} st.rec = null; }
+    var rec = new SpeechRec();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    st.rec = rec;
+    st.want = true;
+    st.base = ta.value.trim();
+    st.startedAt = Date.now();
+    rec.onstart = function() { st.live = true; say('Listening. Keep going, pauses are fine.'); changed(); };
+    rec.onresult = function(e) {
+      var finals = '', interim = '';
+      for (var i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finals += e.results[i][0].transcript + ' ';
+        else interim += e.results[i][0].transcript;
+      }
+      if (hooks.onVoice) hooks.onVoice();
+      ta.value = join(st.base, (finals + interim).replace(/\s+/g, ' '));
+      changed();
+    };
+    rec.onerror = function(ev) {
+      var err = ev && ev.error;
+      if (err === 'not-allowed' || err === 'service-not-allowed') {
+        st.want = false;
+        say('Microphone access is off. You can type instead, or allow the microphone in your browser settings.');
+      }
+    };
+    rec.onend = function() {
+      if (st.rec !== rec) return;
+      st.live = false;
+      st.base = ta.value.trim();
+      if (st.want) {
+        var ranFor = Date.now() - st.startedAt;
+        st.quickEnds = ranFor < 1500 ? st.quickEnds + 1 : 0;
+        if (st.quickEnds < 3) {
+          setTimeout(function() { if (st.want && st.rec === rec) start(); }, 250);
+          return;
+        }
+        st.want = false;
+        say('Paused. Tap to keep talking.');
+      }
+      changed();
+    };
+    try { rec.start(); } catch(e) { st.want = false; st.live = false; say('Tap to keep talking.'); changed(); }
+  }
+  function stop() {
+    st.want = false;
+    st.quickEnds = 0;
+    var rec = st.rec;
+    st.rec = null;
+    st.live = false;
+    if (rec) { try { rec.stop(); } catch(e) {} }
+    var ta = box();
+    if (ta) st.base = ta.value.trim();
+  }
+  function toggle() {
+    if (st.live || st.want) { stop(); say('Paused. Tap to keep talking.'); changed(); }
+    else start();
+  }
+  var tb = box();
+  if (tb) tb.addEventListener('input', function() {
+    if (st.live || st.want) { stop(); say('Paused. Tap to keep talking.'); }
+    if (hooks.onTyped) hooks.onTyped();
+    changed();
+  });
+  return { start: start, stop: stop, toggle: toggle, state: st };
+}
 
 function storySpeechSupported() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
 
+// STORY (free-form retelling by voice or typing)
+var pbStory = { text: '', voice: false, typed: false };
+// Keep false until the Phase 1 Firestore rules are published: private/{uid} must be owner-only first.
+var STORE_RETELLING = false;
+var storyDict = null;
+
 function storySetStatus(msg) { txt('story-status', msg || ''); }
+function storyStopListening() { if (storyDict) storyDict.stop(); }
+function storyToggleMic() { if (storyDict) storyDict.toggle(); }
 
 function storyRenderControls() {
   var supported = storySpeechSupported();
+  var live = !!(storyDict && storyDict.state.live);
   var mic = el('story-mic'), label = el('story-mic-label'), cont = el('story-continue'), note = el('story-mic-note');
-  if (mic) mic.style.display = supported ? 'flex' : 'none';
+  if (mic) { mic.style.display = supported ? 'flex' : 'none'; mic.classList.toggle('story-mic-live', live); }
   if (note) note.style.display = supported ? 'block' : 'none';
-  if (mic) mic.classList.toggle('story-mic-live', _story.live);
-  if (label) label.textContent = _story.live ? 'Tap to pause' : (pbStory.voice ? 'Tap to keep talking' : 'Talk');
+  if (label) label.textContent = live ? 'Tap to pause' : (pbStory.voice ? 'Tap to keep talking' : 'Talk');
   var hasText = !!(el('story-text') && el('story-text').value.trim());
-  if (cont) {
-    cont.disabled = !hasText;
-    cont.textContent = _story.live ? 'Done' : 'Continue';
-  }
+  if (cont) { cont.disabled = !hasText; cont.textContent = live ? 'Done' : 'Continue'; }
 }
 
 function pcSyncInputs() {
@@ -6743,91 +6887,9 @@ function startStory(mode) {
   storySetStatus('');
   storyRenderControls();
   if (mode === 'voice' && storySpeechSupported()) {
-    storyStartListening();
+    storyDict.start();
   } else {
     var ta = el('story-text'); if (ta) ta.focus();
-  }
-}
-
-function storyJoin(base, add) {
-  add = (add || '').trim();
-  if (!base) return add;
-  return add ? base + ' ' + add : base;
-}
-
-function storyStartListening() {
-  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRec) return;
-  var ta = el('story-text');
-  if (!ta) return;
-  if (_story.rec) { try { _story.rec.abort(); } catch(e) {} _story.rec = null; }
-  var rec = new SpeechRec();
-  rec.continuous = true;
-  rec.interimResults = true;
-  rec.lang = 'en-US';
-  _story.rec = rec;
-  _story.want = true;
-  _story.base = ta.value.trim();
-  _story.startedAt = Date.now();
-  rec.onstart = function() {
-    _story.live = true;
-    storySetStatus('Listening. Keep going, pauses are fine.');
-    storyRenderControls();
-  };
-  rec.onresult = function(e) {
-    var finals = '', interim = '';
-    for (var i = 0; i < e.results.length; i++) {
-      if (e.results[i].isFinal) finals += e.results[i][0].transcript + ' ';
-      else interim += e.results[i][0].transcript;
-    }
-    pbStory.voice = true;
-    ta.value = storyJoin(_story.base, (finals + interim).replace(/\s+/g, ' '));
-    storyRenderControls();
-  };
-  rec.onerror = function(ev) {
-    var err = ev && ev.error;
-    if (err === 'not-allowed' || err === 'service-not-allowed') {
-      _story.want = false;
-      storySetStatus('Microphone access is off. You can type instead, or allow the microphone in your browser settings.');
-    }
-  };
-  rec.onend = function() {
-    if (_story.rec !== rec) return;
-    _story.live = false;
-    _story.base = ta.value.trim();
-    if (_story.want) {
-      var ranFor = Date.now() - _story.startedAt;
-      _story.quickEnds = ranFor < 1500 ? _story.quickEnds + 1 : 0;
-      if (_story.quickEnds < 3) {
-        setTimeout(function() { if (_story.want && _story.rec === rec) storyStartListening(); }, 250);
-        return;
-      }
-      _story.want = false;
-      storySetStatus('Paused. Tap to keep talking.');
-    }
-    storyRenderControls();
-  };
-  try { rec.start(); } catch(e) { _story.want = false; _story.live = false; storySetStatus('Tap to keep talking.'); storyRenderControls(); }
-}
-
-function storyStopListening() {
-  _story.want = false;
-  _story.quickEnds = 0;
-  var rec = _story.rec;
-  _story.rec = null;
-  _story.live = false;
-  if (rec) { try { rec.stop(); } catch(e) {} }
-  var ta = el('story-text');
-  if (ta) _story.base = ta.value.trim();
-}
-
-function storyToggleMic() {
-  if (_story.live || _story.want) {
-    storyStopListening();
-    storySetStatus('Paused. Tap to keep talking.');
-    storyRenderControls();
-  } else {
-    storyStartListening();
   }
 }
 
@@ -6851,25 +6913,35 @@ function storyBack() {
   }
 }
 
-(function() {
-  var ta = el('story-text');
-  if (ta) ta.addEventListener('input', function() {
-    if (_story.live || _story.want) { storyStopListening(); storySetStatus('Paused. Tap to keep talking.'); }
-    pbStory.typed = true;
-    storyRenderControls();
-  });
-  pcSyncInputs();
-})();
+storyDict = createDictation('story-text', {
+  onStatus: storySetStatus,
+  onChange: storyRenderControls,
+  onVoice: function() { pbStory.voice = true; },
+  onTyped: function() { pbStory.typed = true; }
+});
+pcSyncInputs();
 
 function choosePathA() {
   sceneLengthOverWarningShown = false;
   el('path-choice-screen').style.display = 'none';
   navPush('script');
   fsSet('scripts/' + user.uid, { scriptPath: 'a', pathChosen: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
+  window._tutFromDraft = false;
+  pbShowPathATutorial();
+}
+
+function pbShowPathATutorial() {
   var tut = el('script-tutorial-screen');
   if (!tut) { openLandingStrip(); return; }
   tut.style.cssText = 'display:flex !important; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:#F6F4F0; overflow-y:auto; flex-direction:column; align-items:center; padding:48px 24px 80px;';
   runScriptDemo();
+}
+
+function tutorialBack() {
+  _demoTimers.forEach(clearTimeout);
+  hide('script-tutorial-screen');
+  if (window._tutFromDraft) { window._tutFromDraft = false; return; }
+  showFlex('path-choice-screen');
 }
 
 var _demoTimers = [];
@@ -6942,6 +7014,7 @@ function runScriptDemo() {
 }
 
 function dismissScriptTutorial() {
+  window._tutFromDraft = false;
   _demoTimers.forEach(clearTimeout);
   _demoTimers = [];
   hide('script-tutorial-screen');
@@ -6958,7 +7031,89 @@ function choosePathB() {
   el('pb-input').value = '';
   el('path-b-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  setTimeout(function() { pbAskQuestion('q1'); }, 200);
+  pbSkip = {};
+  pbRun++;
+  if (pbStory.text) { pbBeginFromStory(); }
+  else { setTimeout(function() { pbAskQuestion('q1'); }, 200); }
+}
+
+var pbSkip = {};
+var pbRun = 0;
+var PB_EXTRACT_MAP = { fightTopic: 'q1', fightLocation: 'q3', startingMoment: 'q4', backAndForth: 'q5', pauseMoment: 'q8' };
+
+function pbExtractPrompt(retelling) {
+  return 'A person has just told the story of a recurring fight with their partner. Their retelling is below, exactly as given (it may have been spoken, so punctuation may be rough).\n\n' +
+    'Your only job: for each item, copy the exact words from the retelling that clearly state it. Copy, never paraphrase or summarize, and never add anything. If the retelling does not clearly state an item, use an empty string. You may use "..." between two separate passages from the retelling.\n\n' +
+    'fightTopic: what the fight is about\n' +
+    'fightLocation: where it happened, or where it usually happens\n' +
+    'startingMoment: the first thing said or done that started it\n' +
+    'backAndForth: what gets said back and forth as it builds (copy the passage of dialogue)\n' +
+    'pauseMoment: how it pauses or gets interrupted (not how it ends)\n\n' +
+    'RETELLING:\n"""\n' + retelling + '\n"""\n\n' +
+    'Return only one JSON object with exactly the keys fightTopic, fightLocation, startingMoment, backAndForth, pauseMoment. Your safety guidance still applies: if the retelling describes fear, control or coercion, include the safety flag from your guidance in your response in addition to the JSON.';
+}
+
+function pbNorm(t) {
+  return String(t || '').toLowerCase().replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// Accept an extracted passage only if it really appears in the retelling.
+function pbParseExtraction(text, retelling) {
+  var out = {};
+  var m = String(text || '').match(/\{[\s\S]*\}/);
+  if (!m) return out;
+  var obj;
+  try { obj = JSON.parse(m[0]); } catch (e) { return out; }
+  var hay = ' ' + pbNorm(retelling) + ' ';
+  Object.keys(PB_EXTRACT_MAP).forEach(function(k) {
+    var v = (typeof obj[k] === 'string') ? obj[k].trim() : '';
+    if (v.length < 4) return;
+    var parts = v.split(/\.\.\.|…/).map(pbNorm).filter(function(x) { return x.length >= 4; });
+    if (!parts.length) return;
+    var ok = parts.every(function(x) { return hay.indexOf(' ' + x + ' ') !== -1; });
+    if (ok) out[PB_EXTRACT_MAP[k]] = v;
+  });
+  return out;
+}
+
+function pbApplyExtraction(found) {
+  pbSkip = {};
+  Object.keys(found).forEach(function(q) { pbAnswers[q] = found[q]; pbSkip[q] = true; });
+}
+
+function pbFirstState() {
+  var n = 'q1';
+  while (n !== 'done' && pbSkip[n]) n = pbNextRaw(n, '');
+  return n;
+}
+
+function pbBeginFromStory() {
+  var run = pbRun;
+  pbSending = true;
+  var inp = el('pb-input'); if (inp) inp.disabled = true;
+  var sb = el('pb-send'); if (sb) sb.disabled = true;
+  pbAppendAI('Thank you for telling me. Give me a moment to read it.');
+  s3ShowTypingIn('pb-thread');
+  callAI([{ role: 'user', content: pbExtractPrompt(pbStory.text) }], 'b').then(function(text) {
+    return pbParseExtraction(text, pbStory.text);
+  }).catch(function() {
+    return {};
+  }).then(function(found) {
+    if (run !== pbRun) return;
+    s3RemoveTypingFrom('pb-thread');
+    pbApplyExtraction(found);
+    pbAppendAI(Object.keys(found).length
+      ? 'I have what happened. A few questions now about what it was like for you.'
+      : 'Now a few questions, one at a time.');
+    pbGoTo(pbFirstState());
+  });
+}
+
+function pbGoTo(state) {
+  pbState = state;
+  if (state === 'done') { pbGenerateDraft(); }
+  else if (state === 'q2') { pbGenerateQ2(pbAnswers.q1 || pbStory.text); }
+  else { pbSending = false; pbAskQuestion(state); }
 }
 
 function pbBack() {
@@ -7048,18 +7203,7 @@ function pbSend() {
   el('pb-send').disabled = true;
   pbSending = true;
 
-  var next = pbNextState(pbState, answer);
-  pbState = next;
-
-  if (next === 'done') {
-    pbGenerateDraft();
-  } else if (next === 'q2') {
-    // Q2 is generated dynamically so the trigger example matches what they just said
-    pbGenerateQ2(answer);
-  } else {
-    pbSending = false;
-    pbAskQuestion(next);
-  }
+  pbGoTo(pbNextState(pbState, answer));
 }
 
 function pbBuildPrompt() {
@@ -7067,9 +7211,12 @@ function pbBuildPrompt() {
   var partner = (user && user.partner) ? user.partner : 'Person B';
   var fight = (user && user.fight) ? user.fight : 'the argument';
   var q5full = (pbAnswers.q5 || '') + (pbAnswers.q5fu ? '\n\nMore detail: ' + pbAnswers.q5fu : '');
+  var told = (pbStory && pbStory.text) ? pbStory.text : '';
 
-  return 'Write a rough-draft screenplay script of an argument between two partners. The argument is called "' + fight + '". ' + name + ' is Character A; ' + partner + ' is Character B.\n\n' +
-    'Here is everything about how this fight unfolds:\n\n' +
+  return 'Write a first-draft script of an argument between two partners, built only from this person\'s own account. The argument is called "' + fight + '". ' + name + ' is Character A, the person telling the story; ' + partner + ' is Character B.\n\n' +
+    'YOU FORMAT. YOU DO NOT FIX. Keep each person\'s words as close to what was actually said as possible. You may remove filler ("um," "like," repeated starts) and split long speech into separate lines, but never change meaning, tone, or intensity. Never add lines, reactions, or beats the person did not describe. Never soften, polish, or rebalance what was said. If something harsh was said, the script keeps it harsh. Seeing the real fight on the page is where the work begins, and a softened script removes that.\n\n' +
+    (told ? 'THEIR OWN ACCOUNT, in their words:\n"""\n' + told + '\n"""\n\n' : '') +
+    'THEIR ANSWERS TO FOLLOW-UP QUESTIONS (use these for the scene, directions and beats; never as a source of new dialogue):\n\n' +
     'What this fight is about: ' + (pbAnswers.q1 || '') + '\n\n' +
     'What typically triggers it: ' + (pbAnswers.q2 || '') + '\n\n' +
     'Physical setting: ' + (pbAnswers.q3 || '') + '\n\n' +
@@ -7085,9 +7232,8 @@ function pbBuildPrompt() {
     'Format the script exactly as follows. Start with:\nSCENE: [brief location from the setting described above]\n\n' +
     'For each line of dialogue:\n[CHARACTER NAME IN CAPS]\n([emotional beat or tone in parentheses])\n[What they say]\n\n' +
     'For stage directions:\nDIRECTION: [brief description]\n\n' +
-    'Write 12-20 exchanges minimum. The beats and stage directions must reflect the emotional and physical reality described above — the feeling of escalation, the specific triggers, the body language, the charge in the room. If recurring lines were provided, use them verbatim as dialogue — these are the actual words and must appear in the script, not paraphrased. Reflect the pause (the to be continued moment) rather than a resolution — these fights do not end, they stop. ' +
+    'Include every exchange the person described and no others. There is no minimum length. Add a beat in parentheses only when the person described the tone, feeling or action for that line, and a DIRECTION only for a physical action or change of setting they described. If recurring lines were provided, they are the actual words and may appear exactly as given. Reflect the pause (the to be continued moment) rather than a resolution — these fights do not end, they stop. ' +
     'Use the actual names ' + name + ' (Character A) and ' + partner + ' (Character B) in all caps as character headers. ' +
-    'The script should reflect the tonal and emotional answers given — not just a factual retelling. ' +
     'Output only the script itself, starting with SCENE:. No preamble, no commentary, no explanation.';
 }
 
@@ -7229,6 +7375,10 @@ function pbLoadDraftIntoTool(parsed) {
     el('scene-input').value = sceneVal;
   }
 
+  pbIsPathB = true;
+  pbSyncDraftActions();
+  pbSaveRetelling();
+
   fsSet('scripts/' + user.uid, {
     scene: sceneVal,
     lines: JSON.stringify(lines),
@@ -7257,6 +7407,270 @@ function pbLoadDraftIntoTool(parsed) {
     document.body.style.overflow = '';
     pbShowHandoff();
   });
+}
+
+// ---- DRAFT ACTIONS: Edit it myself / Edit with AI / Start blank ----
+var pbIsPathB = false;
+
+function scriptHasContent() {
+  var c = el('lines-container');
+  return !!(c && c.children.length > 0);
+}
+
+function pbSyncDraftActions() {
+  var box = el('pb-draft-actions');
+  if (!box) return;
+  box.style.display = pbIsPathB ? 'block' : 'none';
+  var has = scriptHasContent();
+  var bl = el('pb-blank-link'), rl = el('pb-restore-link');
+  if (bl) bl.style.display = has ? 'block' : 'none';
+  if (rl) rl.style.display = (!has && window._pbDraftBackup) ? 'block' : 'none';
+}
+
+function pbEditMyself() {
+  pbDismissHandoff();
+  var first = document.querySelector('#lines-container .dialogue-input');
+  if (first) first.focus();
+}
+
+function scriptSnapshot() {
+  var lines = [];
+  document.querySelectorAll('#lines-container > div').forEach(function(e) {
+    if (e.dataset.type === 'line') lines.push({ type: 'line', char: e.dataset.char, beat: e.querySelector('.beat-input').value, dialogue: e.querySelector('.dialogue-input').value });
+    else if (e.dataset.type === 'direction') lines.push({ type: 'direction', text: e.querySelector('.direction-input').value });
+  });
+  return { scene: el('scene-input').value, lines: lines };
+}
+
+function snapshotToText(snap, nameA, nameB) {
+  var out = ['SCENE: ' + (snap.scene || '')];
+  snap.lines.forEach(function(l) {
+    if (l.type === 'line') {
+      var block = (l.char === 'B' ? nameB : nameA).toUpperCase();
+      if (l.beat) block += '\n(' + l.beat + ')';
+      out.push(block + '\n' + (l.dialogue || ''));
+    } else {
+      out.push('DIRECTION: ' + (l.text || ''));
+    }
+  });
+  return out.join('\n\n');
+}
+
+function scriptApply(snap, flags, sceneChanged) {
+  el('lines-container').innerHTML = '';
+  el('scene-input').value = snap.scene || '';
+  el('scene-input').classList.remove('ai-changed-field');
+  snap.lines.forEach(function(l) {
+    if (l.type === 'line') addLine(l.char, l.beat, l.dialogue, true);
+    else addDir(l.text, true);
+  });
+  var kids = el('lines-container').children;
+  (flags || []).forEach(function(f, i) { if (f && kids[i]) kids[i].classList.add('ai-changed'); });
+  if (sceneChanged) el('scene-input').classList.add('ai-changed-field');
+  sceneLengthOverWarningShown = false;
+  setTimeout(function() { document.querySelectorAll('textarea').forEach(ar); updateSceneEstimate(); }, 50);
+  pbSyncDraftActions();
+}
+
+function lineSig(l) {
+  var n = function(t) { return String(t || '').replace(/\s+/g, ' ').trim(); };
+  return l.type === 'line' ? 'L|' + l.char + '|' + n(l.beat) + '|' + n(l.dialogue) : 'D|' + n(l.text);
+}
+
+// Longest-common-subsequence diff: flags the new lines that were not in the old script.
+function diffLines(oldLines, newLines) {
+  var a = oldLines.map(lineSig), b = newLines.map(lineSig);
+  var dp = [], i, j;
+  for (i = 0; i <= a.length; i++) { dp.push([]); for (j = 0; j <= b.length; j++) dp[i].push(0); }
+  for (i = a.length - 1; i >= 0; i--) {
+    for (j = b.length - 1; j >= 0; j--) {
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  var flags = b.map(function() { return true; });
+  i = 0; j = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { flags[j] = false; i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+  return { flags: flags, removed: a.length - dp[0][0] };
+}
+
+// ---- Edit with AI ----
+var aiEditDict = null;
+var aiEditUndo = null;
+var aiEditBusy = false;
+
+function aiEditRender() {
+  var supported = storySpeechSupported();
+  var live = !!(aiEditDict && aiEditDict.state.live);
+  var mic = el('ai-edit-mic'), label = el('ai-edit-mic-label'), apply = el('ai-edit-apply'), note = el('ai-edit-mic-note'), ta = el('ai-edit-text');
+  if (mic) { mic.style.display = supported ? 'flex' : 'none'; mic.classList.toggle('story-mic-live', live); }
+  if (note) note.style.display = supported ? 'block' : 'none';
+  if (label) label.textContent = live ? 'Tap to pause' : 'Talk';
+  if (apply) {
+    apply.disabled = aiEditBusy || !(ta && ta.value.trim());
+    apply.textContent = aiEditBusy ? 'Working…' : (live ? 'Done' : 'Make this change');
+  }
+}
+
+function openAiEdit() {
+  if (!scriptHasContent()) { status('There is nothing to edit yet.'); return; }
+  showFlex('ai-edit-screen');
+  document.body.style.overflow = 'hidden';
+  txt('ai-edit-status', '');
+  aiEditRender();
+  var ta = el('ai-edit-text'); if (ta) ta.focus();
+}
+
+function aiEditClose() {
+  if (aiEditDict) aiEditDict.stop();
+  hide('ai-edit-screen');
+  document.body.style.overflow = '';
+}
+
+function aiEditPrompt(scriptText, instruction) {
+  return 'Here is a script in a standard format:\n\n"""\n' + scriptText + '\n"""\n\n' +
+    'The person who wrote it asked for this change:\n"' + instruction + '"\n\n' +
+    'Change exactly what they ask for and nothing else. Every other line must come back word for word, unchanged. Do not make any change on your own initiative to sound kinder, fairer, more balanced or more polished. If the request is unclear, or would need words the person did not give you, make no change and return the script exactly as given.\n\n' +
+    'Return the complete script in the same format, starting with SCENE:. Output only the script. No preamble, no commentary.';
+}
+
+function aiEditApply() {
+  if (aiEditBusy) return;
+  if (aiEditDict) aiEditDict.stop();
+  var ta = el('ai-edit-text');
+  var instruction = ta ? ta.value.trim() : '';
+  if (!instruction) return;
+  var before = scriptSnapshot();
+  var nameA = (user && user.name) ? user.name : 'Person A';
+  var nameB = (user && user.partner) ? user.partner : 'Person B';
+  aiEditBusy = true;
+  txt('ai-edit-status', 'Making that change…');
+  aiEditRender();
+  callAI([{ role: 'user', content: aiEditPrompt(snapshotToText(before, nameA, nameB), instruction) }], 'b').then(function(text) {
+    aiEditBusy = false;
+    var parsed = text ? pbParseDraft(text, nameA, nameB) : null;
+    if (!parsed || !parsed.lines.length || parsed.lines.length < Math.floor(before.lines.length / 2)) {
+      txt('ai-edit-status', "That didn't come back in a form I could apply, so nothing changed. Try describing it a different way.");
+      aiEditRender();
+      return;
+    }
+    var d = diffLines(before.lines, parsed.lines);
+    var sceneChanged = (parsed.scene || '').trim() !== (before.scene || '').trim();
+    var changed = d.flags.filter(Boolean).length;
+    if (!changed && !d.removed && !sceneChanged) {
+      txt('ai-edit-status', 'The AI made no change. Try describing it a different way.');
+      aiEditRender();
+      return;
+    }
+    aiEditUndo = before;
+    scriptApply(parsed, d.flags, sceneChanged);
+    if (ta) ta.value = '';
+    txt('ai-edit-status', '');
+    aiEditRender();
+    aiEditClose();
+    aiEditShowResult(changed, d.removed, sceneChanged);
+    sched();
+  }).catch(function() {
+    aiEditBusy = false;
+    txt('ai-edit-status', 'There was an error reaching the AI. Nothing changed. Please try again.');
+    aiEditRender();
+  });
+}
+
+function aiEditShowResult(changed, removed, sceneChanged) {
+  var box = el('ai-edit-result');
+  if (!box) return;
+  var parts = [];
+  if (changed) parts.push(changed + (changed === 1 ? ' line' : ' lines') + ' changed');
+  if (removed) parts.push(removed + (removed === 1 ? ' line' : ' lines') + ' removed');
+  if (sceneChanged) parts.push('scene changed');
+  box.innerHTML = 'The AI made this change: ' + parts.join(', ') + '. Changed lines are highlighted. ' +
+    '<button type="button" onclick="aiEditUndoNow()">Undo</button> <button type="button" onclick="aiEditClear()">Clear highlights</button>';
+  box.style.display = 'block';
+  var first = document.querySelector('#lines-container .ai-changed');
+  if (first && first.scrollIntoView) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function aiEditClear() {
+  document.querySelectorAll('#lines-container .ai-changed').forEach(function(e) { e.classList.remove('ai-changed'); });
+  var sc = el('scene-input'); if (sc) sc.classList.remove('ai-changed-field');
+  var box = el('ai-edit-result'); if (box) box.style.display = 'none';
+}
+
+function aiEditUndoNow() {
+  if (!aiEditUndo) return;
+  scriptApply(aiEditUndo, [], false);
+  aiEditUndo = null;
+  var box = el('ai-edit-result'); if (box) box.style.display = 'none';
+  sched();
+}
+
+// ---- Start blank (keeps the AI draft so it can come back) ----
+function pbConfirm(title, body, yesLabel, noLabel, onYes) {
+  txt('pbc-title', title);
+  txt('pbc-body', body);
+  txt('pbc-yes', yesLabel);
+  txt('pbc-no', noLabel);
+  el('pbc-yes').onclick = function() { hide('pb-confirm'); onYes(); };
+  el('pbc-no').onclick = function() { hide('pb-confirm'); };
+  showFlex('pb-confirm');
+}
+
+function pbStartBlankAsk() {
+  pbConfirm('Start from a blank page?', 'Your AI draft will be set aside, not deleted. You can bring it back later.', 'Start blank', 'Keep my draft', pbStartBlank);
+}
+
+function pbStartBlank() {
+  var snap = scriptSnapshot();
+  window._pbDraftBackup = snap;
+  aiEditClear();
+  aiEditUndo = null;
+  el('lines-container').innerHTML = '';
+  el('scene-input').value = '';
+  el('pb-handoff-banner').style.display = 'none';
+  fsSet('scripts/' + user.uid, {
+    draftBackup: JSON.stringify(snap), draftBackupAt: new Date().toISOString(),
+    scene: '', lines: '[]', handoffSeen: true, userId: user.uid, updatedAt: new Date().toISOString()
+  }).catch(function() {});
+  pbSyncDraftActions();
+  window._tutFromDraft = true;
+  pbShowPathATutorial();
+}
+
+function pbRestoreAsk() {
+  if (!window._pbDraftBackup) return;
+  if (!scriptHasContent()) { pbRestore(); return; }
+  pbConfirm('Bring back your AI draft?', 'This replaces what is on the page now.', 'Bring it back', 'Cancel', pbRestore);
+}
+
+function pbRestore() {
+  var snap = window._pbDraftBackup;
+  if (!snap) return;
+  scriptApply(snap, [], false);
+  sched();
+}
+
+(function() {
+  aiEditDict = createDictation('ai-edit-text', {
+    onStatus: function(m) { txt('ai-edit-status', m || ''); },
+    onChange: aiEditRender
+  });
+  var lc = el('lines-container');
+  if (lc) lc.addEventListener('input', function(e) {
+    var row = e.target && e.target.closest ? e.target.closest('.ai-changed') : null;
+    if (row) row.classList.remove('ai-changed');
+  });
+  var sc = el('scene-input');
+  if (sc) sc.addEventListener('input', function() { sc.classList.remove('ai-changed-field'); });
+})();
+
+function pbSaveRetelling() {
+  if (!STORE_RETELLING || !user || !pbStory.text) return;
+  var method = (pbStory.voice && pbStory.typed) ? 'mixed' : (pbStory.voice ? 'voice' : 'typed');
+  fsSet('private/' + user.uid, { initialRetelling: pbStory.text, inputMethod: method }).catch(function() {});
 }
 
 function pbShowHandoff() {
