@@ -3711,12 +3711,32 @@ function post(url, body) {
 }
 
 // AI PROXY
-function callAI(messages, step) {
+// Gets a fresh sign-in token without touching the screen.
+function refreshTokenQuietly() {
+  if (!user || !user.refresh) return Promise.reject(new Error('Please sign in again.'));
+  return post('https://securetoken.googleapis.com/v1/token?key=' + API_KEY, { grant_type: 'refresh_token', refresh_token: user.refresh })
+  .then(function(d) {
+    if (!d.id_token) throw new Error('Please sign in again.');
+    token = d.id_token; user.token = token; user.refresh = d.refresh_token || user.refresh;
+    localStorage.setItem('oa_user', JSON.stringify(user));
+  });
+}
+
+function aiRequest(messages, step, retried) {
   return fetch('/.netlify/functions/ai', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token || '') },
     body: JSON.stringify({ messages: messages, step: step || '1' })
   }).then(function(r) {
+    if (r.status === 401 && !retried) {
+      return refreshTokenQuietly().then(function() { return aiRequest(messages, step, true); });
+    }
+    return r;
+  });
+}
+
+function callAI(messages, step) {
+  return aiRequest(messages, step, false).then(function(r) {
     if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'AI error'); });
     return r.json();
   }).then(function(d) {
