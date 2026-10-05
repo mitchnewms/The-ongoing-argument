@@ -194,7 +194,6 @@ body {
 .al-coach-entry-time { font-size: 0.62rem; color: var(--ink-faint); margin-top: 2px; }
 
 /* ── COUPLE LINKING ─────────────────────────────────────────── */
-#couple-link-card { display: none; margin-top: 16px; }
 .cl-card { background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 24px 24px 20px; }
 .cl-hd { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
 .cl-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; font-family: 'Courier Prime', monospace; }
@@ -2312,22 +2311,6 @@ h1, h2, h3,
     </div>
   </div>
 
-  <!-- COUPLE LINKING -->
-  <div id="couple-link-card">
-    <div class="cl-card">
-      <div class="cl-hd">Link with Your Partner</div>
-      <div class="cl-label">Your code — share this with your partner</div>
-      <div class="cl-code" id="cl-code-display">——————</div>
-      <button class="cl-copy-btn" id="cl-copy-btn" onclick="clCopyCode()">Copy Code</button>
-      <div class="cl-divider">already have your partner's code?</div>
-      <div class="cl-input-row">
-        <input type="text" id="cl-partner-code" class="cl-input" placeholder="XXXXXX" maxlength="6" autocomplete="off" onkeydown="if(event.key==='Enter')clLinkPartner()" />
-        <button class="cl-link-btn" onclick="clLinkPartner()">Link</button>
-      </div>
-      <div id="cl-error" class="cl-error"></div>
-    </div>
-  </div>
-
   <div id="couple-linked-status">
     <div class="cl-linked">
       <span class="cl-linked-icon">✓</span>
@@ -3143,6 +3126,7 @@ var pendingPartnerAId = null; // set after code verified
 var pendingFightName = null; // carry fight name into auth
 var pendingJoinCoupleId = null; // coupleId extracted from /join/ URL
 var pendingJoinCode = null; // code extracted from /join/coupleId/code URL
+var pendingCodeToUse = null; // validated join code, marked used once Partner B links
 var pcLastJoinUrl = null; // last join URL used for resend
 
 // Path B intake state
@@ -3441,6 +3425,7 @@ function createAccount() {
         // Before launch: remove this block and restore real Stripe payment flow below.
         var qaCode = generateCoupleCode();
         fsSet('couples/' + coupleId, { paidStatus: true, coupleCode: qaCode, paidAt: new Date().toISOString(), partnerAConfirmed: true })
+          .then(function() { return writeJoinCode(coupleId, qaCode, fight, false); })
           .then(function() { showPaymentConfirm(qaCode, coupleId); });
         return;
         // END BETA BYPASS — REMOVE ABOVE BLOCK BEFORE LAUNCH
@@ -3468,9 +3453,9 @@ function signOut() {
   user = null; token = null;
   localStorage.removeItem('oa_user');
   enrollMode = null; soloEnrollMode = false; pendingCoupleId = null; pendingPartnerAId = null;
-  pendingFightName = null; pendingJoinCoupleId = null; pendingJoinCode = null; pcLastJoinUrl = null;
+  pendingFightName = null; pendingJoinCoupleId = null; pendingJoinCode = null; pendingCodeToUse = null; pcLastJoinUrl = null;
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
-  hide('couple-link-card'); hide('couple-linked-status');
+  hide('couple-linked-status');
   hide('step2-card'); hide('analysis-banner'); hide('journey-banner');
   hide('step1-waiting-banner'); hide('video-waiting-banner'); hide('pb-handoff-banner');
   hide('buyin-screen');
@@ -3525,13 +3510,16 @@ function afterLogin() {
     hide('auth-screen'); hide('code-entry-screen'); hide('partner-b-intro-screen');
     var coupleId = pendingCoupleId;
     var partnerAId = pendingPartnerAId;
+    var codeToUse = pendingCodeToUse;
     Promise.all([
       fsSet('couples/' + coupleId, { partnerBId: user.uid, partnerBConfirmed: true }),
       fsSet('users/' + user.uid, { coupleId: coupleId, partnerId: partnerAId })
-    ]).then(function() {
+    ]).then(function(res) {
+      if (!res[0] || res[0].error || !res[1] || res[1].error) throw new Error('link failed');
+      if (codeToUse) fsSet('joinCodes/' + codeToUse, { used: true }).catch(function() {});
       user.coupleId = coupleId; user.partnerId = partnerAId;
       localStorage.setItem('oa_user', JSON.stringify(user));
-      pendingCoupleId = null; pendingPartnerAId = null; pendingJoinCoupleId = null; pendingJoinCode = null;
+      pendingCoupleId = null; pendingPartnerAId = null; pendingJoinCoupleId = null; pendingJoinCode = null; pendingCodeToUse = null;
       enrollMode = null;
       el('al-fab').style.display = 'block';
       show('script-screen');
@@ -3612,18 +3600,34 @@ function fsGetPublic(path) {
   return fetch(DB + '/' + path + '?key=' + API_KEY).then(function(r) { return r.json(); });
 }
 
-function fsQueryPublic(col, field, value) {
-  return fetch(DB + ':runQuery?key=' + API_KEY, {
+// Public join lookup: one code at a time, readable before login.
+function lookupJoinCode(code) {
+  return fsGetPublic('joinCodes/' + code).then(function(d) {
+    if (!d || !d.fields) return null;
+    return fromFields(d.fields);
+  });
+}
+
+function writeJoinCode(coupleId, code, fightName, used) {
+  if (!user || !coupleId || !code) return Promise.resolve();
+  return fsSet('joinCodes/' + code, { coupleId: coupleId, partnerAId: user.uid, fightName: fightName || '', used: !!used }).catch(function() {});
+}
+
+// All documents in a collection where field == value, shaped like fsList's result.
+function fsQueryDocs(col, field, value) {
+  return fetch(DB + ':runQuery', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
     body: JSON.stringify({
       structuredQuery: {
         from: [{ collectionId: col }],
-        where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } },
-        limit: 1
+        where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } }
       }
     })
-  }).then(function(r) { return r.json(); });
+  }).then(function(r) { return r.json(); }).then(function(rows) {
+    if (!Array.isArray(rows)) return { documents: [] };
+    return { documents: rows.filter(function(r) { return r && r.document; }).map(function(r) { return r.document; }) };
+  });
 }
 
 function toFields(obj) {
@@ -3712,7 +3716,7 @@ function loadProfile() {
 
 // NOTES
 function loadNotes() {
-  fsList('notes').then(function(d) {
+  fsQueryDocs('notes', 'userId', user.uid).then(function(d) {
     if (!d.documents) return;
     var mine = d.documents.map(function(doc) { return fromFields(doc.fields); }).filter(function(n) { return n.userId === user.uid; });
     if (!mine.length) return;
@@ -4228,7 +4232,7 @@ function alToggle() {
 
 function loadAwarenessLog() {
   if (!user || user.email === COACH) return;
-  fsList('awarenessLog').then(function(d) {
+  fsQueryDocs('awarenessLog', 'userId', user.uid).then(function(d) {
     var entries = (d.documents || []).map(function(doc) { return fromFields(doc.fields); })
       .filter(function(e) { return e.userId === user.uid; })
       .sort(function(a, b) { return (a.timestamp || '') < (b.timestamp || '') ? -1 : 1; });
@@ -4253,7 +4257,7 @@ function alFmtTime(ts) {
 }
 
 function loadClientAwarenessLog(uid, container) {
-  fsList('awarenessLog').then(function(d) {
+  fsQueryDocs('awarenessLog', 'userId', uid).then(function(d) {
     var entries = (d.documents || []).map(function(doc) { return fromFields(doc.fields); })
       .filter(function(e) { return e.userId === uid; })
       .sort(function(a, b) { return (a.timestamp || '') < (b.timestamp || '') ? -1 : 1; });
@@ -4317,28 +4321,20 @@ function pbAutoValidate() {
   btn.disabled = true; btn.textContent = 'Checking…';
   errDiv.style.display = 'none';
 
-  fsGetPublic('couples/' + pendingJoinCoupleId).then(function(d) {
+  lookupJoinCode(pendingJoinCode).then(function(couple) {
     btn.disabled = false; btn.textContent = 'I\'m in. Create My Account →';
-    if (!d || !d.fields) {
+    if (!couple || couple.coupleId !== pendingJoinCoupleId) {
       errDiv.textContent = 'We could not find that code. Please check it and try again.';
       errDiv.style.display = 'block'; return;
     }
-    var couple = fromFields(d.fields);
-    if ((couple.coupleCode || '').toUpperCase() !== pendingJoinCode) {
-      errDiv.textContent = 'We could not find that code. Please check it and try again.';
-      errDiv.style.display = 'block'; return;
-    }
-    if (!couple.paidStatus) {
-      errDiv.textContent = 'Your partner has started the process but has not completed payment yet. Please check with them, then try your link again.';
-      errDiv.style.display = 'block'; return;
-    }
-    if (couple.partnerBId) {
+    if (couple.used) {
       errDiv.textContent = 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.';
       errDiv.style.display = 'block'; return;
     }
     // Valid — show commitment screen before account creation
     pendingCoupleId = pendingJoinCoupleId;
     pendingPartnerAId = couple.partnerAId || '';
+    pendingCodeToUse = pendingJoinCode;
     if (couple.fightName) pendingFightName = couple.fightName;
     hide('partner-b-intro-screen');
     window._pbCommitSource = 'auto';
@@ -4421,52 +4417,23 @@ function submitPartnerCode() {
   var btn = el('ce-submit-btn');
   btn.disabled = true; btn.textContent = 'Checking…';
 
-  // Partner B is not logged in yet — use public (API key) Firestore queries
-  var lookupPromise;
-  if (pendingJoinCoupleId) {
-    lookupPromise = fsGetPublic('couples/' + pendingJoinCoupleId)
-      .then(function(d) {
-        if (!d || !d.fields) return [];
-        var couple = fromFields(d.fields);
-        couple._id = pendingJoinCoupleId;
-        return [couple];
-      });
-  } else {
-    lookupPromise = fsQueryPublic('couples', 'coupleCode', code).then(function(results) {
-      return (results || []).map(function(r) {
-        if (!r.document || !r.document.fields) return null;
-        var couple = fromFields(r.document.fields);
-        couple._id = r.document.name.split('/').pop();
-        return couple;
-      }).filter(Boolean);
-    });
-  }
-
-  lookupPromise.then(function(couples) {
+  // Partner B is not logged in yet: look up the single join code record
+  lookupJoinCode(code).then(function(match) {
     btn.disabled = false; btn.textContent = 'Verify Code';
 
-    // Find the one matching our code
-    var match = null;
-    for (var i = 0; i < couples.length; i++) {
-      if ((couples[i].coupleCode || '').toUpperCase() === code) { match = couples[i]; break; }
-    }
-
-    if (!match) {
+    if (!match || (pendingJoinCoupleId && match.coupleId !== pendingJoinCoupleId)) {
       txt('ce-error', 'We could not find that code. Please check it and try again.');
       return;
     }
-    if (!match.paidStatus) {
-      txt('ce-error', 'Your partner has started the process but has not completed payment yet. Please check with them, then try your code again.');
-      return;
-    }
-    if (match.partnerBId) {
+    if (match.used) {
       txt('ce-error', 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.');
       return;
     }
 
     // Code valid — show commitment screen before account creation
-    pendingCoupleId = match._id;
+    pendingCoupleId = match.coupleId;
     pendingPartnerAId = match.partnerAId || '';
+    pendingCodeToUse = code;
     if (match.fightName) { pendingFightName = match.fightName; }
 
     hide('code-entry-screen');
@@ -4522,6 +4489,7 @@ function handlePaymentSuccess(sessionId) {
     }
     // Write paidStatus + coupleCode to couple doc
     return fsSet('couples/' + d.coupleId, { paidStatus: true, coupleCode: d.coupleCode })
+    .then(function() { return writeJoinCode(d.coupleId, d.coupleCode, user && user.fight, false); })
     .then(function() {
       showPaymentConfirm(d.coupleCode, d.coupleId);
     });
@@ -4618,7 +4586,6 @@ function clUpdateLinkUI(profile) {
       var couple = fromFields(d.fields);
       if (!couple.paidStatus) {
         // Payment not yet complete — show pending message in place of couple-link-card
-        hide('couple-link-card');
         hide('couple-linked-status');
         var existing = el('cl-payment-pending');
         if (!existing) {
@@ -4631,6 +4598,15 @@ function clUpdateLinkUI(profile) {
         }
         return;
       }
+      var otherId = couple.partnerAId === user.uid ? (couple.partnerBId || '') : (couple.partnerBId === user.uid ? (couple.partnerAId || '') : '');
+      if (otherId && user.partnerId !== otherId) {
+        user.partnerId = otherId;
+        localStorage.setItem('oa_user', JSON.stringify(user));
+        fsSet('users/' + user.uid, { partnerId: otherId }).catch(function() {});
+      }
+      if (couple.partnerAId === user.uid && couple.coupleCode) {
+        writeJoinCode(profile.coupleId, couple.coupleCode, couple.fightName || user.fight, !!couple.partnerBId);
+      }
       var pName = couple.partnerBId ? (profile.partnerName || 'your partner') : 'waiting for partner';
       clShowLinked(pName);
       journeyRoute();
@@ -4640,65 +4616,11 @@ function clUpdateLinkUI(profile) {
     });
     return;
   }
-  // No coupleId — hide old manual link card in new payment flow
-  // (old flow users without a coupleId won't normally reach this in the new system)
-  hide('couple-link-card');
 }
 
 function clShowLinked(partnerName) {
-  hide('couple-link-card');
   txt('cl-linked-text', 'Linked with ' + partnerName);
   el('couple-linked-status').style.display = 'block';
-}
-
-function clCopyCode() {
-  var code = (el('cl-code-display').textContent || '').trim();
-  if (!code) return;
-  var finish = function() {
-    var b = el('cl-copy-btn'); if (b) { b.textContent = 'Copied!'; setTimeout(function() { b.textContent = 'Copy Code'; }, 2000); }
-  };
-  if (navigator.clipboard) { navigator.clipboard.writeText(code).then(finish).catch(finish); return; }
-  var ta = document.createElement('textarea'); ta.value = code;
-  ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta);
-  ta.select(); document.execCommand('copy'); document.body.removeChild(ta); finish();
-}
-
-function clLinkPartner() {
-  var code = (val('cl-partner-code') || '').toUpperCase();
-  if (code.length !== 6) { txt('cl-error', 'Enter the 6-character code from your partner.'); return; }
-  if (user.coupleCode && code === user.coupleCode) { txt('cl-error', "That’s your own code — enter your partner’s code."); return; }
-  txt('cl-error', '');
-  var input = el('cl-partner-code'); var btn = document.querySelector('.cl-link-btn');
-  if (input) input.disabled = true; if (btn) btn.disabled = true;
-  fsQuery('users', 'coupleCode', code).then(function(results) {
-    if (input) input.disabled = false; if (btn) btn.disabled = false;
-    var doc = results && results[0] && results[0].document;
-    if (!doc) { txt('cl-error', 'Code not found. Check with your partner.'); return; }
-    var partner = fromFields(doc.fields);
-    var partnerId = doc.name.split('/').pop();
-    if (partnerId === user.uid) { txt('cl-error', "That’s your own code — enter your partner’s code."); return; }
-    if (partner.coupleId) { txt('cl-error', 'This code is already linked to another account.'); return; }
-    var fightName = user.fight || partner.fightName || 'The Ongoing Argument';
-    fsAdd('couples', {
-      partnerAId: partnerId, partnerBId: user.uid,
-      fightName: fightName, currentStep: '1', createdAt: new Date().toISOString()
-    }).then(function(coupleDoc) {
-      if (!coupleDoc || coupleDoc.error) { txt('cl-error', 'Could not link accounts. Try again.'); return; }
-      var coupleId = coupleDoc.name.split('/').pop();
-      return Promise.all([
-        fsSet('users/' + user.uid, { coupleId: coupleId, partnerId: partnerId }),
-        fsSet('users/' + partnerId, { coupleId: coupleId, partnerId: user.uid })
-      ]).then(function() {
-        user.coupleId = coupleId; user.partnerId = partnerId;
-        localStorage.setItem('oa_user', JSON.stringify(user));
-        clShowLinked(partner.name || 'your partner');
-        journeyRoute();
-      });
-    }).catch(function() { txt('cl-error', 'Connection error. Try again.'); });
-  }).catch(function() {
-    if (input) input.disabled = false; if (btn) btn.disabled = false;
-    txt('cl-error', 'Connection error. Try again.');
-  });
 }
 
 /* STEP 2 — DUAL SCRIPT SUBMISSION AND ANALYSIS */
@@ -5358,7 +5280,7 @@ function generatePersonalizedTakeaways() {
   var isSolo = user.accountType === 'solo';
   var analysisPromise = isSolo ? fsGet('solo-analysis/' + user.uid) : (user.coupleId ? fsGet('couples/' + user.coupleId) : Promise.resolve(null));
   Promise.all([
-    fsList('awarenessLog'),
+    fsQueryDocs('awarenessLog', 'userId', user.uid),
     analysisPromise,
     fsGet('scripts/' + user.uid)
   ]).then(function(results) {
