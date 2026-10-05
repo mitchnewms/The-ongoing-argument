@@ -128,7 +128,8 @@ exports.handler = async function(event) {
   }
 
   // Step 2 (dual-script analysis) and step b (Path B draft) get more tokens
-  const maxTokens = (step === '2' || step === 'b') ? 8000 : 4000;
+  const isSafetyCheck = typeof step === 'string' && step.indexOf('safety') === 0;
+  const maxTokens = isSafetyCheck ? 300 : ((step === '2' || step === 'b') ? 8000 : 4000);
 
   let apiResponse;
   try {
@@ -165,6 +166,7 @@ exports.handler = async function(event) {
   }
 
   const text = (data.content && data.content[0] && data.content[0].text) || '';
+  if (text.indexOf('[[COACH_FLAG') !== -1) console.warn('SAFETY FLAG raised for user ' + who.uid + ' at step ' + step);
 
   return {
     statusCode: 200,

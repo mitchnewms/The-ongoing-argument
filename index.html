@@ -3777,6 +3777,80 @@ function post(url, body) {
   return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) { return r.json(); });
 }
 
+// SAFETY FLAGS: logged for every signed-in account (with or without a couple), and emailed to the coach
+var FLAG_EMAIL_SENT = {};
+
+function recordSafetyFlag(step) {
+  if (!user || !user.uid) return;
+  var rec = {
+    coupleId: user.coupleId || '',
+    triggeredBy: user.name || '',
+    triggeredByUid: user.uid,
+    accountType: user.accountType || (user.coupleId ? 'couple' : 'no couple record'),
+    step: step || '',
+    timestamp: new Date().toISOString()
+  };
+  fsAdd('coachFlags', rec).catch(function(err) { console.error('Could not log safety flag:', err); });
+  sendSafetyFlagEmail(rec, user.email || '');
+}
+
+function sendSafetyFlagEmail(rec, email) {
+  try {
+    if (typeof emailjs === 'undefined') return;
+    var key = rec.triggeredByUid + '|' + rec.step;
+    var now = Date.now();
+    if (FLAG_EMAIL_SENT[key] && now - FLAG_EMAIL_SENT[key] < 120000) return;
+    FLAG_EMAIL_SENT[key] = now;
+    var serviceId = window.EMAILJS_SERVICE_ID;
+    var templateId = window.EMAILJS_FLAG_TEMPLATE_ID || window.EMAILJS_COACH_TEMPLATE_ID;
+    var publicKey = window.EMAILJS_PUBLIC_KEY;
+    if (!serviceId || !templateId || !publicKey) return;
+    emailjs.init({ publicKey: publicKey });
+    emailjs.send(serviceId, templateId, {
+      name: rec.triggeredBy || 'Unknown',
+      email: email,
+      account_type: 'SAFETY FLAG (' + safetyStepLabel(rec.step) + '), ' + rec.accountType,
+      uid: rec.triggeredByUid,
+      couple_id: rec.coupleId,
+      timestamp: rec.timestamp,
+      flag_type: 'Safety Pattern',
+      flag_where: safetyStepLabel(rec.step)
+    }).catch(function(err) { console.error('Safety flag email error:', err); });
+  } catch (e) { console.error('Safety flag email error:', e); }
+}
+
+var SAFETY_SCREEN_LABELS = {
+  here: "Here's what I heard", lines: 'The lines you hear every time', gets: 'What gets to them',
+  story: 'The story they tell themselves', feel: 'What they believe their partner feels',
+  want: 'What they most want understood', end: 'How it ends'
+};
+function safetyStepLabel(step) {
+  step = String(step || '');
+  if (step.indexOf('safety-') === 0) return 'answer on screen: ' + (SAFETY_SCREEN_LABELS[step.slice(7)] || step.slice(7));
+  if (step === 'b') return 'script building, step ' + step;
+  return step ? 'step ' + step : 'unknown';
+}
+
+// Checks one answer as the person gives it. Runs in the background and never holds anything up.
+var safetyChecked = {};
+function pbSafetyCheck(key, question, text) {
+  text = String(text || '').trim();
+  if (text.length < 3 || !user) return;
+  var sig = key + '|' + text;
+  if (safetyChecked[sig]) return;
+  safetyChecked[sig] = true;
+  var prompt = 'SAFETY CHECK ONLY. Do not coach, comment on, or reply to the person. A person answered one question about a recurring argument with their partner.\n\n' +
+    'Question: ' + question + '\nTheir answer, exactly as given:\n"""\n' + text.slice(0, 3000) + '\n"""\n\n' +
+    'Apply your safety guidance about fear, control or coercion. If the answer shows any sign of it, reply with only the safety flag from your guidance. Otherwise reply with only: OK';
+  var attempt = function(n) {
+    callAI([{ role: 'user', content: prompt }], 'safety-' + key).catch(function(err) {
+      if (n < 1) setTimeout(function() { attempt(n + 1); }, 2500);
+      else console.error('Safety check could not run for ' + key + ' (the draft step still checks every answer):', err);
+    });
+  };
+  attempt(0);
+}
+
 // AI PROXY
 // Gets a fresh sign-in token without touching the screen.
 function refreshTokenQuietly() {
@@ -3825,15 +3899,7 @@ function callAI(messages, step) {
     }
     if (text.indexOf('[[COACH_FLAG: Safety Pattern]]') !== -1) {
       text = text.replace(/\[\[COACH_FLAG: Safety Pattern\]\]/g, '').trim();
-      if (user && user.coupleId) {
-        fsAdd('coachFlags', {
-          coupleId: user.coupleId,
-          triggeredBy: user.name || '',
-          triggeredByUid: user.uid || '',
-          step: step || '',
-          timestamp: new Date().toISOString()
-        }).catch(function() {});
-      }
+      recordSafetyFlag(step);
     }
     return text;
   });
@@ -4155,7 +4221,7 @@ function loadCoachRequests() {
       var row = document.createElement('div');
       row.style.cssText = 'padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;';
       var ts = f.timestamp ? new Date(f.timestamp).toLocaleString() : '';
-      var stepLabel = f.step ? 'Step ' + f.step : '';
+      var stepLabel = safetyStepLabel(f.step) + (f.accountType && f.accountType !== 'couple' ? ' · ' + f.accountType : '');
       row.innerHTML = '<div>' +
         '<div style="font-size:0.9rem;color:var(--ink);font-weight:600;">' + esc(f.triggeredBy || 'Unknown') + '</div>' +
         '<div style="font-size:0.75rem;color:var(--ink-faint);margin-top:2px;">' + esc(stepLabel) + (stepLabel && ts ? ' · ' : '') + esc(ts) + '</div>' +
@@ -7405,6 +7471,7 @@ function ivApplyScan(parsed) {
     iv.found[map[q]] = true;
   });
   if (parsed.lines.length) pbSpoken = parsed.lines;
+  iv.origHere = JSON.parse(JSON.stringify(iv.here));
 }
 
 // ---- screen plumbing ----
@@ -7549,7 +7616,11 @@ function ivRenderHere() {
     Array.from(body.querySelectorAll('.iv-fact-val')).forEach(function(b) { ivEditRow(b.parentNode, b.getAttribute('data-key')); });
   }));
   a.appendChild(ivButton("That's right", 'iv-next', function() {
-    Array.from(body.querySelectorAll('input.iv-input')).forEach(function(i) { iv.here[i.getAttribute('data-key')] = i.value.trim(); });
+    Array.from(body.querySelectorAll('input.iv-input')).forEach(function(i) {
+      var k = i.getAttribute('data-key'), v = i.value.trim();
+      if (v && v !== (iv.origHere || {})[k]) pbSafetyCheck('here', 'A detail they added or fixed about the argument (' + k + ')', v);
+      iv.here[k] = v;
+    });
     ivNext();
   }));
 }
@@ -7586,6 +7657,7 @@ function ivRenderLines() {
     iv.lines.partner = el('iv-lines-partner').value.trim();
     iv.lines.me = el('iv-lines-me').value.trim();
     if (!iv.lines.partner && !iv.lines.me) { ivErr('Type a line, tap one, or choose Skip.'); return; }
+    pbSafetyCheck('lines', 'The lines they hear every time in this argument', (iv.lines.partner ? pbName() + ' says: ' + iv.lines.partner : '') + (iv.lines.partner && iv.lines.me ? '\n' : '') + (iv.lines.me ? 'I say: ' + iv.lines.me : ''));
     ivNext();
   });
 }
@@ -7651,6 +7723,7 @@ function ivTextScreen(key, boxId, options, nextLabel) {
     var v = el(boxId).value.trim();
     if (!v) { ivErr('Type an answer, tap an option, or choose Skip.'); return; }
     iv[key] = v;
+    pbSafetyCheck(key, ivHeading(key), v);
     ivNext();
   });
 }
@@ -7680,6 +7753,7 @@ function ivRenderEnd() {
     var v = box.value.trim();
     if (!v) { ivErr('Type how it ends, tap an option, or choose Skip.'); return; }
     iv.end = v;
+    pbSafetyCheck('end', 'How the argument ends', v);
     ivNext();
   });
 }
@@ -8708,6 +8782,8 @@ window.EMAILJS_SERVICE_ID        = 'service_k0ocp9f';
 window.EMAILJS_TEMPLATE_ID       = 'template_hregqk5';
 window.EMAILJS_NOTIFY_TEMPLATE_ID = 'template_ocptuqm';
 window.EMAILJS_COACH_TEMPLATE_ID  = 'template_91srec6';
+// Safety flag alerts use this template. Until a dedicated one is created in EmailJS, they use the coach template above.
+// window.EMAILJS_FLAG_TEMPLATE_ID = 'template_XXXXXXX';
 window.EMAILJS_PUBLIC_KEY        = '1HSruQu2MRIfbUF0B';
 </script>
 
