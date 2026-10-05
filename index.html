@@ -1278,6 +1278,29 @@ body, body * {
 #path-choice-screen .pc-card-desc { font-size: 0.87rem !important; color: #6A6458 !important; }
 .pc-privacy { font-size: 0.8rem !important; color: #A89E92 !important; font-style: normal !important; }
 .pc-scene-note { color: #7A7468 !important; font-style: normal !important; font-size: 0.9rem !important; margin-top: 24px !important; }
+.pc-breath { text-align: center; font-size: 0.95rem; color: #5A5448; margin: 0 0 22px; line-height: 1.6; }
+.pc-inputs { display: flex; gap: 12px; }
+.pc-input-btn { flex: 1; min-height: 132px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); color: #111111; font-family: inherit; font-size: clamp(0.95rem, 3vw, 1.05rem); font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; padding: 16px; }
+.pc-input-btn svg { width: 36px; height: 36px; color: #E06500; }
+.pc-input-btn:active { background: #F6F4F0; }
+.pc-input-btn:focus-visible, .pc-quiet-link:focus-visible, .story-mic:focus-visible { outline: 2px solid #E06500; outline-offset: 2px; }
+.pc-mic-note { text-align: center; font-size: 0.8rem; color: #A89E92; margin: 12px 0 0; }
+.pc-quiet-link { display: block; margin: 22px auto 0; background: none; border: none; padding: 8px; color: #8A8478; font-family: inherit; font-size: 0.88rem; text-decoration: underline; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+#story-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #F6F4F0; flex-direction: column; align-items: center; padding: 32px 24px 60px; overflow-y: auto; }
+.story-wrap { width: 100%; max-width: 520px; margin: auto; }
+.story-prompt { text-align: center; font-size: 0.95rem; color: #5A5448; line-height: 1.6; margin: 0 0 18px; }
+#story-text { display: block; width: 100%; min-height: 220px; resize: vertical; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; padding: 14px; font-family: 'Courier Prime', monospace; font-size: 1rem; line-height: 1.6; color: #111111; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
+#story-text:focus { outline: none; border-color: #E06500; }
+.story-status { min-height: 22px; margin: 10px 0 0; font-size: 0.82rem; color: #7A7468; text-align: center; }
+.story-controls { display: flex; gap: 12px; margin-top: 14px; }
+.story-mic { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; color: #111111; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.story-mic svg { width: 20px; height: 20px; color: #E06500; }
+.story-mic.story-mic-live { border-color: #E06500; background: #FFF4EA; }
+.story-mic.story-mic-live svg { animation: stBlink 1.2s step-end infinite; }
+.story-continue { flex: 1; min-height: 52px; background: #E06500; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.story-continue:disabled { opacity: 0.45; cursor: default; }
+.story-continue:active { background: #C45800; }
+@media (prefers-reduced-motion: reduce) { .story-mic.story-mic-live svg { animation: none; } }
 
 /* 16. PATH B SCREEN — flip to light */
 #path-b-screen { background: #F6F4F0 !important; }
@@ -2379,20 +2402,44 @@ h1, h2, h3,
   <div class="pc-wrap" style="position:relative;">
     <button class="pc-home-btn" onclick="navHome()">← Home</button>
     <div class="pc-eyebrow">Script Writing</div>
-    <div class="pc-heading">How do you want to build your script?</div>
-    <p class="pc-sub">This is private. Your partner makes the same choice on their own.</p>
-    <div class="pc-cards">
-      <div class="pc-card" onclick="choosePathA()">
-        <div class="pc-card-title">Write it yourself</div>
-        <div class="pc-card-desc">Start with a blank page. You set the scene and write each line of dialogue exactly as you remember it, in your own words.</div>
-      </div>
-      <div class="pc-card" onclick="choosePathB()">
-        <div class="pc-card-title">Get AI assistance</div>
-        <div class="pc-card-desc">Answer a few questions about how the fight unfolds. The AI builds a first draft from your answers. You edit it until it sounds like the two of you.</div>
-      </div>
+    <div class="pc-heading">Just tell me what happened.</div>
+    <p class="pc-sub">Talk or type, the way you'd tell a friend. You don't need to write a script. The AI shapes it into one for you.</p>
+    <p class="pc-breath">Take a breath. You're telling the story, not reliving it.</p>
+    <div class="pc-inputs" id="pc-inputs">
+      <button type="button" class="pc-input-btn pc-input-mic" id="pc-btn-talk" onclick="startStory('voice')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        <span>Talk it out</span>
+      </button>
+      <button type="button" class="pc-input-btn" id="pc-btn-type" onclick="startStory('typed')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6.01" y2="10"/><line x1="10" y1="10" x2="10.01" y2="10"/><line x1="14" y1="10" x2="14.01" y2="10"/><line x1="18" y1="10" x2="18.01" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>
+        <span>Type it out</span>
+      </button>
     </div>
+    <p class="pc-mic-note" id="pc-mic-note">Only the words are saved. No audio is recorded.</p>
+    <p class="pc-mic-note" id="pc-mic-tip" style="display:none">Tip: you can also tap the microphone on your keyboard to talk.</p>
+    <button type="button" class="pc-quiet-link" onclick="choosePathA()">Prefer to write it yourself?</button>
     <p class="pc-scene-note">Zero in on the flashpoint — the 1 to 2 minutes where it starts and escalates. Include the parts where, even in the heat of it, you could hear both of you running the same lines you always run. And when finally, one or both of you disengages.</p>
     <div class="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
+  </div>
+</div>
+
+<!-- STORY SCREEN — free-form retelling by voice or typing, before any questions -->
+<div id="story-screen">
+  <div class="story-wrap">
+    <button class="ls-back" onclick="storyBack()">← Back</button>
+    <div class="pc-eyebrow">Script Writing</div>
+    <div class="pc-heading">Tell me what happened.</div>
+    <p class="story-prompt">Start wherever it starts for you. Include what your partner said, as close to their actual words as you can.</p>
+    <textarea id="story-text" placeholder="Start here…" aria-label="Your story" autocomplete="off"></textarea>
+    <p class="story-status" id="story-status" role="status" aria-live="polite"></p>
+    <div class="story-controls">
+      <button type="button" class="story-mic" id="story-mic" onclick="storyToggleMic()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        <span id="story-mic-label">Talk</span>
+      </button>
+      <button type="button" class="story-continue" id="story-continue" onclick="storyDone()" disabled>Continue</button>
+    </div>
+    <p class="pc-mic-note" id="story-mic-note">Only the words are saved. No audio is recorded.</p>
   </div>
 </div>
 
@@ -3210,11 +3257,19 @@ function navBack() {
   appNavStack.pop();
   var prev = appNavStack[appNavStack.length - 1];
   if (prev === 'path-choice') {
+    storyStopListening();
+    hide('story-screen');
     hide('path-b-screen');
     hide('script-tutorial-screen');
     document.body.style.overflow = 'hidden';
     showFlex('path-choice-screen');
+  } else if (prev === 'story') {
+    hide('path-b-screen');
+    document.body.style.overflow = 'hidden';
+    showFlex('story-screen');
+    storyRenderControls();
   } else if (prev === 'script') {
+    hide('story-screen');
     hide('path-choice-screen');
     hide('path-b-screen');
     document.body.style.overflow = '';
@@ -3226,6 +3281,8 @@ function navHome() {
   // Logo home button: clear overlays and return the user to the script screen entry state.
   // Does NOT sign the user out — just closes any overlay above the script tool.
   appNavStack = [];
+  storyStopListening();
+  hide('story-screen');
   hide('path-choice-screen');
   hide('path-b-screen');
   document.body.style.overflow = '';
@@ -6726,6 +6783,162 @@ function checkPathChoice() {
   document.body.style.overflow = 'hidden';
 }
 
+// STORY (free-form retelling by voice or typing)
+var pbStory = { text: '', voice: false, typed: false };
+var _story = { rec: null, want: false, live: false, base: '', startedAt: 0, quickEnds: 0 };
+
+function storySpeechSupported() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+
+function storySetStatus(msg) { txt('story-status', msg || ''); }
+
+function storyRenderControls() {
+  var supported = storySpeechSupported();
+  var mic = el('story-mic'), label = el('story-mic-label'), cont = el('story-continue'), note = el('story-mic-note');
+  if (mic) mic.style.display = supported ? 'flex' : 'none';
+  if (note) note.style.display = supported ? 'block' : 'none';
+  if (mic) mic.classList.toggle('story-mic-live', _story.live);
+  if (label) label.textContent = _story.live ? 'Tap to pause' : (pbStory.voice ? 'Tap to keep talking' : 'Talk');
+  var hasText = !!(el('story-text') && el('story-text').value.trim());
+  if (cont) {
+    cont.disabled = !hasText;
+    cont.textContent = _story.live ? 'Done' : 'Continue';
+  }
+}
+
+function pcSyncInputs() {
+  var supported = storySpeechSupported();
+  var talk = el('pc-btn-talk'), note = el('pc-mic-note'), tip = el('pc-mic-tip');
+  if (talk) talk.style.display = supported ? '' : 'none';
+  if (note) note.style.display = supported ? '' : 'none';
+  if (tip) tip.style.display = supported ? 'none' : '';
+}
+
+function startStory(mode) {
+  el('path-choice-screen').style.display = 'none';
+  navPush('story');
+  showFlex('story-screen');
+  document.body.style.overflow = 'hidden';
+  storySetStatus('');
+  storyRenderControls();
+  if (mode === 'voice' && storySpeechSupported()) {
+    storyStartListening();
+  } else {
+    var ta = el('story-text'); if (ta) ta.focus();
+  }
+}
+
+function storyJoin(base, add) {
+  add = (add || '').trim();
+  if (!base) return add;
+  return add ? base + ' ' + add : base;
+}
+
+function storyStartListening() {
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) return;
+  var ta = el('story-text');
+  if (!ta) return;
+  if (_story.rec) { try { _story.rec.abort(); } catch(e) {} _story.rec = null; }
+  var rec = new SpeechRec();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = 'en-US';
+  _story.rec = rec;
+  _story.want = true;
+  _story.base = ta.value.trim();
+  _story.startedAt = Date.now();
+  rec.onstart = function() {
+    _story.live = true;
+    storySetStatus('Listening. Keep going, pauses are fine.');
+    storyRenderControls();
+  };
+  rec.onresult = function(e) {
+    var finals = '', interim = '';
+    for (var i = 0; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finals += e.results[i][0].transcript + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    pbStory.voice = true;
+    ta.value = storyJoin(_story.base, (finals + interim).replace(/\s+/g, ' '));
+    storyRenderControls();
+  };
+  rec.onerror = function(ev) {
+    var err = ev && ev.error;
+    if (err === 'not-allowed' || err === 'service-not-allowed') {
+      _story.want = false;
+      storySetStatus('Microphone access is off. You can type instead, or allow the microphone in your browser settings.');
+    }
+  };
+  rec.onend = function() {
+    if (_story.rec !== rec) return;
+    _story.live = false;
+    _story.base = ta.value.trim();
+    if (_story.want) {
+      var ranFor = Date.now() - _story.startedAt;
+      _story.quickEnds = ranFor < 1500 ? _story.quickEnds + 1 : 0;
+      if (_story.quickEnds < 3) {
+        setTimeout(function() { if (_story.want && _story.rec === rec) storyStartListening(); }, 250);
+        return;
+      }
+      _story.want = false;
+      storySetStatus('Paused. Tap to keep talking.');
+    }
+    storyRenderControls();
+  };
+  try { rec.start(); } catch(e) { _story.want = false; _story.live = false; storySetStatus('Tap to keep talking.'); storyRenderControls(); }
+}
+
+function storyStopListening() {
+  _story.want = false;
+  _story.quickEnds = 0;
+  var rec = _story.rec;
+  _story.rec = null;
+  _story.live = false;
+  if (rec) { try { rec.stop(); } catch(e) {} }
+  var ta = el('story-text');
+  if (ta) _story.base = ta.value.trim();
+}
+
+function storyToggleMic() {
+  if (_story.live || _story.want) {
+    storyStopListening();
+    storySetStatus('Paused. Tap to keep talking.');
+    storyRenderControls();
+  } else {
+    storyStartListening();
+  }
+}
+
+function storyDone() {
+  storyStopListening();
+  var ta = el('story-text');
+  var text = ta ? ta.value.trim() : '';
+  if (!text) { storyRenderControls(); return; }
+  pbStory.text = text;
+  hide('story-screen');
+  choosePathB();
+}
+
+function storyBack() {
+  storyStopListening();
+  if (appNavStack[appNavStack.length - 1] === 'story') {
+    navBack();
+  } else {
+    hide('story-screen');
+    showFlex('path-choice-screen');
+  }
+}
+
+(function() {
+  var ta = el('story-text');
+  if (ta) ta.addEventListener('input', function() {
+    if (_story.live || _story.want) { storyStopListening(); storySetStatus('Paused. Tap to keep talking.'); }
+    pbStory.typed = true;
+    storyRenderControls();
+  });
+  pcSyncInputs();
+})();
+
 function choosePathA() {
   sceneLengthOverWarningShown = false;
   el('path-choice-screen').style.display = 'none';
@@ -7159,8 +7372,9 @@ window.addEventListener('popstate', function(e) {
   var coachEl = el('coach-screen');
   var pathChoiceEl = el('path-choice-screen');
   var pathBEl = el('path-b-screen');
+  var storyEl = el('story-screen');
   var shown = function(e) { return e && (e.style.display === 'block' || e.style.display === 'flex'); };
-  if (shown(scriptEl) || shown(coachEl) || shown(pathChoiceEl) || shown(pathBEl)) {
+  if (shown(scriptEl) || shown(coachEl) || shown(pathChoiceEl) || shown(pathBEl) || shown(storyEl)) {
     // Try in-app back first; if there's nothing to pop, just re-anchor
     if (appNavStack.length > 1) {
       navBack();
@@ -7429,7 +7643,6 @@ window.EMAILJS_COACH_TEMPLATE_ID  = 'template_91srec6';
 window.EMAILJS_PUBLIC_KEY        = '1HSruQu2MRIfbUF0B';
 </script>
 
-<div style="position:fixed;bottom:4px;left:6px;z-index:2147483647;font:10px monospace;color:#999;opacity:.7;pointer-events:none;">build 2026-10-04a</div>
 </body>
 </html>
 
