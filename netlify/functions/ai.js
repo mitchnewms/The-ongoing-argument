@@ -3,10 +3,28 @@
 const fs = require('fs');
 const path = require('path');
 
-const SYSTEM_PROMPT = fs.readFileSync(
-  path.join(__dirname, 'ai-prompt.txt'),
-  'utf8'
-);
+// Load the master prompt without ever throwing at startup. A crash here makes every
+// request fail with no explanation, so a missing file is reported on each request instead.
+let SYSTEM_PROMPT = '';
+let PROMPT_PROBLEM = '';
+(function loadPrompt() {
+  const roots = [__dirname, process.env.LAMBDA_TASK_ROOT, process.cwd()].filter(Boolean);
+  const names = ['ai-prompt.txt', path.join('netlify', 'functions', 'ai-prompt.txt')];
+  const tried = [];
+  for (const root of roots) {
+    for (const name of names) {
+      const file = path.join(root, name);
+      if (tried.indexOf(file) !== -1) continue;
+      tried.push(file);
+      try {
+        const text = fs.readFileSync(file, 'utf8');
+        if (text.length > 1000) { SYSTEM_PROMPT = text; return; }
+      } catch (err) { /* try the next location */ }
+    }
+  }
+  PROMPT_PROBLEM = 'ai-prompt.txt not found. Looked in: ' + tried.join(', ');
+  console.error(PROMPT_PROBLEM);
+})();
 
 // Public web API key for the Firebase project (it is also in the page source).
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyBAuVl_ZdnBiuN4BbtBp01z_n-2f-lJVys';
@@ -96,6 +114,11 @@ exports.handler = async function(event) {
   if (!messages || !Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES ||
       !messages.every(function(m) { return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'; })) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'messages required', code: 'bad_request' }) };
+  }
+
+  if (!SYSTEM_PROMPT) {
+    console.error('AI request failed: ' + PROMPT_PROBLEM);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'The AI is not set up correctly on the server.', code: 'config_prompt' }) };
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;

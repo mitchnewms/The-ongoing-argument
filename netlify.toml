@@ -1,6 +1,11 @@
 [build]
   functions = "netlify/functions"
 
+# The AI function reads its master prompt from this file at runtime, so it must be
+# shipped inside the function package. Without this the function crashes on startup.
+[functions."ai"]
+  included_files = ["netlify/functions/ai-prompt.txt"]
+
 # Prevent browsers from serving stale cached HTML after a deploy.
 # index.html must always be re-fetched; only the file itself is affected.
 [[headers]]
