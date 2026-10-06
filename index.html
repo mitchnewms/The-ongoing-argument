@@ -1289,11 +1289,12 @@ body, body * {
 .pc-input-btn:focus-visible, .pc-quiet-link:focus-visible, .story-mic:focus-visible { outline: 2px solid #E06500; outline-offset: 2px; }
 .pc-mic-note { text-align: center; font-size: 0.8rem; color: #A89E92; margin: 12px 0 0; }
 .pc-quiet-link { display: block; margin: 22px auto 0; background: none; border: none; padding: 8px; color: #8A8478; font-family: inherit; font-size: 0.88rem; text-decoration: underline; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-#story-screen, #ai-edit-screen, #partner-name-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #F6F4F0; flex-direction: column; align-items: center; padding: 32px 24px 60px; overflow-y: auto; }
+#story-screen, #ai-edit-screen, #partner-name-screen, #join-signedin-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #F6F4F0; flex-direction: column; align-items: center; padding: 32px 24px 60px; overflow-y: auto; }
 .story-wrap { width: 100%; max-width: 520px; margin: auto; }
 .story-prompt { text-align: center; font-size: 0.95rem; color: #5A5448; line-height: 1.6; margin: 0 0 18px; }
 #story-text, #ai-edit-text { display: block; width: 100%; min-height: 220px; resize: vertical; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; padding: 14px; font-family: 'Courier Prime', monospace; font-size: 1rem; line-height: 1.6; color: #111111; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
 #story-text:focus, #ai-edit-text:focus { outline: none; border-color: #E06500; }
+#join-signedin-screen { z-index: 300; }
 #iv-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #F6F4F0; flex-direction: column; align-items: center; padding: 32px 24px 0; overflow-y: auto; }
 .iv-progress { text-align: center; font-size: 0.8rem; color: #8A8478; margin: -4px 0 12px; }
 .iv-label { font-size: 1rem; font-weight: 700; color: #111111; margin: 18px 0 8px; line-height: 1.4; text-align: left; }
@@ -1314,6 +1315,11 @@ body, body * {
 .iv-skip { background: #FFFFFF; border: 1.5px solid #E2DED8; color: #111111; }
 .iv-next { background: #E06500; border: none; color: #FFFFFF; }
 .iv-next:active { background: #C45800; }
+.ipc-btn { display: block; width: 100%; margin: 12px 0; padding: 14px 16px; background: var(--paper); border: 1.5px solid #E06500; border-radius: 2px; color: var(--ink); font-family: 'Courier Prime', monospace; font-size: 0.85rem; line-height: 1.5; text-align: left; cursor: pointer; touch-action: manipulation; -webkit-appearance: none; }
+.signin-only #tab-create { display: none; }
+.signin-only #tab-signin { flex: 1; }
+#signin-back { display: none; align-self: flex-start; margin: 0 0 12px; padding: 8px 4px; background: none; border: none; color: #a09080; font-family: inherit; font-size: 0.85rem; cursor: pointer; }
+.signin-only #signin-back { display: block; }
 .iv-opt:focus-visible, .iv-skip:focus-visible, .iv-next:focus-visible, .iv-fact-val:focus-visible { outline: 2px solid #E06500; outline-offset: 2px; }
 .iv-details { margin-top: 12px; font-size: 0.8rem; color: #5A5448; text-align: left; }
 .iv-details pre { white-space: pre-wrap; word-break: break-word; font-size: 0.72rem; max-height: 200px; overflow: auto; }
@@ -1930,6 +1936,7 @@ h1, h2, h3,
       onkeydown="if(event.key==='Enter')betaGateSubmit()" />
     <div id="beta-pw-error" style="color:#C0392B;font-size:0.8rem;margin-bottom:10px;min-height:1em;"></div>
     <button onclick="betaGateSubmit()" style="width:100%;padding:12px;background:#E06500;color:#fff;border:none;border-radius:3px;font-size:0.9rem;cursor:pointer;font-family:'Lora',Georgia,serif;letter-spacing:0.02em;">Enter</button>
+    <button type="button" id="beta-signin-link" onclick="openSignInFromGate()" style="display:block;width:100%;margin-top:14px;padding:12px;background:#fff;color:#111;border:1px solid #E2DED8;border-radius:3px;font-size:0.9rem;cursor:pointer;font-family:inherit;">Already have an account? Sign in</button>
   </div>
 </div>
 <script>
@@ -1940,6 +1947,8 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
   if (sessionStorage.getItem('oa_beta') === '1') {
     document.getElementById('beta-gate').style.display = 'none';
   }
+  // A signed-in returning person does not need the password again.
+  try { if (localStorage.getItem('oa_user')) document.getElementById('beta-gate').style.display = 'none'; } catch (e) {}
   if (/^\/join\//.test(window.location.pathname)) {
     var hint = document.getElementById('beta-join-hint'); if (hint) hint.style.display = 'block';
   }
@@ -1968,9 +1977,9 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <!-- Payment Confirmation -->
 <div id="payment-confirm-screen" class="enroll-screen" style="display:none;">
   <div class="pc-card">
-    <div class="pc-eyebrow">Payment complete</div>
-    <div class="pc-hd">You are all set.</div>
-    <div class="pc-sub">Your partner just needs a link to join you. Send it now or share the code below as a fallback.</div>
+    <div class="pc-eyebrow" id="pc-eyebrow">Beta access. No payment was taken.</div>
+    <div class="pc-hd" id="pc-hd">You are all set.</div>
+    <div class="pc-sub" id="pc-sub">Your partner just needs a link to join you. Send it now or share the code below as a fallback.</div>
     <div class="pc-beta-note" id="pc-beta-note" style="display:none;"></div>
     <div class="pc-divider"></div>
     <div class="pc-email-label">Send this to your partner so they can join.</div>
@@ -1986,7 +1995,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
     <div class="pc-share-label">Or copy the join link directly</div>
     <div class="pc-share-url" id="pc-join-url"></div>
     <button class="pc-share-copy-btn" id="pc-share-copy-btn" onclick="pcCopyLink()">Copy Link</button>
-    <button class="pc-enter-btn" onclick="pcEnterApp()">Enter Your Script Tool →</button>
+    <button class="pc-enter-btn" id="pc-enter-btn" onclick="pcEnterApp()">Enter Your Script Tool →</button>
   </div>
 </div>
 
@@ -2153,6 +2162,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 </div>
 
 <div id="auth-screen">
+  <button type="button" id="signin-back" onclick="closeSignInOnly()">&#8592; Back</button>
   <div class="auth-header">
     <h1>The Ongoing Argument</h1>
     <p>A script in progress — always to be continued</p>
@@ -2374,6 +2384,10 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
     </div>
   </div>
 
+  <div id="invite-partner-card" style="display:none;">
+    <button type="button" class="ipc-btn" onclick="openInviteScreen()">Your partner has not joined yet. Get the invite link and code.</button>
+  </div>
+
   <div id="couple-linked-status">
     <div class="cl-linked">
       <span class="cl-linked-icon">✓</span>
@@ -2505,6 +2519,19 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
       <button type="button" class="story-continue" id="story-continue" onclick="storyDone()">Continue</button>
     </div>
     <p class="pc-mic-note" id="story-mic-note">Only the words are saved. No audio is recorded.</p>
+  </div>
+</div>
+
+<!-- A signed-in person opened a join link -->
+<div id="join-signedin-screen" role="dialog" aria-modal="true">
+  <div class="story-wrap">
+    <div class="pc-eyebrow">Join link</div>
+    <div class="pc-heading">You are already signed in</div>
+    <p class="story-prompt" id="js-message"></p>
+    <div class="story-controls">
+      <button type="button" class="iv-skip" onclick="joinStayHere()">Stay signed in</button>
+      <button type="button" class="story-continue" onclick="joinSignOut()">Sign out</button>
+    </div>
   </div>
 </div>
 
@@ -3294,6 +3321,9 @@ document.addEventListener('keydown', function(e) {
 
   bindAll();
 
+  // A signed-in person opened a join link: say so plainly instead of silently ignoring it
+  if (pendingJoinCoupleId && user) showJoinSignedIn();
+
   // If Partner B arrived via /join/ URL and is not logged in, show their intro
   if (pendingJoinCoupleId && !user) {
     pendingCoupleId = pendingJoinCoupleId;
@@ -3560,7 +3590,7 @@ function createAccount() {
         var qaCode = generateCoupleCode();
         fsSet('couples/' + coupleId, { paidStatus: true, coupleCode: qaCode, paidAt: new Date().toISOString(), partnerAConfirmed: true })
           .then(function() { return writeJoinCode(coupleId, qaCode, fight, false); })
-          .then(function() { showPaymentConfirm(qaCode, coupleId); });
+          .then(function() { showPaymentConfirm(qaCode, coupleId, 'beta'); });
         return;
         // END BETA BYPASS — REMOVE ABOVE BLOCK BEFORE LAUNCH
         el('btn-create').textContent = 'Redirecting to payment…';
@@ -3583,7 +3613,72 @@ function createAccount() {
   }).catch(function() { el('btn-create').disabled = false; el('btn-create').textContent = 'Create Account'; txt('ca-error', 'Connection error. Try again.'); });
 }
 
+// ---- Sign in from the beta password screen (sign in only: no new accounts without the password) ----
+function openSignInFromGate() {
+  try { sessionStorage.setItem('oa_signin_only', '1'); } catch (e) {}
+  document.body.classList.add('signin-only');
+  var g = el('beta-gate'); if (g) g.style.display = 'none';
+  var lp = el('landing-screen');
+  if (lp) { lp.setAttribute('data-prev-display', lp.style.display || ''); lp.style.display = 'none'; }
+  hide('partner-b-intro-screen');
+  txt('si-error', '');
+  switchTab('signin');
+  showFlex('auth-screen');
+}
+
+function closeSignInOnly() {
+  try { sessionStorage.removeItem('oa_signin_only'); } catch (e) {}
+  document.body.classList.remove('signin-only');
+  hide('auth-screen');
+  var lp = el('landing-screen');
+  if (lp && !/^\/join\//.test(window.location.pathname)) lp.style.display = lp.getAttribute('data-prev-display') || '';
+  if (/^\/join\//.test(window.location.pathname)) { var pb = el('partner-b-intro-screen'); if (pb) pb.style.display = 'block'; }
+  var g = el('beta-gate'); if (g) g.style.display = 'flex';
+}
+
+// ---- Partner invite: find the link and code again from the home screen ----
+var inviteInfo = null;
+function openInviteScreen() {
+  if (!inviteInfo) return;
+  showPaymentConfirm(inviteInfo.code, inviteInfo.coupleId, 'invite');
+}
+
+// ---- A signed-in person opens a join link ----
+function showJoinSignedIn() {
+  var who = (user && (user.name || user.email)) || 'another account';
+  txt('js-message', 'You are signed in as ' + who + '. Sign out to join as the partner.');
+  showFlex('join-signedin-screen');
+}
+function joinStayHere() {
+  hide('join-signedin-screen');
+  try { history.replaceState({ screen: 'app' }, '', '/'); } catch (e) {}
+}
+function joinSignOut() {
+  hide('join-signedin-screen');
+  signOut();
+  window.location.reload();
+}
+
+// ---- Reported speech: "She says I never listen" means her line is "you never listen" ----
+function pbFlipReported(raw) {
+  var t = String(raw || '');
+  if (/\b(you|your|you're|yours)\b/i.test(t)) return t;
+  if (!/\b(I|me|my|mine|myself|I'm|I've|I'll|I'd)\b/.test(t) && !/\b(me|my|mine|myself)\b/i.test(t)) return t;
+  var story = String((pbStory && pbStory.text) || '');
+  var at = story.toLowerCase().indexOf(t.toLowerCase());
+  if (at !== -1) {
+    var quotes = (story.slice(0, at).match(/["“”]/g) || []).length;
+    if (quotes % 2 === 1) return t; // she was quoted directly, so "I" is her
+  }
+  return t.replace(/\bI am\b/g, 'you are').replace(/\bI'm\b/g, "you're").replace(/\bI was\b/g, 'you were')
+    .replace(/\bI've\b/g, "you've").replace(/\bI'll\b/g, "you'll").replace(/\bI'd\b/g, "you'd")
+    .replace(/\bI\b/g, 'you').replace(/\bme\b/gi, 'you').replace(/\bmy\b/gi, 'your')
+    .replace(/\bmine\b/gi, 'yours').replace(/\bmyself\b/gi, 'yourself');
+}
+
 function signOut() {
+  var backToGate = false;
+  try { backToGate = sessionStorage.getItem('oa_beta') !== '1'; sessionStorage.removeItem('oa_signin_only'); } catch (e) {}
   user = null; token = null;
   localStorage.removeItem('oa_user');
   try { localStorage.removeItem('oa_pb_progress'); } catch (e) {}
@@ -3611,7 +3706,9 @@ function signOut() {
   if (idleCheckTimer) { clearInterval(idleCheckTimer); idleCheckTimer = null; }
   idleCheckInShown = false; pbCommitmentShown = false; commitmentCallback = null;
   currentJourneyStep = null;
+  hide('invite-partner-card');
   switchTab('signin');
+  if (backToGate) window.location.reload();
 }
 
 function saveSession(d) {
@@ -4730,7 +4827,7 @@ function handlePaymentSuccess(sessionId) {
     return fsSet('couples/' + d.coupleId, { paidStatus: true, coupleCode: d.coupleCode })
     .then(function() { return writeJoinCode(d.coupleId, d.coupleCode, user && user.fight, false); })
     .then(function() {
-      showPaymentConfirm(d.coupleCode, d.coupleId);
+      showPaymentConfirm(d.coupleCode, d.coupleId, 'paid');
     });
   }).catch(function() {
     history.replaceState({}, '', '/');
@@ -4741,7 +4838,14 @@ function handlePaymentSuccess(sessionId) {
   });
 }
 
-function showPaymentConfirm(code, coupleId) {
+function showPaymentConfirm(code, coupleId, mode) {
+  // mode: 'paid' after a real Stripe payment, 'invite' when reopened from the home screen, anything else is the beta
+  var words = {
+    paid: ['Payment complete', 'You are all set.', 'Your partner just needs a link to join you. Send it now or share the code below as a fallback.', 'Enter Your Script Tool \u2192'],
+    invite: ['Invite your partner', 'Here is your partner\'s invite.', 'Your partner needs this link or code to join you. Send it again, or copy it.', 'Back to my script'],
+    beta: ['Beta access. No payment was taken.', 'You are all set.', 'Your partner just needs a link to join you. Send it now or share the code below as a fallback.', 'Enter Your Script Tool \u2192']
+  }[mode === 'paid' || mode === 'invite' ? mode : 'beta'];
+  txt('pc-eyebrow', words[0]); txt('pc-hd', words[1]); txt('pc-sub', words[2]); txt('pc-enter-btn', words[3]);
   hide('auth-screen'); hide('landing-screen');
   hide('buyin-screen');
   txt('pc-code-display', code);
@@ -4853,6 +4957,9 @@ function clUpdateLinkUI(profile) {
       if (couple.partnerAId === user.uid && couple.coupleCode) {
         writeJoinCode(profile.coupleId, couple.coupleCode, couple.fightName || user.fight, !!couple.partnerBId);
       }
+      var showInvite = couple.partnerAId === user.uid && !couple.partnerBId && !!couple.coupleCode;
+      inviteInfo = showInvite ? { code: couple.coupleCode, coupleId: profile.coupleId } : null;
+      var ic = el('invite-partner-card'); if (ic) ic.style.display = showInvite ? 'block' : 'none';
       var pName = couple.partnerBId ? (profile.partnerName || 'your partner') : 'waiting for partner';
       clShowLinked(pName);
       journeyRoute();
@@ -7517,7 +7624,10 @@ function pbParseScan(text) {
   });
   (Array.isArray(obj.lines) ? obj.lines : []).forEach(function(l) {
     var t = l && typeof l.text === 'string' ? l.text.trim() : '';
-    if (t.length >= 2 && pbEvidenceOk(pbStory.text, t)) out.lines.push({ who: l.who === 'partner' ? 'partner' : 'me', text: t });
+    if (t.length >= 2 && pbEvidenceOk(pbStory.text, t)) {
+      var who = l.who === 'partner' ? 'partner' : 'me';
+      out.lines.push({ who: who, text: who === 'partner' ? pbFlipReported(t) : t, raw: t });
+    }
   });
   return out;
 }
