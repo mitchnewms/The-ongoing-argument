@@ -6320,7 +6320,7 @@ function s9BuildPracticePrompt(myLine, partnerLine, step7Data, scene) {
   if (step7Data.messages) {
     try {
       var msgs = typeof step7Data.messages === 'string' ? JSON.parse(step7Data.messages) : step7Data.messages;
-      var last4 = msgs.slice(-4).map(function(m) { return (m.role === 'user' ? 'Person: ' : 'Coach: ') + m.content; }).join('\n');
+      var last4 = msgs.slice(-4).map(function(m) { return (m.role === 'user' ? 'Person: ' : 'Guide: ') + m.content; }).join('\n');
       if (last4) recentMessages = '\nRecent Step 7 conversation (for tool context):\n' + last4 + '\n';
     } catch(e) {}
   }
