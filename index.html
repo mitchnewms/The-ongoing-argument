@@ -969,15 +969,18 @@ body {
 /* Shared overlay screen base */
 .enroll-screen {
   display: none;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 150;
+  background: #2a2520;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 40px 24px 60px;
+  justify-content: flex-start;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px 24px 60px;
 }
+.enroll-screen > * { width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; }
+.enroll-screen > :first-child { margin-top: auto; }
+.enroll-screen > :last-child { margin-bottom: auto; }
 
 /* ── Start or Join choice ── */
 #start-choice-screen {}
@@ -1006,19 +1009,20 @@ body {
 
 /* ── Payment confirmation screen ── */
 #payment-confirm-screen {}
-.pc-card { background: var(--paper); border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid #E06500; padding: 36px 28px; width: 100%; text-align: center; }
+.pc-card { background: var(--paper); border-radius: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-top: 4px solid #E06500; padding: 26px 24px; width: 100%; text-align: center; }
 .pc-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #E06500; font-family: 'Courier Prime', monospace; margin-bottom: 12px; }
 .pc-hd { font-family: 'Special Elite', cursive; font-size: 1.15rem; color: var(--ink); margin-bottom: 8px; }
-.pc-sub { font-size: 0.82rem; color: var(--ink-light); font-style: italic; font-family: 'Lora', Georgia, serif; line-height: 1.55; margin-bottom: 28px; }
+.pc-sub { font-size: 0.82rem; color: var(--ink-light); font-style: italic; font-family: 'Lora', Georgia, serif; line-height: 1.55; margin-bottom: 16px; }
+.pc-beta-note { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-light); background: var(--paper-dark); border: 1px solid var(--line); padding: 10px 12px; margin-bottom: 16px; line-height: 1.5; text-align: left; }
 .pc-code-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 6px; }
-.pc-code { font-family: 'Special Elite', cursive; font-size: 3rem; letter-spacing: 0.5em; color: #E06500; margin: 0 auto 16px; padding-left: 0.5em; line-height: 1.1; }
+.pc-code { font-family: 'Special Elite', cursive; font-size: 2.4rem; letter-spacing: 0.5em; color: #E06500; margin: 0 auto 16px; padding-left: 0.5em; line-height: 1.1; }
 .pc-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 20px; border: 1.5px solid #E06500; background: transparent; color: #E06500; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; transition: background 0.15s, color 0.15s; }
 .pc-copy-btn:hover { background: #E06500; color: white; }
-.pc-divider { width: 40px; height: 1px; background: var(--line); margin: 28px auto; }
+.pc-divider { width: 40px; height: 1px; background: var(--line); margin: 18px auto; }
 .pc-share-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 8px; }
 .pc-share-url { font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: var(--ink-light); word-break: break-all; margin-bottom: 12px; padding: 10px 12px; background: var(--paper-dark); border-radius: 1px; border: 1px solid var(--line); }
 .pc-share-copy-btn { font-family: 'Courier Prime', monospace; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; border: 1px solid var(--line); background: transparent; color: var(--ink-light); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
-.pc-enter-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin-top: 28px; }
+.pc-enter-btn { font-family: 'Special Elite', cursive; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 2px; width: 100%; cursor: pointer; -webkit-appearance: none; touch-action: manipulation; display: block; margin-top: 20px; }
 .pc-email-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-family: 'Courier Prime', monospace; margin-bottom: 10px; text-align: left; }
 .pc-email-input { display: block; width: 100%; padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: var(--ink); background: white; border: 1.5px solid var(--line); border-radius: 1px; outline: none; -webkit-appearance: none; margin-bottom: 8px; }
 .pc-email-input:focus { border-color: var(--accent); }
@@ -1029,7 +1033,7 @@ body {
 .pc-resend-btn { background: none; border: none; color: var(--accent); font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; padding: 8px 0; display: block; width: 100%; text-align: center; margin-top: 4px; -webkit-appearance: none; text-decoration: underline; }
 
 /* ── Partner B intro screen ── */
-#partner-b-intro-screen { display: none; }
+#partner-b-intro-screen { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 150; background: #2a2520; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .pb-scroll-wrap { width: 100%; max-width: 520px; margin: 0 auto; }
 .pb-hero { text-align: center; padding: 48px 24px 32px; }
 .pb-hero-title { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; margin-bottom: 10px; letter-spacing: 0.04em; }
@@ -1315,6 +1319,10 @@ body, body * {
 .iv-details pre { white-space: pre-wrap; word-break: break-word; font-size: 0.72rem; max-height: 200px; overflow: auto; }
 #pn-input { display: block; width: 100%; box-sizing: border-box; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; padding: 14px; font-family: 'Courier Prime', monospace; font-size: 1.05rem; color: #111111; -webkit-appearance: none; appearance: none; }
 #pn-input:focus { outline: none; border-color: #E06500; }
+.story-controls, .iv-actions { justify-content: center; }
+.story-continue, .story-mic, .iv-next, .iv-skip { max-width: 320px; }
+.s45-continue, .s6-submit, .s11-cap-btn, .pb-continue-btn, .bi-cta, .pc-enter-btn, .pc-send-btn { max-width: 420px; display: block; margin-left: auto; margin-right: auto; }
+.story-type-btn { margin-top: 8px; min-height: 44px; padding: 8px 20px; background: #FFFFFF; border: 1.5px solid #E06500; border-radius: 10px; color: #111111; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; touch-action: manipulation; }
 .story-status { min-height: 22px; margin: 10px 0 0; font-size: 0.82rem; color: #7A7468; text-align: center; }
 .story-controls { display: flex; gap: 12px; margin-top: 14px; }
 .story-mic { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; background: #FFFFFF; border: 1.5px solid #E2DED8; border-radius: 10px; color: #111111; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -1916,6 +1924,7 @@ h1, h2, h3,
   <div style="max-width:340px;width:90%;padding:40px 32px;background:#fff;border:1px solid #E2DED8;border-radius:4px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
     <div style="font-family:'Lora',Georgia,serif;font-size:1.25rem;color:#111111;margin-bottom:6px;">The Ongoing Argument</div>
     <div style="font-size:0.8rem;color:#888888;margin-bottom:28px;letter-spacing:0.04em;text-transform:uppercase;">Beta Access</div>
+    <div id="beta-join-hint" style="display:none;font-size:0.82rem;color:#6A6458;margin:-14px 0 16px;line-height:1.5;">Your partner invited you. The beta password is in their invite email, or ask them.</div>
     <input type="password" id="beta-pw-input" placeholder="Enter password" autocomplete="off"
       style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid #E2DED8;border-radius:3px;font-size:0.95rem;color:#111111;background:#F6F4F0;margin-bottom:10px;font-family:inherit;"
       onkeydown="if(event.key==='Enter')betaGateSubmit()" />
@@ -1925,9 +1934,14 @@ h1, h2, h3,
 </div>
 <script>
 // BETA GATE — REMOVE BEFORE LAUNCH
+// The password named in the invite email and on the all-set screen. REMOVE BEFORE LAUNCH with the gate.
+window.BETA_INVITE_PASSWORD = 'ongoing';
 (function() {
   if (sessionStorage.getItem('oa_beta') === '1') {
     document.getElementById('beta-gate').style.display = 'none';
+  }
+  if (/^\/join\//.test(window.location.pathname)) {
+    var hint = document.getElementById('beta-join-hint'); if (hint) hint.style.display = 'block';
   }
 })();
 </script>
@@ -1957,6 +1971,7 @@ h1, h2, h3,
     <div class="pc-eyebrow">Payment complete</div>
     <div class="pc-hd">You are all set.</div>
     <div class="pc-sub">Your partner just needs a link to join you. Send it now or share the code below as a fallback.</div>
+    <div class="pc-beta-note" id="pc-beta-note" style="display:none;"></div>
     <div class="pc-divider"></div>
     <div class="pc-email-label">Send this to your partner so they can join.</div>
     <input type="email" id="pc-partner-email" class="pc-email-input" placeholder="Enter your partner's email" autocomplete="email" />
@@ -2487,7 +2502,7 @@ h1, h2, h3,
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
         <span id="story-mic-label">Talk</span>
       </button>
-      <button type="button" class="story-continue" id="story-continue" onclick="storyDone()" disabled>Continue</button>
+      <button type="button" class="story-continue" id="story-continue" onclick="storyDone()">Continue</button>
     </div>
     <p class="pc-mic-note" id="story-mic-note">Only the words are saved. No audio is recorded.</p>
   </div>
@@ -2521,7 +2536,7 @@ h1, h2, h3,
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
         <span id="ai-edit-mic-label">Talk</span>
       </button>
-      <button type="button" class="story-continue" id="ai-edit-apply" onclick="aiEditApply()" disabled>Make this change</button>
+      <button type="button" class="story-continue" id="ai-edit-apply" onclick="aiEditApply()">Make this change</button>
     </div>
     <p class="pc-mic-note" id="ai-edit-mic-note">Only the words are saved. No audio is recorded.</p>
   </div>
@@ -4612,7 +4627,9 @@ function pcDoSendEmail(toEmail) {
     to_email: toEmail,
     join_url: joinUrl,
     couple_code: code,
-    from_name: (user && user.name) ? user.name : 'Your partner'
+    from_name: (user && user.name) ? user.name : 'Your partner',
+    beta_password: window.BETA_INVITE_PASSWORD || '',
+    beta_note: window.BETA_INVITE_PASSWORD ? 'This is a private beta. When the page asks for a password, enter: ' + window.BETA_INVITE_PASSWORD : ''
   }).then(function() {
     sendBtn.disabled = false; sendBtn.textContent = 'Send';
     txt('pc-email-status', 'Sent. Your partner should have it within a minute.');
@@ -4736,8 +4753,15 @@ function showPaymentConfirm(code, coupleId) {
   el('pc-partner-email').value = '';
   txt('pc-email-status', '');
   el('pc-resend-btn').style.display = 'none';
+  var note = el('pc-beta-note');
+  if (note) {
+    note.textContent = window.BETA_INVITE_PASSWORD ? 'While the beta is running, the page asks your partner for a password. Tell them it is: ' + window.BETA_INVITE_PASSWORD : '';
+    note.style.display = window.BETA_INVITE_PASSWORD ? 'block' : 'none';
+  }
   var pc = el('payment-confirm-screen');
   pc.style.display = 'flex';
+  pc.scrollTop = 0;
+  window.scrollTo(0, 0);
 }
 
 function pcCopyCode() {
@@ -6884,10 +6908,22 @@ function createDictation(taId, hooks) {
   hooks = hooks || {};
   var st = { rec: null, want: false, live: false, base: '', startedAt: 0, quickEnds: 0 };
   function box() { return el(taId); }
-  function say(m) { if (hooks.onStatus) hooks.onStatus(m || ''); }
+  function say(m, help) { if (hooks.onStatus) hooks.onStatus(m || '', !!help); }
+  function micProblem(err) {
+    var blocked = 'The microphone is blocked for this page. On an iPad, open Settings, then Chrome, and turn on Microphone. You can also tap the lock icon next to the address and allow it. Then tap Talk again.';
+    if (err === 'service-not-allowed') {
+      say('Voice typing is not available in this browser right now. On an iPad, make sure Dictation is on in Settings, General, Keyboard. It may also not work in a private tab.', true);
+      return;
+    }
+    try {
+      navigator.permissions.query({ name: 'microphone' }).then(function(r) {
+        say(r.state === 'prompt' ? 'The microphone was not allowed yet. Tap Talk again and choose Allow when it asks.' : blocked, true);
+      }, function() { say(blocked, true); });
+    } catch (e) { say(blocked, true); }
+  }
   function changed() { if (hooks.onChange) hooks.onChange(); }
   function join(base, add) { add = (add || '').trim(); if (!base) return add; return add ? base + ' ' + add : base; }
-  function start() {
+  function start(auto) {
     var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     var ta = box();
     if (!SpeechRec || !ta) return;
@@ -6915,7 +6951,15 @@ function createDictation(taId, hooks) {
       var err = ev && ev.error;
       if (err === 'not-allowed' || err === 'service-not-allowed') {
         st.want = false;
-        say('Microphone access is off. You can type instead, or allow the microphone in your browser settings.');
+        // Some iPads refuse an automatic restart that was not started by a tap. That is not a microphone problem.
+        if (auto) say('Paused. Tap to keep talking.');
+        else micProblem(err);
+      } else if (err === 'audio-capture') {
+        st.want = false;
+        say('No microphone was found. Check that nothing else is using it.', true);
+      } else if (err === 'network') {
+        st.want = false;
+        say('Voice typing needs an internet connection. Try again in a moment.', true);
       }
     };
     rec.onend = function() {
@@ -6926,7 +6970,7 @@ function createDictation(taId, hooks) {
         var ranFor = Date.now() - st.startedAt;
         st.quickEnds = ranFor < 1500 ? st.quickEnds + 1 : 0;
         if (st.quickEnds < 3) {
-          setTimeout(function() { if (st.want && st.rec === rec) start(); }, 250);
+          setTimeout(function() { if (st.want && st.rec === rec) start(true); }, 250);
           return;
         }
         st.want = false;
@@ -6948,15 +6992,17 @@ function createDictation(taId, hooks) {
   }
   function toggle() {
     if (st.live || st.want) { stop(); say('Paused. Tap to keep talking.'); changed(); }
-    else start();
+    else start(false);
   }
   var tb = box();
+  var settle = null;
   if (tb) tb.addEventListener('input', function() {
     if (st.live || st.want) { stop(); say('Paused. Tap to keep talking.'); }
     if (hooks.onTyped) hooks.onTyped();
-    changed();
+    clearTimeout(settle);
+    settle = setTimeout(changed, 300);
   });
-  return { start: start, stop: stop, toggle: toggle, state: st };
+  return { start: function() { start(false); }, stop: stop, toggle: toggle, state: st };
 }
 
 function storySpeechSupported() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
@@ -6967,7 +7013,21 @@ var pbStory = { text: '', voice: false, typed: false };
 var STORE_RETELLING = false;
 var storyDict = null;
 
-function storySetStatus(msg) { txt('story-status', msg || ''); }
+function showStatus(id, boxId, msg, help) {
+  var n = el(id);
+  if (!n) return;
+  n.textContent = msg || '';
+  if (help && msg) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'story-type-btn';
+    b.textContent = 'Type instead';
+    b.addEventListener('click', function() { n.textContent = ''; var t = el(boxId); if (t) t.focus(); });
+    n.appendChild(document.createElement('br'));
+    n.appendChild(b);
+  }
+}
+function storySetStatus(msg, help) { showStatus('story-status', 'story-text', msg, help); }
 function storyStopListening() { if (storyDict) storyDict.stop(); }
 function storyToggleMic() { if (storyDict) storyDict.toggle(); }
 
@@ -6979,7 +7039,7 @@ function storyRenderControls() {
   if (note) note.style.display = supported ? 'block' : 'none';
   if (label) label.textContent = live ? 'Tap to pause' : (pbStory.voice ? 'Tap to keep talking' : 'Talk');
   var hasText = !!(el('story-text') && el('story-text').value.trim());
-  if (cont) { cont.disabled = !hasText; cont.textContent = live ? 'Done' : 'Continue'; }
+  if (cont) { cont.textContent = live ? 'Done' : 'Continue'; }
 }
 
 function pcSyncInputs() {
@@ -6996,7 +7056,7 @@ function storyDone() {
   storyStopListening();
   var ta = el('story-text');
   var text = ta ? ta.value.trim() : '';
-  if (!text) { storyRenderControls(); return; }
+  if (!text) { storySetStatus('Tell me a little first. Type it, or tap Talk.'); if (ta) ta.focus(); return; }
   pbStory.text = text;
   ivSaveProgress('extract');
   hide('story-screen');
@@ -7365,7 +7425,7 @@ function pbShort(t) {
 
 // ---- partner name step (shown once, before the story) ----
 var pnMode = 'typed';
-function pnNeeded() { return !(user && user.partnerConfirmed && !pbPlaceholderName(user.partner)); }
+function pnNeeded() { return pbPlaceholderName(user && user.partner); }
 
 function startStory(mode) {
   if (pnNeeded()) {
@@ -8275,7 +8335,7 @@ function aiEditRender() {
   if (note) note.style.display = supported ? 'block' : 'none';
   if (label) label.textContent = live ? 'Tap to pause' : 'Talk';
   if (apply) {
-    apply.disabled = aiEditBusy || !(ta && ta.value.trim());
+    apply.disabled = aiEditBusy;
     apply.textContent = aiEditBusy ? 'Working…' : (live ? 'Done' : 'Make this change');
   }
 }
@@ -8307,7 +8367,7 @@ function aiEditApply() {
   if (aiEditDict) aiEditDict.stop();
   var ta = el('ai-edit-text');
   var instruction = ta ? ta.value.trim() : '';
-  if (!instruction) return;
+  if (!instruction) { txt('ai-edit-status', 'Describe the change first.'); return; }
   var before = scriptSnapshot();
   var nameA = (user && user.name) ? user.name : 'Person A';
   var nameB = (user && user.partner) ? user.partner : 'Person B';
@@ -8420,7 +8480,7 @@ function pbRestore() {
 
 (function() {
   aiEditDict = createDictation('ai-edit-text', {
-    onStatus: function(m) { txt('ai-edit-status', m || ''); },
+    onStatus: function(m, help) { showStatus('ai-edit-status', 'ai-edit-text', m, help); },
     onChange: aiEditRender
   });
   var lc = el('lines-container');
