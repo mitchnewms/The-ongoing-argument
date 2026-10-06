@@ -30,6 +30,8 @@ let PROMPT_PROBLEM = '';
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyBAuVl_ZdnBiuN4BbtBp01z_n-2f-lJVys';
 
 const ALLOWED_ORIGINS = [
+  'https://theongoingargument.com',
+  'https://www.theongoingargument.com',
   'https://mitchnewman.com',
   'https://www.mitchnewman.com',
   'https://imaginative-starburst-a1bbd9.netlify.app'
