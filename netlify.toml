@@ -28,3 +28,8 @@
   from = "/join/*"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "/pricing"
+  to = "/pricing.html"
+  status = 200

@@ -286,7 +286,7 @@ body {
 .tl-tier-eyebrow { font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(184,160,112,0.45); font-family: 'Courier Prime', monospace; margin-bottom: 4px; }
 .tl-list { list-style: none; padding: 0; margin: 0 0 16px 0; }
 .tl-item { font-family: 'Courier Prime', monospace; font-size: 0.88rem; color: rgba(255,255,255,0.72); line-height: 1.7; padding: 8px 0 8px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); position: relative; }
-.tl-item::before { content: '—'; position: absolute; left: 0; color: rgba(184,160,112,0.5); }
+.tl-item::before { content: '\2022'; position: absolute; left: 0; color: rgba(184,160,112,0.5); }
 .tl-item:last-child { border-bottom: none; }
 .tl-subgroup-label { font-family: 'Courier Prime', monospace; font-size: 0.75rem; color: rgba(184,160,112,0.6); font-style: italic; margin: 18px 0 10px; }
 .tl-framing { font-family: 'Lora', Georgia, serif; font-size: 0.88rem; color: rgba(255,255,255,0.55); line-height: 1.85; margin-bottom: 20px; font-style: italic; }
@@ -467,7 +467,7 @@ body {
 .pa-guide-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); font-family: system-ui, sans-serif; margin-bottom: 12px; }
 .pa-guide-list { list-style: none; padding: 0; margin: 0; }
 .pa-guide-list li { font-family: system-ui, sans-serif; font-size: 0.82rem; color: var(--ink-light); line-height: 1.6; padding: 4px 0; border-bottom: none; }
-.pa-guide-list li::before { content: '—'; margin-right: 8px; color: var(--ink-faint); }
+.pa-guide-list li::before { content: '\2022'; margin-right: 8px; color: var(--ink-faint); }
 
 /* ── PATH B: HANDOFF BANNER ──────────────────────────────────── */
 #pb-handoff-banner { display: none; background: var(--paper); border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 28px 24px; margin-bottom: 16px; border-left: 4px solid var(--accent); }
@@ -1035,7 +1035,9 @@ body {
 /* ── Partner B intro screen ── */
 #partner-b-intro-screen { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 150; background: #2a2520; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .pb-scroll-wrap { width: 100%; max-width: 520px; margin: 0 auto; }
-.pb-hero { text-align: center; padding: 48px 24px 32px; }
+.pb-hero { text-align: center; padding: 40px 24px 32px; }
+.pb-hero-logo { width: 190px; height: 100px; margin: 0 auto 14px; background: url('toa-logo.png') no-repeat; background-size: 582px auto; background-position: -196px -84px; }
+.pb-hero-title span { color: #E06500; }
 .pb-hero-title { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; margin-bottom: 10px; letter-spacing: 0.04em; }
 .pb-hero-sub { font-family: 'Lora', Georgia, serif; font-size: 0.95rem; color: #a09080; font-style: italic; line-height: 1.6; }
 .pb-section { padding: 32px 24px; }
@@ -1931,16 +1933,20 @@ h1, h2, h3,
     <div style="font-family:'Lora',Georgia,serif;font-size:1.25rem;color:#111111;margin-bottom:6px;">The Ongoing Argument</div>
     <div style="font-size:0.8rem;color:#888888;margin-bottom:28px;letter-spacing:0.04em;text-transform:uppercase;">Beta Access</div>
     <div id="beta-join-hint" style="display:none;font-size:0.82rem;color:#6A6458;margin:-14px 0 16px;line-height:1.5;">Your partner invited you. The beta password is in their invite email, or ask them.</div>
-    <input type="password" id="beta-pw-input" placeholder="Enter password" autocomplete="off"
-      style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid #E2DED8;border-radius:3px;font-size:0.95rem;color:#111111;background:#F6F4F0;margin-bottom:10px;font-family:inherit;"
-      onkeydown="if(event.key==='Enter')betaGateSubmit()" />
+    <div class="pw-wrap" style="margin-bottom:10px;">
+      <input type="password" id="beta-pw-input" placeholder="Enter password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
+        style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid #E2DED8;border-radius:3px;font-size:0.95rem;color:#111111;background:#F6F4F0;font-family:inherit;"
+        onkeydown="if(event.key==='Enter')betaGateSubmit()" />
+      <button type="button" class="pw-eye" id="beta-pw-eye" onclick="togglePw('beta-pw-input',this)" aria-label="Show password" tabindex="-1" style="width:44px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
     <div id="beta-pw-error" style="color:#C0392B;font-size:0.8rem;margin-bottom:10px;min-height:1em;"></div>
     <button onclick="betaGateSubmit()" style="width:100%;padding:12px;background:#E06500;color:#fff;border:none;border-radius:3px;font-size:0.9rem;cursor:pointer;font-family:'Lora',Georgia,serif;letter-spacing:0.02em;">Enter</button>
     <button type="button" id="beta-signin-link" onclick="openSignInFromGate()" style="display:block;width:100%;margin-top:14px;padding:12px;background:#fff;color:#111;border:1px solid #E2DED8;border-radius:3px;font-size:0.9rem;cursor:pointer;font-family:inherit;">Already have an account? Sign in</button>
+    <a href="/pricing" style="display:block;margin-top:14px;font-size:0.82rem;color:#6A6458;">Pricing and refunds</a>
   </div>
 </div>
 <script>
-// BETA GATE — REMOVE BEFORE LAUNCH
+// BETA GATE, REMOVE BEFORE LAUNCH
 // The password named in the invite email and on the all-set screen. REMOVE BEFORE LAUNCH with the gate.
 window.BETA_INVITE_PASSWORD = 'ongoing';
 (function() {
@@ -1964,7 +1970,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
     <div class="bi-body">
       <p>You just made a commitment. This is where we check the other half.</p>
       <p>Not whether you are in. You already said yes.</p>
-      <p>Whether your partner knows you are doing this. Whether they have actually agreed to do their part. Whether you have talked — really talked — and they are genuinely on board.</p>
+      <p>Whether your partner knows you are doing this. Whether they have actually agreed to do their part. Whether you have talked, really talked, and they are genuinely on board.</p>
       <p>This process works when two people are in it independently and honestly. Not one person dragging the other through it.</p>
       <p>Have you talked to your partner? Do they know this is happening? Are they actually in?</p>
       <p>If you are not sure, that is a conversation worth having before you continue.</p>
@@ -1988,8 +1994,8 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
     <div class="pc-email-status" id="pc-email-status"></div>
     <button class="pc-resend-btn" id="pc-resend-btn" onclick="pcResendEmailClick()" style="display:none;">Resend the link</button>
     <div class="pc-divider"></div>
-    <div class="pc-code-label">Your partner's code — for reference or as a fallback</div>
-    <div class="pc-code" id="pc-code-display">——————</div>
+    <div class="pc-code-label">Your partner's code, for reference or as a fallback</div>
+    <div class="pc-code" id="pc-code-display">······</div>
     <button class="pc-copy-btn" id="pc-copy-btn" onclick="pcCopyCode()">Copy Code</button>
     <div class="pc-divider"></div>
     <div class="pc-share-label">Or copy the join link directly</div>
@@ -2003,18 +2009,19 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <div id="partner-b-intro-screen" style="display:none; width:100%; overflow-y:auto;">
   <div class="pb-scroll-wrap">
     <div class="pb-hero">
-      <div class="pb-hero-title">The Ongoing Argument</div>
+      <div class="pb-hero-logo" role="img" aria-label="TOA, The Ongoing Argument"></div>
+      <div class="pb-hero-title"><span>T</span>he <span>O</span>ngoing <span>A</span>rgument</div>
       <div class="pb-hero-sub">Your partner has already started the process.<br>This is where you join them.</div>
     </div>
     <div class="pb-section">
       <div class="pb-body">
         <p>The fight you keep having. The one that never gets resolved. Your partner has named it and started the work. Now it's your turn.</p>
-        <p>This process was built by Mitch Newman, relationship adviser and former screenwriter, to help couples do what TV writers do every week — find the solution to the ongoing conflict.</p>
+        <p>This process was built by Mitch Newman, relationship adviser and former screenwriter, to help couples do what TV writers do every week, which is to find the solution to the ongoing conflict.</p>
         <p>Watch what's possible.</p>
       </div>
       <!-- REPLACE WITH DEMO VIDEO WHEN DELIVERED -->
       <div class="pb-video-placeholder">
-        <div class="pb-video-placeholder-text">Demo video — coming soon</div>
+        <div class="pb-video-placeholder-text">Demo video, coming soon</div>
       </div>
       <div class="pb-body">
         <p>When both people are fully in it, something real becomes possible. You'll write your version of the fight privately, watch it performed by avatars, do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
@@ -2035,7 +2042,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
     <div class="ce-hd">Enter your partner's code.</div>
     <div class="ce-sub">They received this 6-character code after completing payment. Check your messages.</div>
     <label class="ce-label" for="ce-code-input">Partner's code</label>
-    <input type="text" id="ce-code-input" class="ce-input" placeholder="——————" maxlength="6" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')submitPartnerCode()" />
+    <input type="text" id="ce-code-input" class="ce-input" placeholder="······" maxlength="6" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')submitPartnerCode()" />
     <div class="ce-error" id="ce-error"></div>
     <button class="ce-submit-btn" id="ce-submit-btn" onclick="submitPartnerCode()">Verify Code</button>
     <button class="ce-back" onclick="ceGoBack()">← Go back</button>
@@ -2047,7 +2054,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
   <div class="bi-card">
     <div class="bi-eyebrow">Before you create your account</div>
     <div class="bi-body">
-      <p>Your partner has already committed to this process. This is where we check that you are in too — not because we doubt you, but because this only works when both people are genuinely here.</p>
+      <p>Your partner has already committed to this process. This is where we check that you are in too, not because we doubt you, but because this only works when both people are genuinely here.</p>
       <p>You are about to create an account and write your version of the fight. Privately. Honestly. Without your partner seeing it first.</p>
       <p>This is not something you do because your partner signed up. This is something you do because you want to resolve the fight too.</p>
       <p>Are you in this because you actually want to be?</p>
@@ -2062,7 +2069,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 
   <!-- S1: HERO -->
   <section class="lp-hero">
-    <img src="toa-logo.png" alt="The Ongoing Argument — No fight is too big to have a happy ending." class="lp-hero-logo">
+    <img src="toa-logo.png" alt="The Ongoing Argument. No fight is too big to have a happy ending." class="lp-hero-logo">
   </section>
 
   <!-- S2: THE STORY -->
@@ -2089,7 +2096,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
       <p>This is a couples process. That&rsquo;s what it&rsquo;s built for, and that&rsquo;s where it has the power to change things long term.</p>
       <p>But if right now, your partner isn&rsquo;t in a place to do this with you, that doesn&rsquo;t stop you.</p>
       <p>It just means you&rsquo;re starting with you.</p>
-      <p>There&rsquo;s real value in that. A chance to understand yourself better, and your partner better, even on your own. And often, what shifts in you has a way of shifting what&rsquo;s possible between you &mdash; sometimes more than either of you would expect.</p>
+      <p>There&rsquo;s real value in that. A chance to understand yourself better, and your partner better, even on your own. And often, what shifts in you has a way of shifting what&rsquo;s possible between you, sometimes more than either of you would expect.</p>
     </div>
   </section>
 
@@ -2106,7 +2113,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
       <li class="lp-step"><span class="lp-step-n">7.</span><span class="lp-step-t">Learn a new language. Out of blame. Out of confrontation. Into conversation.</span></li>
       <li class="lp-step"><span class="lp-step-n">8.</span><span class="lp-step-t">Rewrite the script. Alone if necessary. Ideally together. Give your relationship a chance to win.</span></li>
     </ol>
-    <p class="lp-solo-note">Doing this on your own? Every step still applies &mdash; you&rsquo;re just doing your part of it first.</p>
+    <p class="lp-solo-note">Doing this on your own? Every step still applies, you&rsquo;re just doing your part of it first.</p>
   </section>
 
   <!-- S4: THE TRUTH -->
@@ -2165,7 +2172,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
   <button type="button" id="signin-back" onclick="closeSignInOnly()">&#8592; Back</button>
   <div class="auth-header">
     <h1>The Ongoing Argument</h1>
-    <p>A script in progress — always to be continued</p>
+    <p>A script in progress, always to be continued</p>
   </div>
   <div class="auth-card">
     <!-- Radio inputs power CSS tab switching with zero JS dependency -->
@@ -2191,7 +2198,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
       <div class="auth-field"><label for="ca-email-confirm">Confirm Email</label><input type="email" id="ca-email-confirm" placeholder="your@email.com" autocomplete="email" /><div id="ca-email-match-err" class="field-error">Emails do not match. Please try again.</div></div>
       <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><div class="pw-wrap"><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /><button type="button" class="pw-eye" onclick="togglePw('ca-pass',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
       <div class="auth-field"><label for="ca-pass-confirm">Confirm Password</label><div class="pw-wrap"><input type="password" id="ca-pass-confirm" placeholder="••••••••" autocomplete="new-password" /><button type="button" class="pw-eye" onclick="togglePw('ca-pass-confirm',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div id="ca-pass-match-err" class="field-error">Passwords do not match. Please try again.</div></div>
-      <div class="auth-field"><label for="ca-fight">The Fight — what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
+      <div class="auth-field"><label for="ca-fight">The Fight, what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
       <div class="auth-disclaimer">
         <div class="auth-disclaimer-box">
           <p>The Ongoing Argument is a coaching platform. It is designed to support more effective communication, ownership of feelings, personal responsibility, and a genuine desire to strengthen the integrity within yourself and within your relationship.</p>
@@ -2228,7 +2235,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
     <div class="pbh-heading">Here's your draft. Tap any line to change it.</div>
     <p class="pbh-body">It's built from your own words. Go through it line by line, change what doesn't fit, and cut anything that isn't true. Nothing is submitted until you approve it as yours.</p>
     <p class="pbh-body" id="pb-handoff-note" style="display:none; font-weight:700;"></p>
-    <button class="pbh-dismiss" onclick="pbDismissHandoff()">Got it — start editing</button>
+    <button class="pbh-dismiss" onclick="pbDismissHandoff()">Got it, start editing</button>
   </div>
 
   <!-- PATH A: OPTIONAL WRITING GUIDE — shown only for Path A, not collected, not sent to AI -->
@@ -2239,10 +2246,10 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
         <li>What is this fight about?</li>
         <li>What usually triggers it?</li>
         <li>Where does it usually happen?</li>
-        <li>How does it typically start — the first thing said or done?</li>
+        <li>How does it typically start, the first thing said or done?</li>
         <li>What gets said as it builds?</li>
         <li>What are you feeling as it builds? Does it start as one thing and shift into another?</li>
-        <li>Is there a specific moment — a word, a tone, a look — where it gets more intense?</li>
+        <li>Is there a specific moment, a word, a tone, a look, where it gets more intense?</li>
         <li>How does it pause? What interrupts it rather than resolves it?</li>
         <li>What do you believe you're right about here?</li>
       </ul>
@@ -2251,13 +2258,13 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 
   <div class="script-page">
     <div class="script-title-header" id="script-title-header">THE ONGOING ARGUMENT</div>
-    <div class="privacy-tag">🔒 Your version — private until you share with <span id="privacy-partner-name">your partner</span></div>
+    <div class="privacy-tag">🔒 Your version. Private until you share with <span id="privacy-partner-name">your partner</span></div>
     <div class="name-row">
       <div class="name-row-label">Add Names Here</div>
       <div class="name-field"><label for="input-name-a">Your name</label><input type="text" id="input-name-a" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
       <div class="name-field"><label for="input-name-b">Partner's name</label><input type="text" id="input-name-b" placeholder="e.g. Alex" autocomplete="off" /></div>
     </div>
-    <div class="scene-block"><label>Scene / Location</label><input type="text" id="scene-input" placeholder="INT. KITCHEN — EVENING" /></div>
+    <div class="scene-block"><label>Scene / Location</label><input type="text" id="scene-input" placeholder="INT. KITCHEN, EVENING" /></div>
     <div id="lines-container"></div>
     <div class="scene-length-estimate" id="scene-length-estimate"></div>
     <div id="pb-draft-actions">
@@ -2401,7 +2408,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 
 <div id="coach-screen">
   <div class="coach-header">
-    <div class="coach-title">Coach Dashboard<span>All clients — read scripts, send notes</span></div>
+    <div class="coach-title">Coach Dashboard<span>All clients, read scripts, send notes</span></div>
     <div style="display:flex;gap:8px;">
       <button class="coach-btn" id="btn-refresh">↻ Refresh</button>
       <button class="signout-btn" id="btn-signout-coach">Sign Out</button>
@@ -2410,7 +2417,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
   <div id="clients-list"><div class="loading">Loading clients…</div></div>
   <div id="coach-status"></div>
   <div id="coach-requests-section" style="margin-top: 32px; padding: 0 24px 32px;">
-    <div style="font-family: 'Special Elite', cursive; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--line);">Safety Pattern — Coach Requests</div>
+    <div style="font-family: 'Special Elite', cursive; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--line);">Safety Pattern, Coach Requests</div>
     <div id="coach-requests-list"><div class="loading" style="font-style:italic;font-size:0.85rem;color:var(--ink-faint);">Loading…</div></div>
   </div>
   <div id="coach-feedback-section" style="margin-top: 32px; padding: 0 24px 48px;">
@@ -2445,7 +2452,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <div id="step3-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep3()" aria-label="Close">&#8592;</button>
-    <span class="s3-title">Step 3 &mdash; Mirror Moment</span>
+    <span class="s3-title">Step 3. Mirror Moment</span>
   </div>
   <div class="s3-thread" id="s3-thread"></div>
   <div class="s3-input-area">
@@ -2453,7 +2460,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
       <textarea class="s3-input" id="s3-input" placeholder="Respond..." rows="1" onkeydown="s3KeyDown(event)" oninput="s3AutoGrow(this)"></textarea>
       <button class="s3-send" id="s3-send" onclick="s3Send()">Send</button>
     </div>
-    <button class="s3-complete" id="s3-complete-btn" onclick="completeStep3()" style="display:none">Complete Step 3 — Continue to Step 4 ›</button>
+    <button class="s3-complete" id="s3-complete-btn" onclick="completeStep3()" style="display:none">Complete Step 3 and continue to Step 4 ›</button>
   </div>
 </div>
 
@@ -2482,7 +2489,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
     <p class="pc-mic-note" id="pc-mic-note">Only the words are saved. No audio is recorded.</p>
     <p class="pc-mic-note" id="pc-mic-tip" style="display:none">Tip: you can also tap the microphone on your keyboard to talk.</p>
     <button type="button" class="pc-quiet-link" onclick="choosePathA()">Prefer to write it yourself?</button>
-    <p class="pc-scene-note">Zero in on the flashpoint — the 1 to 2 minutes where it starts and escalates. Include the parts where, even in the heat of it, you could hear both of you running the same lines you always run. And when finally, one or both of you disengages.</p>
+    <p class="pc-scene-note">Zero in on the flashpoint, the 1 to 2 minutes where it starts and escalates. Include the parts where, even in the heat of it, you could hear both of you running the same lines you always run. And when finally, one or both of you disengages.</p>
     <div class="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
   </div>
 </div>
@@ -2600,18 +2607,18 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <div id="step4-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep4()">&#8592;</button>
-    <span class="s3-title">Step 4 &mdash; Watch Your Script</span>
+    <span class="s3-title">Step 4. Watch Your Script</span>
   </div>
   <div class="s45-scroll" id="s4-inner">
     <p class="s45-intro" id="s4-intro"></p>
     <div class="s45-video-ph">
       <div class="s45-play-icon">&#9654;</div>
-      <div class="s45-ph-label">Avatar Video &mdash; Coming Soon</div>
+      <div class="s45-ph-label">Avatar Video, Coming Soon</div>
       <div class="s45-ph-note">HeyGen integration will appear here. Read your transcript below.</div>
     </div>
     <div class="s45-tx-hd">Your Script Transcript</div>
     <div class="s45-tx" id="s4-transcript"></div>
-    <button class="s45-continue" onclick="completeStep4()">I&rsquo;ve Watched &mdash; Continue to Step 5 &#8250;</button>
+    <button class="s45-continue" onclick="completeStep4()">I&rsquo;ve Watched, Continue to Step 5 &#8250;</button>
   </div>
 </div>
 
@@ -2619,18 +2626,18 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <div id="step5-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep5()">&#8592;</button>
-    <span class="s3-title">Step 5 &mdash; Watch Your Partner&rsquo;s Script</span>
+    <span class="s3-title">Step 5. Watch Your Partner&rsquo;s Script</span>
   </div>
   <div class="s45-scroll" id="s5-inner">
     <p class="s45-intro" id="s5-intro"></p>
     <div class="s45-video-ph">
       <div class="s45-play-icon">&#9654;</div>
-      <div class="s45-ph-label">Avatar Video &mdash; Coming Soon</div>
+      <div class="s45-ph-label">Avatar Video, Coming Soon</div>
       <div class="s45-ph-note">HeyGen integration will appear here. Read the transcript below.</div>
     </div>
     <div class="s45-tx-hd">Partner&rsquo;s Script Transcript</div>
     <div class="s45-tx" id="s5-transcript"></div>
-    <button class="s45-continue" onclick="completeStep5()">I&rsquo;ve Watched &mdash; Continue to Step 6 &#8250;</button>
+    <button class="s45-continue" onclick="completeStep5()">I&rsquo;ve Watched, Continue to Step 6 &#8250;</button>
   </div>
 </div>
 
@@ -2638,7 +2645,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <div id="step6-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep6()">&#8592;</button>
-    <span class="s3-title">Step 6 &mdash; Reflective Questions</span>
+    <span class="s3-title">Step 6. Reflective Questions</span>
   </div>
   <div class="s6-scroll">
     <p class="s6-intro">Answer each question honestly, in your own words. Your partner will not see your answers unless you choose to share them. After you submit, the AI will offer one final thought and encourage you to share what you noticed with your partner before you continue.</p>
@@ -2665,7 +2672,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
     <button class="s6-submit" id="s6-submit-btn" onclick="submitStep6()">Submit My Reflections</button>
     <div class="s6-ai-wrap" id="s6-ai-wrap">
       <div id="s6-ai-body"></div>
-      <button class="s6-continue" onclick="completeStep6()">Continue to Step 7 &mdash; Individual Work &#8250;</button>
+      <button class="s6-continue" onclick="completeStep6()">Continue to Step 7, Individual Work &#8250;</button>
     </div>
   </div>
 </div>
@@ -2674,7 +2681,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <div id="step7-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep7()">&#8592;</button>
-    <span class="s3-title">Step 7 &mdash; Individual Work</span>
+    <span class="s3-title">Step 7. Individual Work</span>
   </div>
   <div class="s3-thread" id="s7-thread"></div>
   <div class="s78-input-area">
@@ -2687,7 +2694,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
       <button class="s3-send" id="s7-send" onclick="s7Send()">Send</button>
     </div>
     <div class="s7-one-thing" id="s7-one-thing-area">
-      <label class="s7-ot-label">The One Thing &mdash; Write it down before you continue</label>
+      <label class="s7-ot-label">The One Thing. Write it down before you continue</label>
       <input type="text" class="s7-ot-input" id="s7-ot-input" placeholder="What I am willing to try differently next time is..." />
       <button class="s7-ot-save" onclick="saveOneThingAndComplete()">Save &amp; Continue to Step 8 &#8250;</button>
     </div>
@@ -2698,7 +2705,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <div id="step8-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep8()">&#8592;</button>
-    <span class="s3-title">Step 8 &mdash; NVC Practice</span>
+    <span class="s3-title">Step 8. NVC Practice</span>
   </div>
   <div class="s3-thread" id="s8-thread"></div>
   <div class="s78-input-area">
@@ -2717,7 +2724,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
 <div id="step9-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep9()">&#8592;</button>
-    <span class="s3-title">Step 9 &mdash; The Rewrite</span>
+    <span class="s3-title">Step 9. The Rewrite</span>
   </div>
 
   <!-- Phase 1: Presence exercise -->
@@ -2820,7 +2827,7 @@ JORDAN
 Okay. I didn't know it was landing that way.
 
 ALEX
-I think I've been needing to feel like we're on the same team about the space. Not rules. Just — shared.
+I think I've been needing to feel like we're on the same team about the space. Not rules. Just shared.
 
 JORDAN
 That makes sense. I think I sometimes zone out and don't notice. Not because I don't care. I just move differently.
@@ -2848,9 +2855,9 @@ ALEX
 Me too.</div>
     </div>
     <hr class="s9-divider">
-    <p class="s9-intro" style="margin-bottom:16px">The AI is right here with you throughout this rewrite. If you get triggered, stuck, or uncertain — tap the AI button. You do not have to figure it out alone.</p>
+    <p class="s9-intro" style="margin-bottom:16px">The AI is right here with you throughout this rewrite. If you get triggered, stuck, or uncertain, tap the AI button. You do not have to figure it out alone.</p>
     <div class="s9-checkin" id="s9-checkin" style="display:none"></div>
-    <span class="s9-rewrite-label">Your Rewrite &mdash; write it differently this time</span>
+    <span class="s9-rewrite-label">Your Rewrite. Write it differently this time</span>
     <textarea class="s9-rewrite-area" id="s9-rewrite-area" placeholder="Write the same fight differently. Together. Not perfectly. Honestly.&#10;&#10;Start with your setting. Then your first line..." oninput="s9AutoSave()"></textarea>
     <!-- Proofing feedback — shown after click one -->
     <div id="s9-proofing" class="s9-proofing" style="display:none;">
@@ -2871,7 +2878,7 @@ Me too.</div>
 <div id="step10-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep10()">&#8592;</button>
-    <span class="s3-title">Step 10 &mdash; Feedback</span>
+    <span class="s3-title">Step 10. Feedback</span>
   </div>
   <div class="s10-scroll">
     <div id="s10-waiting" class="s10-waiting">
@@ -2880,10 +2887,10 @@ Me too.</div>
     <div id="s10-body" class="s10-body" style="display:none"></div>
     <!-- Rewrite avatar video -->
     <div id="s10-video-section" class="s10-video-section" style="display:none;">
-      <div class="s10-video-eyebrow">Your Rewrite &mdash; Watch It Back</div>
+      <div class="s10-video-eyebrow">Your Rewrite. Watch It Back</div>
       <p class="s10-video-note">You wrote it differently. Now watch it back. The same care you saw in Steps 4 and 5, now applied to what you just built together.</p>
       <div id="s10-video-container" class="s10-video-ph">
-        <div class="s10-video-ph-label">Avatar Video &mdash; Being Generated</div>
+        <div class="s10-video-ph-label">Avatar Video, Being Generated</div>
         <div class="s10-video-ph-note" id="s10-video-ph-note">Usually ready in a few minutes.</div>
       </div>
     </div>
@@ -2895,13 +2902,13 @@ Me too.</div>
 <div id="step11-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep11()">&#8592;</button>
-    <span class="s3-title">Step 11 &mdash; The Bridge</span>
+    <span class="s3-title">Step 11. The Bridge</span>
   </div>
   <div class="s11-scroll">
     <div class="s11-section">
       <div class="s11-eyebrow">The Forgetting and Remembering</div>
       <div class="s11-heading">From time to time, everyone forgets.</div>
-      <p class="s11-prose">They drift from their center. From their knowing. From the wholeness that was never actually lost. And then something calls to them — and in the return to the present moment, they remember.</p>
+      <p class="s11-prose">They drift from their center. From their knowing. From the wholeness that was never actually lost. And then something calls to them, and in the return to the present moment, they remember.</p>
       <p class="s11-prose">The ongoing argument you just worked through is one example of the forgetting. An old program ran. Old roles appeared. Old needs went unmet again. The work you just did together is the remembering.</p>
       <p class="s11-prose">But you will forget again. Not because the work failed. Because you are human.</p>
     </div>
@@ -2915,14 +2922,14 @@ Me too.</div>
     <hr class="s11-divider">
     <div class="s11-cap-card">
       <div class="s11-cap-name">CAP Global</div>
-      <div class="s11-cap-tagline">Community At Play &mdash; where the work continues</div>
+      <div class="s11-cap-tagline">Community At Play, where the work continues</div>
       <div class="s11-cap-desc">The place where this work continues and where the tools get applied to every relationship in your life. Not just this one. Ongoing support. Ongoing growth. A community that helps you remember when you forget.</div>
-      <div class="s11-trial">Free two-week membership &mdash; $47 / person / month after that</div>
+      <div class="s11-trial">Free two-week membership, then $47 / person / month</div>
       <button class="s11-cap-btn" onclick="s11TrackCAP()">Visit Community At Play &#8250;</button>
     </div>
     <div class="s11-email-section">
       <div class="s11-email-hd">Stay Connected</div>
-      <div class="s11-email-sub">If you visit CAP and have questions before joining, we&rsquo;d love to answer them. Leave your email and we&rsquo;ll follow up warmly &mdash; not with a sales pitch, with a genuine open door.</div>
+      <div class="s11-email-sub">If you visit CAP and have questions before joining, we&rsquo;d love to answer them. Leave your email and we&rsquo;ll follow up warmly, not with a sales pitch, with a genuine open door.</div>
       <div class="s11-email-row">
         <input type="email" class="s11-email-input" id="s11-email-input" placeholder="your@email.com" />
         <button class="s11-email-btn" id="s11-email-btn" onclick="s11SaveEmail()">Save</button>
@@ -3022,7 +3029,7 @@ Me too.</div>
       <p>To respond and not react. To find solutions instead of feeding a story. To move your Self from righteousness to happiness.</p>
     </div>
     <div class="solo-closing-divider"></div>
-    <div class="solo-closing-cap">Community At Play &mdash; where the work continues. A community that helps you remember when you forget.</div>
+    <div class="solo-closing-cap">Community At Play, where the work continues. A community that helps you remember when you forget.</div>
     <div class="s11-coach-section" id="sc-coach-section" style="display:none">
       <div class="s11-coach-hd">Want to go deeper?</div>
       <p class="s11-coach-body">If you&rsquo;d like more personal, one on one support beyond this process, let us know and we&rsquo;ll reach out.</p>
@@ -3100,7 +3107,7 @@ Me too.</div>
   <div class="wu-inner">
     <div class="wu-eyebrow">Before You Begin</div>
     <div class="wu-heading">Let's take a moment before we start writing.</div>
-    <div class="wu-sub">Select everything that applies — there are no wrong answers.</div>
+    <div class="wu-sub">Select everything that applies. There are no wrong answers.</div>
     <div class="wu-progress">
       <div class="wu-dot wu-dot-active" id="wu-dot-1"></div>
       <div class="wu-dot" id="wu-dot-2"></div>
@@ -3151,11 +3158,11 @@ Me too.</div>
   <div class="cm-box">
     <div class="cm-heading">Try to do this in one sitting.</div>
     <div class="cm-body">
-      <p>When you write in one continuous session, you stay inside the actual energy of the argument. That energy is what makes the script honest. Stopping and starting fragments it — you come back slightly removed from it, slightly more composed, and the script drifts toward the version of events you've already made peace with.</p>
+      <p>When you write in one continuous session, you stay inside the actual energy of the argument. That energy is what makes the script honest. Stopping and starting fragments it. You come back slightly removed from it, slightly more composed, and the script drifts toward the version of events you've already made peace with.</p>
       <p>You don't have this argument in five-minute increments. Don't write it that way either.</p>
       <p>There's no timer. Your progress saves automatically. But plan to stay uninterrupted for as long as it takes to complete.</p>
     </div>
-    <button class="cm-btn" onclick="closeCommitmentPrompt()">I'm Ready — Begin Writing</button>
+    <button class="cm-btn" onclick="closeCommitmentPrompt()">I'm Ready, Begin Writing</button>
   </div>
 </div>
 
@@ -3163,7 +3170,7 @@ Me too.</div>
 <div id="landing-strip-screen">
   <div class="ls-inner">
     <button class="ls-back" onclick="hide('landing-strip-screen'); showFlex('path-choice-screen');">← Back</button>
-    <div class="ls-eyebrow">Path A — Write It Yourself</div>
+    <div class="ls-eyebrow">Write It Yourself</div>
     <div class="ls-heading">Let's set the scene.</div>
     <div class="ls-sub">A few quick details to get you started. You can change any of these once you're inside.</div>
     <div class="ls-field">
@@ -3183,7 +3190,7 @@ Me too.</div>
     </div>
     <div class="ls-actions">
       <button class="ls-btn" onclick="landingStripComplete()">Start Writing →</button>
-      <button class="ls-skip" onclick="landingStripSkip()">Skip — start with a blank script</button>
+      <button class="ls-skip" onclick="landingStripSkip()">Skip, start with a blank script</button>
     </div>
   </div>
 </div>
@@ -3207,7 +3214,7 @@ Me too.</div>
         <button class="st-demo-add-btn" id="d-btn-dir">+ Direction / Scene shift</button>
       </div>
     </div>
-    <button class="st-btn" onclick="dismissScriptTutorial()">Got it — start writing →</button>
+    <button class="st-btn" onclick="dismissScriptTutorial()">Got it, start writing →</button>
     <button class="st-skip-btn" onclick="dismissScriptTutorial()">Skip</button>
   </div>
 </div>
@@ -3215,15 +3222,15 @@ Me too.</div>
 <!-- IDLE CHECK-IN MODAL — shown once after ~9 min inactivity on script screen -->
 <div id="idle-checkin-modal">
   <div class="ic-box">
-    <div class="ic-body">Just checking in — is there anything I can do to support you right now?</div>
-    <button class="ic-dismiss" onclick="closeIdleCheckin()">I'm good — keep going</button>
+    <div class="ic-body">Just checking in. Is there anything I can do to support you right now?</div>
+    <button class="ic-dismiss" onclick="closeIdleCheckin()">I'm good, keep going</button>
   </div>
 </div>
 
 <!-- SCENE LENGTH: ONE-TIME NUDGE POPUP (appears once when first crossing 2:00 while writing) -->
 <div id="sl-nudge-popup">
   <div class="sl-popup-box">
-    <div class="sl-popup-body">You're running a little past two minutes. That's alright — take a look and see what you can trim without losing the heart of what happened. Sometimes a line or two repeats the same point twice, those are usually the easiest to let go of.</div>
+    <div class="sl-popup-body">You're running a little past two minutes. That's alright. Take a look and see what you can trim without losing the heart of what happened. Sometimes a line or two repeats the same point twice, those are usually the easiest to let go of.</div>
     <button class="sl-popup-btn" onclick="el('sl-nudge-popup').style.display='none'">Got it</button>
   </div>
 </div>
@@ -3376,8 +3383,8 @@ function val(id) { var e = el(id); return e ? e.value.trim() : ''; }
 // BETA GATE — REMOVE BEFORE LAUNCH
 function betaGateSubmit() {
   var BETA_CODES = ['ongoing', 'beta001', 'beta002', 'beta003', 'beta004', 'beta005'];
-  var pw = (el('beta-pw-input') || {}).value || '';
-  if (BETA_CODES.indexOf(pw.trim().toLowerCase()) !== -1) {
+  var pw = ((el('beta-pw-input') || {}).value || '').replace(/\s+/g, '').toLowerCase();
+  if (BETA_CODES.indexOf(pw) !== -1) {
     sessionStorage.setItem('oa_beta', '1');
     var g = el('beta-gate'); if (g) g.style.display = 'none';
   } else {
@@ -3501,7 +3508,7 @@ function forgotPassword() {
       return;
     }
     txt('si-error', '');
-    el('btn-forgot').textContent = 'Reset email sent — check your inbox (and spam folder).';
+    el('btn-forgot').textContent = 'Reset email sent. Check your inbox (and spam folder).';
     el('btn-forgot').style.color = 'var(--accent)';
     el('btn-forgot').disabled = true;
   }).catch(function(err) { console.error('Password reset fetch error:', err); txt('si-error', 'Connection error. Try again.'); });
@@ -3531,9 +3538,9 @@ function createAccount() {
       var code = d.error.message;
       var msgs = {
         'EMAIL_EXISTS': 'That email is already in use. Try signing in.',
-        'OPERATION_NOT_ALLOWED': 'Sign-up is currently disabled — contact support.',
+        'OPERATION_NOT_ALLOWED': 'Sign-up is currently disabled. Contact support.',
         'INVALID_EMAIL': 'Please enter a valid email address.',
-        'WEAK_PASSWORD : Password should be at least 6 characters': 'Password is too weak — use at least 6 characters.',
+        'WEAK_PASSWORD : Password should be at least 6 characters': 'Password is too weak. Use at least 6 characters.',
         'TOO_MANY_ATTEMPTS_TRY_LATER': 'Too many attempts. Please wait a few minutes.'
       };
       txt('ca-error', msgs[code] || ('Could not create account (' + code + '). Try again.'));
@@ -3565,7 +3572,7 @@ function createAccount() {
       .catch(function() { afterLogin(); });
     } else {
       // Partner A: create couple doc, then redirect to Stripe
-      el('btn-create').textContent = 'Setting up — one moment…';
+      el('btn-create').textContent = 'Setting up, one moment…';
       fsAdd('couples', {
         partnerAId: user.uid, partnerBId: '',
         fightName: fight, currentStep: '1',
@@ -3596,7 +3603,7 @@ function createAccount() {
         el('btn-create').textContent = 'Redirecting to payment…';
         return fetch('/.netlify/functions/stripe-session', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
           body: JSON.stringify({ coupleId: coupleId, uid: user.uid, fightName: fight })
         }).then(function(r) { return r.json(); }).then(function(data) {
           if (data.url) {
@@ -4153,7 +4160,7 @@ function showSceneLengthBlockPopup(est) {
   var overageWords = Math.max(0, est.words - 240);
   var overageChars = overageWords * 6;
   var body = el('sl-block-body');
-  if (body) body.textContent = 'Your scene is running about ' + est.formatted + '. Try trimming around ' + overageWords + ' words — roughly ' + overageChars + ' characters — to bring it back under two minutes. Look for the parts that repeat the same point twice, those are usually the easiest to cut.';
+  if (body) body.textContent = 'Your scene is running about ' + est.formatted + '. Try trimming around ' + overageWords + ' words (roughly ' + overageChars + ' characters) to bring it back under two minutes. Look for the parts that repeat the same point twice, those are usually the easiest to cut.';
   var popup = el('sl-block-popup'); if (popup) popup.style.display = 'flex';
 }
 
@@ -4177,7 +4184,7 @@ function submitForReview() {
   .then(function() {
     btn.textContent = '✓ Submitted for Review';
     btn.style.background = '#5a8a5a';
-    status('Script submitted — Mitch will be notified.');
+    status('Script submitted. Mitch will be notified.');
   }).catch(function() {
     btn.disabled = false; btn.textContent = 'Submit for Review';
     status('Could not submit. Try again.');
@@ -4266,7 +4273,7 @@ var c = el('lines-container');
 var div = document.createElement('div');
 div.className = 'direction-line'; div.dataset.type = 'direction';
 div.innerHTML = '<button class="delete-btn">✕</button>' +
-'<input class="direction-input" placeholder="— phone rings, door slams, silence… —" value="' + esc(text || '') + '" />';
+'<input class="direction-input" placeholder="phone rings, door slams, silence…" value="' + esc(text || '') + '" />';
 c.appendChild(div);
 div.querySelector('.delete-btn').addEventListener('click', function() { div.remove(); sched(); });
 div.querySelector('.direction-input').addEventListener('input', sched);
@@ -4366,10 +4373,10 @@ function loadFeedback() {
       var ts = f.submittedAt ? new Date(f.submittedAt).toLocaleString() : '';
       var typeBadge = f.accountType === 'solo' ? 'Solo' : 'Couples';
       var qs = [1,2,3,4].map(function(n) {
-        var vote = f['q' + n] || '—';
+        var vote = f['q' + n] || 'none';
         var comment = f['q' + n + 'Comment'] || '';
-        var icon = vote === 'up' ? '👍' : vote === 'down' ? '👎' : '—';
-        var commentHtml = comment ? '<span style="font-size:0.75rem;color:var(--ink-light);margin-left:6px;">— ' + esc(comment) + '</span>' : '';
+        var icon = vote === 'up' ? '👍' : vote === 'down' ? '👎' : 'none';
+        var commentHtml = comment ? '<span style="font-size:0.75rem;color:var(--ink-light);margin-left:6px;">(' + esc(comment) + ')</span>' : '';
         return '<div style="font-size:0.78rem;color:var(--ink-light);margin-bottom:3px;"><span style="font-weight:600;color:var(--ink);">' + qLabels[n-1] + '</span> ' + icon + commentHtml + '</div>';
       }).join('');
       row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">' +
@@ -4387,7 +4394,7 @@ scriptTarget = uid;
 fsGet('scripts/' + uid).then(function(d) {
 var s = fromFields(d.fields);
 var c = el('script-modal-content');
-txt('script-modal-title', (name || 'Client') + ' — ' + (fight || 'script'));
+txt('script-modal-title', (name || 'Client') + ', ' + (fight || 'script'));
 c.innerHTML = '';
 if (s.scene) { var sd = document.createElement('div'); sd.className = 'modal-scene'; sd.textContent = s.scene; c.appendChild(sd); }
 var lines = typeof s.lines === 'string' ? JSON.parse(s.lines || '[]') : (s.lines || []);
@@ -4487,7 +4494,7 @@ function lpProceed() {
       var sub = document.querySelector('#form-create .auth-sub');
       if (sub) sub.textContent = 'Set up your private script space.';
       var fightLabel = el('ca-fight') ? el('ca-fight').previousElementSibling : null;
-      if (fightLabel) fightLabel.textContent = 'The fight — what do you call it?';
+      if (fightLabel) fightLabel.textContent = 'The fight, what do you call it?';
       var btn = el('btn-create'); if (btn) btn.textContent = 'Create Account';
       if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
       history.pushState({ screen: 'auth' }, '');
@@ -4811,7 +4818,7 @@ function handlePaymentSuccess(sessionId) {
 
   fetch('/.netlify/functions/stripe-verify', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
     body: JSON.stringify({ session_id: sessionId })
   }).then(function(r) { return r.json(); })
   .then(function(d) {
@@ -4907,7 +4914,7 @@ function retryPayment() {
   var fight = user.fight || '';
   fetch('/.netlify/functions/stripe-session', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
     body: JSON.stringify({ coupleId: user.coupleId, uid: user.uid, fightName: fight })
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.url) { window.location.href = data.url; }
@@ -5075,7 +5082,7 @@ function buildIntakeBlock(name, data) {
 }
 
 function runStep2Analysis(partnerData) {
-  txt('step2-status', 'Both scripts received. Analysis in progress — this may take up to a minute...');
+  txt('step2-status', 'Both scripts received. Analysis in progress. This may take up to a minute...');
   return Promise.all([
     fsGet('scripts/' + user.uid),
     fsGet('warmup/' + user.uid).catch(function() { return null; })
@@ -5345,7 +5352,7 @@ function s3SaveConversation() {
 
 // ── JOURNEY ROUTING ─────────────────────────────────────────
 var JOURNEY_STEPS = {
-  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'The video performance is coming soon. Skip ahead — your reflective questions are ready.', btn: 'Continue to Reflective Questions' },
+  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'The video performance is coming soon. Skip ahead. Your reflective questions are ready.', btn: 'Continue to Reflective Questions' },
   '5': { label: 'Step 5', title: 'Watch Your Partner\'s Script', sub: 'The video performance is coming soon. Skip ahead.', btn: 'Continue to Next Step' },
   '6': { label: 'Step 6', title: 'Reflective Questions', sub: 'Four questions. Private answers. In your own words, without your partner\'s influence. This is where insight becomes clarity.', btn: 'Answer the Questions' },
   '7': { label: 'Step 7', title: 'Your Individual Work', sub: 'Before the two of you can work together effectively, each person must do their own work first. There is no authentic we unless it starts with an I.', btn: 'Begin Individual Work' },
@@ -5423,7 +5430,7 @@ function advanceStep(newStep) {
 
 var SOLO_JOURNEY_STEPS = {
   '2': { label: 'Step 2', title: 'Your Analysis', sub: 'What the AI found in your script.', btn: 'Read My Analysis' },
-  '3': { label: 'Step 3', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead — your tool is ready.', btn: 'Continue to Your Tool' },
+  '3': { label: 'Step 3', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead. Your tool is ready.', btn: 'Continue to Your Tool' },
   '4': { label: 'Step 4', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
   '5': { label: 'Step 5', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
   '6': { label: 'Step 6', title: 'You\'ve Done the Work', sub: '', btn: 'Read This' }
@@ -5699,36 +5706,36 @@ function tlContinue() {
 function tlPrint() { window.print(); }
 
 function tlCopy() {
-  var lines = ['YOUR TAKEAWAYS — The Ongoing Argument', ''];
+  var lines = ['YOUR TAKEAWAYS, The Ongoing Argument', ''];
   var todoItems = el('tl-todo-personal') ? el('tl-todo-personal').querySelectorAll('.tl-item') : [];
   if (todoItems.length) {
-    lines.push('TO DO — Personalized');
-    todoItems.forEach(function(li) { lines.push('— ' + li.textContent.trim()); });
+    lines.push('TO DO, Personalized');
+    todoItems.forEach(function(li) { lines.push('- ' + li.textContent.trim()); });
     lines.push('');
   }
   var tobeItems = el('tl-tobe-personal') ? el('tl-tobe-personal').querySelectorAll('.tl-item') : [];
   if (tobeItems.length) {
-    lines.push('TO BE — Personalized');
-    tobeItems.forEach(function(li) { lines.push('— ' + li.textContent.trim()); });
+    lines.push('TO BE, Personalized');
+    tobeItems.forEach(function(li) { lines.push('- ' + li.textContent.trim()); });
     lines.push('');
   }
-  lines.push('———', '');
+  lines.push('---', '');
   lines.push('These aren’t just things to remember for this one exercise. You’re going to have communication breakdowns again, with this person, and with others. This is what you take with you, something to come back to and pull from, so you stay in the energy of it, so the remembering stays alive, for the next time an upset shows up, yours or theirs.', '');
   lines.push('TO DO');
-  lines.push('— Notice your energy shifting before you speak. That’s the moment to pause, not push through.');
-  lines.push('— Know the difference between a reaction and a response. We want response, not reaction.');
-  lines.push('— If you need a minute, take it. Ask for it out loud. “I need five minutes to clear my head, then I want to come back to this, is that okay?”');
-  lines.push('— Reflect and ask a clarifying question. “I want to make sure I heard you right, are you saying…” This isn’t about defending, it’s about understanding their experience, even if it’s not your own.');
-  lines.push('— Remember, this is a conversation, not a confrontation.');
-  lines.push('— Don’t take the bait.', '');
+  lines.push('- Notice your energy shifting before you speak. That’s the moment to pause, not push through.');
+  lines.push('- Know the difference between a reaction and a response. We want response, not reaction.');
+  lines.push('- If you need a minute, take it. Ask for it out loud. “I need five minutes to clear my head, then I want to come back to this, is that okay?”');
+  lines.push('- Reflect and ask a clarifying question. “I want to make sure I heard you right, are you saying…” This isn’t about defending, it’s about understanding their experience, even if it’s not your own.');
+  lines.push('- Remember, this is a conversation, not a confrontation.');
+  lines.push('- Don’t take the bait.', '');
   lines.push('If you’re the one bringing something up:');
-  lines.push('— Come to your partner, don’t come at them.');
-  lines.push('— Use I-language. You’re having a feeling, an experience. Avoid you-language that can land as judgment or blame.');
-  lines.push('— Try starting with “the story I tell myself is…” Starting there keeps you in your own experience instead of making a claim about your partner, so they can hear it as information, not an attack.');
-  lines.push('— Keep it simple. “I’d like to talk to you about something that’s come up for me. Is this a good time?”');
-  lines.push('— Be okay if the answer is no. If you genuinely want to be heard, you want your partner to have ears on their heart, truly present enough to receive it, not just physically there.', '');
+  lines.push('- Come to your partner, don’t come at them.');
+  lines.push('- Use I-language. You’re having a feeling, an experience. Avoid you-language that can land as judgment or blame.');
+  lines.push('- Try starting with “the story I tell myself is…” Starting there keeps you in your own experience instead of making a claim about your partner, so they can hear it as information, not an attack.');
+  lines.push('- Keep it simple. “I’d like to talk to you about something that’s come up for me. Is this a good time?”');
+  lines.push('- Be okay if the answer is no. If you genuinely want to be heard, you want your partner to have ears on their heart, truly present enough to receive it, not just physically there.', '');
   lines.push('TO BE');
-  lines.push('— Present', '— Patient', '— Compassionate', '— Empathetic', '— Curious', '— Committed to not taking the bait', '— Committed to checking in and seeing your part in the situation, and if you discover you’re contributing, willing to own it');
+  lines.push('- Present', '- Patient', '- Compassionate', '- Empathetic', '- Curious', '- Committed to not taking the bait', '- Committed to checking in and seeing your part in the situation, and if you discover you’re contributing, willing to own it');
   var text = lines.join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(function() {
@@ -6182,7 +6189,7 @@ var s9PracticePartnerLine = null;
 var s9PracticePass1Attempt = '';
 var s9PracticePass2Attempt = '';
 var S9_CHECKINS = [
-  'Still here if you need me. If you find yourself reaching for an old line — check your Awareness Log first.',
+  'Still here if you need me. If you find yourself reaching for an old line, check your Awareness Log first.',
   'Quick reminder. If a "you" statement sneaks in, try flipping it to an "I" statement. I\'m here if you want help with that.',
   'How\'s the energy in the room? If it\'s getting charged, take a breath before the next line. I\'m right here.',
   'Remember. Not perfectly. Honestly. And together. You\'re doing the work.'
@@ -6378,7 +6385,7 @@ function s9RenderPractice() {
         (ln.beat ? '<div class="s9-pr-beat">(' + esc(cueInner(ln.beat)) + ')</div>' : '') +
         '<div class="s9-pr-dialogue">' + esc(ln.dialogue) + '</div></div>'
         : '') +
-      '<p class="s9-pr-attempt-label">How might you say this differently &mdash; staying in your own experience, without blame or judgment?</p>' +
+      '<p class="s9-pr-attempt-label">How might you say this differently, staying in your own experience, without blame or judgment?</p>' +
       '<textarea id="s9-pr-attempt-1" class="s9-pr-attempt-input" placeholder="Write your version here\u2026"></textarea>' +
       '<button class="s9-pr-btn" onclick="s9PracticeSubmitPass1()">Submit \u2192</button>';
     var ta = el('s9-pr-attempt-1');
@@ -6423,7 +6430,7 @@ function s9RenderPractice() {
         (ln2.beat ? '<div class="s9-pr-beat">(' + esc(cueInner(ln2.beat)) + ')</div>' : '') +
         '<div class="s9-pr-dialogue">' + esc(ln2.dialogue) + '</div></div>'
         : '') +
-      '<p class="s9-pr-attempt-label">How might you respond to this &mdash; staying in your own experience, without blame or judgment?</p>' +
+      '<p class="s9-pr-attempt-label">How might you respond to this, staying in your own experience, without blame or judgment?</p>' +
       '<textarea id="s9-pr-attempt-2" class="s9-pr-attempt-input" placeholder="Write your response here\u2026"></textarea>' +
       '<button class="s9-pr-btn" onclick="s9PracticeSubmitPass2()">Submit \u2192</button>';
     var ta2 = el('s9-pr-attempt-2');
@@ -7267,16 +7274,16 @@ function runScriptDemo() {
     typeIn('ddg' + n, 'ddgc' + n, dialogue, 44);
   }
 
-  dt(400,  function() { typeIn('d-scene-text', 'd-cursor-scene', 'INT. BEDROOM — NIGHT', 55); });
+  dt(400,  function() { typeIn('d-scene-text', 'd-cursor-scene', 'INT. BEDROOM, NIGHT', 55); });
   dt(2400, function() { pulse('d-btn-dir'); });
-  dt(3000, function() { addDir('— ' + nameB + ' walks in carrying her phone. —'); });
+  dt(3000, function() { addDir(nameB + ' walks in carrying her phone.'); });
   dt(5400, function() { pulse('d-btn-you'); });
   dt(6000, function() { addLine(nameA, '(sighs)', "You said you'd be home at seven."); });
   dt(9200, function() { pulse('d-btn-partner'); });
   dt(9800, function() { addLine(nameB, '', 'I texted you.'); });
   dt(11600, function() { pulse('d-btn-you'); });
   dt(12200, function() { addLine(nameA, '', "That's not the same thing."); });
-  dt(14800, function() { addDir('— Silence. —'); });
+  dt(14800, function() { addDir('Silence.'); });
   dt(17200, function() { runScriptDemo(); });
 }
 

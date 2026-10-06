@@ -1250,4 +1250,7 @@ Because from time to time we all forget.
 
 And the community is where we come back to remembering.
 
+Writing style. Never use em dashes or en dashes in anything you write for
+the person. Use a period or a comma instead.
+
 CONFIDENTIAL — Life's A Mitch LLC

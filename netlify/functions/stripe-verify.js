@@ -1,10 +1,7 @@
 'use strict';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
+const { verifyFirebaseUser } = require('../lib/firebase-auth');
+const { corsHeaders, stripeMode, liveAllowed } = require('../lib/stripe-common');
 
 function generateCoupleCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -16,6 +13,7 @@ function generateCoupleCode() {
 }
 
 exports.handler = async function(event) {
+  const CORS_HEADERS = corsHeaders(event);
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers: CORS_HEADERS, body: '' };
   }
@@ -37,9 +35,21 @@ exports.handler = async function(event) {
   }
 
   const stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) {
+  if (stripeMode(stripeKey) === 'unconfigured') {
     console.error('STRIPE_SECRET_KEY not set');
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Configuration error' }) };
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Configuration error', code: 'not_configured' }) };
+  }
+  if (stripeMode(stripeKey) === 'live' && !liveAllowed()) {
+    return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Live payments are switched off.', code: 'live_blocked' }) };
+  }
+
+  // Paying for a couple needs the person who paid to be signed in.
+  const who = await verifyFirebaseUser(event);
+  if (who === 'unavailable') {
+    return { statusCode: 503, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Sign-in check unavailable. Please try again.', code: 'auth_unavailable' }) };
+  }
+  if (!who) {
+    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Please sign in.', code: 'unauthorized' }) };
   }
 
   let stripeRes;
@@ -72,6 +82,18 @@ exports.handler = async function(event) {
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       body: JSON.stringify({ paid: false })
     };
+  }
+
+  if (session.metadata && session.metadata.demo === 'true') {
+    return {
+      statusCode: 200,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paid: true, demo: true })
+    };
+  }
+
+  if (!session.metadata || session.metadata.uid !== who.uid) {
+    return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'That payment belongs to a different account.', code: 'wrong_account' }) };
   }
 
   const coupleId = session.metadata && session.metadata.coupleId;
