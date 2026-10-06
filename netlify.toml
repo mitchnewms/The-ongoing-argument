@@ -33,3 +33,32 @@
   from = "/pricing"
   to = "/pricing.html"
   status = 200
+
+[[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
+
+# The site is published from the repository root, so keep server code, the AI master prompt and
+# the draft database rules from being downloaded as web files.
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/firestore-rules/*"
+  to = "/404.html"
+  status = 404
+  force = true

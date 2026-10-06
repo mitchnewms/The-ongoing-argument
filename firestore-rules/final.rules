@@ -1,0 +1,138 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    function isCoach() {
+      return signedIn() && request.auth.token.email == 'mitch@mitchnewman.com';
+    }
+    function userData(uid) { return get(/databases/$(database)/documents/users/$(uid)).data; }
+    function coupleData(cid) { return get(/databases/$(database)/documents/couples/$(cid)).data; }
+    function inCouple(c, uid) {
+      return c.partnerAId == uid || c.get('partnerBId', '') == uid;
+    }
+    // Both people are members of the same couple record, and each person's own
+    // profile names that couple. A stranger cannot satisfy this without having
+    // joined the couple through its one-time join code.
+    function sameCouple(other) {
+      let cid = userData(me()).get('coupleId', '');
+      return other != me()
+        && cid != ''
+        && userData(other).get('coupleId', '') == cid
+        && inCouple(coupleData(cid), me())
+        && inCouple(coupleData(cid), other);
+    }
+
+    // ---------- profiles ----------
+    match /users/{uid} {
+      allow read: if signedIn() && (me() == uid || isCoach() || sameCouple(uid));
+      allow create, update: if signedIn() && (me() == uid || isCoach());
+      allow delete: if false;
+    }
+
+    // ---------- the couple record (shared by both partners) ----------
+    match /couples/{cid} {
+      allow read: if signedIn() && (isCoach() || inCouple(resource.data, me()));
+      allow create: if signedIn()
+        && request.resource.data.partnerAId == me()
+        && request.resource.data.get('partnerBId', '') == '';
+      allow update: if signedIn() && (isCoach() || memberUpdate() || joinUpdate());
+      allow delete: if false;
+
+      // PRE-LAUNCH: paidStatus, coupleCode and paidAt are currently written by the
+      // browser (beta bypass). At launch they must become server-only writes.
+      function memberUpdate() {
+        return inCouple(resource.data, me())
+          && request.resource.data.partnerAId == resource.data.partnerAId
+          && request.resource.data.get('partnerBId', '') == resource.data.get('partnerBId', '');
+      }
+      function joinUpdate() {
+        return !inCouple(resource.data, me())
+          && resource.data.get('partnerBId', '') == ''
+          && request.resource.data.partnerBId == me()
+          && request.resource.data.partnerAId == resource.data.partnerAId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerBId', 'partnerBConfirmed']);
+      }
+    }
+
+    // ---------- public join lookup (readable before login, one code at a time) ----------
+    match /joinCodes/{code} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.partnerAId == me()
+        && coupleData(request.resource.data.coupleId).partnerAId == me();
+      allow update: if signedIn() && (
+        resource.data.partnerAId == me()
+        || (resource.data.get('used', false) == false
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used'])
+            && request.resource.data.used == true));
+      allow delete: if false;
+    }
+
+    // ---------- private to one person ----------
+    // New: retelling, input method and (later) intake answers live here.
+    match /private/{uid} {
+      allow read: if signedIn() && (me() == uid || isCoach());
+      allow write: if signedIn() && me() == uid;
+    }
+
+    // Scripts, intake answers and story answers: owner only. The Step 2/3/10
+    // analyses must run on the server so a partner's browser never needs this.
+    match /scripts/{uid} {
+      allow read: if signedIn() && (me() == uid || isCoach());
+      allow write: if signedIn() && me() == uid;
+    }
+
+    // The finished script (scene and lines only). Owner writes it; the partner
+    // can read it only once the couple has reached Step 5.
+    match /sharedScripts/{uid} {
+      allow read: if signedIn() && (me() == uid || isCoach()
+        || (sameCouple(uid)
+            && int(coupleData(userData(me()).get('coupleId', '')).get('currentStep', '1')) >= 5));
+      allow write: if signedIn() && me() == uid;
+    }
+
+    // Everything else that belongs to one person.
+    match /{col}/{uid} {
+      allow read: if signedIn()
+        && col in ['warmup', 'step3', 'step4', 'step5', 'step6', 'step7', 'step8', 'step11', 'practice', 'solo-analysis']
+        && (me() == uid || isCoach());
+      allow write: if signedIn()
+        && col in ['warmup', 'step3', 'step4', 'step5', 'step6', 'step7', 'step8', 'step11', 'practice', 'solo-analysis']
+        && me() == uid;
+    }
+
+    // ---------- coach notes: coach writes, the person reads their own ----------
+    match /notes/{id} {
+      allow read: if signedIn() && (isCoach() || resource.data.userId == me());
+      allow create, update, delete: if isCoach();
+    }
+
+    // ---------- awareness log: owner only ----------
+    match /awarenessLog/{id} {
+      allow read: if signedIn() && (isCoach() || resource.data.userId == me());
+      allow create: if signedIn() && request.resource.data.userId == me();
+      allow update: if signedIn() && resource.data.userId == me() && request.resource.data.userId == me();
+      allow delete: if signedIn() && resource.data.userId == me();
+    }
+
+    // ---------- feedback, safety flags, coach interest ----------
+    match /feedback/{uid} {
+      allow create, update: if signedIn() && me() == uid;
+      allow read: if isCoach();
+    }
+    match /coachFlags/{id} {
+      allow create: if signedIn() && request.resource.data.triggeredByUid == me();
+      allow read: if isCoach();
+      allow update, delete: if false;
+    }
+    match /coachInterest/{id} {
+      allow create: if signedIn();
+      allow read: if isCoach();
+      allow update, delete: if false;
+    }
+  }
+}

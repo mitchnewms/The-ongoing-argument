@@ -1,0 +1,29 @@
+* { box-sizing: border-box; }
+body { margin:0; background:#F6F4F0; color:#111; font-family:'Lora',Georgia,serif; line-height:1.6; -webkit-text-size-adjust:100%; }
+.wrap { max-width:620px; margin:0 auto; padding:28px 20px 56px; }
+.logo { width:190px; height:100px; margin:0 auto 10px; background:url('/toa-logo.png') no-repeat; background-size:582px auto; background-position:-196px -84px; }
+h1 { font-size:1.6rem; text-align:center; margin:0 0 6px; font-weight:600; line-height:1.25; }
+h1 span { color:#E06500; }
+.sub { text-align:center; color:#6A6458; margin:0 0 24px; font-size:0.98rem; }
+.card { background:#fff; border:1px solid #E2DED8; border-radius:4px; padding:24px 22px; box-shadow:0 4px 24px rgba(0,0,0,0.06); margin-bottom:18px; }
+h2 { font-size:1.1rem; margin:22px 0 8px; font-weight:600; }
+.card > h2:first-child { margin-top:0; }
+p { margin:0 0 12px; }
+ul { padding-left:20px; margin:8px 0 12px; }
+li { margin-bottom:8px; }
+a { color:#B34F00; }
+.fine { font-size:0.85rem; color:#6A6458; }
+.test { background:#FFF4E5; border:1px solid #E8C48F; border-radius:4px; padding:12px 14px; font-size:0.85rem; color:#5B4520; margin-bottom:18px; }
+.draft { background:#FFF8CC; border:1px solid #D9C75A; border-radius:4px; padding:12px 14px; font-size:0.88rem; color:#4A4210; margin-bottom:18px; }
+.ph { background:#FFE98A; color:#3B3300; padding:1px 5px; border-radius:2px; font-style:normal; }
+.notice { border-left:3px solid #E06500; padding:2px 0 2px 14px; margin:0 0 14px; }
+code { background:#F1EDE6; padding:1px 5px; border-radius:2px; }
+.price { font-size:2.2rem; font-weight:600; text-align:center; margin:0; line-height:1.2; }
+.price small { display:block; font-size:0.82rem; font-weight:400; color:#6A6458; margin-top:4px; }
+.pay { display:block; width:100%; margin-top:18px; padding:14px; background:#E06500; color:#fff; border:none; border-radius:3px; font-size:1rem; font-family:inherit; cursor:pointer; letter-spacing:0.02em; min-height:48px; }
+.pay[disabled] { opacity:0.6; cursor:default; }
+#msg { min-height:1.2em; margin-top:10px; font-size:0.88rem; text-align:center; }
+#msg.err { color:#C0392B; }
+#msg.ok { color:#2E7D32; }
+.foot { display:flex; flex-wrap:wrap; justify-content:center; gap:6px 20px; margin-top:22px; font-size:0.88rem; }
+.foot a { padding:8px 2px; }

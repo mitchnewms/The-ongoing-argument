@@ -3,111 +3,90 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pricing | The Ongoing Argument</title>
+<title>Pricing and refunds | The Ongoing Argument</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; }
-  body { margin:0; background:#F6F4F0; color:#111; font-family:'Lora',Georgia,serif; line-height:1.55; -webkit-text-size-adjust:100%; }
-  .wrap { max-width:560px; margin:0 auto; padding:28px 20px 56px; }
-  .logo { width:190px; height:100px; margin:0 auto 10px; background:url('/toa-logo.png') no-repeat; background-size:582px auto; background-position:-196px -84px; }
-  h1 { font-size:1.6rem; text-align:center; margin:0 0 6px; font-weight:600; }
-  h1 span { color:#E06500; }
-  .sub { text-align:center; color:#6A6458; margin:0 0 24px; font-size:0.98rem; }
-  .test { background:#FFF4E5; border:1px solid #E8C48F; border-radius:4px; padding:12px 14px; font-size:0.85rem; color:#5B4520; margin-bottom:18px; }
-  .test b { color:#8A4A00; }
-  .card { background:#fff; border:1px solid #E2DED8; border-radius:4px; padding:24px 22px; box-shadow:0 4px 24px rgba(0,0,0,0.06); margin-bottom:18px; }
-  .price { font-size:2.4rem; font-weight:600; text-align:center; margin:0; }
-  .price small { display:block; font-size:0.82rem; font-weight:400; color:#6A6458; margin-top:2px; }
-  ul { padding-left:20px; margin:18px 0 6px; }
-  li { margin-bottom:8px; }
-  h2 { font-size:1.05rem; margin:0 0 8px; font-weight:600; }
-  p { margin:0 0 10px; }
-  .pay { display:block; width:100%; margin-top:18px; padding:14px; background:#E06500; color:#fff; border:none; border-radius:3px; font-size:1rem; font-family:inherit; cursor:pointer; letter-spacing:0.02em; min-height:48px; }
-  .pay[disabled] { opacity:0.6; cursor:default; }
-  #msg { min-height:1.2em; margin-top:10px; font-size:0.88rem; text-align:center; }
-  #msg.err { color:#C0392B; }
-  #msg.ok { color:#2E7D32; }
-  .fine { font-size:0.82rem; color:#6A6458; }
-  a { color:#E06500; }
-  .back { text-align:center; margin-top:20px; font-size:0.9rem; }
-  code { background:#F1EDE6; padding:1px 5px; border-radius:2px; }
-</style>
+<link rel="stylesheet" href="/site.css">
 </head>
 <body>
 <div class="wrap">
-  <div class="logo" role="img" aria-label="The Ongoing Argument logo"></div>
+  <a href="/" aria-label="The Ongoing Argument home" style="text-decoration:none"><div class="logo" role="img" aria-label="The Ongoing Argument logo"></div></a>
   <h1><span>T</span>he <span>O</span>ngoing <span>A</span>rgument</h1>
-  <p class="sub">One payment for the two of you.</p>
+  <p class="sub">What you get, what it costs, and how refunds work.</p>
 
   <div class="test" id="test-banner" style="display:none;">
-    <b>Test mode.</b> Nothing real is charged here. At checkout, use the test card <code>4242 4242 4242 4242</code>, any future date, any three digits, any ZIP. The price shown is a placeholder.
+    <b>Test mode.</b> Nothing real is charged here. At checkout, use the test card <code>4242 4242 4242 4242</code>, any future date, any three digits, any ZIP. The checkout amount is a test amount.
   </div>
 
   <div class="card">
-    <p class="price" id="price">&nbsp;<small id="price-note">one time, for both partners</small></p>
+    <h2>What is for sale</h2>
+    <p>One purchase gives a couple access to The Ongoing Argument, a self guided, AI assisted communication tool. Each partner gets their own login and their own private space. It includes:</p>
     <ul>
-      <li>A guided interview that turns your recurring argument into a plain written account of what each of you is living.</li>
-      <li>Your own private script, in your own words, that you can read before the hard conversation.</li>
-      <li>A shared link so your partner joins with their own login and their own private space.</li>
-      <li>Written steps for what to do next, one step at a time.</li>
+      <li>A guided written interview about a conflict you keep having, with AI assistance to help you put it into words.</li>
+      <li>A private script of your own side that you can read before you talk.</li>
+      <li>A shared invite link so your partner can join with their own login.</li>
+      <li>Written steps for what to try next, one at a time.</li>
     </ul>
+    <p class="fine">Planned features that are not available yet, such as video performances of your script, are not included in this price. <span class="ph">[PLACEHOLDER: confirm what is included at launch]</span></p>
+  </div>
+
+  <div class="card">
+    <h2>Price</h2>
+    <p class="price" id="price"><span class="ph">[PLACEHOLDER: price to be decided]</span><small id="price-note"><span class="ph">[PLACEHOLDER: one time or subscription, to be decided]</span></small></p>
     <button class="pay" id="pay" type="button" onclick="startCheckout()">Pay</button>
     <div id="msg" role="status"></div>
   </div>
 
   <div class="card">
-    <h2>Refunds</h2>
-    <p>If it is not useful to you, email us within 14 days of paying and we will refund you in full. No form, no questions.</p>
-    <p class="fine">This refund wording is a draft and will be confirmed before launch.</p>
+    <h2>What this is, and what it is not</h2>
+    <p class="notice">The Ongoing Argument is a self guided, AI assisted communication tool. It is not therapy, counseling, medical care, or legal advice, and it is not a crisis service.</p>
+    <p>You work through written steps on your own, at your own pace. An AI helps you put words to what you notice, and you stay in charge of what you write and what you share with your partner. It does not diagnose anyone and it does not replace a licensed professional.</p>
+    <p>If you or someone else is in danger, call your local emergency number. In the United States you can call or text 988 for the Suicide and Crisis Lifeline, or call the National Domestic Violence Hotline at 1-800-799-7233. This tool is not designed for relationships where there is violence, threats or fear. If that is your situation, please talk to a qualified person first.</p>
   </div>
 
   <div class="card">
-    <h2>Questions</h2>
-    <p class="fine">Write to <a href="mailto:mitch@mitchnewman.com">mitch@mitchnewman.com</a>.</p>
+    <h2>Refunds</h2>
+    <p><span class="ph">[PLACEHOLDER: refund policy to be decided, for example the number of days and how to ask]</span></p>
   </div>
 
-  <p class="back"><a href="/">Back to The Ongoing Argument</a></p>
+  <div class="card">
+    <h2>Contact</h2>
+    <p>Business: <span class="ph">[PLACEHOLDER: registered business name and address, to be confirmed]</span></p>
+    <p>Questions about your purchase: <span class="ph">[PLACEHOLDER: contact email, to be confirmed]</span></p>
+  </div>
+
+  <nav class="foot" aria-label="Site pages">
+    <a href="/">Home</a>
+    <a href="/pricing">Pricing and refunds</a>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/contact">Contact</a>
+  </nav>
 </div>
 <script>
-var SESSION_URL = '/.netlify/functions/stripe-session';
 function $(id) { return document.getElementById(id); }
 function setMsg(t, cls) { var m = $('msg'); m.textContent = t || ''; m.className = cls || ''; }
-
 function money(cents, cur) {
   try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: (cur || 'usd').toUpperCase(), minimumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100); }
   catch (e) { return '$' + (cents / 100); }
 }
-
-var cfg = { mode: 'unconfigured', liveBlocked: false };
 fetch('/.netlify/functions/stripe-config').then(function(r) { return r.json(); }).then(function(c) {
-  cfg = c;
-  $('price').firstChild.nodeValue = money(c.amount, c.currency);
   if (c.mode === 'test') $('test-banner').style.display = 'block';
+  // The real price replaces the placeholder only once a Stripe price has been chosen.
+  if (c.mode === 'live' && !c.placeholder && !c.liveBlocked) { var ph = $('price').firstElementChild; ph.className = ''; ph.textContent = money(c.amount, c.currency); }
   if (c.mode === 'unconfigured' || c.liveBlocked) { $('pay').disabled = true; setMsg('Checkout is not open yet.', 'err'); }
-}).catch(function() {
-  $('pay').disabled = true; setMsg('Could not load pricing. Please reload the page.', 'err');
-});
-
+}).catch(function() { $('pay').disabled = true; setMsg('Could not load checkout. Please reload the page.', 'err'); });
 var qs = new URLSearchParams(location.search);
 if (qs.get('paid') === 'test') setMsg('Test payment complete. Nothing real was charged.', 'ok');
 else if (qs.get('cancelled')) setMsg('Checkout cancelled. You were not charged.', '');
-
-var ERRORS = {
-  not_configured: 'Checkout is not open yet.',
-  live_blocked: 'Checkout is not open yet.',
-  demo_test_only: 'Checkout is not open yet.',
-  no_price: 'Checkout is not open yet.'
-};
-
 function startCheckout() {
-  var b = $('pay'); b.disabled = true; var old = b.textContent; b.textContent = 'Opening checkout…'; setMsg('');
-  fetch(SESSION_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ demo: true }) })
+  var b = $('pay'); b.disabled = true; var old = b.textContent; b.textContent = 'Opening checkout\u2026'; setMsg('');
+  fetch('/.netlify/functions/stripe-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ demo: true }) })
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d && d.url) { window.location.href = d.url; return; }
       b.disabled = false; b.textContent = old;
-      setMsg(ERRORS[d && d.code] || 'Could not open checkout. Please try again.', 'err');
+      setMsg(d && /^(not_configured|live_blocked|demo_test_only|no_price)$/.test(d.code) ? 'Checkout is not open yet.' : 'Could not open checkout. Please try again.', 'err');
     })
     .catch(function() { b.disabled = false; b.textContent = old; setMsg('Could not open checkout. Please try again.', 'err'); });
 }

@@ -1,6 +1,7 @@
 'use strict';
 
 const { verifyFirebaseUser } = require('../lib/firebase-auth');
+const admin = require('../lib/firestore-admin');
 const { corsHeaders, stripeMode, liveAllowed } = require('../lib/stripe-common');
 
 function generateCoupleCode() {
@@ -102,11 +103,37 @@ exports.handler = async function(event) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid session metadata' }) };
   }
 
-  const coupleCode = generateCoupleCode();
+  const json = (status, obj) => ({ statusCode: status, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' }, body: JSON.stringify(obj) });
 
-  return {
-    statusCode: 200,
-    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ paid: true, coupleId, coupleCode })
-  };
+  // Without the server key we cannot record payment safely. In test mode the browser still does it (the
+  // beta way). In live mode we refuse, so a real payment can never be recorded by a browser.
+  if (!admin.configured()) {
+    if (stripeMode(stripeKey) === 'live') {
+      console.error('Live payment seen but FIREBASE_SERVICE_ACCOUNT is not set. Refusing.');
+      return json(500, { error: 'Payment recording is not set up.', code: 'server_not_configured' });
+    }
+    return json(200, { paid: true, coupleId, coupleCode: generateCoupleCode(), serverWrote: false });
+  }
+
+  try {
+    const couple = await admin.getDoc('couples/' + encodeURIComponent(coupleId));
+    if (!couple || couple.partnerAId !== who.uid) {
+      return json(403, { error: 'That payment belongs to a different account.', code: 'wrong_account' });
+    }
+    // Checking twice must not make a second code: reuse the first one.
+    if (couple.paidStatus === true && couple.coupleCode) {
+      return json(200, { paid: true, coupleId, coupleCode: couple.coupleCode, serverWrote: true });
+    }
+    const coupleCode = generateCoupleCode();
+    await admin.setFields('couples/' + encodeURIComponent(coupleId), {
+      paidStatus: true, coupleCode, paidAt: new Date().toISOString(), partnerAConfirmed: true
+    });
+    await admin.setFields('joinCodes/' + coupleCode, {
+      coupleId, partnerAId: who.uid, fightName: String(session.metadata.fightName || ''), used: false
+    });
+    return json(200, { paid: true, coupleId, coupleCode, serverWrote: true });
+  } catch (err) {
+    console.error('Recording payment failed:', err.message);
+    return json(502, { error: 'Payment received but could not be recorded. Please try again.', code: 'record_failed' });
+  }
 };

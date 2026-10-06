@@ -743,6 +743,9 @@ body {
 .lp-btn:disabled { background: #C8A870; cursor: default; }
 .lp-btn-solo { display: block; width: 100%; max-width: 380px; margin: 14px auto 0; padding: 16px 24px; background: transparent; color: #7A6E60; font-family: system-ui, -apple-system, sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; border: 1.5px solid #C8C0B0; cursor: pointer; border-radius: 1px; -webkit-appearance: none; appearance: none; touch-action: manipulation; transition: border-color 0.15s, color 0.15s; }
 .lp-btn-solo:hover, .lp-btn-solo:active { border-color: #9A8870; color: #4A3E30; }
+.lp-signin-link { display: block; margin: 18px auto 0; padding: 10px 14px; background: none; border: none; color: #6A6458; font-family: system-ui, -apple-system, sans-serif; font-size: 0.85rem; text-decoration: underline; cursor: pointer; min-height: 44px; }
+.lp-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; padding: 28px 16px 40px; font-family: system-ui, -apple-system, sans-serif; font-size: 0.8rem; }
+.lp-footer a { color: #6A6458; padding: 8px 2px; }
 .lp-fork-beat { font-family: 'Lora', Georgia, serif; font-size: clamp(1rem, 2.8vw, 1.15rem); line-height: 1.9; color: #3A3028; max-width: 54ch; margin: 0 auto; }
 .lp-fork-beat p { margin-bottom: 1.4em; }
 .lp-fork-beat p:last-child { margin-bottom: 0; }
@@ -2017,11 +2020,6 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
       <div class="pb-body">
         <p>The fight you keep having. The one that never gets resolved. Your partner has named it and started the work. Now it's your turn.</p>
         <p>This process was built by Mitch Newman, relationship adviser and former screenwriter, to help couples do what TV writers do every week, which is to find the solution to the ongoing conflict.</p>
-        <p>Watch what's possible.</p>
-      </div>
-      <!-- REPLACE WITH DEMO VIDEO WHEN DELIVERED -->
-      <div class="pb-video-placeholder">
-        <div class="pb-video-placeholder-text">Demo video, coming soon</div>
       </div>
       <div class="pb-body">
         <p>When both people are fully in it, something real becomes possible. You'll write your version of the fight privately, watch it performed by avatars, do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
@@ -2129,6 +2127,7 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
   <div class="lp-cta">
     <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">Start as a couple</button>
     <button class="lp-btn-solo" id="lp-btn-solo" onclick="lpRevealCommitmentSolo()">Start on your own</button>
+    <button type="button" class="lp-signin-link" id="lp-signin" onclick="openSignInFromGate()">Already have an account? Sign in</button>
   </div>
 
   <!-- S6: COMMITMENT STATEMENT — hidden until S5 button clicked; content branches by path -->
@@ -2165,6 +2164,13 @@ window.BETA_INVITE_PASSWORD = 'ongoing';
       <button class="lp-btn" id="lp-btn-go" onclick="lpProceed()">This is the one. Let's go.</button>
     </div>
   </div>
+
+  <footer class="lp-footer">
+    <a href="/pricing">Pricing and refunds</a>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/contact">Contact</a>
+  </footer>
 
 </div>
 
@@ -3640,7 +3646,9 @@ function closeSignInOnly() {
   var lp = el('landing-screen');
   if (lp && !/^\/join\//.test(window.location.pathname)) lp.style.display = lp.getAttribute('data-prev-display') || '';
   if (/^\/join\//.test(window.location.pathname)) { var pb = el('partner-b-intro-screen'); if (pb) pb.style.display = 'block'; }
-  var g = el('beta-gate'); if (g) g.style.display = 'flex';
+  var showGate = true;
+  try { showGate = sessionStorage.getItem('oa_beta') !== '1'; } catch (e) {}
+  var g = el('beta-gate'); if (g && showGate) g.style.display = 'flex';
 }
 
 // ---- Partner invite: find the link and code again from the home screen ----
@@ -4822,6 +4830,11 @@ function handlePaymentSuccess(sessionId) {
     body: JSON.stringify({ session_id: sessionId })
   }).then(function(r) { return r.json(); })
   .then(function(d) {
+    // Paid but the server could not record it yet: try once more before showing anything.
+    if (d && d.code === 'record_failed' && !handlePaymentSuccess.retried) {
+      handlePaymentSuccess.retried = true;
+      return new Promise(function(res) { setTimeout(res, 2000); }).then(function() { return handlePaymentSuccess(sessionId); });
+    }
     history.replaceState({}, '', '/');
     if (!d.paid || !d.coupleCode || !d.coupleId) {
       // Payment unverified — just enter app
@@ -4830,10 +4843,13 @@ function handlePaymentSuccess(sessionId) {
       loadProfile(); loadScript(); loadNotes();
       return;
     }
-    // Write paidStatus + coupleCode to couple doc
-    return fsSet('couples/' + d.coupleId, { paidStatus: true, coupleCode: d.coupleCode })
-    .then(function() { return writeJoinCode(d.coupleId, d.coupleCode, user && user.fight, false); })
-    .then(function() {
+    // The server records paidStatus, the couple code and the join code itself once it has seen
+    // the payment (serverWrote). The browser only writes them as a fallback, which the launch
+    // Firestore rules will refuse.
+    var recorded = d.serverWrote ? Promise.resolve() :
+      fsSet('couples/' + d.coupleId, { paidStatus: true, coupleCode: d.coupleCode })
+        .then(function() { return writeJoinCode(d.coupleId, d.coupleCode, user && user.fight, false); });
+    return recorded.then(function() {
       showPaymentConfirm(d.coupleCode, d.coupleId, 'paid');
     });
   }).catch(function() {
