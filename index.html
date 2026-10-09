@@ -3772,7 +3772,7 @@ function afterLogin() {
       show('script-screen');
       loadProfile(); loadScript(); loadNotes();
     }).catch(function() {
-      txt('ca-error', 'Account created but could not link to your partner. Please contact mitch@mitchnewman.com.');
+      txt('ca-error', 'Account created but could not link to your partner. Please contact mitch@theongoingargument.com.');
       el('al-fab').style.display = 'block';
       show('script-screen');
       loadProfile(); loadScript(); loadNotes();
@@ -4677,7 +4677,7 @@ function pbAutoValidate() {
       errDiv.style.display = 'block'; return;
     }
     if (couple.used) {
-      errDiv.textContent = 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.';
+      errDiv.textContent = 'This code has already been used. If this is a mistake please reach out to mitch@theongoingargument.com.';
       errDiv.style.display = 'block'; return;
     }
     // Valid — show commitment screen before account creation
@@ -4777,7 +4777,7 @@ function submitPartnerCode() {
       return;
     }
     if (match.used) {
-      txt('ce-error', 'This code has already been used. If this is a mistake please reach out to mitch@mitchnewman.com.');
+      txt('ce-error', 'This code has already been used. If this is a mistake please reach out to mitch@theongoingargument.com.');
       return;
     }
 
