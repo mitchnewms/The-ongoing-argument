@@ -2,6 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const { MODEL } = require('../lib/ai-costs');
+const { logUsage } = require('../lib/ai-usage');
 
 // Load the master prompt without ever throwing at startup. A crash here makes every
 // request fail with no explanation, so a missing file is reported on each request instead.
@@ -143,7 +145,7 @@ exports.handler = async function(event) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: MODEL,
         max_tokens: maxTokens,
         system: SYSTEM_PROMPT,
         messages: messages
@@ -168,6 +170,7 @@ exports.handler = async function(event) {
   }
 
   const text = (data.content && data.content[0] && data.content[0].text) || '';
+  await logUsage(who.uid, step, MODEL, maxTokens, data.usage);
   if (text.indexOf('[[COACH_FLAG') !== -1) console.warn('SAFETY FLAG raised for user ' + who.uid + ' at step ' + step);
 
   return {

@@ -38,8 +38,8 @@ exports.handler = async function(event) {
     // A test checkout from the public price page. Test mode only, so no real money can move.
     if (mode !== 'test') return reply(CORS, 403, { error: 'The demo checkout only works in test mode.', code: 'demo_test_only' });
     metadata['metadata[demo]'] = 'true';
-    successPath = '/pricing?paid=test';
-    cancelPath = '/pricing?cancelled=1';
+    successPath = '/beta147/pricing?paid=test';
+    cancelPath = '/beta147/pricing?cancelled=1';
   } else {
     const { coupleId, uid, fightName } = body;
     if (!coupleId || !uid) return reply(CORS, 400, { error: 'coupleId and uid required', code: 'bad_request' });
@@ -50,8 +50,8 @@ exports.handler = async function(event) {
     metadata['metadata[coupleId]'] = coupleId;
     metadata['metadata[uid]'] = uid;
     metadata['metadata[fightName]'] = (fightName || '').slice(0, 200);
-    successPath = '/?payment_success=1&session_id={CHECKOUT_SESSION_ID}';
-    cancelPath = '/?payment_cancelled=1';
+    successPath = '/beta147/?payment_success=1&session_id={CHECKOUT_SESSION_ID}';
+    cancelPath = '/beta147/?payment_cancelled=1';
   }
 
   const params = new URLSearchParams({

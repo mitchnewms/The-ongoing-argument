@@ -24,20 +24,51 @@
   status = 301
   force = true
 
+# The build lives at /beta147. Old join links redirect to the new address.
 [[redirects]]
   from = "/join/*"
-  to = "/index.html"
+  to = "/beta147/join/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/beta147/join/*"
+  to = "/beta147/index.html"
   status = 200
 
 [[redirects]]
-  from = "/pricing"
-  to = "/pricing.html"
+  from = "/beta147"
+  to = "/beta147/index.html"
   status = 200
+
+[[redirects]]
+  from = "/beta147/admin"
+  to = "/beta147/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/beta147/pricing"
+  to = "/beta147/pricing.html"
+  status = 200
+
+[[redirects]]
+  from = "/beta147/terms"
+  to = "/beta147/terms.html"
+  status = 200
+
+# Pricing and terms moved under the build address. The old public addresses now show not found, so
+# nothing on the home address leads to them or hints at the build.
+[[redirects]]
+  from = "/pricing"
+  to = "/404.html"
+  status = 404
+  force = true
 
 [[redirects]]
   from = "/terms"
-  to = "/terms.html"
-  status = 200
+  to = "/404.html"
+  status = 404
+  force = true
 
 [[redirects]]
   from = "/privacy"
@@ -62,3 +93,15 @@
   to = "/404.html"
   status = 404
   force = true
+
+# Keep the build out of search results.
+[[headers]]
+  for = "/beta147/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/beta147"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

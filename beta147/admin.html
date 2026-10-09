@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin</title>
+<link rel="stylesheet" href="/site.css">
+<style>
+  .wrap { max-width:760px; }
+  h1 { font-size:1.35rem; }
+  .scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:0.9rem; font-variant-numeric:tabular-nums; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid #E2DED8; white-space:nowrap; }
+  th { font-weight:600; background:#FAF8F4; }
+  td.n, th.n { text-align:right; }
+  .big { font-size:1.6rem; font-weight:600; }
+  .row { display:flex; flex-wrap:wrap; gap:14px 28px; }
+  .row div small { display:block; color:#6A6458; font-size:0.8rem; }
+  input[type=email], input[type=password] { width:100%; padding:12px; font-size:16px; border:1px solid #CFC9BF; border-radius:3px; margin-bottom:10px; font-family:inherit; }
+  .btn { padding:12px 16px; background:#E06500; color:#fff; border:none; border-radius:3px; font-family:inherit; font-size:0.95rem; cursor:pointer; min-height:46px; margin:4px 8px 4px 0; }
+  .btn.alt { background:#fff; color:#111; border:1px solid #CFC9BF; }
+  .err { color:#B3261E; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Admin</h1>
+
+  <div class="card" id="login">
+    <h2>Coach sign in</h2>
+    <input type="email" id="em" placeholder="Email" autocomplete="username" autocapitalize="none">
+    <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+    <button class="btn" id="go" type="button">Sign in</button>
+    <p class="err" id="lerr" role="alert"></p>
+  </div>
+
+  <div id="app" style="display:none;">
+    <div class="card">
+      <h2>AI spend</h2>
+      <div id="usage-note" class="fine"></div>
+      <div class="row" id="spend"></div>
+    </div>
+    <div class="card">
+      <h2>Average cost per completed journey</h2>
+      <div id="avg"></div>
+    </div>
+    <div class="card">
+      <h2>Cost of each journey step</h2>
+      <div class="scroll"><table id="steps"></table></div>
+    </div>
+    <div class="card">
+      <h2>Five most expensive accounts</h2>
+      <div class="scroll"><table id="top"></table></div>
+    </div>
+    <div class="card">
+      <h2>Waiting list <span id="wl-count" class="fine"></span></h2>
+      <button class="btn" id="copy" type="button">Copy all emails</button>
+      <button class="btn alt" id="csv" type="button">Download as CSV</button>
+      <p class="fine" id="wl-msg" role="status"></p>
+      <div class="scroll"><table id="wl"></table></div>
+    </div>
+    <button class="btn alt" id="out" type="button">Sign out</button>
+  </div>
+</div>
+<script>
+var API_KEY = 'AIzaSyBAuVl_ZdnBiuN4BbtBp01z_n-2f-lJVys';
+var token = '', waitlist = [];
+function $(i) { return document.getElementById(i); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function usd(x) { return x == null ? 'none yet' : '$' + Number(x).toFixed(x < 1 ? 4 : 2); }
+
+function api(view) {
+  return fetch('/.netlify/functions/admin-data?view=' + view, { headers: { Authorization: 'Bearer ' + token } })
+    .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'Error'); return d; }); });
+}
+
+function signIn() {
+  $('lerr').textContent = ''; $('go').disabled = true;
+  fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + API_KEY, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: $('em').value.trim(), password: $('pw').value, returnSecureToken: true })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (!d.idToken) throw new Error('Wrong email or password.');
+    token = d.idToken; $('pw').value = '';
+    return load();
+  }).catch(function(e) { $('lerr').textContent = e.message; $('go').disabled = false; });
+}
+
+function load() {
+  return Promise.all([api('usage'), api('waitlist')]).then(function(r) {
+    $('login').style.display = 'none'; $('app').style.display = 'block';
+    showUsage(r[0]); showList(r[1]);
+  }).catch(function(e) {
+    token = ''; $('go').disabled = false;
+    $('lerr').textContent = e.message;
+  });
+}
+
+function showUsage(u) {
+  $('usage-note').textContent = u.calls + ' AI calls recorded. Days run on ' + u.timezone.replace('_', ' ') + ' time.' + (u.truncated ? ' Showing the first 30000 records only.' : '');
+  $('spend').innerHTML = [['Today', u.spend.today], ['Last 7 days', u.spend.last7Days], ['All time', u.spend.allTime]].map(function(x) {
+    return '<div><span class="big">' + usd(x[1]) + '</span><small>' + x[0] + '</small></div>';
+  }).join('');
+  var a = u.average, i = a.individual, c = a.couple;
+  $('avg').innerHTML =
+    '<p><b>Per individual:</b> ' + usd(i.avgCompleted) + ' <span class="fine">(' + i.completed + ' completed). All individuals so far: ' + usd(i.avgSoFar) + ' (' + i.accountsSoFar + ').</span></p>' +
+    '<p><b>Per couple:</b> ' + usd(c.avgCompleted) + ' <span class="fine">(' + c.completed + ' completed). All couples so far: ' + usd(c.avgSoFar) + ' (' + c.couplesSoFar + ').</span></p>' +
+    '<p class="fine">Completed means reached Step 11. For a couple, both partners must have reached it.</p>';
+  $('steps').innerHTML = '<tr><th>Step</th><th class="n">Calls</th><th class="n">Accounts</th><th class="n">Total</th><th class="n">Per call</th><th class="n">Per account</th><th class="n">Avg in</th><th class="n">Avg out</th></tr>' +
+    (u.steps.map(function(s) { return '<tr><td>' + esc(s.step) + '</td><td class="n">' + s.calls + '</td><td class="n">' + s.accounts + '</td><td class="n">' + usd(s.totalCost) + '</td><td class="n">' + usd(s.avgPerCall) + '</td><td class="n">' + usd(s.avgPerAccount) + '</td><td class="n">' + s.avgInputTokens + '</td><td class="n">' + s.avgOutputTokens + '</td></tr>'; }).join('') || '<tr><td colspan="8">No AI calls recorded yet.</td></tr>');
+  $('top').innerHTML = '<tr><th>Name</th><th>Email</th><th class="n">Calls</th><th class="n">Cost</th></tr>' +
+    (u.topAccounts.map(function(t) { return '<tr><td>' + esc(t.name) + '</td><td>' + esc(t.email) + '</td><td class="n">' + t.calls + '</td><td class="n">' + usd(t.cost) + '</td></tr>'; }).join('') || '<tr><td colspan="4">Nothing yet.</td></tr>');
+}
+
+function showList(w) {
+  waitlist = w.entries; $('wl-count').textContent = '(' + w.count + ')';
+  $('wl').innerHTML = '<tr><th>Email</th><th>Joined</th></tr>' +
+    (w.entries.map(function(e) { return '<tr><td>' + esc(e.email) + '</td><td>' + esc(String(e.createdAt).slice(0, 10)) + '</td></tr>'; }).join('') || '<tr><td colspan="2">Nobody yet.</td></tr>');
+}
+
+$('go').onclick = signIn;
+$('pw').onkeydown = function(e) { if (e.key === 'Enter') signIn(); };
+$('out').onclick = function() { token = ''; location.reload(); };
+$('copy').onclick = function() {
+  var t = waitlist.map(function(e) { return e.email; }).join('\n');
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function() { $('wl-msg').textContent = 'Copied ' + waitlist.length + ' emails.'; }, function() { $('wl-msg').textContent = 'Could not copy. Use Download as CSV.'; });
+};
+$('csv').onclick = function() {
+  var t = 'email,joined\n' + waitlist.map(function(e) { return e.email + ',' + e.createdAt; }).join('\n');
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv' })); a.download = 'waiting-list.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+};
+</script>
+</body>
+</html>

@@ -52,7 +52,9 @@ function toFields(obj) {
   const f = {};
   Object.keys(obj).forEach(function(k) {
     const v = obj[k];
-    f[k] = typeof v === 'boolean' ? { booleanValue: v } : { stringValue: String(v) };
+    if (typeof v === 'boolean') f[k] = { booleanValue: v };
+    else if (typeof v === 'number') f[k] = Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+    else f[k] = { stringValue: String(v) };
   });
   return f;
 }
@@ -63,6 +65,9 @@ function fromFields(fields) {
     const v = fields[k];
     if ('stringValue' in v) o[k] = v.stringValue;
     else if ('booleanValue' in v) o[k] = v.booleanValue;
+    else if ('integerValue' in v) o[k] = Number(v.integerValue);
+    else if ('doubleValue' in v) o[k] = v.doubleValue;
+    else if ('timestampValue' in v) o[k] = v.timestampValue;
   });
   return o;
 }
@@ -88,4 +93,31 @@ async function setFields(path, obj) {
   if (!r.ok) throw new Error('write_failed');
 }
 
-module.exports = { configured, getDoc, setFields };
+// Adds a document with an automatic id.
+async function addDoc(collection, obj) {
+  const a = account(); const t = await accessToken();
+  const r = await fetch(base(a) + collection, {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: toFields(obj) })
+  });
+  if (!r.ok) throw new Error('write_failed');
+}
+
+// Every document in a collection as plain objects (with an id), up to maxDocs.
+async function listAll(collection, maxDocs) {
+  const a = account(); const t = await accessToken();
+  const out = []; let pageToken = '';
+  do {
+    const r = await fetch(base(a) + collection + '?pageSize=300' + (pageToken ? '&pageToken=' + encodeURIComponent(pageToken) : ''), { headers: { Authorization: 'Bearer ' + t } });
+    if (!r.ok) throw new Error('read_failed');
+    const d = await r.json();
+    (d.documents || []).forEach(function(doc) {
+      const o = fromFields(doc.fields); o.id = doc.name.split('/').pop(); out.push(o);
+    });
+    pageToken = d.nextPageToken || '';
+  } while (pageToken && out.length < (maxDocs || 20000));
+  return out;
+}
+
+module.exports = { configured, getDoc, setFields, addDoc, listAll };
