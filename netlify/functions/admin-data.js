@@ -4,6 +4,7 @@ const { verifyFirebaseUser } = require('../lib/firebase-auth');
 const { corsHeaders } = require('../lib/stripe-common');
 const { COACH_EMAIL } = require('../lib/coach');
 const admin = require('../lib/firestore-admin');
+const { sendNotice, noticeSetup } = require('../lib/waitlist-notice');
 const { categoryOf, LIMITS } = require('../lib/ai-costs');
 
 function reply(CORS, status, obj) {
@@ -98,7 +99,14 @@ exports.handler = async function(event) {
     if (view === 'waitlist') {
       const list = await admin.listAll('waitlist', 20000);
       list.sort(function(a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });
-      return reply(CORS, 200, { count: list.length, entries: list.map(function(x) { return { email: x.email, createdAt: x.createdAt }; }) });
+      return reply(CORS, 200, { count: list.length, setup: noticeSetup(), entries: list.map(function(x) {
+        return { email: x.email, createdAt: x.createdAt, noticeSent: x.noticeSent === true ? true : (x.noticeSent === false ? false : null), noticeError: x.noticeError || '' };
+      }) });
+    }
+    if (view === 'testnotice') {
+      // Sends a clearly marked test through the same path a real signup uses, so any problem shows up here.
+      const n = await sendNotice('TEST NOTICE (not a real signup)', new Date().toISOString());
+      return reply(CORS, 200, { ok: n.ok, reason: n.ok ? '' : n.reason, setup: noticeSetup() });
     }
     if (view === 'usage') {
       const usage = await admin.listAll('aiUsage', 30000);

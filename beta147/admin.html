@@ -64,7 +64,9 @@
       <h2>Waiting list <span id="wl-count" class="fine"></span></h2>
       <button class="btn" id="copy" type="button">Copy all emails</button>
       <button class="btn alt" id="csv" type="button">Download as CSV</button>
+      <button class="btn alt" id="testn" type="button">Send a test notice</button>
       <p class="fine" id="wl-msg" role="status"></p>
+      <p id="notice-result" role="status"></p>
       <div class="scroll"><table id="wl"></table></div>
     </div>
     <button class="btn alt" id="out" type="button">Sign out</button>
@@ -127,10 +129,26 @@ function showUsage(u) {
 
 function showList(w) {
   waitlist = w.entries; $('wl-count').textContent = '(' + w.count + ')';
-  $('wl').innerHTML = '<tr><th>Email</th><th>Joined</th></tr>' +
-    (w.entries.map(function(e) { return '<tr><td>' + esc(e.email) + '</td><td>' + esc(String(e.createdAt).slice(0, 10)) + '</td></tr>'; }).join('') || '<tr><td colspan="2">Nobody yet.</td></tr>');
+  $('wl').innerHTML = '<tr><th>Email</th><th>Joined</th><th>Notice to you</th></tr>' +
+    (w.entries.map(function(e) {
+      var n = e.noticeSent === true ? 'sent' : (e.noticeSent === false ? 'FAILED: ' + e.noticeError : 'not recorded');
+      return '<tr><td>' + esc(e.email) + '</td><td>' + esc(String(e.createdAt).slice(0, 10)) + '</td><td' + (e.noticeSent === false ? ' class="err"' : '') + '>' + esc(n) + '</td></tr>';
+    }).join('') || '<tr><td colspan="3">Nobody yet.</td></tr>');
 }
 
+function explain(r) {
+  if (r.ok) return 'Test notice sent to ' + r.setup.sendsTo + '. Check that inbox now.';
+  var why = String(r.reason || '');
+  if (why === 'no_template_id') return 'Not sent. The Netlify variable WAITLIST_TEMPLATE_ID is empty. Add it, then redeploy the site.';
+  if (/^emailjs_(401|403)/.test(why)) return 'EmailJS refused it (' + why + '). Check that "Allow EmailJS API for non-browser applications" is on in EmailJS' + (r.setup.privateKeySet ? '.' : ', and add your private key to Netlify as EMAILJS_PRIVATE_KEY, then redeploy the site.');
+  if (/^emailjs_400/.test(why)) return 'EmailJS could not use the request (' + why + '). Check the template id and service id.';
+  return 'Not sent: ' + why;
+}
+$('testn').onclick = function() {
+  $('notice-result').className = ''; $('notice-result').textContent = 'Sending\u2026';
+  api('testnotice').then(function(r) { $('notice-result').className = r.ok ? '' : 'err'; $('notice-result').textContent = explain(r); })
+    .catch(function(e) { $('notice-result').className = 'err'; $('notice-result').textContent = e.message; });
+};
 $('go').onclick = signIn;
 $('pw').onkeydown = function(e) { if (e.key === 'Enter') signIn(); };
 $('out').onclick = function() { token = ''; location.reload(); };

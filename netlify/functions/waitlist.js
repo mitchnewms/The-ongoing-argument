@@ -4,30 +4,22 @@ const crypto = require('crypto');
 const admin = require('../lib/firestore-admin');
 const { corsHeaders } = require('../lib/stripe-common');
 
-const NOTICE_TO = process.env.WAITLIST_NOTICE_TO || 'mitch@theongoingargument.com';
+const { sendNotice } = require('../lib/waitlist-notice');
 
 function reply(CORS, status, obj) {
   return { statusCode: status, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify(obj) };
 }
 
-// Tells Mitch someone joined. Uses EmailJS from the server so no mail settings sit in the public page.
-async function sendNotice(email, when) {
-  const templateId = process.env.WAITLIST_TEMPLATE_ID || '';
-  if (!templateId) { console.warn('WAITLIST_TEMPLATE_ID not set, so no notice email was sent'); return false; }
-  const payload = {
-    service_id: process.env.EMAILJS_SERVICE_ID || 'service_k0ocp9f',
-    template_id: templateId,
-    user_id: process.env.EMAILJS_PUBLIC_KEY || '1HSruQu2MRIfbUF0B',
-    template_params: { to_email: NOTICE_TO, signup_email: email, signup_time: when }
-  };
-  if (process.env.EMAILJS_PRIVATE_KEY) payload.accessToken = process.env.EMAILJS_PRIVATE_KEY;
-  try {
-    const r = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    });
-    if (!r.ok) { console.error('Waiting list notice failed:', r.status, (await r.text().catch(function() { return ''; })).slice(0, 160)); return false; }
-    return true;
-  } catch (err) { console.error('Waiting list notice error:', err.message); return false; }
+// Sends the notice and writes down whether it worked, so a failure can be seen on the admin page
+// (no email address is kept in that note). A failed notice never stops the signup.
+async function noticeAndRecord(id, email, when) {
+  const n = await sendNotice(email, when);
+  if (!n.ok) console.error('WAITLIST NOTICE FAILED: ' + n.reason);
+  if (id) {
+    try { await admin.setFields('waitlist/' + id, { noticeSent: n.ok, noticeError: n.ok ? '' : n.reason }); }
+    catch (e) { console.error('Could not record the notice result:', e.message); }
+  }
+  return n.ok;
 }
 
 exports.handler = async function(event) {
@@ -55,7 +47,7 @@ exports.handler = async function(event) {
   if (!admin.configured()) {
     // Cannot save the list yet, but Mitch still hears about the signup.
     console.warn('FIREBASE_SERVICE_ACCOUNT not set: waiting list email was NOT saved: ' + email);
-    const sent = await sendNotice(email, when);
+    const sent = await noticeAndRecord(null, email, when);
     return sent ? reply(CORS, 200, { ok: true }) : reply(CORS, 503, { error: 'Not set up yet.', code: 'not_configured' });
   }
 
@@ -65,9 +57,9 @@ exports.handler = async function(event) {
     await admin.setFields('waitlist/' + id, { email, createdAt: when, source: 'front-page' });
   } catch (err) {
     console.error('Waiting list save failed:', err.message);
-    const sent = await sendNotice(email, when);
+    const sent = await noticeAndRecord(null, email, when);
     return sent ? reply(CORS, 200, { ok: true }) : reply(CORS, 502, { error: 'Could not save.', code: 'save_failed' });
   }
-  await sendNotice(email, when);
+  await noticeAndRecord(id, email, when);
   return reply(CORS, 200, { ok: true });
 };

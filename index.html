@@ -17,14 +17,16 @@
   .name { font-size:1.15rem; font-weight:600; margin:0; }
   .role { color:#6A6458; margin:2px 0 20px; font-size:0.95rem; }
   .front p { text-align:left; }
-  .story p { margin:0 0 14px; }
-  .product { border-top:1px solid #E2DED8; margin-top:30px; padding-top:26px; }
+  .story p { margin:0 0 14px; text-wrap:pretty; }
+  .story { padding-bottom:6px; }
+  .story-tag { font-style:italic; margin-top:22px !important; }
+  .product { border-top:1px solid #E2DED8; margin-top:60px; padding-top:52px; }
   .product .logo { margin-bottom:6px; }
   .product h2 { font-size:1.1rem; letter-spacing:0.06em; margin:0 0 4px; text-align:center; }
   .product p { text-align:center; margin:0 0 6px; }
   .soon { color:#6A6458; }
   .tag { font-style:italic; margin-top:10px; }
-  .block { margin-top:30px; }
+  .block { margin-top:52px; }
   .block h3 { font-size:1.02rem; font-weight:600; margin:0 0 12px; }
   .btn { display:block; width:100%; max-width:340px; margin:0 auto; padding:14px; background:#E06500; color:#fff; border:none; border-radius:3px; font-family:inherit; font-size:1rem; text-decoration:none; text-align:center; cursor:pointer; min-height:48px; letter-spacing:0.02em; }
   .btn:focus-visible, input:focus-visible { outline:3px solid #111; outline-offset:2px; }
@@ -35,7 +37,8 @@
   .hint { font-size:0.82rem; color:#6A6458; margin:8px 0 0; text-align:center !important; }
   #wl-msg { min-height:1.3em; margin:10px 0 0; font-size:0.92rem; text-align:center !important; }
   #wl-msg.err { color:#B3261E; }
-  #wl-msg.ok { color:#1F6B2E; font-size:1.02rem; }
+  #wl-msg.ok { color:#E06500; font-size:1.55rem; font-weight:600; line-height:1.25; margin:6px 0 0; }
+  #wl-saved { font-size:1rem; margin:10px 0 0; text-align:center !important; overflow-wrap:anywhere; }
   .small-foot { margin-top:36px; font-size:0.88rem; display:flex; justify-content:center; gap:10px; color:#6A6458; }
   .small-foot a { padding:10px 6px; color:#6A6458; }
 </style>
@@ -51,30 +54,33 @@
   <div class="story">
     <p>I started out writing for television, where a conflict has to be set up and resolved in 22 minutes. Then I began working with real couples and found the same fight can run for years. Same fight. Same lines. No resolution.</p>
     <p>For over 25 years I've listened for the conversation underneath the conversation.</p>
+    <p>I built The Ongoing Argument so couples can hear it too.</p>
+    <p class="story-tag">And coming soon, you'll be able to see the argument from the outside looking in.</p>
   </div>
 
   <section class="product" aria-label="The Ongoing Argument">
     <div class="logo" role="img" aria-label="The Ongoing Argument logo"></div>
     <h2>THE ONGOING ARGUMENT</h2>
-    <p>A self guided communication tool for couples. <span class="soon">Coming soon.</span></p>
+    <p>A self guided communication tool for couples.</p>
     <p class="tag">No fight is too big to have a happy ending.</p>
   </section>
 
   <section class="block">
-    <h3>Want to work on something specific in your relationship?</h3>
+    <h3>Interested in working on something specific in your relationship?</h3>
     <a class="btn" href="mailto:mitch@theongoingargument.com">Contact Mitch</a>
   </section>
 
   <section class="block">
-    <h3>Be the first to know when it opens.</h3>
+    <h3>Be the first to know when The Ongoing Argument goes live.</h3>
     <form class="form" id="wl-form" novalidate>
       <label class="hp" aria-hidden="true">Leave this empty <input type="text" name="website" id="wl-hp" tabindex="-1" autocomplete="off"></label>
       <label for="wl-email" class="hp">Email address</label>
       <input type="email" id="wl-email" name="email" placeholder="Your email address" autocomplete="email" inputmode="email" required>
       <button class="btn" id="wl-btn" type="submit">Notify me</button>
     </form>
-    <p class="hint">One email when it opens, nothing else.</p>
+    <p class="hint" id="wl-hint">One email when it goes live, nothing else.</p>
     <p id="wl-msg" role="status"></p>
+    <p id="wl-saved" role="status"></p>
   </section>
 
   <nav class="small-foot" aria-label="Site pages">
@@ -96,7 +102,12 @@
       body: JSON.stringify({ email: email, website: document.getElementById('wl-hp').value, elapsed: Date.now() - started })
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (x) {
-        if (x.ok && x.d.ok) { form.style.display = 'none'; say("Thank you, you're on the list.", 'ok'); return; }
+        if (x.ok && x.d.ok) {
+          form.style.display = 'none'; document.getElementById('wl-hint').style.display = 'none';
+          say("Thank you, you're on the list!", 'ok');
+          document.getElementById('wl-saved').textContent = 'We saved ' + email + ". You'll get one email when it goes live.";
+          return;
+        }
         btn.disabled = false; btn.textContent = old;
         say(x.d && x.d.code === 'bad_email' ? 'Please enter a valid email address.' : 'Something went wrong. Please try again in a moment.', 'err');
       })
