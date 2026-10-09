@@ -1924,6 +1924,13 @@ h1, h2, h3,
 <body>
 
 <!-- STALE VERSION BANNER — shown automatically if a newer deploy is detected; never shown in normal use -->
+<div id="daily-limit-modal" role="alertdialog" aria-labelledby="daily-limit-text" style="display:none;position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;max-width:360px;width:100%;border-radius:6px;padding:26px 22px;text-align:center;font-family:'Lora',Georgia,serif;color:#111;">
+    <div style="font-size:1.05rem;font-weight:700;margin-bottom:10px;">Daily limit reached</div>
+    <p id="daily-limit-text" style="font-size:0.95rem;line-height:1.5;margin:0 0 18px;"></p>
+    <button type="button" onclick="document.getElementById('daily-limit-modal').style.display='none'" style="width:100%;padding:13px;background:#E06500;color:#fff;border:none;border-radius:4px;font-size:0.95rem;cursor:pointer;min-height:46px;">OK</button>
+  </div>
+</div>
 <div id="stale-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#E06500;color:#fff;text-align:center;padding:11px 16px;z-index:100000;font-family:'Lora',Georgia,serif;font-size:0.85rem;line-height:1.4;">
   A newer version of this page is available.
   <a href="/beta147/" style="color:#fff;font-weight:700;text-decoration:underline;margin-left:8px;">Reload to update →</a>
@@ -3904,7 +3911,7 @@ var SAFETY_SCREEN_LABELS = {
 function safetyStepLabel(step) {
   step = String(step || '');
   if (step.indexOf('safety-') === 0) return 'answer on screen: ' + (SAFETY_SCREEN_LABELS[step.slice(7)] || step.slice(7));
-  if (step === 'b') return 'script building, step ' + step;
+  if (step === 'b' || step.indexOf('b-') === 0) return 'script building, step ' + step;
   return step ? 'step ' + step : 'unknown';
 }
 
@@ -3953,6 +3960,14 @@ function aiRequest(messages, step, retried) {
   });
 }
 
+// Shown when the daily AI limit has been reached. The server supplies the wording.
+function showDailyLimit(message) {
+  var m = el('daily-limit-modal');
+  if (!m) return;
+  txt('daily-limit-text', message || "You've reached today's limit. Your work is saved. Please come back tomorrow.");
+  m.style.display = 'flex';
+}
+
 function callAI(messages, step) {
   return aiRequest(messages, step, false).then(function(r) {
     if (!r.ok) {
@@ -3964,6 +3979,7 @@ function callAI(messages, step) {
         err.code = body.code || '';
         err.detail = String(t || '').slice(0, 300);
         window._lastAIError = { status: err.status, code: err.code, detail: err.detail, step: step || '' };
+        if (err.code === 'daily_limit') showDailyLimit(err.message);
         throw err;
       });
     }
@@ -7929,7 +7945,7 @@ function ivBeginFromStory() {
   ivSaveProgress('extract');
   pbPronoun = pbDetectPronoun(pbStory.text);
   ivBusy('Reading your story', 'Just a moment.');
-  callAI([{ role: 'user', content: pbScanPrompt() }], 'b').then(function(text) {
+  callAI([{ role: 'user', content: pbScanPrompt() }], 'b-scan').then(function(text) {
     return { ok: true, parsed: pbParseScan(text) };
   }).catch(function(err) {
     return { ok: false, err: err };
@@ -8079,7 +8095,7 @@ function pbGenerateDraft(isRetry) {
   ivBusy('Building your draft', isRetry ? 'Trying again. This may take a moment.' : 'This may take a moment.');
   var retry = function() { pbGenerateDraft(true); };
 
-  callAI([{ role: 'user', content: pbBuildPrompt() }], 'b').then(function(text) {
+  callAI([{ role: 'user', content: pbBuildPrompt() }], 'b-draft').then(function(text) {
     if (!text || text.length < 100) {
       ivShowRetry('The AI sent back something too short to be a script. Your answers are saved.', retry, null, null, 'reply length: ' + (text || '').length);
       pbSending = false;
@@ -8454,7 +8470,7 @@ function aiEditApply() {
   aiEditBusy = true;
   txt('ai-edit-status', 'Making that change…');
   aiEditRender();
-  callAI([{ role: 'user', content: aiEditPrompt(snapshotToText(before, nameA, nameB), instruction) }], 'b').then(function(text) {
+  callAI([{ role: 'user', content: aiEditPrompt(snapshotToText(before, nameA, nameB), instruction) }], 'b-edit').then(function(text) {
     aiEditBusy = false;
     var parsed = text ? pbParseDraft(text, nameA, nameB) : null;
     if (!parsed || !parsed.lines.length || parsed.lines.length < Math.floor(before.lines.length / 2)) {

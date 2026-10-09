@@ -42,6 +42,13 @@
       <div class="row" id="spend"></div>
     </div>
     <div class="card">
+      <h2>Script help on its own</h2>
+      <div class="scroll"><table id="cats"></table></div>
+      <p class="fine">Script help is reading your notes, the first draft and edits. Safety is the quiet check on each answer.</p>
+      <p class="fine" id="cache"></p>
+      <p class="fine" id="limits"></p>
+    </div>
+    <div class="card">
       <h2>Average cost per completed journey</h2>
       <div id="avg"></div>
     </div>
@@ -107,8 +114,13 @@ function showUsage(u) {
     '<p><b>Per individual:</b> ' + usd(i.avgCompleted) + ' <span class="fine">(' + i.completed + ' completed). All individuals so far: ' + usd(i.avgSoFar) + ' (' + i.accountsSoFar + ').</span></p>' +
     '<p><b>Per couple:</b> ' + usd(c.avgCompleted) + ' <span class="fine">(' + c.completed + ' completed). All couples so far: ' + usd(c.avgSoFar) + ' (' + c.couplesSoFar + ').</span></p>' +
     '<p class="fine">Completed means reached Step 11. For a couple, both partners must have reached it.</p>';
-  $('steps').innerHTML = '<tr><th>Step</th><th class="n">Calls</th><th class="n">Accounts</th><th class="n">Total</th><th class="n">Per call</th><th class="n">Per account</th><th class="n">Avg in</th><th class="n">Avg out</th></tr>' +
-    (u.steps.map(function(s) { return '<tr><td>' + esc(s.step) + '</td><td class="n">' + s.calls + '</td><td class="n">' + s.accounts + '</td><td class="n">' + usd(s.totalCost) + '</td><td class="n">' + usd(s.avgPerCall) + '</td><td class="n">' + usd(s.avgPerAccount) + '</td><td class="n">' + s.avgInputTokens + '</td><td class="n">' + s.avgOutputTokens + '</td></tr>'; }).join('') || '<tr><td colspan="8">No AI calls recorded yet.</td></tr>');
+  $('steps').innerHTML = '<tr><th>Step</th><th>Kind</th><th class="n">Calls</th><th class="n">Accounts</th><th class="n">Total</th><th class="n">Per call</th><th class="n">Per account</th><th class="n">Avg in</th><th class="n">Avg out</th></tr>' +
+    (u.steps.map(function(s) { return '<tr><td>' + esc(s.step) + '</td><td>' + esc(s.category) + '</td><td class="n">' + s.calls + '</td><td class="n">' + s.accounts + '</td><td class="n">' + usd(s.totalCost) + '</td><td class="n">' + usd(s.avgPerCall) + '</td><td class="n">' + usd(s.avgPerAccount) + '</td><td class="n">' + s.avgInputTokens + '</td><td class="n">' + s.avgOutputTokens + '</td></tr>'; }).join('') || '<tr><td colspan="9">No AI calls recorded yet.</td></tr>');
+  var names = { journey: 'Journey steps', script: 'Script help', safety: 'Safety checks' };
+  $('cats').innerHTML = '<tr><th>Kind</th><th class="n">Calls</th><th class="n">Accounts</th><th class="n">Total</th><th class="n">Per call</th><th class="n">Per account</th></tr>' +
+    u.categories.map(function(c) { return '<tr><td>' + names[c.category] + '</td><td class="n">' + c.calls + '</td><td class="n">' + c.accounts + '</td><td class="n">' + usd(c.totalCost) + '</td><td class="n">' + usd(c.avgPerCall) + '</td><td class="n">' + usd(c.avgPerAccount) + '</td></tr>'; }).join('');
+  $('cache').textContent = 'Cached prompt tokens read: ' + u.cache.readTokens + '. Written: ' + u.cache.writeTokens + '. Normal input tokens: ' + u.cache.uncachedInputTokens + '.';
+  $('limits').textContent = 'Daily limits now: ' + u.limits.callsPerAccountPerDay + ' AI calls per account and $' + u.limits.dollarsPerDay + ' overall.';
   $('top').innerHTML = '<tr><th>Name</th><th>Email</th><th class="n">Calls</th><th class="n">Cost</th></tr>' +
     (u.topAccounts.map(function(t) { return '<tr><td>' + esc(t.name) + '</td><td>' + esc(t.email) + '</td><td class="n">' + t.calls + '</td><td class="n">' + usd(t.cost) + '</td></tr>'; }).join('') || '<tr><td colspan="4">Nothing yet.</td></tr>');
 }

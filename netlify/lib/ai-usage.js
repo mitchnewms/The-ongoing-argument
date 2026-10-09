@@ -1,7 +1,8 @@
 'use strict';
 
 const admin = require('./firestore-admin');
-const { estimateCost } = require('./ai-costs');
+const { estimateCost, categoryOf } = require('./ai-costs');
+const { recordSpend } = require('./ai-limits');
 
 // Remembers who belongs to which couple for a few minutes so each AI call does not need an extra read.
 const WHO = {};
@@ -23,6 +24,7 @@ async function logUsage(uid, step, model, maxTokens, usage) {
   const rec = {
     uid: uid,
     step: String(step || 'unknown').slice(0, 40),
+    category: categoryOf(step),
     model: model,
     maxTokens: maxTokens,
     inputTokens: (usage && usage.input_tokens) || 0,
@@ -40,6 +42,7 @@ async function logUsage(uid, step, model, maxTokens, usage) {
         const w = await whoIs(uid);
         rec.coupleId = w.coupleId; rec.accountType = w.accountType;
         await admin.addDoc('aiUsage', rec);
+        await recordSpend(rec.costUsd);
       })(),
       new Promise(function(res) { setTimeout(res, 2500); })
     ]);

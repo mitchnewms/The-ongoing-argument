@@ -4,6 +4,7 @@ const { verifyFirebaseUser } = require('../lib/firebase-auth');
 const { corsHeaders } = require('../lib/stripe-common');
 const { COACH_EMAIL } = require('../lib/coach');
 const admin = require('../lib/firestore-admin');
+const { categoryOf, LIMITS } = require('../lib/ai-costs');
 
 function reply(CORS, status, obj) {
   return { statusCode: status, headers: { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: JSON.stringify(obj) };
@@ -21,15 +22,20 @@ function summarize(usage, users, couples, step11) {
   const today = dayKey(new Date().toISOString());
   const weekStart = dayKey(new Date(Date.now() - 6 * 86400000).toISOString());
   let total = 0, todayTotal = 0, weekTotal = 0;
-  const byAccount = {}, byGroup = {}, bySteps = {};
+  const byAccount = {}, byGroup = {}, bySteps = {}, byCat = {};
+  let cacheRead = 0, cacheWrite = 0, uncachedIn = 0;
   usage.forEach(function(u) {
     const c = u.costUsd || 0; total += c;
+    cacheRead += u.cacheReadTokens || 0; cacheWrite += u.cacheWriteTokens || 0; uncachedIn += u.inputTokens || 0;
+    const cat = u.category || categoryOf(u.step);
+    const ct = byCat[cat] || (byCat[cat] = { calls: 0, cost: 0, accounts: {} });
+    ct.calls++; ct.cost += c; ct.accounts[u.uid] = true;
     if (u.ts) { const k = dayKey(u.ts); if (k === today) todayTotal += c; if (k >= weekStart) weekTotal += c; }
     const a = byAccount[u.uid] || (byAccount[u.uid] = { uid: u.uid, cost: 0, calls: 0, coupleId: u.coupleId || '' });
     a.cost += c; a.calls++; if (u.coupleId) a.coupleId = u.coupleId;
     const gk = u.coupleId ? 'couple:' + u.coupleId : 'solo:' + u.uid;
     byGroup[gk] = (byGroup[gk] || 0) + c;
-    const st = bySteps[u.step] || (bySteps[u.step] = { step: u.step, calls: 0, cost: 0, inTok: 0, outTok: 0, accounts: {} });
+    const st = bySteps[u.step] || (bySteps[u.step] = { step: u.step, category: cat, calls: 0, cost: 0, inTok: 0, outTok: 0, accounts: {} });
     st.calls++; st.cost += c; st.inTok += u.inputTokens || 0; st.outTok += u.outputTokens || 0; st.accounts[u.uid] = true;
   });
 
@@ -49,7 +55,7 @@ function summarize(usage, users, couples, step11) {
 
   const steps = Object.keys(bySteps).map(function(k) {
     const s = bySteps[k]; const n = Object.keys(s.accounts).length;
-    return { step: s.step, calls: s.calls, accounts: n, totalCost: r4(s.cost), avgPerCall: r4(s.cost / s.calls), avgPerAccount: r4(s.cost / n),
+    return { step: s.step, category: s.category, calls: s.calls, accounts: n, totalCost: r4(s.cost), avgPerCall: r4(s.cost / s.calls), avgPerAccount: r4(s.cost / n),
       avgInputTokens: Math.round(s.inTok / s.calls), avgOutputTokens: Math.round(s.outTok / s.calls) };
   }).sort(function(a, b) { return b.totalCost - a.totalCost; });
 
@@ -66,6 +72,12 @@ function summarize(usage, users, couples, step11) {
       individual: { completed: completedSolo.length, avgCompleted: avg(completedSolo), accountsSoFar: soloAll.length, avgSoFar: avg(soloAll) },
       couple: { completed: completedCouples.length, avgCompleted: avg(completedCouples), couplesSoFar: coupleAll.length, avgSoFar: avg(coupleAll) }
     },
+    categories: ['journey', 'script', 'safety'].map(function(k) {
+      const c = byCat[k] || { calls: 0, cost: 0, accounts: {} }; const n = Object.keys(c.accounts).length;
+      return { category: k, calls: c.calls, accounts: n, totalCost: r4(c.cost), avgPerCall: c.calls ? r4(c.cost / c.calls) : null, avgPerAccount: n ? r4(c.cost / n) : null };
+    }),
+    cache: { readTokens: cacheRead, writeTokens: cacheWrite, uncachedInputTokens: uncachedIn },
+    limits: { callsPerAccountPerDay: LIMITS.callsPerAccountPerDay, dollarsPerDay: LIMITS.dollarsPerDay },
     steps, topAccounts: top
   };
 }

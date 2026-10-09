@@ -19,4 +19,23 @@ function estimateCost(model, usage) {
   return Math.round(usd * 1e6) / 1e6;
 }
 
-module.exports = { MODEL, RATES, estimateCost };
+// DAILY LIMITS. Days run on Pacific time. Change the numbers here, or set AI_CALLS_PER_DAY and
+// AI_DOLLARS_PER_DAY in Netlify. The coach login is not held to these, so you can always test.
+const LIMITS = {
+  callsPerAccountPerDay: Number(process.env.AI_CALLS_PER_DAY) || 60,
+  dollarsPerDay: Number(process.env.AI_DOLLARS_PER_DAY) || 40
+};
+const LIMIT_MESSAGE = "You've reached today's limit. Your work is saved. Please come back tomorrow.";
+
+// What kind of call this was, for the cost page. The browser sends the step label.
+//   script  = script help: reading your notes (b-scan), first draft (b-draft), edits (b-edit)
+//   safety  = the quiet safety check on each answer
+//   journey = every other step of the journey
+function categoryOf(step) {
+  const s = String(step || '');
+  if (s === 'b' || s.indexOf('b-') === 0) return 'script';
+  if (s.indexOf('safety') === 0) return 'safety';
+  return 'journey';
+}
+
+module.exports = { MODEL, RATES, LIMITS, LIMIT_MESSAGE, estimateCost, categoryOf };

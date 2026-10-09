@@ -120,4 +120,28 @@ async function listAll(collection, maxDocs) {
   return out;
 }
 
-module.exports = { configured, getDoc, setFields, addDoc, listAll };
+// Adds to number fields in one step (creates the document if needed) and returns the new totals.
+// amounts is like { calls: 1, costUsd: 0.04 }.
+async function increment(path, amounts) {
+  const a = account(); const t = await accessToken();
+  const names = Object.keys(amounts);
+  const r = await fetch(base(a).replace(/\/documents\/$/, '/documents') + ':commit', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ writes: [{ transform: {
+      document: 'projects/' + a.project_id + '/databases/(default)/documents/' + path,
+      fieldTransforms: names.map(function(n) {
+        const v = amounts[n];
+        return { fieldPath: n, increment: Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v } };
+      })
+    } }] })
+  });
+  if (!r.ok) throw new Error('write_failed');
+  const d = await r.json();
+  const res = (d.writeResults && d.writeResults[0] && d.writeResults[0].transformResults) || [];
+  const out = {};
+  names.forEach(function(n, i) { const v = res[i] || {}; out[n] = 'integerValue' in v ? Number(v.integerValue) : (v.doubleValue || 0); });
+  return out;
+}
+
+module.exports = { configured, getDoc, setFields, addDoc, listAll, increment };

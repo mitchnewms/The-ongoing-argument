@@ -2,7 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { MODEL } = require('../lib/ai-costs');
+const { MODEL, LIMIT_MESSAGE } = require('../lib/ai-costs');
+const { checkLimits } = require('../lib/ai-limits');
 const { logUsage } = require('../lib/ai-usage');
 
 // Load the master prompt without ever throwing at startup. A crash here makes every
@@ -131,9 +132,17 @@ exports.handler = async function(event) {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Configuration error', code: 'config' }) };
   }
 
+  // Daily limits (per account and overall). Safety checks are never held back.
+  const isSafety = typeof step === 'string' && step.indexOf('safety') === 0;
+  const limited = await checkLimits(who.uid, who.email, isSafety);
+  if (limited) {
+    console.warn('DAILY LIMIT reached (' + limited.which + ') for user ' + who.uid + ' at step ' + step);
+    return { statusCode: 429, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: LIMIT_MESSAGE, code: 'daily_limit' }) };
+  }
+
   // Step 2 (dual-script analysis) and step b (Path B draft) get more tokens
-  const isSafetyCheck = typeof step === 'string' && step.indexOf('safety') === 0;
-  const maxTokens = isSafetyCheck ? 300 : ((step === '2' || step === 'b') ? 8000 : 4000);
+  const isScriptHelp = step === 'b' || (typeof step === 'string' && step.indexOf('b-') === 0);
+  const maxTokens = isSafety ? 300 : ((step === '2' || isScriptHelp) ? 8000 : 4000);
 
   let apiResponse;
   try {
@@ -147,7 +156,8 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: maxTokens,
-        system: SYSTEM_PROMPT,
+        // The master prompt is the same on every call, so it is cached: repeat reads cost a tenth.
+        system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages: messages
       })
     });
