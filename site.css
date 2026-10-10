@@ -1,7 +1,7 @@
 * { box-sizing: border-box; }
 body { margin:0; background:#F6F4F0; color:#111; font-family:'Lora',Georgia,serif; line-height:1.6; -webkit-text-size-adjust:100%; }
 .wrap { max-width:620px; margin:0 auto; padding:28px 20px 56px; }
-.logo { width:190px; height:100px; margin:0 auto 10px; background:url('/toa-logo.png') no-repeat; background-size:582px auto; background-position:-196px -84px; }
+.logo { width:190px; height:100px; margin:0 auto 10px; background:url('/toa-logo.png?v=2') no-repeat; background-size:582px auto; background-position:-196px -84px; }
 h1 { font-size:1.6rem; text-align:center; margin:0 0 6px; font-weight:600; line-height:1.25; }
 h1 span { color:#E06500; }
 .sub { text-align:center; color:#6A6458; margin:0 0 24px; font-size:0.98rem; }
