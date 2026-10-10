@@ -17,6 +17,13 @@
   .name { font-size:1.15rem; font-weight:600; margin:0; }
   .role { color:#6A6458; margin:2px 0 20px; font-size:0.95rem; }
   .front p { text-align:left; }
+  .stanzas { margin:0 0 6px; }
+  .front .stanza { text-align:center; font-size:19px; line-height:1.55; margin:0 0 34px; }
+  .stanza .ln { display:block; text-wrap:balance; }
+  .front .knock { text-align:center; font-style:italic; font-size:20px; line-height:1.4; color:#B84F00; margin:46px 0 26px; text-wrap:balance; }
+  @media (min-width:700px) { .front .knock { margin-left:-70px; margin-right:-70px; } }
+  .front .lead { font-size:17.5px; line-height:1.6; margin:0; text-wrap:pretty; }
+  .about { margin-top:56px; }
   .story p { margin:0 0 14px; text-wrap:pretty; }
   .story { padding-bottom:6px; }
   .story-tag { font-style:italic; margin-top:22px !important; }
@@ -48,9 +55,21 @@
 <main class="front">
   <h1 class="headline">THERE'S ALWAYS MORE HAPPENING IN A RELATIONSHIP THAN WHAT'S BEING SAID.</h1>
 
+  <section class="stanzas" aria-label="Remember how you talked when you first met">
+    <p class="stanza"><span class="ln">Remember how you talked when you first met?</span><span class="ln">No rehearsing. No bracing. Just saying what was true.</span></p>
+    <p class="stanza"><span class="ln">Somewhere along the way, the walls went up.</span><span class="ln">Now every sentence gets checked first.</span><span class="ln">How will they take this?</span></p>
+    <p class="stanza"><span class="ln">What if the walls came down?</span><span class="ln">You say it, and you're heard, not jumped on.</span><span class="ln">You get to say it again, better, without payback.</span><span class="ln">Your shoulders drop. Your whole body exhales.</span><span class="ln">And the house you tiptoe through becomes a place you want to come home to.</span></p>
+  </section>
+
+  <p class="knock">Every argument is a knock at the door to a deeper connection.</p>
+
+  <p class="lead">The Ongoing Argument walks you through a conflict, helps you hear what's underneath the words, and opens the door to feeling safe, seen, and closer than ever before.</p>
+
+  <section class="about">
   <img class="portrait" src="/portrait-front.jpg" width="132" height="132" alt="Mitch Newman">
   <p class="name" style="text-align:center">Mitch Newman, M.A.</p>
   <p class="role" style="text-align:center">Relationship Adviser</p>
+  </section>
 
   <div class="story">
     <p>I started out writing for television, where a conflict has to be set up and resolved in 22 minutes. Then I began working with real couples and found the same fight can run for years. Same fight. Same lines. No resolution.</p>
