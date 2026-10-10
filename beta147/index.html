@@ -772,6 +772,13 @@ body {
   height: auto;
   display: block;
 }
+/* On phones, show only the part of the picture that holds the artwork (source x 340 to 940, y 179 to 591
+   of the 1280 x 720 picture) so the logo and tagline come out about twice as large. */
+.lp-hero-logo-wrap { width: 100%; }
+@media (max-width: 699px) {
+  .lp-hero-logo-wrap { position: relative; overflow: hidden; height: 0; padding-bottom: 68.6667%; }
+  .lp-hero-logo-wrap .lp-hero-logo { position: absolute; width: 213.3333%; max-width: none; left: -56.6667%; top: -43.4466%; height: auto; }
+}
 
 /* STORY INTRO PHOTO BLOCK */
 .lp-story-intro {
@@ -1040,7 +1047,7 @@ body {
 #partner-b-intro-screen { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 150; background: #2a2520; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .pb-scroll-wrap { width: 100%; max-width: 520px; margin: 0 auto; }
 .pb-hero { text-align: center; padding: 40px 24px 32px; }
-.pb-hero-logo { width: 190px; height: 100px; margin: 0 auto 14px; background: url('/toa-logo.png?v=2') no-repeat; background-size: 582px auto; background-position: -196px -84px; }
+.pb-hero-logo { width: 190px; height: 100px; margin: 0 auto 14px; background: url('/toa-logo.png?v=3') no-repeat; background-size: 582px auto; background-position: -196px -84px; }
 .pb-hero-title span { color: #E06500; }
 .pb-hero-title { font-family: 'Special Elite', cursive; font-size: 1.6rem; color: #f0e8d5; margin-bottom: 10px; letter-spacing: 0.04em; }
 .pb-hero-sub { font-family: 'Lora', Georgia, serif; font-size: 0.95rem; color: #a09080; font-style: italic; line-height: 1.6; }
@@ -2040,7 +2047,9 @@ h1, h2, h3,
 
   <!-- S1: HERO -->
   <section class="lp-hero">
-    <img src="/toa-logo.png?v=2" alt="The Ongoing Argument. Every argument is a knock at the door to a deeper connection." class="lp-hero-logo">
+    <div class="lp-hero-logo-wrap">
+    <img src="/toa-logo.png?v=3" alt="The Ongoing Argument. Every argument is a knock at the door to a deeper connection." class="lp-hero-logo">
+    </div>
   </section>
 
   <!-- S2: THE STORY -->
