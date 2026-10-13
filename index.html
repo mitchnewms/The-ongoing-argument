@@ -41,6 +41,7 @@
   .product .tag { font-style:italic; font-size:19px; line-height:1.4; color:#B84F00; margin:14px 0 0; text-wrap:balance; }
   @media (min-width:700px) { .product .tag { margin-left:-70px; margin-right:-70px; } }
   .block { margin-top:52px; }
+  .front .wl-lead { text-align:center; font-style:italic; font-size:22px; line-height:1.35; color:#B84F00; margin:0 0 12px; text-wrap:balance; }
   .block h3 { font-size:1.02rem; font-weight:600; margin:0 0 12px; }
   .btn { display:block; width:100%; max-width:340px; margin:0 auto; padding:14px; background:#E06500; color:#fff; border:none; border-radius:3px; font-family:inherit; font-size:1rem; text-decoration:none; text-align:center; cursor:pointer; min-height:48px; letter-spacing:0.02em; }
   .btn:focus-visible, input:focus-visible { outline:3px solid #111; outline-offset:2px; }
@@ -71,6 +72,9 @@
     .front .stanza:last-child { margin-bottom:0; }
     /* screen 2: the turn */
     .front .knock { font-size:22px; margin:0 0 26px; }
+    .front .wl-lead { font-size:20px; }
+    .block { margin-top:40px; }
+    .small-foot { margin-top:28px; }
     .front .lead { text-align:center; margin:0; }
     /* screens 3 and 4: the guide and the invitation clear the bottom bar */
     .screen { min-height:100vh; padding-bottom:calc(96px + env(safe-area-inset-bottom)); padding-bottom:calc(max(96px, 100vh - 100svh + 24px) + env(safe-area-inset-bottom)); }
@@ -127,6 +131,7 @@
   </section>
 
   <section class="block">
+    <p class="wl-lead">Ready to discover what your arguments may be trying to tell you?</p>
     <h3>Be the first to know when The Ongoing Argument goes live.</h3>
     <form class="form" id="wl-form" novalidate>
       <label class="hp" aria-hidden="true">Leave this empty <input type="text" name="website" id="wl-hp" tabindex="-1" autocomplete="off"></label>
