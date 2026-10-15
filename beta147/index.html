@@ -2276,6 +2276,7 @@ h1, h2, h3,
     <button class="action-btn" id="btn-submit" style="background:var(--accent);">Submit for Review</button>
   </div>
   <div id="status-msg"></div>
+  <div id="solo-next-note" role="status" style="display:none;margin:14px 16px 0;padding:14px 16px;background:#FFF4E5;border:1px solid #E8C48F;border-radius:4px;font-size:0.92rem;line-height:1.5;color:#3B2F1A;"></div>
 
   <!-- STEP 2: STORY QUESTIONS + SUBMIT -->
   <div id="step2-card">
@@ -3643,21 +3644,43 @@ function joinSignOut() {
   window.location.reload();
 }
 
-// ---- Reported speech: "She says I never listen" means her line is "you never listen" ----
-function pbFlipReported(raw) {
+// ---- Reported speech: a partner's line keeps their own first person ----
+// The AI may offer a "direct" version of a line that the story only reports ("she says I never listen"
+// becomes "You never listen"). It is used only when every check below passes, otherwise the exact words
+// from the story are kept. Lines in script form, in quotes, or where the speaker talks about themselves
+// are never changed.
+function pbPronounMap(t) {
+  // Every I-word and every you-word becomes the same placeholder, so two versions of a line that differ
+  // only in pronouns compare as equal.
+  var m = { "i": 1, "me": 1, "my": 1, "mine": 1, "myself": 1, "i'm": 1, "i've": 1, "i'll": 1, "i'd": 1,
+            "you": 1, "your": 1, "yours": 1, "yourself": 1, "you're": 1, "you've": 1, "you'll": 1, "you'd": 1 };
+  return pbNorm(t).split(' ').map(function(w) { return m[w] ? 'P' : w; }).join(' ');
+}
+function pbReportedIntro(story, raw) {
+  var hay = String(story || ''), at = hay.toLowerCase().indexOf(String(raw || '').toLowerCase());
+  if (at < 1) return false;
+  var before = hay.slice(Math.max(0, at - 80), at);
+  if ((hay.slice(0, at).match(/["\u201C\u201D]/g) || []).length % 2 === 1) return false;
+  return /\b(says?|said|tells?|told|telling|thinks?|thought|claims?|claimed|accuses?|accused)\b(\s+me)?(\s+that)?[\s,]*$/i.test(before);
+}
+function pbFlipReported(raw, direct) {
   var t = String(raw || '');
-  if (/\b(you|your|you're|yours)\b/i.test(t)) return t;
-  if (!/\b(I|me|my|mine|myself|I'm|I've|I'll|I'd)\b/.test(t) && !/\b(me|my|mine|myself)\b/i.test(t)) return t;
-  var story = String((pbStory && pbStory.text) || '');
-  var at = story.toLowerCase().indexOf(t.toLowerCase());
-  if (at !== -1) {
-    var quotes = (story.slice(0, at).match(/["“”]/g) || []).length;
-    if (quotes % 2 === 1) return t; // she was quoted directly, so "I" is her
-  }
-  return t.replace(/\bI am\b/g, 'you are').replace(/\bI'm\b/g, "you're").replace(/\bI was\b/g, 'you were')
-    .replace(/\bI've\b/g, "you've").replace(/\bI'll\b/g, "you'll").replace(/\bI'd\b/g, "you'd")
-    .replace(/\bI\b/g, 'you').replace(/\bme\b/gi, 'you').replace(/\bmy\b/gi, 'your')
-    .replace(/\bmine\b/gi, 'yours').replace(/\bmyself\b/gi, 'yourself');
+  if (typeof direct !== 'string' || !direct.trim() || direct.trim() === t) return t;
+  if (!pbReportedIntro(pbStory && pbStory.text, t)) return t;
+  if (pbPronounMap(direct) !== pbPronounMap(t)) return t;   // only pronouns may differ
+  return direct.trim();
+}
+
+// Never the same line twice: drop a line a character already said in the draft (same words, same speaker).
+function pbDedupeLines(parsed) {
+  var seen = { A: {}, B: {} }, out = [], prevKey = '', prevChar = '';
+  parsed.lines.forEach(function(l) {
+    if (l.type !== 'line') { out.push(l); prevKey = ''; return; }
+    var ch = l.char === 'B' ? 'B' : 'A', key = pbPronounMap(l.dialogue);
+    var dup = key && ((key.length >= 20 && seen[ch][key]) || (key === prevKey && ch === prevChar));
+    if (!dup) { out.push(l); if (key) seen[ch][key] = true; prevKey = key; prevChar = ch; }
+  });
+  parsed.lines = out;
 }
 
 function signOut() {
@@ -4027,7 +4050,8 @@ function loadProfile() {
     if (p.partnerNameConfirmed) user.partnerConfirmed = true;
     if (p.partnerId) user.partnerId = p.partnerId;
     if (p.accountType) user.accountType = p.accountType;
-    if (p.soloCurrentStep) user.soloCurrentStep = p.soloCurrentStep;
+    if (p.soloCurrentStep) user.soloCurrentStep = String(p.soloCurrentStep);
+    if (user.accountType === 'solo' && p.readyForReview) soloMarkSubmitted();
     localStorage.setItem('oa_user', JSON.stringify(user));
     if (user.accountType === 'solo') { soloJourneyRoute(); return; }
     clUpdateLinkUI(p);
@@ -4161,17 +4185,40 @@ function saveScript() {
 function submitForReview() {
   if (!user || user.email === COACH) return;
   var btn = el('btn-submit');
+  var solo = user.accountType === 'solo';
   btn.disabled = true; btn.textContent = 'Submitting…';
   saveScript();
   fsSet('users/' + user.uid, { readyForReview: 'true', submittedAt: new Date().toISOString() })
   .then(function() {
     btn.textContent = '✓ Submitted for Review';
     btn.style.background = '#5a8a5a';
+    if (solo) { soloAfterSubmit(); return; }
     status('Script submitted. Mitch will be notified.');
   }).catch(function() {
     btn.disabled = false; btn.textContent = 'Submit for Review';
     status('Could not submit. Try again.');
   });
+}
+
+// Individual (solo) path: the script is in, so show what comes next instead of leaving the person guessing.
+function soloMarkSubmitted() {
+  var btn = el('btn-submit');
+  if (btn) { btn.disabled = true; btn.textContent = '✓ Submitted for Review'; btn.style.background = '#5a8a5a'; }
+}
+function soloShowNote(msg) {
+  var n = el('solo-next-note');
+  if (!n) return;
+  n.textContent = msg; n.style.display = msg ? 'block' : 'none';
+}
+function soloAfterSubmit() {
+  status('');
+  var step = String(user.soloCurrentStep || '1');
+  if (step !== '1') { soloJourneyRoute(); return; }
+  soloShowNote('Your script is in. Next, two quick questions about the story you tell yourself. Then the AI reads your script and shows you what is underneath.');
+  step2Init();
+  var card = el('step2-card');
+  if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(function() { var t = el('step2-thinking'); if (t && !t.value) t.focus({ preventScroll: true }); }, 500);
 }
 
 // LINES
@@ -4987,6 +5034,7 @@ function step2Init() {
     if (s.storyThinking) el('step2-thinking').value = s.storyThinking;
     if (s.storyFeeling) el('step2-feeling').value = s.storyFeeling;
     if (s.submitted) {
+      if (user.accountType === 'solo') { soloResumeAfterSubmit(); return; }
       step2ShowSubmittedState();
       checkAnalysisReady();
     } else {
@@ -4994,6 +5042,25 @@ function step2Init() {
       el('step2-feeling').addEventListener('input', step2AutoSave);
     }
   }).catch(function() {});
+}
+
+// A solo person who already submitted comes back (refresh, new visit): show where things stand.
+function soloResumeAfterSubmit() {
+  soloMarkSubmitted();
+  fsGet('solo-analysis/' + user.uid).then(function(d) {
+    var sa = (d && d.fields) ? fromFields(d.fields) : {};
+    if (sa.analysisReady) {
+      step2ShowSubmittedState();
+      hide('step1-waiting-banner');
+      soloAdvanceStep('2');
+      return;
+    }
+    // Saved, but the AI never finished reading it. Offer to start it, instead of waiting for nothing.
+    var b = el('step2-submit-btn');
+    hide('step1-waiting-banner');
+    txt('step2-status', 'Your script and answers are saved. The AI has not read your script yet.');
+    if (b) { b.disabled = false; b.textContent = 'Have the AI read my script'; b.onclick = function() { b.disabled = true; txt('step2-status', ''); step2ShowSubmittedState(); el('step1-waiting-banner').scrollIntoView({ behavior: 'smooth', block: 'center' }); runSoloAnalysis(); }; }
+  }).catch(function() { step2ShowSubmittedState(); });
 }
 
 function step2AutoSave() {
@@ -5027,7 +5094,11 @@ function submitScript() {
     submittedAt: new Date().toISOString()
   }).then(function() {
     step2ShowSubmittedState();
-    if (user.accountType === 'solo') { return runSoloAnalysis(); }
+    if (user.accountType === 'solo') {
+      var wbn = el('step1-waiting-banner');
+      if (wbn && wbn.scrollIntoView) wbn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return runSoloAnalysis();
+    }
     return checkPartnerAndAnalyze();
   }).catch(function() {
     btn.disabled = false;
@@ -5039,7 +5110,12 @@ function step2ShowSubmittedState() {
   var btn = el('step2-submit-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Script Submitted ✓'; }
   txt('step2-status', '');
+  if (user && user.accountType === 'solo') {
+    var wb = document.querySelector('#step1-waiting-banner .wb-body');
+    if (wb) wb.textContent = 'The AI is reading your script now. This takes about a minute, so please stay on this page. Your analysis will appear here when it is ready.';
+  }
   el('step1-waiting-banner').style.display = 'block';
+  soloShowNote('');
 }
 
 function checkPartnerAndAnalyze() {
@@ -5426,7 +5502,8 @@ var SOLO_JOURNEY_STEPS = {
 
 function soloJourneyRoute() {
   if (!user || !user.uid) return;
-  var step = user.soloCurrentStep || '1';
+  // Firestore hands numbers back as numbers, so make the step a string before comparing it
+  var step = String(user.soloCurrentStep || '1');
   currentJourneyStep = step;
   hide('partner-waiting-banner');
   if (step === '1') {
@@ -5764,9 +5841,16 @@ function runSoloAnalysis() {
       soloAdvanceStep('2');
       hide('step1-waiting-banner');
       showSoloJourneyBanner('2');
+      txt('step2-status', 'Your analysis is ready.');
+      var jb = el('journey-banner');
+      if (jb && jb.scrollIntoView) jb.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }).catch(function() {
-    txt('step2-status', 'Analysis could not complete. Please refresh and try again.');
+    // The script and the answers are already saved, so offer a retry instead of a dead end.
+    hide('step1-waiting-banner');
+    txt('step2-status', 'The AI could not finish reading your script just now. Your script and answers are saved.');
+    var b = el('step2-submit-btn');
+    if (b) { b.disabled = false; b.textContent = 'Try the analysis again'; b.onclick = function() { b.disabled = true; txt('step2-status', 'Trying again…'); step2ShowSubmittedState(); runSoloAnalysis(); }; }
   });
 }
 
@@ -7465,7 +7549,7 @@ function pbAutoGrow(el) {
 
 // ===== AI interview as screens: story first, then one screen per question =====
 var IV_SCREENS = ['here', 'lines', 'sound', 'start', 'gets', 'story', 'feel', 'want', 'end'];
-var IV_SOUNDS = ['flat', 'sharp', 'tired', 'cold', 'fast', 'quiet', 'already loud'];
+var IV_SOUNDS = ['flat', 'sharp', 'tired', 'cold', 'fast', 'quiet', 'loud'];
 var IV_SCAN = ['q1', 'q3', 'q4', 'q8'];
 var ivScreens = IV_SCREENS.slice();
 var ivIndex = 0;
@@ -7488,7 +7572,7 @@ function ivNew() {
 function cueClean(raw) {
   var seen = {}, out = [];
   String(raw || '').replace(/[()]/g, ' ').split(',').forEach(function(x) {
-    x = x.replace(/\s+/g, ' ').trim();
+    x = x.replace(/\balready\b\s*/gi, '').replace(/\s+/g, ' ').trim();   // tone notes never use the word "already"
     if (x && !seen[x.toLowerCase()]) { seen[x.toLowerCase()] = 1; out.push(x); }
   });
   return out.join(', ');
@@ -7596,8 +7680,8 @@ function pbScanPrompt() {
     'q3: where it happens (also give "label": a short name for the place, for example "the bedroom" if they say they are on the bed)\n' +
     'q4: the first thing said or done that starts it\n' +
     'q8: the last thing said or done before it stops\n\n' +
-    'Also list every line that is quoted or clearly reported as spoken in the story, in the order spoken. Each has "who" ("me" for the person telling the story, "partner" for ' + N + ') and "text", copied exactly from the story without the words that introduce it, like "she says". Include a line even if it is short.\n\n' +
-    'Return only one JSON object shaped like {"items":{"q1":{"evidence":"","label":""}},"lines":[{"who":"me","text":""}]}. Include every item key listed above. Your safety guidance still applies: if what they have said describes fear, control or coercion, include the safety flag from your guidance in your response in addition to the JSON.';
+    'Also list every line that is quoted or clearly reported as spoken in the story, in the order spoken. Each has "who" ("me" for the person telling the story, "partner" for ' + N + ') and "text", copied exactly from the story without the words that introduce it, like "she says". Include a line even if it is short. For lines spoken by ' + N + ' also give "direct": the same line as ' + N + ' would say it straight to the other person, in ' + N + '\'s own first person. Keep it exactly as in the story unless the story only reports the line and its "I" or "me" means the person telling the story, as in "she says I never listen", which becomes "You never listen." Never change a line that is written as a script, is in quotes, or where ' + N + ' is talking about ' + N + 'self, such as "I\'m not asking for permission, I\'m asking to be included", which stays exactly as written.\n\n' +
+    'Return only one JSON object shaped like {"items":{"q1":{"evidence":"","label":""}},"lines":[{"who":"me","text":""},{"who":"partner","text":"","direct":""}]}. Include every item key listed above. Your safety guidance still applies: if what they have said describes fear, control or coercion, include the safety flag from your guidance in your response in addition to the JSON.';
 }
 
 function pbParseScan(text) {
@@ -7621,7 +7705,7 @@ function pbParseScan(text) {
     var t = l && typeof l.text === 'string' ? l.text.trim() : '';
     if (t.length >= 2 && pbEvidenceOk(pbStory.text, t)) {
       var who = l.who === 'partner' ? 'partner' : 'me';
-      out.lines.push({ who: who, text: who === 'partner' ? pbFlipReported(t) : t, raw: t });
+      out.lines.push({ who: who, text: who === 'partner' ? pbFlipReported(t, l.direct) : t, raw: t });
     }
   });
   return out;
@@ -8008,11 +8092,11 @@ function pbBuildPrompt() {
   var spoken = pbSpoken.length
     ? pbSpoken.map(function(l, i) { return (i + 1) + '. ' + (l.who === 'me' ? nameA : nameB).toUpperCase() + ': ' + l.text; }).join('\n')
     : '';
-  var startNote = A('q6') === 'Already upset' ? nameA + ' is already upset when it starts.' : (A('q6') === 'It builds' ? 'The feeling builds for ' + nameA + '.' : '');
+  var startNote = A('q6') === 'Already upset' ? nameA + ' says it is tense from the very first line.' : (A('q6') === 'It builds' ? nameA + ' says the feeling builds from calm.' : '');
   var tonesB = iv.tones.partner.join(', '), tonesA = iv.tones.me.join(', ');
 
   return 'Write a first-draft script of an argument between two partners, built only from this person\'s own account. The argument is called "' + fight + '". ' + nameA + ' is Character A, the person telling the story; ' + nameB + ' is Character B. Refer to ' + nameB + ' by name' + (pbPronoun ? ' (' + pbPronoun + ')' : '') + '.\n\n' +
-    'YOU FORMAT. YOU DO NOT FIX. Keep each person\'s words as close to what was actually said as possible. You may remove filler ("um," "like," repeated starts) and split long speech into separate lines, but never change meaning, tone, or intensity. Never add lines, reactions, or beats the person did not describe. Never soften, polish, or rebalance what was said. If something harsh was said, the script keeps it harsh. Seeing the real fight on the page is where the work begins, and a softened script removes that.\n\n' +
+    'YOU FORMAT. YOU DO NOT FIX. Keep each person\'s words as close to what was actually said as possible. You may remove filler ("um," "like," repeated starts) and split long speech into separate lines, but never change meaning, tone, or intensity. Never add lines or reactions the person did not describe. Never soften, polish, or rebalance what was said. If something harsh was said, the script keeps it harsh. Seeing the real fight on the page is where the work begins, and a softened script removes that.\n\n' +
     (told ? 'THEIR OWN ACCOUNT, in their words:\n"""\n' + told + '\n"""\n\n' : '') +
     (spoken ? 'EVERY SPOKEN LINE FOUND IN THEIR ACCOUNT, in the order it was said. Every one of these must appear in the script, in this order, as its own line or as part of a line. The first one may belong to ' + nameB + ': start the script with whoever speaks first.\n' + spoken + '\n\n' : '') +
     'WHAT THEY CONFIRMED OR ADDED (use these for the scene, directions and beats; never as a source of new dialogue):\n\n' +
@@ -8024,15 +8108,17 @@ function pbBuildPrompt() {
     'What ' + nameB + ' does without words that gets to them: ' + A('q9') + '\n\n' +
     'The story they tell themselves about that: ' + A('q9b') + '\n\n' +
     'How it ends: ' + A('q8') + '\n\n' +
+    ((tonesA || tonesB) ? 'HOW EACH OF THEM SOUNDS, in the person\'s words. This is a range of feelings to draw on for the tone notes, not one label to repeat on every line:\n' +
+      nameB + ': ' + tonesB + '\n' + nameA + ': ' + tonesA + '\n\n' : '') +
     'FOR YOUR GUIDANCE AND SAFETY ONLY. Never put any of this into the script, never comment on it, and never correct it:\n' +
-    'How ' + nameB + ' sounds, in their words: ' + tonesB + '\n' +
-    'How they sound, in their words: ' + tonesA + '\n' +
     'What they think ' + nameB + ' is feeling, in their words: ' + A('qRead') + '\n' +
     'What they most want ' + nameB + ' to understand, in their words: ' + A('qWant') + '\n\n' +
     'Format the script exactly as follows. Start with:\nSCENE: [brief location from the setting described above]\n\n' +
     'For each line of dialogue:\n[CHARACTER NAME IN CAPS]\n([emotional beat or tone in parentheses])\n[What they say]\n\n' +
     'For stage directions:\nDIRECTION: [brief description]\n\n' +
-    'Include every exchange the person described and no others. There is no minimum length. Add a beat in parentheses only when the person described the tone, feeling or action for that line, and a DIRECTION only for a physical action or change of setting they described. If recurring lines were provided, they are the actual words and may appear exactly as given. Reflect how it ends (the to be continued moment) rather than a resolution, because these fights do not end, they stop. ' +
+    'Include every exchange the person described and no others. There is no minimum length. A DIRECTION only for a physical action or change of setting they described. If recurring lines were provided, they are the actual words and may appear exactly as given, but a line that already appears in their account is the same line: never put the same line in the script twice. ' +
+    'TONE NOTES. Give every line a short tone note in parentheses, one to three words, chosen from that specific line and from what the person told you about how each of them sounds. Use the real range of an argument, for example casual, calm, measured, guarded, defensive, sarcastic, dismissive, hurt, pleading, frustrated, flat, worn out, going quiet. Follow the shape of a real fight: the first line is usually measured, the feeling rises, then it falls or goes quiet. Never give one character the same tone note on more than two lines in a row. Do not invent a feeling the person did not signal; when you are unsure, use a neutral note such as (evenly) or (plainly). Never use the word "already" in a tone note. ' +
+    'THE ENDING. These fights do not end, they get interrupted. If the script needs a closing DIRECTION, make it an interruption, for example someone leaves the room, someone goes quiet, a phone rings. Never end on peace, agreement, resolution or a settled moment such as silence settling over the day. If the person described how it ends, use that, in their words. ' +
     'Use the actual names ' + nameA + ' (Character A) and ' + nameB + ' (Character B) in all caps as character headers. ' +
     'Output only the script itself, starting with SCENE:. No preamble, no commentary, no explanation.';
 }
@@ -8046,7 +8132,7 @@ function pbEnsureSpokenLines(parsed) {
     var joined = ' ', pieces = [];
     lines.forEach(function(l, idx) {
       if (l.type !== 'line') return;
-      var t = pbNorm(l.dialogue);
+      var t = pbPronounMap(l.dialogue);
       pieces.push({ idx: idx, start: joined.length, end: joined.length + t.length });
       joined += t + ' ';
     });
@@ -8059,7 +8145,7 @@ function pbEnsureSpokenLines(parsed) {
   var cursor = 0, lastIdx = -1;
   pbSpoken.forEach(function(sp) {
     var b = build();
-    var needle = ' ' + pbNorm(sp.text) + ' ';
+    var needle = ' ' + pbPronounMap(sp.raw || sp.text) + ' ';
     var at = b.joined.indexOf(needle, cursor);
     if (at !== -1) {
       var pc = pieceAt(b, at + needle.length - 2);
@@ -8080,22 +8166,17 @@ function pbEnsureSpokenLines(parsed) {
 
 // Cues for both people, in their own words, from the tone buttons and how it starts.
 function pbPostProcessDraft(parsed) {
+  pbDedupeLines(parsed);   // first, so the line numbers of anything added below stay right
   var inserted = pbEnsureSpokenLines(parsed);
-  var tonesB = cueClean(iv.tones.partner.join(', ')), tonesA = cueClean(iv.tones.me.join(', '));
-  var intensity = iv.start === 'Already upset' ? 'already tense' : '';
-  var firstA = true;
+  // The AI writes a tone note for each line from that line. Keep them as written (no one label stamped on
+  // every line), tidy them, and never let one character repeat the same note more than twice in a row.
+  var run = { A: { note: '', n: 0 }, B: { note: '', n: 0 } };
   parsed.lines.forEach(function(l) {
     if (l.type !== 'line') return;
-    var cur = cueClean(l.beat);
-    if (l.char === 'B') {
-      l.beat = cur || tonesB;
-    } else {
-      var parts = [];
-      if (firstA && intensity) parts.push(intensity);
-      parts.push(cur || tonesA);
-      l.beat = cueClean(parts.join(', '));
-      firstA = false;
-    }
+    l.beat = cueClean(l.beat);
+    var r = run[l.char === 'B' ? 'B' : 'A'], key = l.beat.toLowerCase();
+    if (key && key === r.note) { r.n++; } else { r.note = key; r.n = key ? 1 : 0; }
+    if (key && r.n > 2) { l.beat = ''; }
   });
   return { parsed: parsed, inserted: inserted };
 }
@@ -8463,7 +8544,7 @@ function aiEditClose() {
 function aiEditPrompt(scriptText, instruction) {
   return 'Here is a script in a standard format:\n\n"""\n' + scriptText + '\n"""\n\n' +
     'The person who wrote it asked for this change:\n"' + instruction + '"\n\n' +
-    'Change exactly what they ask for and nothing else. Every other line must come back word for word, unchanged. Do not make any change on your own initiative to sound kinder, fairer, more balanced or more polished. If the request is unclear, or would need words the person did not give you, make no change and return the script exactly as given.\n\n' +
+    'Change exactly what they ask for and nothing else. Every other line must come back word for word, unchanged. Do not make any change on your own initiative to sound kinder, fairer, more balanced or more polished. If the request is unclear, or would need words the person did not give you, make no change and return the script exactly as given. When you write or change a tone note in parentheses, make it fit that specific line, vary the wording instead of repeating one label, and never use the word "already" in a tone note. If you write a closing direction, make it an interruption (someone leaves, someone goes quiet), not a settled ending.\n\n' +
     'Return the complete script in the same format, starting with SCENE:. Output only the script. No preamble, no commentary.';
 }
 
