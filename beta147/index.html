@@ -507,6 +507,23 @@ body {
 .s11-coach-body { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(255,255,255,0.32); line-height: 1.65; margin-bottom: 12px; }
 .s11-coach-btn { font-family: 'Courier Prime', monospace; font-size: 0.78rem; background: transparent; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.42); padding: 8px 14px; cursor: pointer; border-radius: 2px; -webkit-appearance: none; touch-action: manipulation; }
 .s11-coach-confirm { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(184,160,112,0.6); font-style: italic; }
+
+/* ANALYSIS PAGE (individual path): the analysis gets a page of its own */
+#analysis-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 210; background: #F6F4F0; flex-direction: column; }
+.ap-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #E2DED8; flex-shrink: 0; }
+.ap-back { background: none; border: none; cursor: pointer; color: #777; font-size: 1.2rem; padding: 4px 10px 4px 0; line-height: 1; touch-action: manipulation; }
+.ap-title { font-family: 'Lora', Georgia, serif; font-size: 0.9rem; font-weight: 600; color: #777; }
+.ap-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 32px 22px 56px; }
+.ap-col { max-width: 640px; margin: 0 auto; }
+.ap-col h1 { font-family: 'Lora', Georgia, serif; font-size: 1.7rem; font-weight: 600; color: #111; margin: 0 0 24px; text-align: left; }
+.ap-body p { font-family: 'Lora', Georgia, serif; font-size: 1.12rem; line-height: 1.8; color: #1a1a1a; margin: 0 0 1.3em; }
+.ap-state { font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.6; color: #444; margin: 8px 0 22px; }
+.ap-btn { display: block; width: 100%; max-width: 420px; margin: 28px 0 0; padding: 15px; background: #E06500; color: #fff; border: none; border-radius: 4px; font-family: 'Lora', Georgia, serif; font-size: 1rem; cursor: pointer; min-height: 50px; }
+.ap-btn.alt { background: #fff; color: #111; border: 1px solid #CFC9BF; }
+.s3-who { font-family: system-ui, sans-serif; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: #999; margin: 0 2px 4px; text-align: right; }
+.s3-wait { font-family: 'Lora', Georgia, serif; font-size: 0.85rem; color: #777; margin: 6px 4px 0; }
+.s3-reread { margin-left: auto; background: none; border: none; color: #B84F00; font-family: system-ui, sans-serif; font-size: 0.82rem; text-decoration: underline; cursor: pointer; padding: 8px 4px; min-height: 40px; display: none; }
+.s3-retry { margin-top: 10px; padding: 10px 16px; background: #E06500; color: #fff; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; min-height: 44px; }
 </style>
 
 <style>
@@ -2443,6 +2460,7 @@ h1, h2, h3,
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep3()" aria-label="Close">&#8592;</button>
     <span class="s3-title">Step 3. Mirror Moment</span>
+    <button type="button" class="s3-reread" id="s3-reread" onclick="openAnalysisPage()">Read my analysis again</button>
   </div>
   <div class="s3-thread" id="s3-thread"></div>
   <div class="s3-input-area">
@@ -2451,6 +2469,23 @@ h1, h2, h3,
       <button class="s3-send" id="s3-send" onclick="s3Send()">Send</button>
     </div>
     <button class="s3-complete" id="s3-complete-btn" onclick="completeStep3()" style="display:none">Complete Step 3 and continue to Step 4 ›</button>
+  </div>
+</div>
+
+<!-- ANALYSIS PAGE (individual path) -->
+<div id="analysis-screen" role="dialog" aria-labelledby="ap-heading">
+  <div class="ap-header">
+    <button class="ap-back" onclick="closeAnalysisPage()" aria-label="Close">&#8592;</button>
+    <span class="ap-title">Step 2</span>
+  </div>
+  <div class="ap-scroll" id="ap-scroll">
+    <div class="ap-col">
+      <h1 id="ap-heading">Your Analysis</h1>
+      <p class="ap-state" id="ap-state" role="status"></p>
+      <div class="ap-body" id="ap-body"></div>
+      <button class="ap-btn" id="ap-continue" style="display:none" onclick="apContinue()">Continue to the conversation</button>
+      <button class="ap-btn" id="ap-retry" style="display:none" onclick="apGenerate()">Try again</button>
+    </div>
   </div>
 </div>
 
@@ -5197,7 +5232,7 @@ function scriptDataToText(data, personName, partnerName) {
     var lines = typeof data.lines === 'string' ? JSON.parse(data.lines) : data.lines;
     lines.forEach(function(l) {
       if (l.type === 'line') {
-        var speaker = l.char === 'a' ? personName : partnerName;
+        var speaker = String(l.char || '').toUpperCase() === 'A' ? personName : partnerName;
         var block = speaker.toUpperCase();
         if (l.beat) block += '\n(' + cueInner(l.beat) + ')';
         if (l.dialogue) block += '\n' + l.dialogue;
@@ -5246,9 +5281,90 @@ function showAnalysisBanner() {
 // ── STEP 3: MIRROR MOMENT ────────────────────────────────────
 var s3Messages = [];
 var s3Sending = false;
+var s3Mode = '';   // 'solo' when the conversation is the individual path's Mirror Moment
+
+// ===== MIRROR MOMENT, INDIVIDUAL PATH =====
+// The AI speaks first and is given everything it needs, so it never asks for what it already has.
+function openMirrorMomentSolo() {
+  if (!user || !user.uid) return;
+  s3Mode = 'solo';
+  el('step3-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  el('s3-reread').style.display = 'inline-block';
+  var cb = el('s3-complete-btn'); if (cb) cb.style.display = 'none';
+  s3Messages = []; s3Render();
+  fsGet('step3/' + user.uid).then(function(d) {
+    var saved = (d && d.fields) ? fromFields(d.fields) : {};
+    if (saved.messages) {
+      try {
+        var parsed = typeof saved.messages === 'string' ? JSON.parse(saved.messages) : saved.messages;
+        if (Array.isArray(parsed) && parsed.length > 1) {
+          s3Messages = parsed; s3Render(); s3ScrollBottom(); s3UpdateSoloComplete();
+          return;
+        }
+      } catch (e) {}
+    }
+    s3StartSolo();
+  }).catch(function() { s3StartSolo(); });
+}
+
+function s3StartSolo() {
+  s3Messages = [];
+  s3Render();
+  s3ShowTyping('Reading what you wrote...');
+  s3Sending = true; el('s3-send').disabled = true;
+  Promise.all([fsGet('scripts/' + user.uid), fsGet('solo-analysis/' + user.uid)]).then(function(r) {
+    var myData = (r[0] && r[0].fields) ? fromFields(r[0].fields) : {};
+    var sa = (r[1] && r[1].fields) ? fromFields(r[1].fields) : {};
+    var analysis = String(sa.analysis || '').trim();
+    if (!analysis) { var e = new Error('no analysis'); e.code = 'no_analysis'; throw e; }
+    var me = soloMyName(), partner = soloPartnerName(), fight = soloFightName();
+    var known = partner !== 'your partner';
+    var setup = 'You are now beginning Step 3, the Mirror Moment, with ' + me + '. This is the individual pathway: ' + me + '\'s partner' + (known ? ', ' + partner + ',' : '') + ' is not using The Ongoing Argument and will not see any of this.\n\n' +
+      'Everything you need is below. ' + me + '\'s script has already been written and submitted, and the analysis has already been done. ' +
+      (known ? 'Their partner\'s name is ' + partner + '. ' : 'Their partner\'s name was not given, so say "your partner". ') +
+      (fight ? 'They call this fight "' + fight + '". ' : 'This fight has no name yet, so call it "the argument" and do not ask for one. ') +
+      'Do not give the welcome to the process. Do not ask for anything that is given here: do not ask what to call the fight, do not ask whether their partner has agreed to anything, and do not ask whether they are ready to begin writing their script, because it is already submitted.\n\n' +
+      '--- ' + me.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myData, me, partner) + '\n\n' +
+      '--- THE STORY ' + me.toUpperCase() + ' TELLS THEMSELVES ---\n' +
+      'What ' + (known ? partner : 'their partner') + ' is thinking: ' + (myData.storyThinking || '(no answer provided)') + '\n' +
+      'What ' + (known ? partner : 'their partner') + ' is feeling: ' + (myData.storyFeeling || '(no answer provided)') + '\n\n' +
+      '--- FULL ANALYSIS (use this as the foundation; do not quote it word for word) ---\n' + analysis + '\n\n' +
+      'Speak first. Deliver ' + me + '\'s personalized Mirror Moment. Begin with what you see in their script: their specific words, their recurring themes, the story they are telling themselves. Offer it as something for their consideration, never a verdict. Be warm, precise and grounded in what they actually wrote. Do not be generic and do not compare to a partner\'s script, because none was written. Keep it to a few short paragraphs and end with one open question for ' + me + '.';
+    s3Messages = [{ role: 'user', content: setup }];
+    return callAIWithTimeout(s3Messages, '3', 120000);
+  }).then(function(text) {
+    s3RemoveTyping();
+    s3Messages.push({ role: 'assistant', content: text });
+    s3SaveConversation();
+    s3Render(); s3ScrollBottom();
+    s3Sending = false; el('s3-send').disabled = false;
+  }).catch(function(err) {
+    s3RemoveTyping();
+    s3Sending = false; el('s3-send').disabled = false;
+    s3Messages = [];
+    if (err && err.code === 'no_analysis') s3AppendError('Your analysis is not saved yet, so the conversation cannot start. Open your analysis and tap Try again there.');
+    else s3AppendError('The AI could not start the conversation just now. Nothing is lost.', s3StartSolo);
+    console.error('Mirror Moment start error:', err);
+  });
+}
+
+// After a few replies, the individual path offers a way to move on.
+function s3UpdateSoloComplete() {
+  if (s3Mode !== 'solo') return;
+  var replies = s3Messages.filter(function(m, i) { return i > 0 && m.role === 'user'; }).length;
+  var cb = el('s3-complete-btn');
+  if (!cb) return;
+  if (replies >= 3) {
+    cb.textContent = 'I am ready to move on ›';
+    cb.style.display = 'block';
+    cb.onclick = function() { hide('step3-screen'); document.body.style.overflow = ''; s3Mode = ''; soloAdvanceStep('3'); };
+  }
+}
 
 function viewAnalysis() {
   if (!user || !user.coupleId) return;
+  s3Mode = '';
   var screen = el('step3-screen');
   screen.style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -5276,6 +5392,7 @@ function viewAnalysis() {
 function closeStep3() {
   hide('step3-screen');
   document.body.style.overflow = '';
+  var rr = el('s3-reread'); if (rr) rr.style.display = 'none';
 }
 
 function s3StartDelivery() {
@@ -5324,15 +5441,22 @@ function s3Send() {
   var inp = el('s3-input');
   var text = inp.value.trim();
   if (!text) return;
+  if (!s3Messages.length) return;   // nothing to answer yet
   inp.value = '';
   s3AutoGrow(inp);
-  s3Sending = true;
-  el('s3-send').disabled = true;
   s3Messages.push({ role: 'user', content: text });
   s3Render();
   s3ScrollBottom();
-  s3ShowTyping();
-  callAI(s3Messages, '3').then(function(reply) {
+  s3Ask();
+}
+
+// Sends the conversation so far and shows the reply. On a failure the person's message stays on screen
+// and a Try again button asks again without adding it twice.
+function s3Ask() {
+  s3Sending = true;
+  el('s3-send').disabled = true;
+  s3ShowTyping(s3Mode === 'solo' ? 'Thinking about what you said...' : '');
+  callAIWithTimeout(s3Messages, '3', 120000).then(function(reply) {
     s3RemoveTyping();
     s3Messages.push({ role: 'assistant', content: reply });
     s3SaveConversation();
@@ -5340,9 +5464,10 @@ function s3Send() {
     s3ScrollBottom();
     s3Sending = false;
     el('s3-send').disabled = false;
+    s3UpdateSoloComplete();
   }).catch(function(err) {
     s3RemoveTyping();
-    s3AppendError('Could not reach the AI. Please try again.');
+    s3AppendError('The AI did not answer. Your message is saved on screen.', s3Ask);
     s3Sending = false;
     el('s3-send').disabled = false;
     console.error('Step 3 send error:', err);
@@ -5372,16 +5497,16 @@ function s3Render() {
     var html = paras.map(function(p) {
       return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>';
     }).join('');
-    return '<div class="' + cls + '"><div class="s3-bubble">' + html + '</div></div>';
+    return '<div class="' + cls + '">' + (isAI ? '' : '<div class="s3-who">You</div>') + '<div class="s3-bubble">' + html + '</div></div>';
   }).join('');
 }
 
-function s3ShowTyping() {
+function s3ShowTyping(label) {
   var thread = el('s3-thread');
   var div = document.createElement('div');
   div.className = 's3-typing';
   div.id = 's3-typing';
-  div.innerHTML = '<div class="s3-bubble"><div class="s3-dot"></div><div class="s3-dot"></div><div class="s3-dot"></div></div>';
+  div.innerHTML = '<div class="s3-bubble"><div class="s3-dot"></div><div class="s3-dot"></div><div class="s3-dot"></div></div>' + (label ? '<div class="s3-wait">' + esc(label) + '</div>' : '');
   thread.appendChild(div);
   s3ScrollBottom();
 }
@@ -5391,11 +5516,17 @@ function s3RemoveTyping() {
   if (t) t.parentNode.removeChild(t);
 }
 
-function s3AppendError(msg) {
+function s3AppendError(msg, retryFn) {
   var thread = el('s3-thread');
   var div = document.createElement('div');
-  div.className = 's3-msg s3-msg-ai';
-  div.innerHTML = '<div class="s3-bubble" style="color:rgba(255,100,100,0.8)">' + esc(msg) + '</div>';
+  div.className = 's3-msg s3-msg-ai s3-error';
+  div.innerHTML = '<div class="s3-bubble" style="color:#B3261E">' + esc(msg) + '</div>';
+  if (retryFn) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 's3-retry'; b.textContent = 'Try again';
+    b.addEventListener('click', function() { if (div.parentNode) div.parentNode.removeChild(div); retryFn(); });
+    div.appendChild(b);
+  }
   thread.appendChild(div);
   s3ScrollBottom();
 }
@@ -5556,34 +5687,7 @@ function soloAdvanceStep(newStep) {
   if (SOLO_JOURNEY_STEPS[newStep]) showSoloJourneyBanner(newStep);
 }
 
-function openSoloAnalysis() {
-  fsGet('solo-analysis/' + user.uid).then(function(d) {
-    if (!d || !d.fields) { s3StartDelivery(); return; }
-    var sa = fromFields(d.fields);
-    if (sa.analysis) {
-      el('step3-screen').style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-      s3RenderSoloAnalysis(sa.analysis);
-    } else {
-      s3StartDelivery();
-    }
-  }).catch(function() { s3StartDelivery(); });
-}
-
-function s3RenderSoloAnalysis(analysisText) {
-  var body = el('s3-analysis-body');
-  if (!body) return;
-  var paras = analysisText.split(/\n\n+/).filter(function(p) { return p.trim(); });
-  body.innerHTML = paras.map(function(p) { return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
-  var completeBtn = el('s3-complete-btn');
-  if (completeBtn) {
-    completeBtn.style.display = 'block';
-    completeBtn.onclick = function() {
-      hide('step3-screen'); document.body.style.overflow = '';
-      soloAdvanceStep('3');
-    };
-  }
-}
+function openSoloAnalysis() { openAnalysisPage(); }
 
 function openSoloClosing() {
   el('solo-closing-screen').style.display = 'flex';
@@ -5809,8 +5913,17 @@ function tlCopy() {
   }
 }
 
-function runSoloAnalysis() {
-  var myName = (user.name || 'Me').split(' ')[0];
+// Names used in the individual path's AI prompts. A placeholder partner name becomes "your partner".
+function soloMyName() { return ((user && user.name) || 'Me').split(' ')[0]; }
+function soloPartnerName() { return (user && !pbPlaceholderName(user.partner)) ? String(user.partner).trim().split(' ')[0] : 'your partner'; }
+function soloFightName() {
+  var f = String((user && user.fight) || '').trim();
+  return (!f || /^the ongoing argument$/i.test(f)) ? '' : f;
+}
+
+// Asks the AI for the Step 2 analysis from the saved script and story answers, saves it, and returns the text.
+function soloGenerateAnalysis() {
+  var myName = soloMyName();
   return Promise.all([
     fsGet('scripts/' + user.uid),
     fsGet('warmup/' + user.uid).catch(function() { return null; })
@@ -5818,7 +5931,7 @@ function runSoloAnalysis() {
     var d = results[0];
     var warmupDoc = results[1];
     var myData = fromFields(d.fields || {});
-    var scriptText = scriptDataToText(myData, myName, 'their partner');
+    var scriptText = scriptDataToText(myData, myName, soloPartnerName());
     var warmupBlock = buildWarmupBlock(myName, warmupDoc);
     var prompt = myName + ' is working through The Ongoing Argument solo pathway. Their partner is not participating. This is their script of a recurring conflict, written privately from their own perspective.\n\n' +
       warmupBlock +
@@ -5831,20 +5944,38 @@ function runSoloAnalysis() {
       '- What this pattern costs them — what does it get them, and what does it take from them?\n' +
       '- One specific pattern they carry into this conflict that they may not be fully aware of\n\n' +
       'Do not mention a partner perspective beyond what ' + myName + ' projected. Do not use right/wrong language. Write in second person directly to ' + myName + '. Warm, honest, reflective. 3-4 paragraphs.';
-    return callAI([{ role: 'user', content: prompt }], '2');
+    return callAIWithTimeout([{ role: 'user', content: prompt }], '2', 150000);
   }).then(function(analysisText) {
+    if (!analysisText || String(analysisText).trim().length < 40) throw new Error('empty analysis');
     return fsSet('solo-analysis/' + user.uid, {
       analysis: analysisText,
       analysisReady: true,
       analysisAt: new Date().toISOString()
-    }).then(function() {
-      soloAdvanceStep('2');
-      hide('step1-waiting-banner');
-      showSoloJourneyBanner('2');
-      txt('step2-status', 'Your analysis is ready.');
-      var jb = el('journey-banner');
-      if (jb && jb.scrollIntoView) jb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).then(function(res) {
+      if (res && res.error) throw new Error('could not save the analysis');
+      return analysisText;
     });
+  });
+}
+
+// Gives up after a while instead of waiting forever (a phone that went to sleep can leave a request hanging).
+function callAIWithTimeout(messages, step, ms) {
+  return new Promise(function(resolve, reject) {
+    var done = false;
+    var t = setTimeout(function() { if (!done) { done = true; var e = new Error('The AI took too long.'); e.code = 'timeout'; reject(e); } }, ms || 120000);
+    callAI(messages, step).then(function(x) { if (!done) { done = true; clearTimeout(t); resolve(x); } },
+                                function(e) { if (!done) { done = true; clearTimeout(t); reject(e); } });
+  });
+}
+
+function runSoloAnalysis() {
+  return soloGenerateAnalysis().then(function() {
+    soloAdvanceStep('2');
+    hide('step1-waiting-banner');
+    showSoloJourneyBanner('2');
+    txt('step2-status', 'Your analysis is ready.');
+    var jb = el('journey-banner');
+    if (jb && jb.scrollIntoView) jb.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }).catch(function() {
     // The script and the answers are already saved, so offer a retry instead of a dead end.
     hide('step1-waiting-banner');
@@ -5852,6 +5983,55 @@ function runSoloAnalysis() {
     var b = el('step2-submit-btn');
     if (b) { b.disabled = false; b.textContent = 'Try the analysis again'; b.onclick = function() { b.disabled = true; txt('step2-status', 'Trying again…'); step2ShowSubmittedState(); runSoloAnalysis(); }; }
   });
+}
+
+// ===== THE ANALYSIS PAGE (individual path) =====
+function apState(msg, showRetry) {
+  txt('ap-state', msg || '');
+  el('ap-state').style.display = msg ? 'block' : 'none';
+  el('ap-retry').style.display = showRetry ? 'block' : 'none';
+}
+function openAnalysisPage() {
+  if (!user || !user.uid) return;
+  el('analysis-screen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  el('ap-body').innerHTML = '';
+  el('ap-continue').style.display = 'none';
+  apState('Opening your analysis…', false);
+  fsGet('solo-analysis/' + user.uid).then(function(d) {
+    var sa = (d && d.fields) ? fromFields(d.fields) : {};
+    if (sa.analysis && String(sa.analysis).trim()) apRender(String(sa.analysis));
+    else apMissing();
+  }).catch(function() { apMissing(); });
+}
+function apRender(text) {
+  apState('', false);
+  var paras = text.split(/\n\n+/).filter(function(x) { return x.trim(); });
+  el('ap-body').innerHTML = paras.map(function(x) { return '<p>' + esc(x.trim()).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  el('ap-continue').style.display = 'block';
+  var sc = el('ap-scroll'); if (sc) sc.scrollTop = 0;
+}
+function apMissing(afterFailure) {
+  el('ap-body').innerHTML = '';
+  el('ap-continue').style.display = 'none';
+  apState(afterFailure ? 'The AI could not finish reading your script just now. Your script and answers are saved, so nothing is lost.' : 'Your analysis is not here yet. If your script is submitted, the AI can read it again now.', true);
+}
+function apGenerate() {
+  el('ap-retry').style.display = 'none';
+  apState('The AI is reading your script. This takes about a minute, so please stay on this page.', false);
+  soloGenerateAnalysis().then(function(text) {
+    if (String(user.soloCurrentStep || '1') === '1') soloAdvanceStep('2');
+    apRender(text);
+  }).catch(function() { apMissing(true); });
+}
+function closeAnalysisPage() {
+  hide('analysis-screen');
+  document.body.style.overflow = el('step3-screen').style.display === 'flex' ? 'hidden' : '';
+}
+function apContinue() {
+  hide('analysis-screen');
+  if (el('step3-screen').style.display === 'flex') { return; }   // opened from the conversation: go back to it
+  openMirrorMomentSolo();
 }
 
 function pollSoloAnalysisReady() {

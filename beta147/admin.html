@@ -69,6 +69,16 @@
       <p id="notice-result" role="status"></p>
       <div class="scroll"><table id="wl"></table></div>
     </div>
+    <!-- TEST TOOLS. REMOVE BEFORE LAUNCH (this block, the script below it, and netlify/functions/admin-test-tools.js) -->
+    <div class="card" id="testtools">
+      <h2>Test tools</h2>
+      <p class="fine">For testing only. They work on a test account you created yourself (an address like mitch+test7@wearecapglobal.com) and never on a real person or a couple.</p>
+      <input type="email" id="tt-email" placeholder="Test account email" autocapitalize="none" autocomplete="off">
+      <button class="btn" id="tt-load" type="button">Load sample story</button>
+      <button class="btn alt" id="tt-rerun" type="button">Run analysis again</button>
+      <p id="tt-msg" role="status"></p>
+    </div>
+    <!-- END TEST TOOLS -->
     <button class="btn alt" id="out" type="button">Sign out</button>
   </div>
 </div>
@@ -149,6 +159,26 @@ $('testn').onclick = function() {
   api('testnotice').then(function(r) { $('notice-result').className = r.ok ? '' : 'err'; $('notice-result').textContent = explain(r); })
     .catch(function(e) { $('notice-result').className = 'err'; $('notice-result').textContent = e.message; });
 };
+// TEST TOOLS. REMOVE BEFORE LAUNCH
+function ttRun(action) {
+  var email = $('tt-email').value.trim();
+  if (!email) { $('tt-msg').className = 'err'; $('tt-msg').textContent = 'Type the test account email first.'; return; }
+  $('tt-msg').className = ''; $('tt-msg').textContent = 'Working…';
+  $('tt-load').disabled = true; $('tt-rerun').disabled = true;
+  fetch('/.netlify/functions/admin-test-tools', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ action: action, email: email }) })
+    .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'Something went wrong.'); return d; }); })
+    .then(function(d) {
+      $('tt-msg').textContent = (action === 'load_sample'
+        ? 'Sample story loaded for ' + d.email + '. Now open theongoingargument.com/beta147 and sign in as that account. You will see "Have the AI read my script". Tap it.'
+        : 'Analysis reset for ' + d.email + '. Open the build and sign in as that account (or refresh it). Tap "Have the AI read my script".');
+    })
+    .catch(function(e) { $('tt-msg').className = 'err'; $('tt-msg').textContent = e.message; })
+    .then(function() { $('tt-load').disabled = false; $('tt-rerun').disabled = false; });
+}
+$('tt-load').onclick = function() { ttRun('load_sample'); };
+$('tt-rerun').onclick = function() { ttRun('rerun_analysis'); };
+// END TEST TOOLS
+
 $('go').onclick = signIn;
 $('pw').onkeydown = function(e) { if (e.key === 'Enter') signIn(); };
 $('out').onclick = function() { token = ''; location.reload(); };
