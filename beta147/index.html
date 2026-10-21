@@ -3840,6 +3840,21 @@ function fsSet(path, data) {
   }).then(function(r) { return r.json(); });
 }
 
+// Like fsSet, but a refused or failed write is an error. Used where a silent failure would mislead the person.
+function fsSetStrict(path, data) {
+  var mask = Object.keys(data).map(function(k) { return 'updateMask.fieldPaths=' + k; }).join('&');
+  return fetch(DB + '/' + path + '?' + mask, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ fields: toFields(data) })
+  }).then(function(r) {
+    return r.json().catch(function() { return {}; }).then(function(j) {
+      if (!r.ok || (j && j.error)) { var e = new Error('save failed'); e.code = 'save_failed'; throw e; }
+      return j;
+    });
+  });
+}
+
 function fsAdd(col, data) {
   return fetch(DB + '/' + col, {
     method: 'POST',
@@ -5947,14 +5962,11 @@ function soloGenerateAnalysis() {
     return callAIWithTimeout([{ role: 'user', content: prompt }], '2', 150000);
   }).then(function(analysisText) {
     if (!analysisText || String(analysisText).trim().length < 40) throw new Error('empty analysis');
-    return fsSet('solo-analysis/' + user.uid, {
+    return fsSetStrict('solo-analysis/' + user.uid, {
       analysis: analysisText,
       analysisReady: true,
       analysisAt: new Date().toISOString()
-    }).then(function(res) {
-      if (res && res.error) throw new Error('could not save the analysis');
-      return analysisText;
-    });
+    }).then(function() { return analysisText; });
   });
 }
 
@@ -5976,10 +5988,12 @@ function runSoloAnalysis() {
     txt('step2-status', 'Your analysis is ready.');
     var jb = el('journey-banner');
     if (jb && jb.scrollIntoView) jb.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }).catch(function() {
+  }).catch(function(err) {
     // The script and the answers are already saved, so offer a retry instead of a dead end.
     hide('step1-waiting-banner');
-    txt('step2-status', 'The AI could not finish reading your script just now. Your script and answers are saved.');
+    txt('step2-status', (err && err.code === 'save_failed')
+      ? 'Your analysis could not be saved just now, so it is not ready yet. Your script and answers are saved. Please try again.'
+      : 'The AI could not finish reading your script just now. Your script and answers are saved.');
     var b = el('step2-submit-btn');
     if (b) { b.disabled = false; b.textContent = 'Try the analysis again'; b.onclick = function() { b.disabled = true; txt('step2-status', 'Trying again…'); step2ShowSubmittedState(); runSoloAnalysis(); }; }
   });
@@ -6011,10 +6025,10 @@ function apRender(text) {
   el('ap-continue').style.display = 'block';
   var sc = el('ap-scroll'); if (sc) sc.scrollTop = 0;
 }
-function apMissing(afterFailure) {
+function apMissing(afterFailure, code) {
   el('ap-body').innerHTML = '';
   el('ap-continue').style.display = 'none';
-  apState(afterFailure ? 'The AI could not finish reading your script just now. Your script and answers are saved, so nothing is lost.' : 'Your analysis is not here yet. If your script is submitted, the AI can read it again now.', true);
+  apState(afterFailure ? (code === 'save_failed' ? 'Your analysis could not be saved just now, so it is not ready yet. Your script and answers are saved, so nothing is lost.' : 'The AI could not finish reading your script just now. Your script and answers are saved, so nothing is lost.') : 'Your analysis is not here yet. If your script is submitted, the AI can read it again now.', true);
 }
 function apGenerate() {
   el('ap-retry').style.display = 'none';
@@ -6022,7 +6036,7 @@ function apGenerate() {
   soloGenerateAnalysis().then(function(text) {
     if (String(user.soloCurrentStep || '1') === '1') soloAdvanceStep('2');
     apRender(text);
-  }).catch(function() { apMissing(true); });
+  }).catch(function(err) { apMissing(true, err && err.code); });
 }
 function closeAnalysisPage() {
   hide('analysis-screen');
