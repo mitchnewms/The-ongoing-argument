@@ -6,6 +6,9 @@
 [functions."ai"]
   included_files = ["netlify/functions/ai-prompt.txt"]
 
+[functions."witness"]
+  included_files = ["netlify/functions/witness-prompt.txt"]
+
 # Prevent browsers from serving stale cached HTML after a deploy.
 # index.html must always be re-fetched; only the file itself is affected.
 [[headers]]

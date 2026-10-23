@@ -1959,6 +1959,56 @@ h1, h2, h3,
 .s3-send { min-height: 60px; padding: 0 22px; font-size: 0.95rem; }
 .s3-complete { display: block; max-width: 680px; margin: 10px auto 0; padding: 10px 18px; }
 .ap-col { max-width: 680px; }
+
+/* WITNESS YOUR ARGUMENT (individual path): one screen, tap only */
+#witness-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 215; background: #F6F4F0; color: #111111; flex-direction: column;
+  --w-stage: #EFEAE2; --w-surface: #FFFFFF; --w-ink: #111111; --w-muted: #555555; --w-line: #DDD6CB; --w-you: #111111; --w-partner: #7A6F66; --w-hot: #E06500; --w-heart: #E06500; --w-on: #FFFFFF;
+  height: 100vh; height: 100dvh; overflow: hidden; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 15px; line-height: 1.35; }
+#witness-screen * { box-sizing: border-box; }
+#witness-screen .w-wrap { height: 100%; width: 100%; max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; min-height: 0;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+#witness-screen .w-card { position: relative; background: var(--w-surface); border: 1px solid var(--w-line); border-radius: 18px; padding: 14px 52px 14px 18px; max-height: 40%; overflow-y: auto; flex-shrink: 0; }
+#witness-screen .w-close { position: absolute; top: 6px; right: 8px; width: 40px; height: 40px; background: none; border: none; color: var(--w-muted); font-size: 1.6rem; line-height: 1; cursor: pointer; }
+#witness-screen .w-who { display: inline-block; font-size: .8rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 4px; }
+#witness-screen .w-who.you { color: var(--w-you); } #witness-screen .w-who.partner { color: var(--w-partner); } #witness-screen .w-who.dir { color: var(--w-muted); }
+#witness-screen .w-said { font-family: 'Lora', Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(1.3rem, 4.2vw, 2.2rem); line-height: 1.18; margin: 0; text-wrap: balance; text-align: left; }
+#witness-screen .w-said + .w-said { margin-top: 8px; }
+#witness-screen .w-said.dir { font-style: italic; font-weight: 500; }
+#witness-screen .w-note { margin: 10px 0 0; font-size: 1.05rem; line-height: 1.35; color: var(--w-muted); text-align: left; }
+#witness-screen .w-mine { margin: 8px 0 0; font-size: .95rem; color: var(--w-muted); text-align: left; font-weight: 600; }
+#witness-screen .w-stage-wrap { position: relative; flex: 1 1 0; min-height: 120px; border-radius: 20px; overflow: hidden; border: 1px solid var(--w-line); background: var(--w-stage); display: flex; }
+#witness-screen svg.w-stage { display: block; width: 100%; height: 100%; position: relative; z-index: 1; }
+#witness-screen .w-heat { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #E06500; opacity: 0; transition: opacity 1.1s ease; pointer-events: none; }
+#witness-screen .w-fig { transition: transform 1.1s cubic-bezier(.4, .1, .2, 1); }
+#witness-screen .w-lean { transition: transform .7s cubic-bezier(.3, 1.3, .5, 1); }
+#witness-screen .w-flip { transition: transform .8s ease; }
+#witness-screen .w-fig .w-body line, #witness-screen .w-fig .w-body path.w-limb { stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+#witness-screen .w-halo { opacity: 0; transform-box: fill-box; transform-origin: center; }
+#witness-screen .w-halo.on { animation: w-halo 1.2s ease-out 2; }
+@keyframes w-halo { 0% { opacity: .9; transform: scale(.85); } 100% { opacity: 0; transform: scale(1.5); } }
+#witness-screen #w-mid { transition: transform 1.1s cubic-bezier(.4, .1, .2, 1), opacity 2s ease; }
+#witness-screen #w-haze { transition: transform 1.1s ease; }
+#witness-screen #w-wisps { transition: opacity 1.8s ease; fill: var(--w-heart); }
+#witness-screen .w-drift { animation: w-drift 11s ease-in-out infinite alternate; }
+#witness-screen .w-drift.d2 { animation-duration: 8s; animation-direction: alternate-reverse; }
+#witness-screen .w-drift.d3 { animation-duration: 6s; }
+@keyframes w-drift { 0% { transform: translate(-7px, 4px); } 100% { transform: translate(8px, -6px); } }
+#witness-screen .w-wisp { animation: w-rise 7s ease-in infinite; transform-box: fill-box; transform-origin: center; opacity: 0; }
+@keyframes w-rise { 0% { transform: translateY(0) scale(.6); opacity: 0; } 20% { opacity: .75; } 100% { transform: translateY(-120px) scale(1.6); opacity: 0; } }
+#witness-screen .w-eyes { transition: opacity .5s ease; }
+#witness-screen .w-controls { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+#witness-screen button { font: inherit; cursor: pointer; }
+#witness-screen button:focus-visible { outline: 3px solid var(--w-heart); outline-offset: 2px; }
+#witness-screen .w-btn { min-height: 56px; padding: 0 22px; border-radius: 14px; border: 2px solid var(--w-ink); background: var(--w-surface); color: var(--w-ink); font-weight: 700; font-size: 1.05rem; }
+#witness-screen .w-btn.next { flex: 1; background: var(--w-heart); border-color: var(--w-heart); color: var(--w-on); font-size: 1.2rem; }
+#witness-screen .w-btn:disabled { opacity: .35; cursor: default; }
+#witness-screen .w-count { font-size: .9rem; color: var(--w-muted); font-weight: 700; min-width: 74px; text-align: right; }
+#witness-screen .w-again { background: none; border: none; color: var(--w-muted); text-decoration: underline; font-size: .95rem; padding: 10px 6px; min-height: 44px; }
+@media (prefers-reduced-motion: reduce) {
+  #witness-screen .w-fig, #witness-screen .w-lean, #witness-screen .w-flip, #witness-screen #w-mid, #witness-screen #w-heat, #witness-screen .w-eyes { transition-duration: .01s; }
+  #witness-screen .w-halo.on, #witness-screen .w-drift, #witness-screen .w-wisp { animation: none; }
+}
+.ap-watch { display: none; background: none; border: none; color: #B84F00; font-family: system-ui, sans-serif; font-size: .9rem; text-decoration: underline; cursor: pointer; padding: 8px 4px; min-height: 40px; margin: 0 0 8px; }
 </style>
 
 </head>
@@ -2489,6 +2539,63 @@ h1, h2, h3,
   </div>
 </div>
 
+<!-- WITNESS YOUR ARGUMENT (individual path): one screen, tap only -->
+<div id="witness-screen" role="dialog" aria-label="Your argument">
+  <div class="w-wrap">
+    <div class="w-card" aria-live="polite">
+      <button type="button" class="w-close" id="w-close" aria-label="Close" onclick="witnessClose()">&times;</button>
+      <span class="w-who" id="w-who"></span>
+      <div id="w-lines"></div>
+      <p class="w-note" id="w-note" hidden></p>
+      <p class="w-mine" id="w-mine" hidden></p>
+    </div>
+    <div class="w-stage-wrap">
+      <div class="w-heat" id="w-heat"></div>
+      <svg class="w-stage" id="w-stage" viewBox="0 0 800 440" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Two people begin close together with a warm space between them. As the argument goes on, they move apart and the warmth between them changes.">
+        <defs>
+          <radialGradient id="wHeartG" cx="50%" cy="45%" r="62%">
+            <stop offset="0%" style="stop-color:#E06500;stop-opacity:.95"/>
+            <stop offset="100%" style="stop-color:#E06500;stop-opacity:.3"/>
+          </radialGradient>
+          <filter id="wSmoke" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.011 0.015" numOctaves="3" seed="7" result="n">
+              <animate attributeName="baseFrequency" dur="20s" values="0.011 0.015;0.015 0.010;0.011 0.015" repeatCount="indefinite"/>
+            </feTurbulence>
+            <feDisplacementMap id="wDisp" in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G" result="d"/>
+            <feGaussianBlur id="wBlur" in="d" stdDeviation="4"/>
+          </filter>
+          <filter id="wPuff" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+        </defs>
+        <g id="w-mid">
+          <g id="w-haze">
+            <g class="w-drift d1"><path d="M0 72 C-176 -48 -120 -176 0 -80 C120 -176 176 -48 0 72 Z" transform="scale(1.3)" fill="url(#wHeartG)" filter="url(#wSmoke)" opacity=".45"/></g>
+            <g class="w-drift d2"><path d="M0 72 C-176 -48 -120 -176 0 -80 C120 -176 176 -48 0 72 Z" transform="scale(1.05)" fill="url(#wHeartG)" filter="url(#wSmoke)" opacity=".7"/></g>
+            <g class="w-drift d3"><path d="M0 72 C-176 -48 -120 -176 0 -80 C120 -176 176 -48 0 72 Z" transform="scale(.75)" fill="url(#wHeartG)" filter="url(#wSmoke)" opacity=".9"/></g>
+          </g>
+          <g id="w-wisps" filter="url(#wPuff)" opacity="0">
+            <circle class="w-wisp" cx="-95" cy="10" r="16" style="animation-delay:0s"/>
+            <circle class="w-wisp" cx="-55" cy="-45" r="12" style="animation-delay:-1.4s"/>
+            <circle class="w-wisp" cx="0" cy="-75" r="18" style="animation-delay:-2.8s"/>
+            <circle class="w-wisp" cx="60" cy="-35" r="13" style="animation-delay:-4.2s"/>
+            <circle class="w-wisp" cx="98" cy="18" r="17" style="animation-delay:-5.6s"/>
+            <circle class="w-wisp" cx="-20" cy="45" r="11" style="animation-delay:-3.5s"/>
+            <circle class="w-wisp" cx="35" cy="62" r="15" style="animation-delay:-0.7s"/>
+          </g>
+        </g>
+        <line x1="30" y1="380" x2="770" y2="380" stroke="#DDD6CB" stroke-width="6" stroke-linecap="round"/>
+        <g id="w-youG" class="w-fig" style="color:#111111"></g>
+        <g id="w-partnerG" class="w-fig" style="color:#7A6F66"></g>
+      </svg>
+    </div>
+    <div class="w-controls">
+      <button class="w-btn" id="w-back" type="button">Back</button>
+      <button class="w-btn next" id="w-next" type="button">Start</button>
+      <button class="w-again" id="w-again" type="button" hidden>Watch again</button>
+      <span class="w-count" id="w-count"></span>
+    </div>
+  </div>
+</div>
+
 <!-- ANALYSIS PAGE (individual path) -->
 <div id="analysis-screen" role="dialog" aria-labelledby="ap-heading">
   <div class="ap-header">
@@ -2497,6 +2604,7 @@ h1, h2, h3,
   </div>
   <div class="ap-scroll" id="ap-scroll">
     <div class="ap-col">
+      <button type="button" class="ap-watch" id="ap-watch" onclick="openWitness()">Watch your argument again</button>
       <h1 id="ap-heading">Your Analysis</h1>
       <p class="ap-state" id="ap-state" role="status"></p>
       <div class="ap-body" id="ap-body"></div>
@@ -3390,6 +3498,7 @@ document.addEventListener('keydown', function(e) {
 }());
 
 function bindAll() {
+  wBind();
   on('btn-signout', signOut);
   on('btn-signout-coach', signOut);
   on('btn-save', saveScript);
@@ -3974,6 +4083,9 @@ function recordSafetyFlag(step) {
     timestamp: new Date().toISOString()
   };
   fsAdd('coachFlags', rec).catch(function(err) { console.error('Could not log safety flag:', err); });
+  user.safetyFlag = true;   // a flagged account never gets the Witness scene
+  try { localStorage.setItem('oa_user', JSON.stringify(user)); } catch (e) {}
+  fsSet('users/' + user.uid, { safetyFlag: true }).catch(function() {});
   sendSafetyFlagEmail(rec, user.email || '');
 }
 
@@ -4118,6 +4230,7 @@ function loadProfile() {
     if (p.partnerId) user.partnerId = p.partnerId;
     if (p.accountType) user.accountType = p.accountType;
     if (p.soloCurrentStep) user.soloCurrentStep = String(p.soloCurrentStep);
+    if (p.safetyFlag) user.safetyFlag = true;
     if (user.accountType === 'solo' && p.readyForReview) soloMarkSubmitted();
     localStorage.setItem('oa_user', JSON.stringify(user));
     if (user.accountType === 'solo') { soloJourneyRoute(); return; }
@@ -5696,6 +5809,7 @@ function soloJourneyRoute() {
 function showSoloJourneyBanner(step) {
   var cfg = SOLO_JOURNEY_STEPS[step];
   if (!cfg) return;
+  if (step === '2') return soloShowStep2Banner();
   txt('jb-step', cfg.label);
   txt('jb-title', cfg.title);
   txt('jb-sub', cfg.sub);
@@ -5705,7 +5819,7 @@ function showSoloJourneyBanner(step) {
 }
 
 function openJourneyStepSolo(step) {
-  if (step === '2') openSoloAnalysis();
+  if (step === '2') { if (soloCard2 === 'watch') openWitness(); else openAnalysisPage(); }
   else if (step === '3') soloAdvanceStep('4');
   else if (step === '4') openStep7();
   else if (step === '5') openStep9();
@@ -5999,13 +6113,22 @@ function callAIWithTimeout(messages, step, ms) {
 }
 
 function runSoloAnalysis() {
+  // The scene is made at the same time as the analysis. The analysis is never held up: we wait for the scene
+  // only until 90 seconds have passed since the start.
+  var t0 = Date.now();
+  var witnessP = soloWitnessGenerate();
   return soloGenerateAnalysis().then(function() {
+    var left = Math.max(0, W_WAIT_MS - (Date.now() - t0));
+    return Promise.race([witnessP, new Promise(function(r) { setTimeout(function() { r(null); }, left); })]);
+  }).then(function() {
+    if (user) user.soloCurrentStep = '2';
     soloAdvanceStep('2');
     hide('step1-waiting-banner');
-    showSoloJourneyBanner('2');
     txt('step2-status', 'Your analysis is ready.');
-    var jb = el('journey-banner');
-    if (jb && jb.scrollIntoView) jb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return soloShowStep2Banner().then(function() {
+      var jb = el('journey-banner');
+      if (jb && jb.scrollIntoView) jb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }).catch(function(err) {
     // The script and the answers are already saved, so offer a retry instead of a dead end.
     hide('step1-waiting-banner');
@@ -6015,6 +6138,248 @@ function runSoloAnalysis() {
     var b = el('step2-submit-btn');
     if (b) { b.disabled = false; b.textContent = 'Try the analysis again'; b.onclick = function() { b.disabled = true; txt('step2-status', 'Trying again…'); step2ShowSubmittedState(); runSoloAnalysis(); }; }
   });
+}
+
+// ===== WITNESS YOUR ARGUMENT (individual path) =====
+// A short visual mirror of the person's own argument, shown before the analysis. Tap only, one screen.
+// The AI only marks what each line does (see netlify/functions/witness-prompt.txt). Every position, lean, the
+// room heat and the heart come from the rules below, in the browser.
+var W_COST = { blame: 0.14, dismiss: 0.14, push: 0.16, defend: 0.10, withdraw: 0.14, exit: 0.20, none: 0, bid: 0 };
+var W_TEMP_STEP = { 0: -8, 1: 6, 2: 14, 3: 25 };
+var W_END = {
+  gone:   { text: 'Instead of moving closer together, they moved further apart.', note: 'Defending is a move away. What comes out while moving away can be a push. That push and pull is what drives people apart.' },
+  thin:   { text: 'The fight stopped before the warmth was gone.', note: 'Defending is a move away. What comes out while moving away can be a push. Some of what was between you was still there when it stopped.' },
+  intact: { text: 'In this version, the words did not pull you far apart.', note: 'Even so, notice where the space between you changed.' }
+};
+var W_WAIT_MS = 90000;   // how long the analysis card waits for the scene before it shows without it
+var wScene = null, wStates = [], wI = -1, wDissolve = 0, wTweenId = 0, wFigs = null;
+
+function wHash(str) { var h = 5381; for (var k = 0; k < str.length; k++) h = ((h << 5) + h + str.charCodeAt(k)) | 0; return 'h' + (h >>> 0).toString(36); }
+
+// The saved script as an ordered list: { i, speaker: you | partner | direction, text, tone }.
+function wScriptItems(sd) {
+  var lines = [];
+  try { lines = typeof sd.lines === 'string' ? JSON.parse(sd.lines) : (sd.lines || []); } catch (e) { lines = []; }
+  var out = [];
+  (lines || []).forEach(function(l) {
+    if (l.type === 'line' && String(l.dialogue || '').trim()) out.push({ i: out.length, speaker: String(l.char).toUpperCase() === 'B' ? 'partner' : 'you', text: String(l.dialogue).trim(), tone: cueClean(l.beat) });
+    else if (l.type === 'direction' && String(l.text || '').trim()) out.push({ i: out.length, speaker: 'direction', text: String(l.text).trim(), tone: '' });
+  });
+  return out;
+}
+function wScriptHash(sd, items) { return wHash((sd.scene || '') + '|' + JSON.stringify(items.map(function(x) { return [x.speaker, x.text]; }))); }
+function wEnergy() {
+  try { var pr = pbLoadProgress(); if (pr && pr.iv && pr.iv.tones && (pr.iv.tones.me.length || pr.iv.tones.partner.length)) return { you: pr.iv.tones.me.join(', '), partner: pr.iv.tones.partner.join(', ') }; } catch (e) {}
+  return null;
+}
+
+function wRequest(body, retried) {
+  return fetch('/.netlify/functions/witness', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token || '') }, body: JSON.stringify(body) })
+    .then(function(r) { if (r.status === 401 && !retried) return refreshTokenQuietly().then(function() { return wRequest(body, true); }); return r; });
+}
+
+// Makes and saves the scene. Never rejects: it resolves to the scene, or null when there is none.
+function soloWitnessGenerate() {
+  if (!user || !user.uid || user.safetyFlag) return Promise.resolve(null);
+  return fsGet('scripts/' + user.uid).then(function(d) {
+    var sd = fromFields((d && d.fields) || {}), items = wScriptItems(sd);
+    if (!items.length) return null;
+    var hash = wScriptHash(sd, items);
+    var body = { you: soloMyName(), partner: soloPartnerName(), lines: items };
+    var en = wEnergy(); if (en) body.energy = en;
+    return wRequest(body).then(function(r) { return r.json().catch(function() { return {}; }); }).then(function(res) {
+      if (!res || !res.beats || !res.beats.length) return null;
+      return fsGet('solo-analysis/' + user.uid).then(function(a) {
+        var cur = (a && a.fields) ? fromFields(a.fields) : {};
+        var map = (cur.witness && typeof cur.witness === 'object') ? cur.witness : {};
+        map[hash] = { beats: res.beats, createdAt: new Date().toISOString(), hash: hash };
+        return fsSetStrict('solo-analysis/' + user.uid, { witness: JSON.stringify(map), witnessSeen: false });
+      }).then(function() { return { hash: hash, beats: res.beats, items: items, seen: false }; });
+    });
+  }).catch(function(err) { console.error('Witness scene could not be made:', err); return null; });
+}
+
+// The saved scene for the script as it is now (or null).
+function wLoadScene() {
+  return Promise.all([fsGet('scripts/' + user.uid), fsGet('solo-analysis/' + user.uid)]).then(function(r) {
+    var sd = (r[0] && r[0].fields) ? fromFields(r[0].fields) : {};
+    var sa = (r[1] && r[1].fields) ? fromFields(r[1].fields) : {};
+    var items = wScriptItems(sd);
+    if (!items.length || !sa.witness || typeof sa.witness !== 'object') return null;
+    var hit = sa.witness[wScriptHash(sd, items)];
+    if (!hit || !Array.isArray(hit.beats) || !hit.beats.length) return null;
+    return { hash: hit.hash, beats: hit.beats, items: items, seen: sa.witnessSeen === true };
+  }).catch(function() { return null; });
+}
+
+// ---- the rules: beats in, positions and the heart out ----
+function wActor(beat, items) {
+  if (beat.actor === 'you' || beat.actor === 'partner') return beat.actor;
+  var t = String(items[beat.lines[0]].text).toLowerCase();
+  var re = function(n) { return n ? new RegExp('\\b' + n.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').exec(t) : null; };
+  var py = re(soloMyName()), pp = soloPartnerName() !== 'your partner' ? re(soloPartnerName()) : null;
+  if (!py && !pp) return null;
+  if (!py) return 'partner'; if (!pp) return 'you';
+  return py.index < pp.index ? 'you' : 'partner';
+}
+function wBuildStates(sc) {
+  var MIN = 70, MAX = 730, GAP = 120;
+  var s = { you: 300, partner: 500, yLean: 0, pLean: 0, yAway: false, pAway: false, level: 1, temp: 5 };
+  var out = [];
+  sc.beats.forEach(function(b) {
+    var S = b.speaker === 'direction' ? wActor(b, sc.items) : b.speaker;
+    var O = S === 'you' ? 'partner' : 'you';
+    s.yLean = 0; s.pLean = 0;
+    function lean(who, deg) { if (who === 'you') s.yLean = deg; else s.pLean = deg; }
+    function away(who, dx) { if (who === 'you') s.you = Math.max(MIN, s.you - dx); else s.partner = Math.min(MAX, s.partner + dx); }
+    function toward(who, dx) { var room = Math.max(0, (s.partner - s.you) - GAP); var d = Math.min(dx, room); if (who === 'you') s.you += d; else s.partner -= d; }
+    var m = b.move, extraTemp = 0;
+    if (S) {
+      if (m === 'blame') { lean(S, 14); lean(O, -12); away(O, 45); }
+      else if (m === 'dismiss') { lean(S, 10); away(O, 30); }
+      else if (m === 'defend') { lean(S, -10); away(S, 35); }
+      else if (m === 'push') { lean(S, 17); lean(O, -12); away(O, 20); extraTemp = 6; }
+      else if (m === 'bid') { toward(S, 35); if (S === 'you') s.yAway = false; else s.pAway = false; }
+      else if (m === 'withdraw') { if (S === 'you') s.yAway = true; else s.pAway = true; away(S, 40); }
+      else if (m === 'exit') { if (S === 'you') { s.yAway = true; s.you = MIN; } else { s.pAway = true; s.partner = MAX; } }
+    }
+    if (s.partner - s.you < GAP) { var mid = (s.you + s.partner) / 2; s.you = mid - GAP / 2; s.partner = mid + GAP / 2; }
+    // the heart: only moves found in their own words take warmth from it
+    if (s.level > 0) {
+      if (m === 'bid') s.level = Math.min(1, s.level + 0.05); else s.level = Math.max(0, s.level - (W_COST[m] || 0));
+      if (s.level < 0.001) s.level = 0;
+    }
+    s.temp = Math.max(5, Math.min(100, s.temp + (W_TEMP_STEP[b.temp] || 0) + extraTemp));
+    out.push({ you: s.you, partner: s.partner, yLean: s.yLean, pLean: s.pLean, yAway: s.yAway, pAway: s.pAway, level: s.level, temp: s.temp, speaker: b.speaker });
+  });
+  return out;
+}
+
+// ---- the picture ----
+function wFigure(g) {
+  g.innerHTML = '<g class="w-lean"><g class="w-flip"><g class="w-body">' +
+    '<circle class="w-halo" cx="0" cy="-190" r="46" fill="none" stroke="currentColor" stroke-width="7"/>' +
+    '<circle cx="0" cy="-190" r="27" fill="#EFEAE2" stroke="currentColor" stroke-width="14"/>' +
+    '<g class="w-eyes" fill="currentColor"><circle cx="6" cy="-196" r="4.5"/><circle cx="18" cy="-196" r="4.5"/></g>' +
+    '<line x1="0" y1="-163" x2="0" y2="-80" stroke="currentColor"/>' +
+    '<path class="w-limb" d="M0 -148 L-38 -106 M0 -148 L38 -106" stroke="currentColor"/>' +
+    '<path class="w-limb" d="M0 -80 L-30 0 M0 -80 L30 0" stroke="currentColor"/>' +
+    '</g></g></g>';
+  return { lean: g.querySelector('.w-lean'), flip: g.querySelector('.w-flip'), halo: g.querySelector('.w-halo'), eyes: g.querySelector('.w-eyes') };
+}
+function wTween(from, to, ms, fn) {
+  var id = ++wTweenId, t0 = null;
+  function step(t) {
+    if (id !== wTweenId) return;
+    if (t0 === null) t0 = t;
+    var k = Math.min(1, (t - t0) / ms), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    fn(from + (to - from) * e);
+    if (k < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+function wRestart(elm, on) { elm.classList.remove('on'); if (on) { void elm.getBoundingClientRect(); elm.classList.add('on'); } }
+function wRender(s, speaker) {
+  var GROUND = 380, f = wFigs;
+  el('w-youG').style.transform = 'translate(' + s.you + 'px,' + GROUND + 'px)';
+  el('w-partnerG').style.transform = 'translate(' + s.partner + 'px,' + GROUND + 'px)';
+  f.you.lean.style.transform = 'rotate(' + (s.yAway ? 0 : s.yLean) + 'deg)';
+  f.partner.lean.style.transform = 'rotate(' + (s.pAway ? 0 : -s.pLean) + 'deg)';
+  f.you.flip.style.transform = 'scale(' + (s.yAway ? -1 : 1) + ',1)';
+  f.partner.flip.style.transform = 'scale(' + (s.pAway ? 1 : -1) + ',1)';
+  wRestart(f.you.halo, speaker === 'you'); wRestart(f.partner.halo, speaker === 'partner');
+  f.you.eyes.style.opacity = s.yAway ? 0 : 1; f.partner.eyes.style.opacity = s.pAway ? 0 : 1;
+  // The heart is smoke in the air between them. It keeps its shape until the level falls below 0.3, then it tears and dissolves.
+  var L = s.level, v = L >= 0.3 ? 0 : (0.3 - L) / 0.3;
+  el('w-mid').style.transform = 'translate(' + ((s.you + s.partner) / 2) + 'px,215px)';
+  el('w-mid').style.opacity = L <= 0 ? 0 : (0.2 + 0.7 * L).toFixed(2);
+  el('w-haze').style.transform = 'scale(' + (1 - 0.18 * v).toFixed(2) + ')';
+  el('w-wisps').setAttribute('opacity', Math.min(v * 1.3, L * 4, 0.85).toFixed(2));
+  var ms = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 10 : 2000;
+  wTween(wDissolve, v, ms, function(x) { wDissolve = x; el('wDisp').setAttribute('scale', (8 + 45 * x).toFixed(1)); el('wBlur').setAttribute('stdDeviation', (3 + 9 * x).toFixed(1)); });
+  el('w-heat').style.opacity = (0.24 * s.temp / 100).toFixed(3);
+}
+
+var W_INTRO_STATE = function() { return { you: 300, partner: 500, yLean: 0, pLean: 0, yAway: false, pAway: false, level: 1, temp: 5 }; };
+
+function wNames() { return { you: soloMyName(), partner: soloPartnerName() }; }
+function wSetCard(who, whoCls, paras, dirCls, note, mine) {
+  var w = el('w-who'); w.textContent = who || ''; w.className = 'w-who ' + (whoCls || ''); w.style.display = who ? 'inline-block' : 'none';
+  var box = el('w-lines'); box.innerHTML = '';
+  paras.forEach(function(p) { var x = document.createElement('p'); x.className = 'w-said' + (dirCls ? ' dir' : ''); x.textContent = p; box.appendChild(x); });
+  var n = el('w-note'); if (note) { n.textContent = note; n.hidden = false; } else n.hidden = true;
+  var m = el('w-mine'); if (mine) { m.textContent = mine; m.hidden = false; } else m.hidden = true;
+}
+function wShow(n) {
+  wI = n;
+  var N = wScene.beats.length, nm = wNames(), nx = el('w-next'), again = el('w-again');
+  again.hidden = true;
+  if (n === -1) {
+    wRender(W_INTRO_STATE(), '');
+    wSetCard('', '', ['Two people, one argument. Watch the space between them.'], false, 'The warmth between them is what they share.', '');
+    nx.textContent = 'Start'; el('w-count').textContent = '';
+  } else if (n >= N) {
+    var last = wStates[N - 1], key = last.level <= 0 ? 'gone' : (last.level < 0.8 ? 'thin' : 'intact');
+    wRender(last, '');
+    wSetCard('', '', [W_END[key].text], false, W_END[key].note, 'This is your version of the story.');
+    nx.textContent = 'Read your analysis'; again.hidden = false; el('w-count').textContent = 'Done';
+  } else {
+    var b = wScene.beats[n], isDir = b.speaker === 'direction';
+    var who = isDir ? '' : (b.speaker === 'you' ? nm.you : nm.partner).toUpperCase();
+    var paras = b.lines.map(function(ix) { var t = wScene.items[ix].text; return isDir ? t : '“' + t + '”'; });
+    wRender(wStates[n], b.speaker);
+    wSetCard(who, isDir ? 'dir' : b.speaker, paras, isDir, '', '');
+    nx.textContent = 'Next line'; el('w-count').textContent = (n + 1) + ' of ' + N;
+  }
+  el('w-back').disabled = n <= -1;
+}
+
+function openWitness() {
+  if (!user || !user.uid) return;
+  wLoadScene().then(function(sc) {
+    if (!sc || user.safetyFlag) { openAnalysisPage(); return; }
+    wScene = sc; wStates = wBuildStates(sc);
+    if (!wFigs) { wFigs = { you: wFigure(el('w-youG')), partner: wFigure(el('w-partnerG')) }; }
+    el('witness-screen').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    wShow(-1);
+  });
+}
+function witnessClose() {
+  hide('witness-screen');
+  document.body.style.overflow = (el('analysis-screen').style.display === 'flex' || el('step3-screen').style.display === 'flex') ? 'hidden' : '';
+}
+function wFinish() {
+  fsSet('solo-analysis/' + user.uid, { witnessSeen: true }).catch(function() {});
+  hide('witness-screen');
+  openAnalysisPage();
+  if (typeof soloShowStep2Banner === 'function' && String(user.soloCurrentStep || '') === '2') soloShowStep2Banner();
+}
+function wBind() {
+  el('w-next').addEventListener('click', function() {
+    if (!wScene) return;
+    if (wI >= wScene.beats.length) { wFinish(); return; }
+    wShow(wI + 1);
+  });
+  el('w-back').addEventListener('click', function() { if (wScene && wI > -1) wShow(wI - 1); });
+  el('w-again').addEventListener('click', function() { if (wScene) wShow(-1); });
+}
+
+// The Step 2 card: "Watch it" while an unwatched scene exists, otherwise "Read My Analysis" as before.
+var soloCard2 = 'analysis';
+function soloShowStep2Banner() {
+  var cfg = SOLO_JOURNEY_STEPS['2'], b = el('journey-banner');
+  currentJourneyStep = 'solo-2';
+  b.style.display = 'none';
+  function done(mode) {
+    soloCard2 = mode;
+    txt('jb-step', cfg.label);
+    if (mode === 'watch') { txt('jb-title', 'Your analysis is ready.'); txt('jb-sub', 'First, watch your argument.'); txt('jb-btn', 'Watch it'); }
+    else { txt('jb-title', cfg.title); txt('jb-sub', cfg.sub); txt('jb-btn', cfg.btn); }
+    b.style.display = 'block';
+    return mode;
+  }
+  return wLoadScene().then(function(sc) { return done(sc && !sc.seen && !user.safetyFlag ? 'watch' : 'analysis'); }).catch(function() { return done('analysis'); });
 }
 
 // ===== THE ANALYSIS PAGE (individual path) =====
@@ -6030,6 +6395,8 @@ function openAnalysisPage() {
   el('ap-body').innerHTML = '';
   el('ap-continue').style.display = 'none';
   apState('Opening your analysis…', false);
+  el('ap-watch').style.display = 'none';
+  wLoadScene().then(function(sc) { if (sc && !user.safetyFlag) el('ap-watch').style.display = 'inline-block'; });
   fsGet('solo-analysis/' + user.uid).then(function(d) {
     var sa = (d && d.fields) ? fromFields(d.fields) : {};
     if (sa.analysis && String(sa.analysis).trim()) apRender(String(sa.analysis));
@@ -6049,6 +6416,7 @@ function apMissing(afterFailure, code) {
   apState(afterFailure ? (code === 'save_failed' ? 'Your analysis could not be saved just now, so it is not ready yet. Your script and answers are saved, so nothing is lost.' : 'The AI could not finish reading your script just now. Your script and answers are saved, so nothing is lost.') : 'Your analysis is not here yet. If your script is submitted, the AI can read it again now.', true);
 }
 function apGenerate() {
+  soloWitnessGenerate();   // in the background; the analysis does not wait for it
   el('ap-retry').style.display = 'none';
   apState('The AI is reading your script. This takes about a minute, so please stay on this page.', false);
   soloGenerateAnalysis().then(function(text) {

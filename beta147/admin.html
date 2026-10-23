@@ -76,7 +76,9 @@
       <input type="email" id="tt-email" placeholder="Test account email" autocapitalize="none" autocomplete="off">
       <button class="btn" id="tt-load" type="button">Load sample story</button>
       <button class="btn alt" id="tt-rerun" type="button">Run analysis again</button>
+      <button class="btn alt" id="tt-scene" type="button">Show scene data</button>
       <p id="tt-msg" role="status"></p>
+      <div class="scroll"><table id="tt-table"></table></div>
     </div>
     <!-- END TEST TOOLS -->
     <button class="btn alt" id="out" type="button">Sign out</button>
@@ -127,7 +129,7 @@ function showUsage(u) {
     '<p><b>Per couple:</b> ' + usd(c.avgCompleted) + ' <span class="fine">(' + c.completed + ' completed). All couples so far: ' + usd(c.avgSoFar) + ' (' + c.couplesSoFar + ').</span></p>' +
     '<p class="fine">Completed means reached Step 11. For a couple, both partners must have reached it.</p>';
   $('steps').innerHTML = '<tr><th>Step</th><th>Kind</th><th class="n">Calls</th><th class="n">Accounts</th><th class="n">Total</th><th class="n">Per call</th><th class="n">Per account</th><th class="n">Avg in</th><th class="n">Avg out</th></tr>' +
-    (u.steps.map(function(s) { return '<tr><td>' + esc(s.step) + '</td><td>' + esc(s.category) + '</td><td class="n">' + s.calls + '</td><td class="n">' + s.accounts + '</td><td class="n">' + usd(s.totalCost) + '</td><td class="n">' + usd(s.avgPerCall) + '</td><td class="n">' + usd(s.avgPerAccount) + '</td><td class="n">' + s.avgInputTokens + '</td><td class="n">' + s.avgOutputTokens + '</td></tr>'; }).join('') || '<tr><td colspan="9">No AI calls recorded yet.</td></tr>');
+    (u.steps.map(function(s) { return '<tr><td>' + esc(s.step === 'witness' ? 'Witness scene' : s.step) + '</td><td>' + esc(s.category) + '</td><td class="n">' + s.calls + '</td><td class="n">' + s.accounts + '</td><td class="n">' + usd(s.totalCost) + '</td><td class="n">' + usd(s.avgPerCall) + '</td><td class="n">' + usd(s.avgPerAccount) + '</td><td class="n">' + s.avgInputTokens + '</td><td class="n">' + s.avgOutputTokens + '</td></tr>'; }).join('') || '<tr><td colspan="9">No AI calls recorded yet.</td></tr>');
   var names = { journey: 'Journey steps', script: 'Script help', safety: 'Safety checks' };
   $('cats').innerHTML = '<tr><th>Kind</th><th class="n">Calls</th><th class="n">Accounts</th><th class="n">Total</th><th class="n">Per call</th><th class="n">Per account</th></tr>' +
     u.categories.map(function(c) { return '<tr><td>' + names[c.category] + '</td><td class="n">' + c.calls + '</td><td class="n">' + c.accounts + '</td><td class="n">' + usd(c.totalCost) + '</td><td class="n">' + usd(c.avgPerCall) + '</td><td class="n">' + usd(c.avgPerAccount) + '</td></tr>'; }).join('');
@@ -177,6 +179,21 @@ function ttRun(action) {
 }
 $('tt-load').onclick = function() { ttRun('load_sample'); };
 $('tt-rerun').onclick = function() { ttRun('rerun_analysis'); };
+$('tt-scene').onclick = function() {
+  var email = $('tt-email').value.trim();
+  if (!email) { $('tt-msg').className = 'err'; $('tt-msg').textContent = 'Type the test account email first.'; return; }
+  $('tt-msg').className = ''; $('tt-msg').textContent = 'Working…'; $('tt-table').innerHTML = '';
+  fetch('/.netlify/functions/admin-test-tools', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ action: 'view_scene', email: email }) })
+    .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'Something went wrong.'); return d; }); })
+    .then(function(d) {
+      if (!d.scenes.length) { $('tt-msg').textContent = 'No scene saved yet for ' + d.email + '. Run the analysis first.'; return; }
+      $('tt-msg').textContent = d.scenes.length + ' scene(s) saved for ' + d.email + '. The script has ' + d.lineCount + ' lines.';
+      var sc = d.scenes[d.scenes.length - 1];
+      $('tt-table').innerHTML = '<tr><th>Beat</th><th>Who</th><th>Move</th><th class="n">Temp</th><th>Line(s)</th><th>Evidence</th><th>Reason</th></tr>' +
+        sc.beats.map(function(b, i) { return '<tr><td>' + (i + 1) + '</td><td>' + esc(b.speaker + (b.actor ? ' (' + b.actor + ')' : '')) + '</td><td><b>' + esc(b.move) + '</b></td><td class="n">' + b.temp + '</td><td style="white-space:normal;min-width:220px">' + b.texts.map(esc).join(' / ') + '</td><td style="white-space:normal;min-width:160px">' + esc(b.evidence) + '</td><td style="white-space:normal;min-width:200px">' + esc(b.reason) + '</td></tr>'; }).join('');
+    })
+    .catch(function(e) { $('tt-msg').className = 'err'; $('tt-msg').textContent = e.message; });
+};
 // END TEST TOOLS
 
 $('go').onclick = signIn;

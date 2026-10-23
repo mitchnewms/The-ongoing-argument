@@ -67,12 +67,31 @@ exports.handler = async function(event) {
 
   let body; try { body = JSON.parse(event.body || '{}'); } catch { return reply(CORS, 400, { error: 'Invalid JSON', code: 'bad_request' }); }
   const action = body.action;
-  if (action !== 'load_sample' && action !== 'rerun_analysis') return reply(CORS, 400, { error: 'Unknown action', code: 'bad_request' });
+  if (['load_sample', 'rerun_analysis', 'view_scene'].indexOf(action) === -1) return reply(CORS, 400, { error: 'Unknown action', code: 'bad_request' });
 
   try {
     const t = await findTestUser(body.email);
     if (t.error) return reply(CORS, 400, { error: t.error, code: 'bad_target' });
     const now = new Date().toISOString();
+
+    if (action === 'view_scene') {
+      // Shows the saved Witness scene beats next to the script lines, with the evidence and reason for each beat.
+      const sa = await admin.getDoc('solo-analysis/' + t.uid);
+      const sc = await admin.getDoc('scripts/' + t.uid);
+      let map = {}; try { map = sa && sa.witness ? JSON.parse(sa.witness) : {}; } catch (e) { map = {}; }
+      let raw = []; try { raw = sc && sc.lines ? JSON.parse(sc.lines) : []; } catch (e) { raw = []; }
+      const items = [];
+      raw.forEach(function(l) {
+        if (l.type === 'line' && String(l.dialogue || '').trim()) items.push({ speaker: String(l.char).toUpperCase() === 'B' ? 'partner' : 'you', text: String(l.dialogue).trim(), tone: l.beat || '' });
+        else if (l.type === 'direction' && String(l.text || '').trim()) items.push({ speaker: 'direction', text: String(l.text).trim(), tone: '' });
+      });
+      const scenes = Object.keys(map).map(function(k) {
+        return { hash: k, createdAt: map[k].createdAt, beats: (map[k].beats || []).map(function(b) {
+          return { lines: b.lines, texts: b.lines.map(function(i) { return items[i] ? items[i].text : '(missing)'; }), speaker: b.speaker, move: b.move, temp: b.temp, evidence: b.evidence, reason: b.reason, actor: b.actor || '' };
+        }) };
+      });
+      return reply(CORS, 200, { ok: true, email: t.email, action, scenes, lineCount: items.length });
+    }
 
     if (action === 'load_sample') {
       await admin.setFields('users/' + t.uid, {
@@ -92,7 +111,7 @@ exports.handler = async function(event) {
       await admin.setFields('users/' + t.uid, { soloCurrentStep: '1' });
     }
     // Start the analysis and the conversation from nothing, so the next look is a fresh one.
-    await admin.setFields('solo-analysis/' + t.uid, { analysis: '', analysisReady: false });
+    await admin.setFields('solo-analysis/' + t.uid, { analysis: '', analysisReady: false, witness: '', witnessSeen: false });
     await admin.setFields('step3/' + t.uid, { messages: '[]', savedAt: now, uid: t.uid });
     return reply(CORS, 200, { ok: true, email: t.email, action });
   } catch (err) {
