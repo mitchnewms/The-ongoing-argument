@@ -524,6 +524,23 @@ body {
 .s3-wait { font-family: 'Lora', Georgia, serif; font-size: 0.85rem; color: #777; margin: 6px 4px 0; }
 .s3-reread { margin-left: auto; background: none; border: none; color: #B84F00; font-family: system-ui, sans-serif; font-size: 0.82rem; text-decoration: underline; cursor: pointer; padding: 8px 4px; min-height: 40px; display: none; }
 .s3-retry { margin-top: 10px; padding: 10px 16px; background: #E06500; color: #fff; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; min-height: 44px; }
+
+/* Front screen: two clearly different starts, same size */
+.lp-choice { display: block !important; width: 100%; max-width: 380px; margin-left: auto !important; margin-right: auto !important; padding: 16px 20px !important; text-align: center; }
+.lp-choice-main { display: block; font-size: 1.05rem; font-weight: 700; }
+.lp-choice-sub { display: block; margin-top: 4px; font-size: 0.82rem; font-weight: 500; opacity: 0.9; line-height: 1.35; }
+.lp-choice-solo { background: #FFFFFF !important; color: #B84F00 !important; border: 2px solid #E06500 !important; font-size: 1.05rem !important; font-weight: 700 !important; margin-top: 0 !important; }
+.lp-choice-solo .lp-choice-main { font-size: 1.05rem; }
+.lp-choice-solo .lp-choice-sub { color: #6A6458; }
+.lp-choice-or { text-align: center; color: #7A6E60; font-size: 0.85rem; margin: 10px 0; }
+
+/* Sign out, on every screen once signed in */
+#so-global { position: fixed; top: 10px; right: 10px; z-index: 600; display: none; min-height: 40px; padding: 8px 14px; background: #FFFFFF; color: #4A3E30; border: 1px solid #C8C0B0; border-radius: 8px; font: 600 0.82rem system-ui, -apple-system, sans-serif; cursor: pointer; touch-action: manipulation; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+#so-global:focus-visible { outline: 2px solid #E06500; outline-offset: 2px; }
+.iv-review-row { padding: 12px 0; border-bottom: 1px solid #E2DED8; display: flex; flex-direction: column; gap: 4px; }
+.iv-review-val { white-space: pre-line; font-size: 0.98rem; color: #111111; }
+.iv-review-skipped { color: #7A6E60; font-style: italic; }
+.iv-review-edit { align-self: flex-start; min-height: 44px; min-width: 96px; padding: 8px 20px; margin-top: 4px; font-size: 0.95rem; }
 </style>
 
 <style>
@@ -2191,8 +2208,9 @@ h1, h2, h3,
 
   <!-- S5: CTA -->
   <div class="lp-cta">
-    <button class="lp-btn" id="lp-btn-begin" onclick="lpRevealCommitment()">Start as a couple</button>
-    <button class="lp-btn-solo" id="lp-btn-solo" onclick="lpRevealCommitmentSolo()">Start on your own</button>
+    <button class="lp-btn lp-choice" id="lp-btn-begin" onclick="lpRevealCommitment()"><span class="lp-choice-main">Start as a couple</span><span class="lp-choice-sub">You and your partner, each on your own phone</span></button>
+    <div class="lp-choice-or" aria-hidden="true">or</div>
+    <button class="lp-btn-solo lp-choice lp-choice-solo" id="lp-btn-solo" onclick="lpRevealCommitmentSolo()"><span class="lp-choice-main">Start on your own</span><span class="lp-choice-sub">Just you. Your partner does not need to join.</span></button>
     <button type="button" class="lp-signin-link" id="lp-signin" onclick="openSignIn()">Already have an account? Sign in</button>
   </div>
 
@@ -2622,8 +2640,10 @@ h1, h2, h3,
     <div class="pc-heading">Just tell me what happened.</div>
     <p class="pc-sub">Talk or type, the way you'd tell a friend. You don't need to write a script. The AI shapes it into one for you.</p>
     <div id="pc-resume" style="display:none; margin: 0 0 18px; padding: 16px; background: #FFF3C4; border-radius: 10px; text-align: center;">
-      <div style="font-size:0.92rem; color:#4A3F10; margin-bottom:10px;">You have an unfinished story. Your answers are saved on this device.</div>
-      <button type="button" class="pbd-btn pbd-primary" style="width:100%;" onclick="pbResume()">Pick up where you left off</button>
+      <div style="font-size:0.92rem; color:#4A3F10; margin-bottom:4px;">You have an unfinished story. Your answers are saved to your account.</div>
+      <div id="pc-resume-where" style="font-size:0.88rem; color:#4A3F10; margin-bottom:12px;"></div>
+      <button type="button" class="pbd-btn pbd-primary" style="width:100%;" onclick="pbResume()">Continue where you left off</button>
+      <button type="button" class="pbd-btn" style="width:100%; margin-top:8px;" onclick="pbStartOverAsk()">Start over</button>
     </div>
     <p class="pc-breath">Take a breath. You're telling the story, not reliving it.</p>
     <div class="pc-inputs" id="pc-inputs">
@@ -2691,6 +2711,8 @@ h1, h2, h3,
     </div>
   </div>
 </div>
+
+<button type="button" id="so-global" aria-label="Sign out">Sign out</button>
 
 <!-- INTERVIEW: one screen per question -->
 <div id="iv-screen">
@@ -3845,7 +3867,8 @@ function pbDedupeLines(parsed) {
 }
 
 function signOut() {
-  user = null; token = null;
+  try { acctFlush(); } catch (e) {}
+  user = null; token = null; acctDirty = null;
   localStorage.removeItem('oa_user');
   try { localStorage.removeItem('oa_pb_progress'); } catch (e) {}
   enrollMode = null; soloEnrollMode = false; pendingCoupleId = null; pendingPartnerAId = null;
@@ -3952,6 +3975,12 @@ function afterLogin() {
 }
 
 // FIRESTORE
+// One set of records per argument (fight). The first argument keeps the original paths (the account id), so
+// nothing that already exists moves. A later argument gets its own ids (account id, underscore, fight id), so
+// it can never overwrite an earlier one. The account points to the current fight with currentFightId.
+function fightId() { return (user && user.currentFightId) || 'f1'; }
+function fdoc() { return fightId() === 'f1' ? user.uid : user.uid + '_' + fightId(); }
+
 function fsGet(path) {
   return fetch(DB + '/' + path, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.json(); });
 }
@@ -4230,6 +4259,7 @@ function loadProfile() {
     if (p.partnerId) user.partnerId = p.partnerId;
     if (p.accountType) user.accountType = p.accountType;
     if (p.soloCurrentStep) user.soloCurrentStep = String(p.soloCurrentStep);
+    if (p.currentFightId) user.currentFightId = String(p.currentFightId);
     if (p.safetyFlag) user.safetyFlag = true;
     if (user.accountType === 'solo' && p.readyForReview) soloMarkSubmitted();
     localStorage.setItem('oa_user', JSON.stringify(user));
@@ -4256,9 +4286,24 @@ function loadNotes() {
   }).catch(function() {});
 }
 
+
+// ---- Sign out: always reachable once signed in (the coach page and the Witness scene have their own way out) ----
+function soSync() {
+  var b = el('so-global');
+  if (!b) return;
+  function vis(id) { var n = el(id); return !!(n && getComputedStyle(n).display !== 'none'); }
+  var on = !!(user && token) && !vis('auth-screen') && !vis('coach-screen') && !vis('witness-screen') && !vis('landing-screen');
+  // The script screen has its own Sign Out in its header; show ours only when something is covering it.
+  var covering = ['iv-screen','story-screen','path-choice-screen','ai-edit-screen','partner-name-screen','step3-screen','analysis-screen','analysis-page','path-b-screen','script-tutorial-screen','warmup-screen','solo-closing-screen','step4-screen','step5-screen','step6-screen','step7-screen','step8-screen','step9-screen','step10-screen','step11-screen','takeaway-screen','feedback-screen','payment-confirm-screen','buyin-screen','code-entry-screen','partner-b-intro-screen','pb-commit-screen','landing-strip-screen','join-signedin-screen'].some(vis);
+  var scriptOnly = vis('script-screen') && !covering;
+  b.style.display = (on && !scriptOnly) ? 'block' : 'none';
+}
+setInterval(soSync, 500);
+(function() { var b = el('so-global'); if (b) b.addEventListener('click', function() { try { acctFlush(); } catch (e) {} signOut(); }); })();
+
 // SCRIPT
 function loadScript() {
-  fsGet('scripts/' + user.uid).then(function(d) {
+  fsGet('scripts/' + fdoc()).then(function(d) {
     if (d.error) {
       // No script doc — new user; gate behind warm-up if not yet done
       if (user && user.uid) {
@@ -4275,6 +4320,7 @@ function loadScript() {
       return;
     }
     var s = fromFields(d.fields);
+    acctHydrate(s);
     // Returning user — ensure nav stack is set so Back button appears
     if (appNavStack.indexOf('path-choice') === -1) navPush('path-choice');
     if (appNavStack.indexOf('script') === -1) navPush('script');
@@ -4358,7 +4404,7 @@ function saveScript() {
     if (e.dataset.type === 'line') lines.push({ type: 'line', char: e.dataset.char, beat: e.querySelector('.beat-input').value, dialogue: e.querySelector('.dialogue-input').value });
     else if (e.dataset.type === 'direction') lines.push({ type: 'direction', text: e.querySelector('.direction-input').value });
   });
-  fsSet('scripts/' + user.uid, { scene: el('scene-input').value, lines: JSON.stringify(lines), userId: user.uid, updatedAt: new Date().toISOString() })
+  fsSet('scripts/' + fdoc(), { scene: el('scene-input').value, lines: JSON.stringify(lines), userId: user.uid, updatedAt: new Date().toISOString() })
   .then(function() { status('Saved.'); }).catch(function() { status('Save failed.'); });
 }
 
@@ -5208,7 +5254,7 @@ function step2Init() {
     var partnerFirst = ((user.partner || user.partnerName || '').split(' ')[0]) || 'your partner';
     txt('privacy-partner-name', partnerFirst);
   }
-  fsGet('scripts/' + user.uid).then(function(d) {
+  fsGet('scripts/' + fdoc()).then(function(d) {
     if (!d || !d.fields) return;
     var s = fromFields(d.fields);
     if (s.storyThinking) el('step2-thinking').value = s.storyThinking;
@@ -5227,7 +5273,7 @@ function step2Init() {
 // A solo person who already submitted comes back (refresh, new visit): show where things stand.
 function soloResumeAfterSubmit() {
   soloMarkSubmitted();
-  fsGet('solo-analysis/' + user.uid).then(function(d) {
+  fsGet('solo-analysis/' + fdoc()).then(function(d) {
     var sa = (d && d.fields) ? fromFields(d.fields) : {};
     if (sa.analysisReady) {
       step2ShowSubmittedState();
@@ -5250,7 +5296,7 @@ function step2AutoSave() {
     var thinking = el('step2-thinking').value;
     var feeling = el('step2-feeling').value;
     if (thinking || feeling) {
-      fsSet('scripts/' + user.uid, { storyThinking: thinking, storyFeeling: feeling });
+      fsSet('scripts/' + fdoc(), { storyThinking: thinking, storyFeeling: feeling });
     }
   }, 2000);
 }
@@ -5267,7 +5313,7 @@ function submitScript() {
   var btn = el('step2-submit-btn');
   btn.disabled = true;
   txt('step2-status', 'Submitting...');
-  fsSet('scripts/' + user.uid, {
+  fsSet('scripts/' + fdoc(), {
     storyThinking: thinking,
     storyFeeling: feeling,
     submitted: true,
@@ -5328,7 +5374,7 @@ function buildIntakeBlock(name, data) {
 function runStep2Analysis(partnerData) {
   txt('step2-status', 'Both scripts received. Analysis in progress. This may take up to a minute...');
   return Promise.all([
-    fsGet('scripts/' + user.uid),
+    fsGet('scripts/' + fdoc()),
     fsGet('warmup/' + user.uid).catch(function() { return null; })
   ]).then(function(results) {
     var d = results[0];
@@ -5438,7 +5484,7 @@ function openMirrorMomentSolo() {
   el('s3-reread').style.display = 'inline-block';
   var cb = el('s3-complete-btn'); if (cb) cb.style.display = 'none';
   s3Messages = []; s3Render();
-  fsGet('step3/' + user.uid).then(function(d) {
+  fsGet('step3/' + fdoc()).then(function(d) {
     var saved = (d && d.fields) ? fromFields(d.fields) : {};
     if (saved.messages) {
       try {
@@ -5458,7 +5504,7 @@ function s3StartSolo() {
   s3Render();
   s3ShowTyping('Reading what you wrote...');
   s3Sending = true; el('s3-send').disabled = true;
-  Promise.all([fsGet('scripts/' + user.uid), fsGet('solo-analysis/' + user.uid)]).then(function(r) {
+  Promise.all([fsGet('scripts/' + fdoc()), fsGet('solo-analysis/' + fdoc())]).then(function(r) {
     var myData = (r[0] && r[0].fields) ? fromFields(r[0].fields) : {};
     var sa = (r[1] && r[1].fields) ? fromFields(r[1].fields) : {};
     var analysis = String(sa.analysis || '').trim();
@@ -5513,7 +5559,7 @@ function viewAnalysis() {
   var screen = el('step3-screen');
   screen.style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  fsGet('step3/' + user.uid).then(function(d) {
+  fsGet('step3/' + fdoc()).then(function(d) {
     if (d && d.fields) {
       var saved = fromFields(d.fields);
       if (saved.messages) {
@@ -5546,7 +5592,7 @@ function s3StartDelivery() {
   s3Render();
   s3ShowTyping();
   Promise.all([
-    fsGet('scripts/' + user.uid),
+    fsGet('scripts/' + fdoc()),
     user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
     fsGet('couples/' + user.coupleId)
   ]).then(function(results) {
@@ -5684,7 +5730,7 @@ function s3ScrollBottom() {
 
 function s3SaveConversation() {
   if (!user) return;
-  fsSet('step3/' + user.uid, {
+  fsSet('step3/' + fdoc(), {
     messages: JSON.stringify(s3Messages),
     savedAt: new Date().toISOString(),
     uid: user.uid
@@ -5788,7 +5834,7 @@ function soloJourneyRoute() {
     hide('journey-banner');
     hide('analysis-banner');
   } else if (step === '2') {
-    fsGet('solo-analysis/' + user.uid).then(function(d) {
+    fsGet('solo-analysis/' + fdoc()).then(function(d) {
       if (d && d.fields) {
         var sa = fromFields(d.fields);
         if (sa.analysisReady) { showSoloJourneyBanner('2'); return; }
@@ -5955,11 +6001,11 @@ function closeTakeawayScreen() {
 function generatePersonalizedTakeaways() {
   if (!user || !user.uid) { tlShowContent([], []); return; }
   var isSolo = user.accountType === 'solo';
-  var analysisPromise = isSolo ? fsGet('solo-analysis/' + user.uid) : (user.coupleId ? fsGet('couples/' + user.coupleId) : Promise.resolve(null));
+  var analysisPromise = isSolo ? fsGet('solo-analysis/' + fdoc()) : (user.coupleId ? fsGet('couples/' + user.coupleId) : Promise.resolve(null));
   Promise.all([
     fsQueryDocs('awarenessLog', 'userId', user.uid),
     analysisPromise,
-    fsGet('scripts/' + user.uid)
+    fsGet('scripts/' + fdoc())
   ]).then(function(results) {
     var logDocs = (results[0] && results[0].documents) ? results[0].documents : [];
     var entries = logDocs.map(function(d) { return fromFields(d.fields); })
@@ -6072,7 +6118,7 @@ function soloFightName() {
 function soloGenerateAnalysis() {
   var myName = soloMyName();
   return Promise.all([
-    fsGet('scripts/' + user.uid),
+    fsGet('scripts/' + fdoc()),
     fsGet('warmup/' + user.uid).catch(function() { return null; })
   ]).then(function(results) {
     var d = results[0];
@@ -6094,7 +6140,7 @@ function soloGenerateAnalysis() {
     return callAIWithTimeout([{ role: 'user', content: prompt }], '2', 150000);
   }).then(function(analysisText) {
     if (!analysisText || String(analysisText).trim().length < 40) throw new Error('empty analysis');
-    return fsSetStrict('solo-analysis/' + user.uid, {
+    return fsSetStrict('solo-analysis/' + fdoc(), {
       analysis: analysisText,
       analysisReady: true,
       analysisAt: new Date().toISOString()
@@ -6181,7 +6227,7 @@ function wRequest(body, retried) {
 // Makes and saves the scene. Never rejects: it resolves to the scene, or null when there is none.
 function soloWitnessGenerate() {
   if (!user || !user.uid || user.safetyFlag) return Promise.resolve(null);
-  return fsGet('scripts/' + user.uid).then(function(d) {
+  return fsGet('scripts/' + fdoc()).then(function(d) {
     var sd = fromFields((d && d.fields) || {}), items = wScriptItems(sd);
     if (!items.length) return null;
     var hash = wScriptHash(sd, items);
@@ -6189,11 +6235,11 @@ function soloWitnessGenerate() {
     var en = wEnergy(); if (en) body.energy = en;
     return wRequest(body).then(function(r) { return r.json().catch(function() { return {}; }); }).then(function(res) {
       if (!res || !res.beats || !res.beats.length) return null;
-      return fsGet('solo-analysis/' + user.uid).then(function(a) {
+      return fsGet('solo-analysis/' + fdoc()).then(function(a) {
         var cur = (a && a.fields) ? fromFields(a.fields) : {};
         var map = (cur.witness && typeof cur.witness === 'object') ? cur.witness : {};
         map[hash] = { beats: res.beats, createdAt: new Date().toISOString(), hash: hash };
-        return fsSetStrict('solo-analysis/' + user.uid, { witness: JSON.stringify(map), witnessSeen: false });
+        return fsSetStrict('solo-analysis/' + fdoc(), { witness: JSON.stringify(map), witnessSeen: false });
       }).then(function() { return { hash: hash, beats: res.beats, items: items, seen: false }; });
     });
   }).catch(function(err) { console.error('Witness scene could not be made:', err); return null; });
@@ -6201,7 +6247,7 @@ function soloWitnessGenerate() {
 
 // The saved scene for the script as it is now (or null).
 function wLoadScene() {
-  return Promise.all([fsGet('scripts/' + user.uid), fsGet('solo-analysis/' + user.uid)]).then(function(r) {
+  return Promise.all([fsGet('scripts/' + fdoc()), fsGet('solo-analysis/' + fdoc())]).then(function(r) {
     var sd = (r[0] && r[0].fields) ? fromFields(r[0].fields) : {};
     var sa = (r[1] && r[1].fields) ? fromFields(r[1].fields) : {};
     var items = wScriptItems(sd);
@@ -6350,7 +6396,7 @@ function witnessClose() {
   document.body.style.overflow = (el('analysis-screen').style.display === 'flex' || el('step3-screen').style.display === 'flex') ? 'hidden' : '';
 }
 function wFinish() {
-  fsSet('solo-analysis/' + user.uid, { witnessSeen: true }).catch(function() {});
+  fsSet('solo-analysis/' + fdoc(), { witnessSeen: true }).catch(function() {});
   hide('witness-screen');
   openAnalysisPage();
   if (typeof soloShowStep2Banner === 'function' && String(user.soloCurrentStep || '') === '2') soloShowStep2Banner();
@@ -6397,7 +6443,7 @@ function openAnalysisPage() {
   apState('Opening your analysis…', false);
   el('ap-watch').style.display = 'none';
   wLoadScene().then(function(sc) { if (sc && !user.safetyFlag) el('ap-watch').style.display = 'inline-block'; });
-  fsGet('solo-analysis/' + user.uid).then(function(d) {
+  fsGet('solo-analysis/' + fdoc()).then(function(d) {
     var sa = (d && d.fields) ? fromFields(d.fields) : {};
     if (sa.analysis && String(sa.analysis).trim()) apRender(String(sa.analysis));
     else apMissing();
@@ -6436,7 +6482,7 @@ function apContinue() {
 
 function pollSoloAnalysisReady() {
   if (!user || !user.uid || user.accountType !== 'solo') return;
-  fsGet('solo-analysis/' + user.uid).then(function(d) {
+  fsGet('solo-analysis/' + fdoc()).then(function(d) {
     if (d && d.fields) {
       var sa = fromFields(d.fields);
       if (sa.analysisReady) {
@@ -6464,7 +6510,7 @@ function openStep4() {
   document.body.style.overflow = 'hidden';
   el('s4-intro').textContent = 'Watch with curiosity. Consider who you see in your own role. Does it sound like you at your best? Does one of the characters remind you of someone from your past? Watch without judgment. Just notice.';
   if (user.uid) {
-    fsGet('scripts/' + user.uid).then(function(d) {
+    fsGet('scripts/' + fdoc()).then(function(d) {
       if (!d || !d.fields) return;
       renderScriptTranscript(fromFields(d.fields), 's4-transcript', user.name || 'Me', user.partner || 'Partner');
     }).catch(function() {});
@@ -6624,8 +6670,8 @@ function s7StartDelivery() {
   var partnerName = user.partner || 'your partner';
   var isSolo = user.accountType === 'solo';
   Promise.all([
-    fsGet('scripts/' + user.uid),
-    isSolo ? fsGet('solo-analysis/' + user.uid) : fsGet('couples/' + user.coupleId),
+    fsGet('scripts/' + fdoc()),
+    isSolo ? fsGet('solo-analysis/' + fdoc()) : fsGet('couples/' + user.coupleId),
     fsGet('step6/' + user.uid)
   ]).then(function(results) {
     var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
@@ -6753,7 +6799,7 @@ function s8StartDelivery() {
   var myName = (user.name || 'Me').split(' ')[0];
   var partnerName = user.partner || 'your partner';
   Promise.all([
-    fsGet('scripts/' + user.uid),
+    fsGet('scripts/' + fdoc()),
     fsGet('couples/' + user.coupleId),
     fsGet('step7/' + user.uid)
   ]).then(function(results) {
@@ -6925,7 +6971,7 @@ function s9StartPractice() {
   if (!user || !user.uid) { s9RenderPracticeError('Not signed in.'); return; }
 
   Promise.all([
-    fsGet('scripts/' + user.uid),
+    fsGet('scripts/' + fdoc()),
     fsGet('step7/' + user.uid)
   ]).then(function(results) {
     var scriptData = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
@@ -7359,7 +7405,7 @@ function finalizeRewrite() {
 function runRewriteAnalysis(rewriteText) {
   if (!user || !user.coupleId) return Promise.reject('no coupleId');
   return Promise.all([
-    fsGet('scripts/' + user.uid),
+    fsGet('scripts/' + fdoc()),
     user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
     fsGet('couples/' + user.coupleId)
   ]).then(function(results) {
@@ -7839,6 +7885,17 @@ function storyBack() {
   }
 }
 
+(function() {
+  var st = el('story-text');
+  if (st) st.addEventListener('input', function() {
+    if (!user) return;
+    pbStory.text = st.value;
+    ivSaveProgress('story');
+  });
+  var ib = el('iv-body');
+  if (ib) ib.addEventListener('input', function() { if (ivLive) { ivCapture(); ivSaveProgress(); } });
+})();
+
 storyDict = createDictation('story-text', {
   onStatus: storySetStatus,
   onChange: storyRenderControls,
@@ -7851,7 +7908,7 @@ function choosePathA() {
   sceneLengthOverWarningShown = false;
   el('path-choice-screen').style.display = 'none';
   navPush('script');
-  fsSet('scripts/' + user.uid, { scriptPath: 'a', pathChosen: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
+  fsSet('scripts/' + fdoc(), { scriptPath: 'a', pathChosen: 'a', userId: user.uid, updatedAt: new Date().toISOString() }).catch(function(){});
   window._tutFromDraft = false;
   pbShowPathATutorial();
 }
@@ -8128,7 +8185,7 @@ function pbAutoGrow(el) {
 
 
 // ===== AI interview as screens: story first, then one screen per question =====
-var IV_SCREENS = ['here', 'lines', 'sound', 'start', 'gets', 'story', 'feel', 'want', 'end'];
+var IV_SCREENS = ['here', 'lines', 'sound', 'start', 'gets', 'story', 'feel', 'want', 'end', 'review'];
 var IV_SOUNDS = ['flat', 'sharp', 'tired', 'cold', 'fast', 'quiet', 'loud'];
 var IV_SCAN = ['q1', 'q3', 'q4', 'q8'];
 var ivScreens = IV_SCREENS.slice();
@@ -8144,7 +8201,7 @@ function ivNew() {
     here: { where: '', topic: '', first: '', last: '' }, found: {},
     lines: { partner: '', me: '' },
     tones: { partner: [], me: [] }, toneSkip: { partner: false, me: false },
-    start: '', gets: '', story: '', feel: '', want: '', end: '', skipped: {}
+    start: '', gets: '', story: '', feel: '', want: '', end: '', extra: '', skipped: {}
   };
 }
 
@@ -8345,9 +8402,42 @@ function ivAppendLine(boxId, text) {
   t.value = cur ? cur + '\n' + text : text;
   t.focus();
 }
-function ivOptions(labels, onTap, wrapClass) {
+function ivParts(v, mode) {
+  return String(v || '').split(mode === 'line' ? /\n/ : /\s*,\s*/).map(function(x) { return x.trim(); }).filter(Boolean);
+}
+// Option chips. With a box id, a chip is lit while its words are in the box, and tapping it again takes them out.
+function ivOptions(labels, onTap, wrapClass, boxId, mode) {
   var row = ivNode('div', 'iv-opts' + (wrapClass ? ' ' + wrapClass : ''));
-  labels.forEach(function(l) { row.appendChild(ivButton(l, 'iv-opt', function() { onTap(l, this); })); });
+  var btns = [];
+  function paint() {
+    if (!boxId) return;
+    var t = el(boxId);
+    var have = ivParts(t ? t.value : '', mode).map(function(x) { return x.toLowerCase(); });
+    btns.forEach(function(b) {
+      var on = have.indexOf(b.textContent.toLowerCase()) !== -1;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  labels.forEach(function(l) {
+    var b = ivButton(l, 'iv-opt', function() {
+      if (boxId) {
+        var t = el(boxId);
+        var parts = ivParts(t.value, mode);
+        var at = parts.map(function(x) { return x.toLowerCase(); }).indexOf(l.toLowerCase());
+        if (at === -1) { if (mode === 'line') ivAppendLine(boxId, l); else ivAppend(boxId, l); }
+        else { parts.splice(at, 1); t.value = parts.join(mode === 'line' ? '\n' : ', '); }
+        ivCapture(); ivSaveProgress();
+        paint();
+      } else onTap(l, this);
+    });
+    btns.push(b); row.appendChild(b);
+  });
+  if (boxId) {
+    var bx = el(boxId);
+    if (bx) bx.addEventListener('input', paint);
+    paint();
+  }
   return row;
 }
 function ivActions(skipFn, nextLabel, nextFn) {
@@ -8369,6 +8459,7 @@ function ivHeading(key) {
     case 'story': return ivStoryQuestion();
     case 'feel': return 'What do you believe ' + N + ' is feeling during this ' + W + '?';
     case 'want': return 'What do you most want ' + N + ' to understand?';
+    case 'review': return "Here's everything I heard";
     case 'end': return iv.here.last
       ? "Your story ends with '" + pbShort(iv.here.last) + "'. Is that where it shuts down?"
       : 'How does it end?';
@@ -8397,18 +8488,49 @@ function ivShow(i) {
   ivIndex = Math.max(0, Math.min(ivScreens.length - 1, i));
   var key = ivScreens[ivIndex];
   ivClear();
-  txt('iv-progress', 'Question ' + (ivIndex + 1) + ' of ' + ivScreens.length);
+  ivLive = true;
+  txt('iv-progress', key === 'review' ? 'Last look' : 'Question ' + (ivIndex + 1) + ' of ' + (ivScreens.length - 1));
   txt('iv-heading', ivHeading(key));
   ivSaveProgress();
-  var fn = { here: ivRenderHere, lines: ivRenderLines, sound: ivRenderSound, start: ivRenderStart, gets: ivRenderGets, story: ivRenderStory, feel: ivRenderFeel, want: ivRenderWant, end: ivRenderEnd }[key];
+  var fn = { review: ivRenderReview, here: ivRenderHere, lines: ivRenderLines, sound: ivRenderSound, start: ivRenderStart, gets: ivRenderGets, story: ivRenderStory, feel: ivRenderFeel, want: ivRenderWant, end: ivRenderEnd }[key];
   fn();
   window.scrollTo(0, 0);
   var sc = el('iv-screen'); if (sc) sc.scrollTop = 0;
 }
 
-function ivNext() { if (ivIndex >= ivScreens.length - 1) ivFinish(); else ivShow(ivIndex + 1); }
+var ivLive = false;       // a question is on screen (not the busy or retry screens)
+var ivReturn = false;     // the person came here from the final review to change one answer
+function ivReviewIndex() { return ivScreens.indexOf('review'); }
+function ivNext() {
+  ivCapture();
+  if (ivReturn) { ivReturn = false; ivShow(ivReviewIndex()); return; }
+  if (ivIndex >= ivScreens.length - 1) ivFinish(); else ivShow(ivIndex + 1);
+}
 function ivSkip(key) { iv.skipped[key] = true; ivNext(); }
+
+// Reads whatever is on the screen into the saved answers, so nothing typed is lost on Back, reload or sign out.
+function ivCapture() {
+  if (!ivLive) return;
+  var key = ivScreens[ivIndex];
+  function val(id) { var t = el(id); return t ? t.value.trim() : null; }
+  var v;
+  if (key === 'here') {
+    Array.from(document.querySelectorAll('#iv-body input.iv-input')).forEach(function(i) { iv.here[i.getAttribute('data-key')] = i.value.trim(); });
+  } else if (key === 'lines') {
+    if ((v = val('iv-lines-partner')) !== null) iv.lines.partner = v;
+    if ((v = val('iv-lines-me')) !== null) iv.lines.me = v;
+  } else if (key === 'gets' || key === 'story' || key === 'feel' || key === 'want') {
+    if ((v = val('iv-' + key)) !== null) iv[key] = v;
+  } else if (key === 'end') {
+    var bx = el('iv-end');
+    if (bx && bx.style.display !== 'none' && (v = val('iv-end')) !== null && v) iv.end = v;
+  } else if (key === 'review') {
+    if ((v = val('iv-extra')) !== null) iv.extra = v;
+  }
+}
 function ivBack() {
+  if (ivLive) { ivCapture(); ivSaveProgress(); }
+  if (ivReturn) { ivReturn = false; ivShow(ivReviewIndex()); return; }
   if (ivIndex > 0) ivShow(ivIndex - 1);
   else if (appNavStack[appNavStack.length - 1] === 'path-b-intake') navBack();
   else { hide('iv-screen'); showFlex('story-screen'); }
@@ -8478,7 +8600,7 @@ function ivRenderLines() {
     box.value = iv.lines[key] || '';
     body.appendChild(box);
     var mine = pbSpoken.filter(function(l) { return l.who === who; });
-    if (mine.length) body.appendChild(ivOptions(mine.map(function(l) { return l.text; }), function(t) { ivAppendLine(boxId, t); }));
+    if (mine.length) body.appendChild(ivOptions(mine.map(function(l) { return l.text; }), null, '', boxId, 'line'));
   }
   group('partner', 'iv-lines-partner', 'What does ' + N + ' say every time you have this ' + W + '?', 'partner');
   group('me', 'iv-lines-me', 'What do you say?', 'me');
@@ -8538,7 +8660,9 @@ function ivRenderSound() {
 
 // ---- Screen 4: how it starts ----
 function ivRenderStart() {
-  el('iv-body').appendChild(ivOptions(['Already upset', 'It builds', 'Not sure'], function(label) { iv.start = label; ivNext(); }, 'iv-opts-big'));
+  var row = ivOptions(['Already upset', 'It builds', 'Not sure'], function(label) { iv.start = label; ivNext(); }, 'iv-opts-big');
+  Array.from(row.children).forEach(function(b) { if (b.textContent === iv.start) { b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); } });
+  el('iv-body').appendChild(row);
 }
 
 // ---- text screens: what gets to you, the story, what she feels, what I want understood ----
@@ -8547,7 +8671,7 @@ function ivTextScreen(key, boxId, options, nextLabel) {
   var box = ivBox(boxId, 3);
   box.value = iv[key] || '';
   body.appendChild(box);
-  if (options && options.length) body.appendChild(ivOptions(options, function(t) { ivAppend(boxId, t); }));
+  if (options && options.length) body.appendChild(ivOptions(options, null, '', boxId));
   ivActions(function() { ivSkip(key); }, nextLabel || 'Next', function() {
     var v = el(boxId).value.trim();
     if (!v) { ivErr('Type an answer, tap an option, or choose Skip.'); return; }
@@ -8568,27 +8692,78 @@ function ivRenderWant() { ivTextScreen('want', 'iv-want', []); }
 function ivRenderEnd() {
   var body = el('iv-body');
   var shut = ['leaves the room', 'goes silent', 'checks phone'];
-  var choose = function(v) { iv.end = v; ivNext(); };
+  var choose = function(v) { iv.end = v; box.value = ''; ivNext(); };
   var opts = (iv.here.last ? ["Yes, that's it", 'Not quite'] : []).concat(shut);
   var box = ivBox('iv-end', 2);
-  box.style.display = iv.here.last ? 'none' : 'block';
-  body.appendChild(ivOptions(opts, function(l) {
+  var custom = iv.end && iv.end !== iv.here.last && shut.indexOf(iv.end) === -1;
+  box.style.display = (iv.here.last && !custom) ? 'none' : 'block';
+  if (custom) box.value = iv.end;
+  var row = ivOptions(opts, function(l) {
     if (l === "Yes, that's it") choose(iv.here.last);
     else if (l === 'Not quite') { box.style.display = 'block'; box.focus(); }
     else choose(l);
-  }, 'iv-opts-big'));
+  }, 'iv-opts-big');
+  Array.from(row.children).forEach(function(b) {
+    var t = b.textContent;
+    var on = (t === "Yes, that's it" && iv.end && iv.end === iv.here.last) || (t === 'Not quite' && custom) || (iv.end && t === iv.end);
+    if (on) { b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); }
+  });
+  body.appendChild(row);
   body.appendChild(box);
-  ivActions(function() { ivSkip('end'); }, 'Build my draft', function() {
+  ivActions(function() { ivSkip('end'); }, 'Next', function() {
     var v = box.value.trim();
-    if (!v) { ivErr('Type how it ends, tap an option, or choose Skip.'); return; }
-    iv.end = v;
-    pbSafetyCheck('end', 'How the argument ends', v);
+    if (!v && iv.end && box.style.display === 'none') { ivNext(); return; }
+    if (!v && !iv.end) { ivErr('Type how it ends, tap an option, or choose Skip.'); return; }
+    if (v) { iv.end = v; pbSafetyCheck('end', 'How the argument ends', v); }
     ivNext();
+  });
+}
+
+// ---- Last screen: everything they told me, each answer with an Edit button, and room for anything new ----
+function ivSummary(key) {
+  var N = pbName();
+  function skipped() { return 'Skipped'; }
+  switch (key) {
+    case 'here': return [iv.here.where && 'Where: ' + iv.here.where, iv.here.topic && 'About: ' + iv.here.topic, iv.here.first && 'First line: "' + iv.here.first + '"', iv.here.last && 'Last: ' + iv.here.last].filter(Boolean).join('\n') || skipped();
+    case 'lines': return [iv.lines.partner && N + ': ' + iv.lines.partner, iv.lines.me && 'You: ' + iv.lines.me].filter(Boolean).join('\n') || skipped();
+    case 'sound': return [iv.tones.partner.length && N + ': ' + iv.tones.partner.join(', '), iv.tones.me.length && 'You: ' + iv.tones.me.join(', ')].filter(Boolean).join('\n') || skipped();
+    case 'start': return iv.start || skipped();
+    default: return iv[key] || skipped();
+  }
+}
+function ivEditFrom(key) {
+  ivCapture();
+  ivSaveProgress();
+  ivReturn = true;
+  ivShow(ivScreens.indexOf(key));
+}
+function ivRenderReview() {
+  var body = el('iv-body');
+  txt('iv-sub', 'Change anything that is not right. Nothing is sent until you tap Build my draft.');
+  ivScreens.forEach(function(key) {
+    if (key === 'review') return;
+    var row = ivNode('div', 'iv-review-row');
+    row.appendChild(ivNode('div', 'iv-fact-label', ivHeading(key)));
+    var v = ivSummary(key);
+    var t = ivNode('div', 'iv-review-val' + (v === 'Skipped' ? ' iv-review-skipped' : ''), v);
+    row.appendChild(t);
+    row.appendChild(ivButton('Edit', 'iv-skip iv-review-edit', function() { ivEditFrom(key); }));
+    body.appendChild(row);
+  });
+  body.appendChild(ivNode('div', 'iv-label', 'Is there anything else you remembered, or want to add?'));
+  var box = ivBox('iv-extra', 3);
+  box.value = iv.extra || '';
+  body.appendChild(box);
+  ivActions(null, 'Build my draft', function() {
+    ivCapture();
+    if (iv.extra) pbSafetyCheck('extra', 'Something they added at the end', iv.extra);
+    ivFinish();
   });
 }
 
 // ---- reading the story, retries ----
 function ivBusy(heading, sub) {
+  ivLive = false;
   ivClear();
   txt('iv-progress', '');
   txt('iv-heading', heading);
@@ -8596,6 +8771,7 @@ function ivBusy(heading, sub) {
 }
 
 function ivShowRetry(message, onRetry, secondaryLabel, onSecondary, details) {
+  ivLive = false;
   ivClear();
   txt('iv-progress', '');
   txt('iv-heading', 'Something got in the way');
@@ -8650,6 +8826,7 @@ function ivToLegacy() {
   var rep = [];
   if (iv.lines.partner) rep.push(nameB + ' says: ' + iv.lines.partner.replace(/\n/g, ' / '));
   if (iv.lines.me) rep.push(nameA + ' says: ' + iv.lines.me.replace(/\n/g, ' / '));
+  if (iv.extra) rep.push('Also remembered: ' + iv.extra.replace(/\n/g, ' / '));
   pbAnswers = {
     q1: iv.here.topic, q3: iv.here.where, q4: iv.here.first, q5: spoken, q6: iv.start,
     q2: '', q7: '', q7b: rep.join('\n'), q8: iv.end, q9: iv.gets, q9b: iv.story,
@@ -8658,6 +8835,8 @@ function ivToLegacy() {
 }
 
 function ivFinish() {
+  ivCapture();
+  ivLive = false;
   ivToLegacy();
   ivSaveProgress('done');
   pbGenerateDraft();
@@ -8795,14 +8974,68 @@ function pbSaveRetelling() {
 }
 
 // ---- saved progress ----
+// Every answer is kept in two places: this device (instant) and the person's account (so clearing Safari,
+// switching to a phone, or signing out and in never loses it). The account copy lives in the argument's own
+// script record as "intake", and only that person can read it.
+var acctTimer = null, acctDirty = null, acctBusy = false, acctFails = 0;
+
+function ivProgressObj(state) {
+  return {
+    uid: user.uid, story: pbStory.text, voice: !!pbStory.voice, typed: !!pbStory.typed,
+    iv: iv, spoken: pbSpoken, pronoun: pbPronoun, index: ivIndex,
+    state: state || 'screens', at: Date.now()
+  };
+}
+
 function ivSaveProgress(state) {
   try {
     if (!user) return;
-    localStorage.setItem(PB_PROGRESS_KEY, JSON.stringify({
-      uid: user.uid, story: pbStory.text, voice: !!pbStory.voice, typed: !!pbStory.typed,
-      iv: iv, spoken: pbSpoken, pronoun: pbPronoun, index: ivIndex,
-      state: state || 'screens', at: Date.now()
-    }));
+    var o = ivProgressObj(state);
+    try { localStorage.setItem(PB_PROGRESS_KEY, JSON.stringify(o)); } catch (e) {}
+    acctQueue(o);
+  } catch (e) {}
+}
+
+function acctQueue(o) {
+  acctDirty = o;
+  clearTimeout(acctTimer);
+  acctTimer = setTimeout(acctFlush, 1200);
+}
+
+function acctFlush() {
+  clearTimeout(acctTimer);
+  if (!acctDirty || !user || !token || acctBusy) return;
+  var o = acctDirty;
+  acctBusy = true;
+  var key = (o.state === 'screens' && ivScreens[o.index]) ? ivScreens[o.index] : (o.state === 'story' ? 'telling' : o.state);
+  fsSetStrict('scripts/' + fdoc(), {
+    intake: o, intakeAt: o.at, lastQuestion: key, lastQuestionNumber: (o.state === 'screens' ? o.index + 1 : 0),
+    fightId: fightId(), userId: user.uid
+  }).then(function() {
+    acctBusy = false; acctFails = 0;
+    if (acctDirty === o) acctDirty = null; else acctQueue(acctDirty);
+  }).catch(function() {
+    // Quiet retry. The device copy still has everything, so the person is never interrupted.
+    acctBusy = false; acctFails++;
+    clearTimeout(acctTimer);
+    acctTimer = setTimeout(acctFlush, Math.min(60000, 3000 * acctFails));
+  });
+}
+
+// Put the unsaved answers into the account before the page goes away.
+document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden') acctFlush(); });
+window.addEventListener('pagehide', function() { acctFlush(); });
+
+// The account copy wins when it is newer than this device's copy (a different device, or cleared storage).
+function acctHydrate(s) {
+  try {
+    var a = s && s.intake;
+    if (typeof a === 'string') { try { a = JSON.parse(a); } catch (e) { a = null; } }
+    if (!a || !a.story || a.uid !== user.uid) return;
+    var local = null;
+    try { local = JSON.parse(localStorage.getItem(PB_PROGRESS_KEY) || 'null'); } catch (e) {}
+    if (local && local.uid === user.uid && (local.at || 0) >= (a.at || 0)) return;
+    localStorage.setItem(PB_PROGRESS_KEY, JSON.stringify(a));
   } catch (e) {}
 }
 
@@ -8811,17 +9044,38 @@ function pbResume() {
   if (!pr) { pcSyncResume(); return; }
   pbStory = { text: pr.story, voice: !!pr.voice, typed: !!pr.typed };
   el('path-choice-screen').style.display = 'none';
-  navPush('path-b-intake');
   iv = pr.iv || ivNew();
+  if (!iv.extra) iv.extra = '';
   pbSpoken = pr.spoken || [];
   pbPronoun = pr.pronoun || '';
   pbSending = false;
+  ivReturn = false;
   pbRun++;
-  showFlex('iv-screen');
   document.body.style.overflow = 'hidden';
+  if (pr.state === 'story') {
+    navPush('story');
+    var ta = el('story-text'); if (ta) ta.value = pr.story;
+    showFlex('story-screen');
+    storyRenderControls();
+    return;
+  }
+  navPush('path-b-intake');
+  showFlex('iv-screen');
   if (pr.state === 'extract' || !pr.iv) ivBeginFromStory();
   else if (pr.state === 'done') { ivToLegacy(); pbGenerateDraft(true); }
   else ivShow(pr.index || 0);
+}
+
+// "Start over" clears only the unfinished interview. A script or analysis that was already made is never touched.
+function pbStartOverAsk() {
+  pbConfirm('Start over?', 'Your unfinished answers will be cleared. Anything you already submitted stays as it is.', 'Start over', 'Keep my answers', pbStartOver);
+}
+function pbStartOver() {
+  pbClearProgress();
+  pbStory = { text: '', voice: false, typed: false };
+  var ta = el('story-text'); if (ta) ta.value = '';
+  iv = ivNew(); pbSpoken = []; pbPronoun = ''; pbAnswers = {};
+  pcSyncResume();
 }
 
 function choosePathB() {
@@ -8968,7 +9222,7 @@ function pbLoadDraftIntoTool(parsed, inserted) {
   pbSaveRetelling();
   pbClearProgress();
 
-  fsSet('scripts/' + user.uid, {
+  fsSet('scripts/' + fdoc(), {
     scene: sceneVal,
     lines: JSON.stringify(lines),
     userId: user.uid,
@@ -9222,7 +9476,7 @@ function pbStartBlank() {
   el('lines-container').innerHTML = '';
   el('scene-input').value = '';
   el('pb-handoff-banner').style.display = 'none';
-  fsSet('scripts/' + user.uid, {
+  fsSet('scripts/' + fdoc(), {
     draftBackup: JSON.stringify(snap), draftBackupAt: new Date().toISOString(),
     scene: '', lines: '[]', handoffSeen: true, userId: user.uid, updatedAt: new Date().toISOString()
   }).catch(function() {});
@@ -9286,19 +9540,29 @@ function pbLoadProgress() {
   try {
     var pr = JSON.parse(localStorage.getItem(PB_PROGRESS_KEY) || 'null');
     if (!pr || !user || pr.uid !== user.uid || !pr.story) return null;
-    if (Date.now() - (pr.at || 0) > 7 * 24 * 3600 * 1000) return null;
+    if (Date.now() - (pr.at || 0) > 60 * 24 * 3600 * 1000) return null;
     return pr;
   } catch (e) { return null; }
 }
 
 function pbClearProgress() {
   try { localStorage.removeItem(PB_PROGRESS_KEY); } catch (e) {}
+  clearTimeout(acctTimer);
+  acctDirty = null;
+  if (user && token) fsSet('scripts/' + fdoc(), { intake: '', intakeAt: 0, lastQuestion: '', lastQuestionNumber: 0 }).catch(function() {});
 }
 
 function pcSyncResume() {
   var box = el('pc-resume');
   if (!box) return;
-  box.style.display = (pbLoadProgress() && !scriptHasContent()) ? 'block' : 'none';
+  var pr = pbLoadProgress();
+  var show = !!(pr && !scriptHasContent());
+  box.style.display = show ? 'block' : 'none';
+  if (show) {
+    var where = pr.state === 'story' ? 'You had started telling your story.' :
+      (pr.state === 'screens' && pr.iv ? 'You got as far as question ' + ((pr.index || 0) + 1) + ' of ' + (IV_SCREENS.length - 1) + '.' : 'Your story is saved.');
+    txt('pc-resume-where', where);
+  }
 }
 
 
@@ -9313,7 +9577,7 @@ var pbCommitmentShown = false;
 
 function pbDismissHandoff() {
   el('pb-handoff-banner').style.display = 'none';
-  fsSet('scripts/' + user.uid, { handoffSeen: true }).catch(function(){});
+  fsSet('scripts/' + fdoc(), { handoffSeen: true }).catch(function(){});
   if (!pbCommitmentShown) {
     pbCommitmentShown = true;
     openCommitmentPrompt(null);
@@ -9324,6 +9588,14 @@ window.addEventListener('popstate', function(e) {
   var state = (e.state) || {};
   var screen = state.screen;
   var lpState = state.lp;
+
+  // Inside the questions, the browser or swipe Back goes to the previous question, not out of the interview
+  var ivNow = el('iv-screen');
+  if (ivNow && getComputedStyle(ivNow).display !== 'none' && ivLive && ivIndex > 0) {
+    ivBack();
+    history.pushState({ screen: 'app' }, '');
+    return;
+  }
 
   // Terminal app state — push sentinel back to prevent browser exit
   if (screen === 'app') {

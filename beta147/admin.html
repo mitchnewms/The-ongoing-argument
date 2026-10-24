@@ -70,6 +70,13 @@
       <div class="scroll"><table id="wl"></table></div>
     </div>
     <!-- TEST TOOLS. REMOVE BEFORE LAUNCH (this block, the script below it, and netlify/functions/admin-test-tools.js) -->
+    <div class="card">
+      <h2>Where people stop</h2>
+      <p class="fine">The last question each person reached in the story questions. It is saved as they go.</p>
+      <div id="drop-tally" class="fine"></div>
+      <div class="scroll"><table id="drop"></table></div>
+    </div>
+
     <div class="card" id="testtools">
       <h2>Test tools</h2>
       <p class="fine">For testing only. They work on a test account you created yourself (an address like mitch+test7@wearecapglobal.com) and never on a real person or a couple.</p>
@@ -112,6 +119,7 @@ function load() {
   return Promise.all([api('usage'), api('waitlist')]).then(function(r) {
     $('login').style.display = 'none'; $('app').style.display = 'block';
     showUsage(r[0]); showList(r[1]);
+    api('dropoff').then(showDrop).catch(function() { $('drop').innerHTML = '<tr><td>Could not load this list.</td></tr>'; });
   }).catch(function(e) {
     token = ''; $('go').disabled = false;
     $('lerr').textContent = e.message;
@@ -137,6 +145,17 @@ function showUsage(u) {
   $('limits').textContent = 'Daily limits now: ' + u.limits.callsPerAccountPerDay + ' AI calls per account and $' + u.limits.dollarsPerDay + ' overall.';
   $('top').innerHTML = '<tr><th>Name</th><th>Email</th><th class="n">Calls</th><th class="n">Cost</th></tr>' +
     (u.topAccounts.map(function(t) { return '<tr><td>' + esc(t.name) + '</td><td>' + esc(t.email) + '</td><td class="n">' + t.calls + '</td><td class="n">' + usd(t.cost) + '</td></tr>'; }).join('') || '<tr><td colspan="4">Nothing yet.</td></tr>');
+}
+
+var DROP_NAMES = { here: 'Here\u2019s what I heard', lines: 'Lines you hear', sound: 'How each of you sounds', start: 'How it starts', gets: 'What gets to you', story: 'The story you tell yourself', feel: 'What they feel', want: 'What you want understood', end: 'How it ends', review: 'Final review', telling: 'Telling the story', extract: 'Reading the story', done: 'Building the draft' };
+function showDrop(d) {
+  var keys = Object.keys(d.tally);
+  $('drop-tally').textContent = keys.length ? 'Unfinished, by question: ' + keys.map(function(k) { return (DROP_NAMES[k] || k) + ' ' + d.tally[k]; }).join(', ') : 'Nobody has an unfinished set of questions right now.';
+  $('drop').innerHTML = '<tr><th>Email</th><th>Last question</th><th>Last saved</th><th>Status</th></tr>' +
+    (d.rows.map(function(r) {
+      var q = DROP_NAMES[r.question] || r.question;
+      return '<tr><td>' + esc(r.email || r.name) + '</td><td>' + (r.number ? r.number + '. ' : '') + esc(q) + '</td><td>' + esc(String(r.at).slice(0, 16).replace('T', ' ')) + '</td><td>' + (r.finished ? 'finished' : 'unfinished') + '</td></tr>';
+    }).join('') || '<tr><td colspan="4">Nothing yet.</td></tr>');
 }
 
 function showList(w) {

@@ -103,6 +103,20 @@ exports.handler = async function(event) {
         return { email: x.email, createdAt: x.createdAt, noticeSent: x.noticeSent === true ? true : (x.noticeSent === false ? false : null), noticeError: x.noticeError || '' };
       }) });
     }
+    if (view === 'dropoff') {
+      // Where people stop in the questions: the last question each person reached, saved as they went.
+      const parts = await Promise.all([admin.listAll('scripts', 20000), admin.listAll('users', 20000)]);
+      const byUid = {};
+      parts[1].forEach(function(u) { if (u && u.id) byUid[u.id] = u; });
+      const rows = parts[0].filter(function(d) { return d && d.lastQuestion; }).map(function(d) {
+        const u = byUid[d.userId] || {};
+        return { email: u.email || '', name: u.name || '', fightId: d.fightId || 'f1', question: d.lastQuestion, number: Number(d.lastQuestionNumber) || 0, at: d.intakeAt ? new Date(Number(d.intakeAt)).toISOString() : '', finished: d.submitted === true || !!d.lines };
+      });
+      rows.sort(function(a, b) { return String(b.at).localeCompare(String(a.at)); });
+      const tally = {};
+      rows.filter(function(r) { return !r.finished; }).forEach(function(r) { tally[r.question] = (tally[r.question] || 0) + 1; });
+      return reply(CORS, 200, { rows: rows.slice(0, 200), tally: tally });
+    }
     if (view === 'testnotice') {
       // Sends a clearly marked test through the same path a real signup uses, so any problem shows up here.
       const n = await sendNotice('TEST NOTICE (not a real signup)', new Date().toISOString());

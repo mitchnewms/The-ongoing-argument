@@ -5,6 +5,10 @@ service cloud.firestore {
     // ---------- helpers ----------
     function signedIn() { return request.auth != null; }
     function me() { return request.auth.uid; }
+    // One record per argument: the first keeps the account id; a later one is the account id, an underscore
+    // and the argument id. Only that person (or the coach, for reading) may use them.
+    function ownsDoc(id) { return id == me() || id.matches(me() + '_.*'); }
+    function coachOrOwnsDoc(id) { return isCoach() || ownsDoc(id); }
     function isCoach() {
       return signedIn() && request.auth.token.email == 'mitch@mitchnewman.com';
     }
@@ -82,8 +86,8 @@ service cloud.firestore {
     // Scripts. TEMPORARY in Phase 1: a linked partner can read it, because the
     // Step 2/3/10 analyses run in the browser. Removed in the final rules.
     match /scripts/{uid} {
-      allow read: if signedIn() && (me() == uid || isCoach() || sameCouple(uid));
-      allow write: if signedIn() && me() == uid;
+      allow read: if signedIn() && (ownsDoc(uid) || isCoach() || sameCouple(uid));
+      allow write: if signedIn() && ownsDoc(uid);
     }
 
     // Step 11: the other partner may see only that someone has reached it.
@@ -96,10 +100,10 @@ service cloud.firestore {
     match /{col}/{uid} {
       allow read: if signedIn()
         && col in ['warmup', 'step3', 'step4', 'step5', 'step6', 'step7', 'step8', 'practice', 'solo-analysis']
-        && (me() == uid || isCoach());
+        && coachOrOwnsDoc(uid);
       allow write: if signedIn()
         && col in ['warmup', 'step3', 'step4', 'step5', 'step6', 'step7', 'step8', 'practice', 'solo-analysis']
-        && me() == uid;
+        && ownsDoc(uid);
     }
 
     // ---------- coach notes: coach writes, the person reads their own ----------
