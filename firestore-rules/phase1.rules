@@ -77,10 +77,10 @@ service cloud.firestore {
     }
 
     // ---------- private to one person ----------
-    // New: retelling, input method and (later) intake answers live here.
+    // The saved interview answers (and the retelling, once it is switched on) live here. Never readable by a partner.
     match /private/{uid} {
-      allow read: if signedIn() && (me() == uid || isCoach());
-      allow write: if signedIn() && me() == uid;
+      allow read: if signedIn() && coachOrOwnsDoc(uid);
+      allow write: if signedIn() && ownsDoc(uid);
     }
 
     // Scripts. TEMPORARY in Phase 1: a linked partner can read it, because the

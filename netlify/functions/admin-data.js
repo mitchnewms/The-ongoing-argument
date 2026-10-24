@@ -105,12 +105,13 @@ exports.handler = async function(event) {
     }
     if (view === 'dropoff') {
       // Where people stop in the questions: the last question each person reached, saved as they went.
-      const parts = await Promise.all([admin.listAll('scripts', 20000), admin.listAll('users', 20000)]);
+      const parts = await Promise.all([admin.listAll('private', 20000), admin.listAll('users', 20000), admin.listAll('scripts', 20000)]);
       const byUid = {};
       parts[1].forEach(function(u) { if (u && u.id) byUid[u.id] = u; });
+      const submittedBy = {}; parts[2].forEach(function(x) { if (x.userId && (x.submitted === true || x.lines)) submittedBy[x.userId] = true; });
       const rows = parts[0].filter(function(d) { return d && d.lastQuestion; }).map(function(d) {
         const u = byUid[d.userId] || {};
-        return { email: u.email || '', name: u.name || '', fightId: d.fightId || 'f1', question: d.lastQuestion, number: Number(d.lastQuestionNumber) || 0, at: d.intakeAt ? new Date(Number(d.intakeAt)).toISOString() : '', finished: d.submitted === true || !!d.lines };
+        return { email: u.email || '', name: u.name || '', fightId: d.fightId || 'f1', question: d.lastQuestion, number: Number(d.lastQuestionNumber) || 0, at: d.intakeAt ? new Date(Number(d.intakeAt)).toISOString() : '', finished: !!submittedBy[d.userId] };
       });
       rows.sort(function(a, b) { return String(b.at).localeCompare(String(a.at)); });
       const tally = {};

@@ -4305,6 +4305,7 @@ setInterval(soSync, 500);
 function loadScript() {
   fsGet('scripts/' + fdoc()).then(function(d) {
     if (d.error) {
+      acctPull(null);
       // No script doc — new user; gate behind warm-up if not yet done
       if (user && user.uid) {
         fsGet('warmup/' + user.uid).then(function(w) {
@@ -4320,7 +4321,7 @@ function loadScript() {
       return;
     }
     var s = fromFields(d.fields);
-    acctHydrate(s);
+    acctPull(s);
     // Returning user — ensure nav stack is set so Back button appears
     if (appNavStack.indexOf('path-choice') === -1) navPush('path-choice');
     if (appNavStack.indexOf('script') === -1) navPush('script');
@@ -9008,7 +9009,7 @@ function acctFlush() {
   var o = acctDirty;
   acctBusy = true;
   var key = (o.state === 'screens' && ivScreens[o.index]) ? ivScreens[o.index] : (o.state === 'story' ? 'telling' : o.state);
-  fsSetStrict('scripts/' + fdoc(), {
+  fsSetStrict('private/' + fdoc(), {
     intake: o, intakeAt: o.at, lastQuestion: key, lastQuestionNumber: (o.state === 'screens' ? o.index + 1 : 0),
     fightId: fightId(), userId: user.uid
   }).then(function() {
@@ -9025,6 +9026,22 @@ function acctFlush() {
 // Put the unsaved answers into the account before the page goes away.
 document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden') acctFlush(); });
 window.addEventListener('pagehide', function() { acctFlush(); });
+
+// Reads the person's saved interview from their private record (and, once, from the older place it was first
+// saved) and puts it on this device, so Continue works from the account alone.
+function acctPull(scriptDoc) {
+  if (!user || !token) return;
+  var uid = user.uid;
+  fsGet('private/' + fdoc()).then(function(d) {
+    var p = d && d.fields ? fromFields(d.fields) : null;
+    if (p && p.intake) acctHydrate(p);
+    else if (scriptDoc && scriptDoc.intake) {
+      acctHydrate(scriptDoc);
+      fsSet('scripts/' + fdoc(), { intake: '', intakeAt: 0, lastQuestion: '', lastQuestionNumber: 0 }).catch(function() {});
+      if (user && user.uid === uid) { try { var o = JSON.parse(localStorage.getItem(PB_PROGRESS_KEY) || 'null'); if (o) acctQueue(o); } catch (e) {} }
+    }
+  }).catch(function() {}).then(function() { pcSyncResume(); });
+}
 
 // The account copy wins when it is newer than this device's copy (a different device, or cleared storage).
 function acctHydrate(s) {
@@ -9549,7 +9566,11 @@ function pbClearProgress() {
   try { localStorage.removeItem(PB_PROGRESS_KEY); } catch (e) {}
   clearTimeout(acctTimer);
   acctDirty = null;
-  if (user && token) fsSet('scripts/' + fdoc(), { intake: '', intakeAt: 0, lastQuestion: '', lastQuestionNumber: 0 }).catch(function() {});
+  if (user && token) {
+    var blank = { intake: '', intakeAt: 0, lastQuestion: '', lastQuestionNumber: 0 };
+    fsSet('private/' + fdoc(), blank).catch(function() {});
+    fsSet('scripts/' + fdoc(), blank).catch(function() {});   // clears the copy the first Part 2 build wrote there
+  }
 }
 
 function pcSyncResume() {
