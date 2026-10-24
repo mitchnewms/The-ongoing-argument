@@ -541,6 +541,18 @@ body {
 .iv-review-val { white-space: pre-line; font-size: 0.98rem; color: #111111; }
 .iv-review-skipped { color: #7A6E60; font-style: italic; }
 .iv-review-edit { align-self: flex-start; min-height: 44px; min-width: 96px; padding: 8px 20px; margin-top: 4px; font-size: 0.95rem; }
+
+/* Save Progress is the quiet button; Submit stays the one orange action */
+.action-btn.action-btn-quiet { background: #FFFFFF !important; color: #4A3E30 !important; border: 1.5px solid #C8C0B0 !important; box-shadow: none !important; }
+.action-btn:disabled { opacity: 0.7; cursor: default; }
+/* A submitted script is locked while the AI reads it */
+body.script-locked #lines-container { pointer-events: none; }
+body.script-locked #lines-container .delete-btn, body.script-locked #lines-container .voice-btn, body.script-locked .add-bar,
+body.script-locked #pb-draft-actions, body.script-locked #btn-save, body.script-locked #pb-handoff-banner, body.script-locked #ai-edit-result { display: none !important; }
+body.script-locked #scene-input { pointer-events: none; }
+@keyframes jbPulse { 0% { box-shadow: 0 0 0 0 rgba(224,101,0,0.55); } 100% { box-shadow: 0 0 0 18px rgba(224,101,0,0); } }
+#journey-banner.jb-pulse { animation: jbPulse 1.4s ease-out 2; }
+@media (prefers-reduced-motion: reduce) { #journey-banner.jb-pulse { animation: none; } }
 </style>
 
 <style>
@@ -1385,8 +1397,8 @@ body, body * {
 .story-continue:active { background: #C45800; }
 @media (prefers-reduced-motion: reduce) { .story-mic.story-mic-live svg { animation: none; } }
 #ai-edit-text { min-height: 130px; }
-.ai-changed { background: #FFF3C4 !important; box-shadow: -4px 0 0 #E06500; border-radius: 2px; }
-#scene-input.ai-changed-field { background: #FFF3C4 !important; }
+.ai-changed { background: #FFF9E6 !important; box-shadow: -3px 0 0 #EBB27A; border-radius: 2px; }
+#scene-input.ai-changed-field { background: #FFF9E6 !important; }
 #pb-draft-actions { display: none; margin: 18px 0 6px; padding: 18px 16px; background: #FFFFFF; border: 1px solid #E2DED8; border-radius: 10px; }
 .pbd-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .pbd-btn { flex: 1 1 140px; min-height: 48px; border-radius: 10px; border: 1.5px solid #E2DED8; background: #FFFFFF; color: #111111; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -2374,17 +2386,19 @@ h1, h2, h3,
     <div class="tbc"><span>To Be Continued<span class="dot">...</span></span></div>
   </div>
   <div class="action-bar">
-    <button class="action-btn" id="btn-save">Save Progress</button>
+    <button class="action-btn action-btn-quiet" id="btn-save">Save Progress</button>
     <button class="action-btn" id="btn-submit" style="background:var(--accent);">Submit for Review</button>
   </div>
   <div id="status-msg"></div>
   <div id="solo-next-note" role="status" style="display:none;margin:14px 16px 0;padding:14px 16px;background:#FFF4E5;border:1px solid #E8C48F;border-radius:4px;font-size:0.92rem;line-height:1.5;color:#3B2F1A;"></div>
 
+  <button type="button" id="solo-retry" class="action-btn" style="display:none;margin:12px 16px 0;flex:none;">Have the AI read my script</button>
+
   <!-- STEP 2: STORY QUESTIONS + SUBMIT -->
   <div id="step2-card">
     <div class="step2-inner">
-      <div class="step2-hd">Your Private Story</div>
-      <p class="step2-intro">Answer honestly before submitting. Your partner will not see these answers until the full analysis is shared with both of you in Step 3.</p>
+      <div class="step2-hd" id="step2-hd">Your Private Story</div>
+      <p class="step2-intro" id="step2-intro">Answer honestly before submitting. Your partner will not see these answers until the full analysis is shared with both of you in Step 3.</p>
       <div class="step2-q-block">
         <div class="step2-q-label">The story I tell myself about what my partner is thinking in this argument is...</div>
         <textarea id="step2-thinking" class="step2-textarea" placeholder="Write your honest answer here..."></textarea>
@@ -2660,7 +2674,7 @@ h1, h2, h3,
     <p class="pc-mic-note" id="pc-mic-tip" style="display:none">Tip: you can also tap the microphone on your keyboard to talk.</p>
     <button type="button" class="pc-quiet-link" onclick="choosePathA()">Prefer to write it yourself?</button>
     <p class="pc-scene-note">Zero in on the flashpoint, the 1 to 2 minutes where it starts and escalates. Include the parts where, even in the heat of it, you could hear both of you running the same lines you always run. And when finally, one or both of you disengages.</p>
-    <div class="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
+    <div class="pc-privacy" id="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
   </div>
 </div>
 
@@ -2734,15 +2748,15 @@ h1, h2, h3,
     <button class="ls-back" onclick="aiEditClose()">← Back to my script</button>
     <div class="pc-eyebrow">Edit with AI</div>
     <div class="pc-heading">What would you like changed?</div>
-    <p class="story-prompt">Describe the change, by talking or typing. The AI changes only what you ask for, and every line it touches is highlighted.</p>
-    <textarea id="ai-edit-text" placeholder="For example: in the third line, change &quot;never&quot; to &quot;always&quot;." aria-label="Describe the change" autocomplete="off"></textarea>
+    <p class="story-prompt">Describe the changes, by talking or typing. You can ask for several at once. The AI changes only what you ask for, and every line it touches is highlighted.</p>
+    <textarea id="ai-edit-text" placeholder="For example: in the third line, change &quot;never&quot; to &quot;always&quot;." aria-label="Describe the changes" autocomplete="off"></textarea>
     <p class="story-status" id="ai-edit-status" role="status" aria-live="polite"></p>
     <div class="story-controls">
       <button type="button" class="story-mic" id="ai-edit-mic" onclick="aiEditDict.toggle()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
         <span id="ai-edit-mic-label">Talk</span>
       </button>
-      <button type="button" class="story-continue" id="ai-edit-apply" onclick="aiEditApply()">Make this change</button>
+      <button type="button" class="story-continue" id="ai-edit-apply" onclick="aiEditApply()">Make these changes</button>
     </div>
     <p class="pc-mic-note" id="ai-edit-mic-note">Only the words are saved. No audio is recorded.</p>
   </div>
@@ -3875,7 +3889,7 @@ function signOut() {
   pendingFightName = null; pendingJoinCoupleId = null; pendingJoinCode = null; pendingCodeToUse = null; pcLastJoinUrl = null;
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-linked-status');
-  hide('step2-card'); hide('analysis-banner'); hide('journey-banner');
+  hide('step2-card'); hide('analysis-banner'); hide('journey-banner'); soloUnlock(); soloRun = { started: false, analysisDone: false, sent: false }; hide('solo-retry');
   hide('step1-waiting-banner'); hide('video-waiting-banner'); hide('pb-handoff-banner');
   hide('buyin-screen');
   hide('payment-confirm-screen'); hide('partner-b-intro-screen'); hide('code-entry-screen');
@@ -3885,7 +3899,7 @@ function signOut() {
   showFlex('auth-screen');
   el('lines-container').innerHTML = '';
   el('step2-thinking').value = ''; el('step2-feeling').value = '';
-  var sb = el('step2-submit-btn'); if (sb) { sb.disabled = false; sb.textContent = 'Submit My Script'; }
+  var sb = el('step2-submit-btn'); if (sb) { sb.disabled = false; sb.textContent = 'Submit My Script'; sb.onclick = submitScript; }
   txt('step2-status', '');
   s3Messages = []; el('s3-thread').innerHTML = '';
   s7Messages = []; if (el('s7-thread')) el('s7-thread').innerHTML = '';
@@ -4146,7 +4160,7 @@ function sendSafetyFlagEmail(rec, email) {
 var SAFETY_SCREEN_LABELS = {
   here: "Here's what I heard", lines: 'The lines you hear every time', gets: 'What gets to them',
   story: 'The story they tell themselves', feel: 'What they believe their partner feels',
-  want: 'What they most want understood', end: 'How it ends'
+  want: 'What they most want understood', end: 'How it ends', extra: 'Something they added at the end'
 };
 function safetyStepLabel(step) {
   step = String(step || '');
@@ -4258,6 +4272,8 @@ function loadProfile() {
     if (p.partnerNameConfirmed) user.partnerConfirmed = true;
     if (p.partnerId) user.partnerId = p.partnerId;
     if (p.accountType) user.accountType = p.accountType;
+    var sbn = el('btn-submit'); if (sbn && !sbn.disabled) sbn.textContent = user.accountType === 'solo' ? 'Submit my script' : 'Submit for Review';
+    var pcp = el('pc-privacy'); if (pcp) pcp.style.display = user.accountType === 'solo' ? 'none' : '';
     if (p.soloCurrentStep) user.soloCurrentStep = String(p.soloCurrentStep);
     if (p.currentFightId) user.currentFightId = String(p.currentFightId);
     if (p.safetyFlag) user.safetyFlag = true;
@@ -4345,6 +4361,7 @@ function loadScript() {
       checkPathChoice();
     }
     pbSyncDraftActions();
+    if (user && user.accountType === 'solo' && s.submitted) setTimeout(soloLock, 80);
   }).catch(function() {});
 }
 
@@ -4409,8 +4426,47 @@ function saveScript() {
   .then(function() { status('Saved.'); }).catch(function() { status('Save failed.'); });
 }
 
+// ---- Individual path: one Submit button. It saves and locks the script, starts the AI reading it, and only then
+// asks the two story questions. The analysis is shown once the answers are in, so they are not shaped by it.
+var soloRun = { started: false, analysisDone: false, sent: false };
+
+function soloLock() {
+  document.body.classList.add('script-locked');
+  Array.prototype.forEach.call(document.querySelectorAll('#lines-container textarea, #lines-container input, #scene-input'), function(n) { n.readOnly = true; });
+}
+function soloUnlock() { document.body.classList.remove('script-locked'); }
+
+function soloSubmit() {
+  if (!user || user.email === COACH) return;
+  var est = estimateSceneLength();
+  if (est.totalSeconds > 120) { showSceneLengthBlockPopup(est); return; }
+  if (!scriptHasContent()) { status('Add a few lines first.'); return; }
+  var btn = el('btn-submit');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  var lines = [];
+  document.querySelectorAll('#lines-container > div').forEach(function(e) {
+    if (e.dataset.type === 'line') lines.push({ type: 'line', char: e.dataset.char, beat: e.querySelector('.beat-input').value, dialogue: e.querySelector('.dialogue-input').value });
+    else if (e.dataset.type === 'direction') lines.push({ type: 'direction', text: e.querySelector('.direction-input').value });
+  });
+  var now = new Date().toISOString();
+  fsSetStrict('scripts/' + fdoc(), { scene: el('scene-input').value, lines: JSON.stringify(lines), userId: user.uid, updatedAt: now, submitted: true, submittedAt: now })
+  .then(function() {
+    fsSet('users/' + user.uid, { readyForReview: 'true', submittedAt: now }).catch(function() {});
+    status('');
+    soloLock();
+    soloMarkSubmitted();
+    soloRun = { started: true, analysisDone: false, sent: false };
+    soloShowQuestions(false);
+    runSoloAnalysis();
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Submit my script';
+    status('Your script could not be submitted just now. It is still on the page. Please try again.');
+  });
+}
+
 function submitForReview() {
   if (!user || user.email === COACH) return;
+  if (user.accountType === 'solo') { soloSubmit(); return; }
   var btn = el('btn-submit');
   var solo = user.accountType === 'solo';
   btn.disabled = true; btn.textContent = 'Submitting…';
@@ -4419,7 +4475,6 @@ function submitForReview() {
   .then(function() {
     btn.textContent = '✓ Submitted for Review';
     btn.style.background = '#5a8a5a';
-    if (solo) { soloAfterSubmit(); return; }
     status('Script submitted. Mitch will be notified.');
   }).catch(function() {
     btn.disabled = false; btn.textContent = 'Submit for Review';
@@ -4430,23 +4485,75 @@ function submitForReview() {
 // Individual (solo) path: the script is in, so show what comes next instead of leaving the person guessing.
 function soloMarkSubmitted() {
   var btn = el('btn-submit');
-  if (btn) { btn.disabled = true; btn.textContent = '✓ Submitted for Review'; btn.style.background = '#5a8a5a'; }
+  if (btn) { btn.disabled = true; btn.textContent = '✓ Script submitted'; btn.style.background = '#5a8a5a'; }
 }
 function soloShowNote(msg) {
   var n = el('solo-next-note');
   if (!n) return;
   n.textContent = msg; n.style.display = msg ? 'block' : 'none';
 }
-function soloAfterSubmit() {
-  status('');
-  var step = String(user.soloCurrentStep || '1');
-  if (step !== '1') { soloJourneyRoute(); return; }
-  soloShowNote('Your script is in. Next, two quick questions about the story you tell yourself. Then the AI reads your script and shows you what is underneath.');
-  step2Init();
+// Shows the two story questions (after Submit). alreadyReady is true when the analysis is already waiting.
+function soloShowQuestions(alreadyReady) {
   var card = el('step2-card');
-  if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!card) return;
+  txt('step2-hd', 'Your Private Story');
+  txt('step2-intro', 'Two quick questions while the AI reads your script. Answer honestly. They are private, and your analysis appears as soon as you have answered.');
+  var b = el('step2-submit-btn');
+  if (b) { b.disabled = false; b.textContent = 'Send my answers'; b.onclick = soloSendAnswers; }
+  txt('step2-status', '');
+  card.style.display = 'block';
+  soloShowNote(alreadyReady ? 'Your analysis is ready. Send your answers to see it.' : 'Your script is in and locked. The AI is reading it now, which takes about a minute.');
+  if (card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   setTimeout(function() { var t = el('step2-thinking'); if (t && !t.value) t.focus({ preventScroll: true }); }, 500);
 }
+
+function soloSendAnswers() {
+  var thinking = (el('step2-thinking').value || '').trim();
+  var feeling = (el('step2-feeling').value || '').trim();
+  if (!thinking || !feeling) { txt('step2-status', 'Please answer both questions.'); return; }
+  var b = el('step2-submit-btn');
+  b.disabled = true; txt('step2-status', 'Saving…');
+  fsSetStrict('scripts/' + fdoc(), { storyThinking: thinking, storyFeeling: feeling, storySent: true }).then(function() {
+    soloRun.sent = true;
+    txt('step2-status', '');
+    hide('step2-card');
+    if (soloRun.analysisDone) soloMaybeReveal();
+    else {
+      var wb = document.querySelector('#step1-waiting-banner .wb-body');
+      if (wb) wb.textContent = 'Thank you. The AI is still reading your script. This takes about a minute, so please stay on this page. Your analysis will appear here when it is ready.';
+      el('step1-waiting-banner').style.display = 'block';
+      soloShowNote('Your answers are saved.');
+      if (el('step1-waiting-banner').scrollIntoView) el('step1-waiting-banner').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }).catch(function() { b.disabled = false; txt('step2-status', 'Your answers could not be saved just now. Please try again.'); });
+}
+
+// The analysis is shown only when it is ready and the answers are in.
+function soloMaybeReveal() {
+  if (!soloRun.analysisDone) return;
+  if (!soloRun.sent) { soloShowNote('Your analysis is ready. Send your answers to see it.'); return; }
+  if (user) user.soloCurrentStep = '2';
+  soloAdvanceStep('2');
+  hide('step1-waiting-banner'); hide('step2-card');
+  soloShowNote('');
+  txt('step2-status', '');
+  soloShowStep2Banner().then(function() {
+    var jb = el('journey-banner');
+    if (jb) {
+      if (jb.scrollIntoView) jb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      jb.classList.remove('jb-pulse'); void jb.offsetWidth; jb.classList.add('jb-pulse');
+    }
+  });
+}
+
+// If the iPad slept or the person left during the wait, look again when they are back.
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState !== 'visible' || !user || user.accountType !== 'solo' || !soloRun.started || soloRun.analysisDone) return;
+  fsGet('solo-analysis/' + fdoc()).then(function(d) {
+    var sa = (d && d.fields) ? fromFields(d.fields) : {};
+    if (sa.analysisReady) { soloRun.analysisDone = true; soloMaybeReveal(); }
+  }).catch(function() {});
+});
 
 // LINES
 function addLine(char, beat, dialogue, silent) {
@@ -4458,7 +4565,7 @@ function addLine(char, beat, dialogue, silent) {
   var micIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>';
   div.innerHTML = '<button class="delete-btn">✕</button>' +
     '<span class="char-name' + (isB ? ' char-b' : '') + '">' + label.toUpperCase() + '</span>' +
-    '<input class="beat-input" placeholder="(sighs, quietly, laughing…)" value="' + esc(cueFormat(beat)) + '" />' +
+    '<input class="beat-input" placeholder="' + (silent ? '' : '(sighs, quietly, laughing…)') + '" value="' + esc(cueFormat(beat)) + '" />' +
     '<textarea class="dialogue-input" rows="1" placeholder="What they say…">' + esc(dialogue || '') + '</textarea>' +
     '<button class="voice-btn" title="Speak this line">' + micIcon + '</button>';
 
@@ -5250,8 +5357,9 @@ var step2SaveTimer = null;
 
 function step2Init() {
   if (!user) return;
-  el('step2-card').style.display = 'block';
-  if (user.accountType !== 'solo') {
+  var soloUser = user.accountType === 'solo';
+  el('step2-card').style.display = soloUser ? 'none' : 'block';
+  if (!soloUser) {
     var partnerFirst = ((user.partner || user.partnerName || '').split(' ')[0]) || 'your partner';
     txt('privacy-partner-name', partnerFirst);
   }
@@ -5261,7 +5369,7 @@ function step2Init() {
     if (s.storyThinking) el('step2-thinking').value = s.storyThinking;
     if (s.storyFeeling) el('step2-feeling').value = s.storyFeeling;
     if (s.submitted) {
-      if (user.accountType === 'solo') { soloResumeAfterSubmit(); return; }
+      if (user.accountType === 'solo') { soloResumeAfterSubmit(s); return; }
       step2ShowSubmittedState();
       checkAnalysisReady();
     } else {
@@ -5271,23 +5379,26 @@ function step2Init() {
   }).catch(function() {});
 }
 
-// A solo person who already submitted comes back (refresh, new visit): show where things stand.
-function soloResumeAfterSubmit() {
+// A solo person who already submitted comes back (refresh, new visit, a phone that slept): show where things stand.
+function soloResumeAfterSubmit(sd) {
+  soloLock();
   soloMarkSubmitted();
+  var sent = !!(sd && (sd.storySent === true || (sd.storyThinking && sd.storyFeeling)));
   fsGet('solo-analysis/' + fdoc()).then(function(d) {
     var sa = (d && d.fields) ? fromFields(d.fields) : {};
+    soloRun = { started: true, analysisDone: !!sa.analysisReady, sent: sent };
     if (sa.analysisReady) {
-      step2ShowSubmittedState();
-      hide('step1-waiting-banner');
-      soloAdvanceStep('2');
+      if (sent) { soloMaybeReveal(); return; }
+      soloShowQuestions(true);
       return;
     }
     // Saved, but the AI never finished reading it. Offer to start it, instead of waiting for nothing.
-    var b = el('step2-submit-btn');
+    if (!sent) soloShowQuestions(false);
     hide('step1-waiting-banner');
-    txt('step2-status', 'Your script and answers are saved. The AI has not read your script yet.');
-    if (b) { b.disabled = false; b.textContent = 'Have the AI read my script'; b.onclick = function() { b.disabled = true; txt('step2-status', ''); step2ShowSubmittedState(); el('step1-waiting-banner').scrollIntoView({ behavior: 'smooth', block: 'center' }); runSoloAnalysis(); }; }
-  }).catch(function() { step2ShowSubmittedState(); });
+    soloShowNote('Your script is saved. The AI has not finished reading it.');
+    var rb = el('solo-retry');
+    if (rb) { rb.style.display = 'inline-block'; rb.disabled = false; rb.onclick = function() { rb.style.display = 'none'; soloRun.started = true; soloRun.analysisDone = false; el('step1-waiting-banner').style.display = 'block'; el('step1-waiting-banner').scrollIntoView({ behavior: 'smooth', block: 'center' }); runSoloAnalysis(); }; }
+  }).catch(function() { el('step1-waiting-banner').style.display = 'block'; });
 }
 
 function step2AutoSave() {
@@ -5817,7 +5928,7 @@ function advanceStep(newStep) {
 // ── SOLO PATHWAY ─────────────────────────────────────────────
 
 var SOLO_JOURNEY_STEPS = {
-  '2': { label: 'Step 2', title: 'Your Analysis', sub: 'What the AI found in your script.', btn: 'Read My Analysis' },
+  '2': { label: 'Step 2', title: 'Your Analysis', sub: 'What the AI noticed in your script.', btn: 'Read My Analysis' },
   '3': { label: 'Step 3', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead. Your tool is ready.', btn: 'Continue to Your Tool' },
   '4': { label: 'Step 4', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
   '5': { label: 'Step 5', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
@@ -6130,8 +6241,6 @@ function soloGenerateAnalysis() {
     var prompt = myName + ' is working through The Ongoing Argument solo pathway. Their partner is not participating. This is their script of a recurring conflict, written privately from their own perspective.\n\n' +
       warmupBlock +
       '--- SCRIPT FROM ' + myName.toUpperCase() + ' ---\n\n' + scriptText + '\n\n' +
-      myName + '\'s story about what their partner is thinking:\n' + (myData.storyThinking || '(no answer provided)') + '\n\n' +
-      myName + '\'s story about what their partner is feeling:\n' + (myData.storyFeeling || '(no answer provided)') + '\n\n' +
       'Analyze this script from the inside of ' + myName + '\'s experience. Do NOT compare two scripts — only one was written. Surface:\n' +
       '- The pattern ' + myName + ' is expressing in their lines (their language, their dynamic, what their choices reveal about how they show up in this conflict)\n' +
       '- What they appear to be reaching for — what do they want but cannot quite say?\n' +
@@ -6164,26 +6273,21 @@ function runSoloAnalysis() {
   // only until 90 seconds have passed since the start.
   var t0 = Date.now();
   var witnessP = soloWitnessGenerate();
+  soloRun.started = true;
   return soloGenerateAnalysis().then(function() {
     var left = Math.max(0, W_WAIT_MS - (Date.now() - t0));
     return Promise.race([witnessP, new Promise(function(r) { setTimeout(function() { r(null); }, left); })]);
   }).then(function() {
-    if (user) user.soloCurrentStep = '2';
-    soloAdvanceStep('2');
-    hide('step1-waiting-banner');
-    txt('step2-status', 'Your analysis is ready.');
-    return soloShowStep2Banner().then(function() {
-      var jb = el('journey-banner');
-      if (jb && jb.scrollIntoView) jb.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    soloRun.analysisDone = true;
+    soloMaybeReveal();
   }).catch(function(err) {
-    // The script and the answers are already saved, so offer a retry instead of a dead end.
+    // The script is already saved, so offer a retry instead of a dead end.
     hide('step1-waiting-banner');
-    txt('step2-status', (err && err.code === 'save_failed')
-      ? 'Your analysis could not be saved just now, so it is not ready yet. Your script and answers are saved. Please try again.'
-      : 'The AI could not finish reading your script just now. Your script and answers are saved.');
-    var b = el('step2-submit-btn');
-    if (b) { b.disabled = false; b.textContent = 'Try the analysis again'; b.onclick = function() { b.disabled = true; txt('step2-status', 'Trying again…'); step2ShowSubmittedState(); runSoloAnalysis(); }; }
+    soloShowNote((err && err.code === 'save_failed')
+      ? 'Your analysis could not be saved just now, so it is not ready yet. Your script is saved. Please try again.'
+      : 'The AI could not finish reading your script just now. Your script is saved.');
+    var rb = el('solo-retry');
+    if (rb) { rb.style.display = 'inline-block'; rb.disabled = false; rb.onclick = function() { rb.style.display = 'none'; soloShowNote('Trying again…'); runSoloAnalysis(); }; }
   });
 }
 
@@ -8186,7 +8290,8 @@ function pbAutoGrow(el) {
 
 
 // ===== AI interview as screens: story first, then one screen per question =====
-var IV_SCREENS = ['here', 'lines', 'sound', 'start', 'gets', 'story', 'feel', 'want', 'end', 'review'];
+var IV_SCREENS = ['here', 'lines', 'sound', 'start', 'gets', 'story', 'want', 'end', 'review'];
+var IV_LEGACY_SCREENS = ['here', 'lines', 'sound', 'start', 'gets', 'story', 'feel', 'want', 'end'];   // the order before the feelings question was removed
 var IV_SOUNDS = ['flat', 'sharp', 'tired', 'cold', 'fast', 'quiet', 'loud'];
 var IV_SCAN = ['q1', 'q3', 'q4', 'q8'];
 var ivScreens = IV_SCREENS.slice();
@@ -8458,7 +8563,6 @@ function ivHeading(key) {
     case 'start': return 'When it starts, are you already upset, or does it build?';
     case 'gets': return 'What does ' + N + ' do that gets to you more than the words?';
     case 'story': return ivStoryQuestion();
-    case 'feel': return 'What do you believe ' + N + ' is feeling during this ' + W + '?';
     case 'want': return 'What do you most want ' + N + ' to understand?';
     case 'review': return "Here's everything I heard";
     case 'end': return iv.here.last
@@ -8493,7 +8597,7 @@ function ivShow(i) {
   txt('iv-progress', key === 'review' ? 'Last look' : 'Question ' + (ivIndex + 1) + ' of ' + (ivScreens.length - 1));
   txt('iv-heading', ivHeading(key));
   ivSaveProgress();
-  var fn = { review: ivRenderReview, here: ivRenderHere, lines: ivRenderLines, sound: ivRenderSound, start: ivRenderStart, gets: ivRenderGets, story: ivRenderStory, feel: ivRenderFeel, want: ivRenderWant, end: ivRenderEnd }[key];
+  var fn = { review: ivRenderReview, here: ivRenderHere, lines: ivRenderLines, sound: ivRenderSound, start: ivRenderStart, gets: ivRenderGets, story: ivRenderStory, want: ivRenderWant, end: ivRenderEnd }[key];
   fn();
   window.scrollTo(0, 0);
   var sc = el('iv-screen'); if (sc) sc.scrollTop = 0;
@@ -8520,7 +8624,7 @@ function ivCapture() {
   } else if (key === 'lines') {
     if ((v = val('iv-lines-partner')) !== null) iv.lines.partner = v;
     if ((v = val('iv-lines-me')) !== null) iv.lines.me = v;
-  } else if (key === 'gets' || key === 'story' || key === 'feel' || key === 'want') {
+  } else if (key === 'gets' || key === 'story' || key === 'want') {
     if ((v = val('iv-' + key)) !== null) iv[key] = v;
   } else if (key === 'end') {
     var bx = el('iv-end');
@@ -8686,7 +8790,6 @@ function ivRenderStory() {
   var N = pbName();
   ivTextScreen('story', 'iv-story', [N + " thinks I'm wrong", "I'm being judged", N + ' has already given up', "I'm too much", N + " doesn't care", N + " doesn't respect me", 'This is my fault', "I'm alone in this"]);
 }
-function ivRenderFeel() { ivTextScreen('feel', 'iv-feel', ['overwhelmed', 'scared about money', 'resentful', 'alone with it', 'dismissed', 'done']); }
 function ivRenderWant() { ivTextScreen('want', 'iv-want', []); }
 
 // ---- Screen 9: how it ends (always last) ----
@@ -8831,7 +8934,7 @@ function ivToLegacy() {
   pbAnswers = {
     q1: iv.here.topic, q3: iv.here.where, q4: iv.here.first, q5: spoken, q6: iv.start,
     q2: '', q7: '', q7b: rep.join('\n'), q8: iv.end, q9: iv.gets, q9b: iv.story,
-    qRead: iv.feel, qWant: iv.want, q10: ''
+    qRead: '', qWant: iv.want, q10: ''
   };
 }
 
@@ -8849,16 +8952,26 @@ function pbBuildPrompt() {
   var fight = (user && user.fight) ? user.fight : 'the argument';
   var A = function(k) { return pbAnswers[k] || ''; };
   var told = (pbStory && pbStory.text) ? pbStory.text : '';
+  var reportedAny = false;
   var spoken = pbSpoken.length
-    ? pbSpoken.map(function(l, i) { return (i + 1) + '. ' + (l.who === 'me' ? nameA : nameB).toUpperCase() + ': ' + l.text; }).join('\n')
+    ? pbSpoken.map(function(l, i) {
+        var rep = !pbVoiced(l);
+        if (rep) reportedAny = true;
+        return (i + 1) + '. ' + (l.who === 'me' ? nameA : nameB).toUpperCase() + (rep ? ' [REPORTED]' : '') + ': ' + l.text;
+      }).join('\n')
+    : '';
+  var reportedNote = reportedAny
+    ? 'Lines marked [REPORTED] are only reported in the story, in the voice of the person telling it, not spoken in that person\'s own words. In a report, "I" and "me" mean ' + nameA + ' (the person telling the story) and "she", "he" or "her" mean ' + nameB + '. Write each one as the named speaker saying it in their own first person to the other person. Example: "' + nameB + ' says I hide things and then she is the bad guy" becomes ' + nameB.toUpperCase() + ' saying "You hide things and then I\'m the bad guy."\n\n'
     : '';
   var startNote = A('q6') === 'Already upset' ? nameA + ' says it is tense from the very first line.' : (A('q6') === 'It builds' ? nameA + ' says the feeling builds from calm.' : '');
   var tonesB = iv.tones.partner.join(', '), tonesA = iv.tones.me.join(', ');
 
   return 'Write a first-draft script of an argument between two partners, built only from this person\'s own account. The argument is called "' + fight + '". ' + nameA + ' is Character A, the person telling the story; ' + nameB + ' is Character B. Refer to ' + nameB + ' by name' + (pbPronoun ? ' (' + pbPronoun + ')' : '') + '.\n\n' +
     'YOU FORMAT. YOU DO NOT FIX. Keep each person\'s words as close to what was actually said as possible. You may remove filler ("um," "like," repeated starts) and split long speech into separate lines, but never change meaning, tone, or intensity. Never add lines or reactions the person did not describe. Never soften, polish, or rebalance what was said. If something harsh was said, the script keeps it harsh. Seeing the real fight on the page is where the work begins, and a softened script removes that.\n\n' +
+    'FAITHFUL, NOT FLATTERING. Do not make either person more reasonable, more emotionally aware or more articulate than they actually were. If someone was sarcastic, defensive, dismissive, controlling or unreasonable, that stays in the script. Keep each person\'s remembered words exactly as given instead of turning them into polished language. Do not invent a feeling, a look, a gesture or a line the person did not describe; when you are unsure, stay neutral. Do not give the script a title.\n\n' +
+    'THE OPENING. The script begins where their account begins. Put the first beats of their story on the page in the order they told them, with the specific details they named (what the thing was, an amount, a place), before any later line. The topic and what set it off must be clear in the first few lines. Never open in the middle of the fight.\n\n' +
     (told ? 'THEIR OWN ACCOUNT, in their words:\n"""\n' + told + '\n"""\n\n' : '') +
-    (spoken ? 'EVERY SPOKEN LINE FOUND IN THEIR ACCOUNT, in the order it was said. Every one of these must appear in the script, in this order, as its own line or as part of a line. The first one may belong to ' + nameB + ': start the script with whoever speaks first.\n' + spoken + '\n\n' : '') +
+    (spoken ? 'EVERY SPOKEN LINE FOUND IN THEIR ACCOUNT, in the order it was said. Every one of these must appear in the script, in this order, as its own line or as part of a line. The first one may belong to ' + nameB + ': start the script with whoever speaks first.\n' + spoken + '\n\n' + reportedNote : '') +
     'WHAT THEY CONFIRMED OR ADDED (use these for the scene, directions and beats; never as a source of new dialogue):\n\n' +
     'What it is about: ' + A('q1') + '\n\n' +
     'Physical setting: ' + A('q3') + '\n\n' +
@@ -8871,7 +8984,6 @@ function pbBuildPrompt() {
     ((tonesA || tonesB) ? 'HOW EACH OF THEM SOUNDS, in the person\'s words. This is a range of feelings to draw on for the tone notes, not one label to repeat on every line:\n' +
       nameB + ': ' + tonesB + '\n' + nameA + ': ' + tonesA + '\n\n' : '') +
     'FOR YOUR GUIDANCE AND SAFETY ONLY. Never put any of this into the script, never comment on it, and never correct it:\n' +
-    'What they think ' + nameB + ' is feeling, in their words: ' + A('qRead') + '\n' +
     'What they most want ' + nameB + ' to understand, in their words: ' + A('qWant') + '\n\n' +
     'Format the script exactly as follows. Start with:\nSCENE: [brief location from the setting described above]\n\n' +
     'For each line of dialogue:\n[CHARACTER NAME IN CAPS]\n([emotional beat or tone in parentheses])\n[What they say]\n\n' +
@@ -8884,44 +8996,69 @@ function pbBuildPrompt() {
 }
 
 // Makes sure every spoken line from the story is in the draft, in order. Returns the indexes it had to add.
+// A line from the person's story counts as already in the draft when its meaning is there, not only when the
+// exact letters are. The draft puts each person's words in their own voice ("nobody asked her to" becomes
+// "Nobody asked you to."), so the check drops pronouns and small words and compares the words that carry meaning.
+var PB_SMALL = ('a an the and or but so if then than that this those these there here to of in on at for from with by as is are was were be been being am ' +
+  'i me my mine myself you your yours yourself he him his himself she her hers herself they them their it its we us our ' +
+  'do does did done not no oh well yeah okay ok just really very too also what whats when who how about up out over into ' +
+  'im ive id ill youre youve youd youll hes shes thats theres theyre dont doesnt didnt cant wont isnt wasnt s t d ll re ve m').split(' ');
+function pbStem(w) {
+  if (w.length > 5) w = w.replace(/(ing|ed|es|ly)$/, '');
+  else if (w.length > 3) w = w.replace(/s$/, '');
+  return w;
+}
+function pbWordsOf(t) {
+  return String(t || '').toLowerCase().replace(/[\u2019']/g, '').replace(/[^a-z0-9$ ]+/g, ' ').split(/\s+/).filter(Boolean);
+}
+function pbMeaning(t) {
+  var out = [];
+  pbWordsOf(t).forEach(function(w) { if (PB_SMALL.indexOf(w) === -1) out.push(pbStem(w)); });
+  return out;
+}
+// Is this remembered line in the draft, in any voice? Looks at each line and each pair of neighbouring lines.
+function pbInDraft(sp, lines) {
+  var want = pbMeaning(sp.raw || sp.text);
+  var spoken = lines.map(function(l, i) { return l.type === 'line' ? i : -1; }).filter(function(i) { return i !== -1; });
+  var all = pbWordsOf(sp.text).join(' ');
+  function hits(text) {
+    if (!want.length) return pbWordsOf(text).join(' ').indexOf(all) !== -1 ? 1 : 0;
+    var have = pbMeaning(text);
+    return want.filter(function(w) { return have.indexOf(w) !== -1; }).length / want.length;
+  }
+  var k;
+  for (k = 0; k < spoken.length; k++) { if (hits(lines[spoken[k]].dialogue) >= 0.7) return spoken[k]; }
+  for (k = 0; k + 1 < spoken.length; k++) { if (hits(lines[spoken[k]].dialogue + ' ' + lines[spoken[k + 1]].dialogue) >= 0.7) return spoken[k + 1]; }
+  return -1;
+}
+// A remembered line can be added only when it is already in someone's own voice. A line that still talks about
+// the partner in the third person ("she was asking to be included") cannot be dropped in as it is.
+function pbVoiced(sp) {
+  return !/\b(she|her|hers|herself|he|him|his|himself|they|them|their)\b/i.test(String(sp.text || ''));
+}
+
+// Silent completeness check. Adds a line only when its meaning is truly missing from the draft and the line is
+// already in a person's own voice. Never pastes raw story text. Returns the places where it added a line.
 function pbEnsureSpokenLines(parsed) {
   var inserted = [];
   if (!pbSpoken.length) return inserted;
   var lines = parsed.lines;
-  function build() {
-    var joined = ' ', pieces = [];
-    lines.forEach(function(l, idx) {
-      if (l.type !== 'line') return;
-      var t = pbPronounMap(l.dialogue);
-      pieces.push({ idx: idx, start: joined.length, end: joined.length + t.length });
-      joined += t + ' ';
-    });
-    return { joined: joined, pieces: pieces };
+  var where = pbSpoken.map(function(sp) { return pbInDraft(sp, lines); });
+  // Work from the end so the places found above stay right as lines are added.
+  for (var i = pbSpoken.length - 1; i >= 0; i--) {
+    if (where[i] !== -1 || !pbVoiced(pbSpoken[i])) continue;
+    var next = -1, prev = -1, j;
+    for (j = i + 1; j < where.length; j++) { if (where[j] !== -1) { next = where[j]; break; } }
+    for (j = i - 1; j >= 0; j--) { if (where[j] !== -1) { prev = where[j]; break; } }
+    var pos = next !== -1 ? next : (prev !== -1 ? prev + 1 : 0);
+    var sp = pbSpoken[i];
+    lines.splice(pos, 0, { type: 'line', char: sp.who === 'me' ? 'A' : 'B', beat: '', dialogue: sp.text });
+    for (j = 0; j < where.length; j++) { if (where[j] >= pos) where[j]++; }
+    for (j = 0; j < inserted.length; j++) { if (inserted[j] >= pos) inserted[j]++; }
+    where[i] = pos;
+    inserted.push(pos);
   }
-  function pieceAt(b, pos) {
-    for (var i = 0; i < b.pieces.length; i++) { if (pos >= b.pieces[i].start && pos <= b.pieces[i].end) return b.pieces[i]; }
-    return null;
-  }
-  var cursor = 0, lastIdx = -1;
-  pbSpoken.forEach(function(sp) {
-    var b = build();
-    var needle = ' ' + pbPronounMap(sp.raw || sp.text) + ' ';
-    var at = b.joined.indexOf(needle, cursor);
-    if (at !== -1) {
-      var pc = pieceAt(b, at + needle.length - 2);
-      if (pc) lastIdx = pc.idx;
-      cursor = at + needle.length - 1;
-    } else {
-      var pos = lastIdx + 1;
-      lines.splice(pos, 0, { type: 'line', char: sp.who === 'me' ? 'A' : 'B', beat: '', dialogue: sp.text });
-      inserted.push(pos);
-      lastIdx = pos;
-      var b2 = build();
-      var np = pieceAt(b2, b2.pieces.filter(function(p) { return p.idx === pos; })[0].start);
-      cursor = np ? np.end : cursor;
-    }
-  });
-  return inserted;
+  return inserted.sort(function(x, y) { return x - y; });
 }
 
 // Cues for both people, in their own words, from the tone buttons and how it starts.
@@ -8977,13 +9114,13 @@ function pbSaveRetelling() {
 // ---- saved progress ----
 // Every answer is kept in two places: this device (instant) and the person's account (so clearing Safari,
 // switching to a phone, or signing out and in never loses it). The account copy lives in the argument's own
-// script record as "intake", and only that person can read it.
+// private record as "intake", and only that person can read it.
 var acctTimer = null, acctDirty = null, acctBusy = false, acctFails = 0;
 
 function ivProgressObj(state) {
   return {
     uid: user.uid, story: pbStory.text, voice: !!pbStory.voice, typed: !!pbStory.typed,
-    iv: iv, spoken: pbSpoken, pronoun: pbPronoun, index: ivIndex,
+    iv: iv, spoken: pbSpoken, pronoun: pbPronoun, index: ivIndex, key: ivScreens[ivIndex],
     state: state || 'screens', at: Date.now()
   };
 }
@@ -9080,7 +9217,16 @@ function pbResume() {
   showFlex('iv-screen');
   if (pr.state === 'extract' || !pr.iv) ivBeginFromStory();
   else if (pr.state === 'done') { ivToLegacy(); pbGenerateDraft(true); }
-  else ivShow(pr.index || 0);
+  else ivShow(ivResumeIndex(pr));
+}
+
+// Where a saved set of answers should reopen. Older saves only know a number, from the order before the
+// feelings question was removed.
+function ivResumeIndex(pr) {
+  var key = pr.key || IV_LEGACY_SCREENS[pr.index || 0] || 'here';
+  if (key === 'feel') key = 'want';
+  var at = ivScreens.indexOf(key);
+  return at === -1 ? 0 : at;
 }
 
 // "Start over" clears only the unfinished interview. A script or analysis that was already made is never touched.
@@ -9205,12 +9351,10 @@ function pbLoadDraftIntoTool(parsed, inserted) {
   var nbField = el('input-name-b');
   if (nbField && !pbPlaceholderName(user && user.partner)) nbField.value = user.partner;
   inserted = inserted || [];
-  var kids = el('lines-container').children;
-  inserted.forEach(function(i) { if (kids[i]) kids[i].classList.add('ai-changed'); });
   var note = el('pb-handoff-note');
   if (note) {
     note.textContent = inserted.length
-      ? 'I checked your story against the draft and added ' + inserted.length + (inserted.length === 1 ? ' line' : ' lines') + ' the AI had left out. ' + (inserted.length === 1 ? 'It is' : 'They are') + ' highlighted.'
+      ? 'I added ' + (inserted.length === 1 ? 'one line' : inserted.length + ' lines') + ' you told me about that the draft had left out.'
       : '';
     note.style.display = inserted.length ? 'block' : 'none';
   }
@@ -9339,7 +9483,8 @@ function lineSig(l) {
   return l.type === 'line' ? 'L|' + l.char + '|' + cueClean(l.beat) + '|' + n(l.dialogue) : 'D|' + n(l.text);
 }
 
-// Longest-common-subsequence diff: flags the new lines that were not in the old script.
+// Longest-common-subsequence diff: flags every new or rewritten line. Between two lines that stayed the same, a
+// rewritten line counts once as "changed", not as one removed plus one added.
 function diffLines(oldLines, newLines) {
   var a = oldLines.map(lineSig), b = newLines.map(lineSig);
   var dp = [], i, j;
@@ -9350,13 +9495,22 @@ function diffLines(oldLines, newLines) {
     }
   }
   var flags = b.map(function() { return true; });
-  i = 0; j = 0;
-  while (i < a.length && j < b.length) {
-    if (a[i] === b[j]) { flags[j] = false; i++; j++; }
-    else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
-    else j++;
+  var changed = 0, added = 0, removed = 0, gapOld = 0, gapNew = 0;
+  function closeGap() {
+    var pair = Math.min(gapOld, gapNew);
+    changed += pair; added += gapNew - pair; removed += gapOld - pair;
+    gapOld = 0; gapNew = 0;
   }
-  return { flags: flags, removed: a.length - dp[0][0] };
+  i = 0; j = 0;
+  while (i < a.length || j < b.length) {
+    if (i < a.length && j < b.length && a[i] === b[j]) { closeGap(); flags[j] = false; i++; j++; }
+    else if (j >= b.length) { gapOld++; i++; }
+    else if (i >= a.length) { gapNew++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { gapOld++; i++; }
+    else { gapNew++; j++; }
+  }
+  closeGap();
+  return { flags: flags, changed: changed, added: added, removed: removed };
 }
 
 // ---- Edit with AI ----
@@ -9373,7 +9527,7 @@ function aiEditRender() {
   if (label) label.textContent = live ? 'Tap to pause' : 'Talk';
   if (apply) {
     apply.disabled = aiEditBusy;
-    apply.textContent = aiEditBusy ? 'Working…' : (live ? 'Done' : 'Make this change');
+    apply.textContent = aiEditBusy ? 'Working…' : (live ? 'Done' : 'Make these changes');
   }
 }
 
@@ -9395,8 +9549,8 @@ function aiEditClose() {
 function aiEditPrompt(scriptText, instruction) {
   return 'Here is a script in a standard format:\n\n"""\n' + scriptText + '\n"""\n\n' +
     'The person who wrote it asked for this change:\n"' + instruction + '"\n\n' +
-    'Change exactly what they ask for and nothing else. Every other line must come back word for word, unchanged. Do not make any change on your own initiative to sound kinder, fairer, more balanced or more polished. If the request is unclear, or would need words the person did not give you, make no change and return the script exactly as given. When you write or change a tone note in parentheses, make it fit that specific line, vary the wording instead of repeating one label, and never use the word "already" in a tone note. If you write a closing direction, make it an interruption (someone leaves, someone goes quiet), not a settled ending.\n\n' +
-    'Return the complete script in the same format, starting with SCENE:. Output only the script. No preamble, no commentary.';
+    'Change exactly what they ask for and nothing else. Every other line must come back word for word, unchanged. Do not make any change on your own initiative to sound kinder, fairer, more balanced or more polished, and do not make either person more reasonable, more aware or more articulate than they were. The request may contain several changes: make every one of them. If they ask you to add something they have described (for example what a package was, an amount, how it began), add it as a line or direction in their own words, in the place they ask for. Do not invent a feeling, look or line they did not give you. If one change is unclear, or would need words the person did not give you, skip only that change. When you write or change a tone note in parentheses, make it fit that specific line, vary the wording instead of repeating one label, and never use the word "already" in a tone note. If you write a closing direction, make it an interruption (someone leaves, someone goes quiet), not a settled ending.\n\n' +
+    'Return the complete script in the same format, starting with SCENE:. After the script, on its own line, write NOT DONE: followed by each requested change you did not make and a few words on why, or NOT DONE: none. Nothing else. No preamble, no commentary.';
 }
 
 function aiEditApply() {
@@ -9409,10 +9563,19 @@ function aiEditApply() {
   var nameA = (user && user.name) ? user.name : 'Person A';
   var nameB = (user && user.partner) ? user.partner : 'Person B';
   aiEditBusy = true;
-  txt('ai-edit-status', 'Making that change…');
+  txt('ai-edit-status', 'Making your changes…');
   aiEditRender();
   callAI([{ role: 'user', content: aiEditPrompt(snapshotToText(before, nameA, nameB), instruction) }], 'b-edit').then(function(text) {
     aiEditBusy = false;
+    var notDone = '';
+    if (text) {
+      var nd = text.search(/\n\s*NOT DONE:/i);
+      if (nd !== -1) {
+        notDone = text.slice(nd).replace(/^\s*NOT DONE:\s*/i, '').trim();
+        text = text.slice(0, nd);
+        if (/^(none|nothing)\.?$/i.test(notDone)) notDone = '';
+      }
+    }
     var parsed = text ? pbParseDraft(text, nameA, nameB) : null;
     if (!parsed || !parsed.lines.length || parsed.lines.length < Math.floor(before.lines.length / 2)) {
       txt('ai-edit-status', "That didn't come back in a form I could apply, so nothing changed. Try describing it a different way.");
@@ -9421,9 +9584,8 @@ function aiEditApply() {
     }
     var d = diffLines(before.lines, parsed.lines);
     var sceneChanged = (parsed.scene || '').trim() !== (before.scene || '').trim();
-    var changed = d.flags.filter(Boolean).length;
-    if (!changed && !d.removed && !sceneChanged) {
-      txt('ai-edit-status', 'The AI made no change. Try describing it a different way.');
+    if (!d.changed && !d.added && !d.removed && !sceneChanged) {
+      txt('ai-edit-status', 'The AI made no change.' + (notDone ? ' It said: ' + notDone : ' Try describing it a different way.'));
       aiEditRender();
       return;
     }
@@ -9433,7 +9595,7 @@ function aiEditApply() {
     txt('ai-edit-status', '');
     aiEditRender();
     aiEditClose();
-    aiEditShowResult(changed, d.removed, sceneChanged);
+    aiEditShowResult(d, sceneChanged, notDone);
     sched();
   }).catch(function(err) {
     aiEditBusy = false;
@@ -9442,15 +9604,21 @@ function aiEditApply() {
   });
 }
 
-function aiEditShowResult(changed, removed, sceneChanged) {
+function aiEditShowResult(d, sceneChanged, notDone) {
   var box = el('ai-edit-result');
   if (!box) return;
   var parts = [];
-  if (changed) parts.push(changed + (changed === 1 ? ' line' : ' lines') + ' changed');
-  if (removed) parts.push(removed + (removed === 1 ? ' line' : ' lines') + ' removed');
+  function n(x, w) { return x + (x === 1 ? ' line ' : ' lines ') + w; }
+  if (d.changed) parts.push(n(d.changed, 'changed'));
+  if (d.added) parts.push(n(d.added, 'added'));
+  if (d.removed) parts.push(n(d.removed, 'removed'));
   if (sceneChanged) parts.push('scene changed');
-  box.innerHTML = 'The AI made this change: ' + parts.join(', ') + '. Changed lines are highlighted. ' +
-    '<button type="button" onclick="aiEditUndoNow()">Undo</button> <button type="button" onclick="aiEditClear()">Clear highlights</button>';
+  box.textContent = '';
+  box.appendChild(document.createTextNode((parts.length ? 'The AI made these changes: ' + parts.join(', ') + '. Changed lines are highlighted. ' : '')));
+  if (notDone) box.appendChild(document.createTextNode('It did not make: ' + notDone + ' '));
+  var u = document.createElement('button'); u.type = 'button'; u.textContent = 'Undo'; u.addEventListener('click', aiEditUndoNow);
+  var c = document.createElement('button'); c.type = 'button'; c.textContent = 'Clear highlights'; c.addEventListener('click', aiEditClear);
+  box.appendChild(u); box.appendChild(document.createTextNode(' ')); box.appendChild(c);
   box.style.display = 'block';
   var first = document.querySelector('#lines-container .ai-changed');
   if (first && first.scrollIntoView) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -9522,6 +9690,7 @@ function pbRestore() {
   });
   var lc = el('lines-container');
   if (lc) lc.addEventListener('input', function(e) {
+    var hn = el('pb-handoff-note'); if (hn) { hn.textContent = ''; hn.style.display = 'none'; }
     var row = e.target && e.target.closest ? e.target.closest('.ai-changed') : null;
     if (row) row.classList.remove('ai-changed');
   });
@@ -9581,7 +9750,7 @@ function pcSyncResume() {
   box.style.display = show ? 'block' : 'none';
   if (show) {
     var where = pr.state === 'story' ? 'You had started telling your story.' :
-      (pr.state === 'screens' && pr.iv ? 'You got as far as question ' + ((pr.index || 0) + 1) + ' of ' + (IV_SCREENS.length - 1) + '.' : 'Your story is saved.');
+      (pr.state === 'screens' && pr.iv ? 'You got as far as question ' + (ivResumeIndex(pr) + 1) + ' of ' + (IV_SCREENS.length - 1) + '.' : 'Your story is saved.');
     txt('pc-resume-where', where);
   }
 }

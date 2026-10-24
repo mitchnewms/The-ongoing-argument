@@ -102,7 +102,7 @@ exports.handler = async function(event) {
         scene: SAMPLE.scene, lines: JSON.stringify(SAMPLE_LINES), userId: t.uid, updatedAt: now,
         scriptPath: 'b', handoffSeen: true,
         storyThinking: SAMPLE.storyThinking, storyFeeling: SAMPLE.storyFeeling,
-        submitted: true, submittedAt: now
+        storySent: true, submitted: true, submittedAt: now
       });
       await admin.setFields('warmup/' + t.uid, { completed: true });
     } else {
