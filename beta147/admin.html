@@ -208,6 +208,10 @@ $('tt-scene').onclick = function() {
       if (!d.scenes.length) { $('tt-msg').textContent = 'No scene saved yet for ' + d.email + '. Run the analysis first.'; return; }
       $('tt-msg').textContent = d.scenes.length + ' scene(s) saved for ' + d.email + '. The script has ' + d.lineCount + ' lines.';
       var sc = d.scenes[d.scenes.length - 1];
+      var inp = sc.input || {}, en = inp.energy || {};
+      function enTxt(e, who) { if (!e) return ''; var t = e.same ? 'stays the same' : [e.start && 'starts ' + e.start, e.end && 'ends ' + e.end].filter(Boolean).join(', '); if (e.other) t += (t ? ', ' : '') + 'own word: ' + e.other; return t ? who + ' ' + t : ''; }
+      var received = [enTxt(en.you, 'You'), enTxt(en.partner, 'Partner')].filter(Boolean).join('; ');
+      $('tt-msg').textContent += ' Energy words the scene received: ' + (received || 'none') + '. Cue received: ' + (inp.cue ? inp.cue.text + (inp.cue.after !== null && inp.cue.after !== undefined ? ' (after line ' + (inp.cue.after + 1) + ')' : ' (no line given)') : 'none') + '.';
       $('tt-table').innerHTML = '<tr><th>Beat</th><th>Who</th><th>Move</th><th class="n">Temp</th><th>Line(s)</th><th>Evidence</th><th>Reason</th></tr>' +
         sc.beats.map(function(b, i) { return '<tr><td>' + (i + 1) + '</td><td>' + esc(b.speaker + (b.actor ? ' (' + b.actor + ')' : '')) + '</td><td><b>' + esc(b.move) + '</b></td><td class="n">' + b.temp + '</td><td style="white-space:normal;min-width:220px">' + b.texts.map(esc).join(' / ') + '</td><td style="white-space:normal;min-width:160px">' + esc(b.evidence) + '</td><td style="white-space:normal;min-width:200px">' + esc(b.reason) + '</td></tr>'; }).join('');
     })

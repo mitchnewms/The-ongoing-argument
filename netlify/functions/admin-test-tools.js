@@ -42,6 +42,32 @@ const SAMPLE = {
   storyThinking: 'Dana thinks I am careless with money and that I only think about my own toys. She thinks I hid the drone on purpose.',
   storyFeeling: 'I think she feels scared about our finances, shut out of decisions, and tired of being the one who worries.'
 };
+// The new interview answers for the same story, so one tap tests the whole path. Dana is the partner (character B),
+// Sam is the person (character A). Dana starts Calm and ends Cold; Sam starts Casual and ends Snappy.
+const SAMPLE_INTAKE = {
+  fightTopic: 'Buying a drone without talking first',
+  fightTrigger: 'A package arriving that nobody talked about',
+  whoStartsIt: 'Dana asks what is in the box and how much it was',
+  setting: 'The kitchen',
+  fightLocation: 'The kitchen',
+  startingMoment: "There's a box on the porch with your name on it.",
+  heardWhenTheySayThat: "I'm being watched, I'm not trusted",
+  speedsUpAt: '"You always"',
+  cue: 'heavy sigh',
+  cuePlacement: 'Nobody asked you to.',
+  interruption: 'Dana leaves the room',
+  nonverbalCue: 'heavy sigh',
+  pauseMoment: 'Dana leaves the room',
+  energy: JSON.stringify({
+    me: { energyStart: 'Casual', energyEnd: 'Snappy', sameWholeTime: false, other: '' },
+    partner: { energyStart: 'Calm', energyEnd: 'Cold', sameWholeTime: false, other: '' }
+  }),
+  stopBelief: "If Dana would really listen, I'd stay calmer",
+  partnerStopGuess: "If I stopped getting defensive",
+  oneThingToSay: 'I just want to be included in the decision.',
+  triggerLine: 'Nobody asked you to.',
+  privateStory: 'Dana thinks I am careless with money and that I only think about my own toys. She thinks I hid the drone on purpose.'
+};
 
 async function findTestUser(email) {
   const e = String(email || '').trim().toLowerCase();
@@ -86,7 +112,7 @@ exports.handler = async function(event) {
         else if (l.type === 'direction' && String(l.text || '').trim()) items.push({ speaker: 'direction', text: String(l.text).trim(), tone: '' });
       });
       const scenes = Object.keys(map).map(function(k) {
-        return { hash: k, createdAt: map[k].createdAt, beats: (map[k].beats || []).map(function(b) {
+        return { hash: k, createdAt: map[k].createdAt, input: map[k].input || null, beats: (map[k].beats || []).map(function(b) {
           return { lines: b.lines, texts: b.lines.map(function(i) { return items[i] ? items[i].text : '(missing)'; }), speaker: b.speaker, move: b.move, temp: b.temp, evidence: b.evidence, reason: b.reason, actor: b.actor || '' };
         }) };
       });
@@ -102,8 +128,10 @@ exports.handler = async function(event) {
         scene: SAMPLE.scene, lines: JSON.stringify(SAMPLE_LINES), userId: t.uid, updatedAt: now,
         scriptPath: 'b', handoffSeen: true,
         storyThinking: SAMPLE.storyThinking, storyFeeling: SAMPLE.storyFeeling,
-        storySent: true, submitted: true, submittedAt: now
+        storySent: true, submitted: true, submittedAt: now,
+        pathChosen: 'b', fightName: SAMPLE.fightName
       });
+      await admin.setFields('scripts/' + t.uid, SAMPLE_INTAKE);
       await admin.setFields('warmup/' + t.uid, { completed: true });
     } else {
       const s = await admin.getDoc('scripts/' + t.uid);

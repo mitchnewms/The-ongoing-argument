@@ -77,7 +77,26 @@ exports.handler = async function(event) {
     you: String(body.you || 'you').slice(0, 40), partner: String(body.partner || 'your partner').slice(0, 40),
     lines: lines.map(function(l) { const o = { index: l.i, speaker: l.speaker, text: l.text }; if (l.tone) o.tone = l.tone; if (l.cue) o.cue = l.cue; return o; })
   };
-  if (body.energy && typeof body.energy === 'object') input.energy_words = { you: String((body.energy.you || '')).slice(0, 120), partner: String((body.energy.partner || '')).slice(0, 120) };
+  // The energy words (start, end, same the whole time, an own word) for each person, and the nonverbal cue with
+  // the line it follows. They inform only how hot the room is, never a move.
+  function oneEnergy(e) {
+    if (typeof e === 'string') return e.trim() ? { other: e.trim().slice(0, 80) } : null;
+    if (!e || typeof e !== 'object') return null;
+    const o = {};
+    if (e.same) o.same_whole_time = true;
+    else { if (e.start) o.start = String(e.start).slice(0, 40); if (e.end) o.end = String(e.end).slice(0, 40); }
+    if (e.other) o.other = String(e.other).slice(0, 80);
+    return Object.keys(o).length ? o : null;
+  }
+  if (body.energy && typeof body.energy === 'object') {
+    const you = oneEnergy(body.energy.you), partner = oneEnergy(body.energy.partner);
+    if (you || partner) input.energy_words = { you: you || {}, partner: partner || {} };
+  }
+  if (body.cue && typeof body.cue === 'object' && body.cue.text) {
+    input.cue = { text: String(body.cue.text).slice(0, 60) };
+    const after = Number(body.cue.after);
+    if (Number.isInteger(after) && after >= 0 && after < lines.length) input.cue.follows_line = after;
+  }
 
   let note = '';
   for (let attempt = 0; attempt < 2; attempt++) {

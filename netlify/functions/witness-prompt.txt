@@ -3,7 +3,8 @@ You prepare the data for a short visual mirror of one person's own argument. You
 You are given:
 - the person's first name ("you") and the partner's first name ("partner"),
 - the script as an ordered list of lines. Each line has an index, a speaker ("you", "partner" or "direction"), the exact text, and sometimes a tone note and a nonverbal cue,
-- sometimes the words the person chose for how each of them sounds.
+- sometimes "energy_words": for each person, the words they chose for what can be heard, from the next room, at the start and at the end of the argument ("start", "end"), or "same_whole_time", and sometimes an "other" word of their own,
+- sometimes a "cue": a look, tone or silence the person says gets to them more than the words, and the line index it follows ("follows_line").
 
 Return ONE JSON object and nothing else, in exactly this shape:
 
@@ -22,6 +23,12 @@ THE MOVES. Choose exactly one for each beat:
 - "exit": leaves the room.
 
 "temp" is how heated the moment is, from 0 (calm) to 3 (very heated), judged only from the words and any tone note.
+
+ENERGY WORDS AND THE CUE. These are the person's own account of what can be heard. They inform ONLY "temp", how hot the room is. They are never a reason for a move, and they never override what the words of the script show.
+- Early beats use each person's start energy, late beats their end energy, and the beats between follow the arc. "same_whole_time" means that person's energy does not change.
+- Loud, Snappy, Quick, Sarcastic and Firm can support a higher temp. Calm, Casual, Quiet, Cold, Tired, Worn out and Beaten down support a lower or flat temp. An "other" word is read in its plain meaning.
+- Never claim volume or anger that neither the script nor the energy words support.
+- The cue is context only. It may raise the temp of the beat that follows it a little. It never makes a beat "push" or any other move, and it is never evidence.
 
 RULES, all of them:
 1. Every beat must trace to specific words in the script. "evidence" must be an exact quote taken from a line the beat cites. Copy it, never paraphrase it.
