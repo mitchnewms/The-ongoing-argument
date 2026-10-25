@@ -7,13 +7,13 @@ const { corsHeaders } = require('../lib/stripe-common');
 const { LIMIT_MESSAGE } = require('../lib/ai-costs');
 const { checkLimits } = require('../lib/ai-limits');
 const { logUsage } = require('../lib/ai-usage');
-const { buildStep2Prompt, scriptDataToText, normalize } = require('../lib/couple-text');
+const { buildStep2Prompt, normalize } = require('../lib/couple-text');
 
 // Everything in the couple flow that needs the OTHER partner's private script happens here, on the server.
 // A browser never reads the partner's script. What a partner may see is only what each person chose to share at
 // the sharing moment (the shared copy), and the joint analysis, which is stored in the shared couple record.
 //
-// actions:  status  analyze  share  ai
+// actions:  status  analyze  share
 function reply(CORS, status, obj) {
   return { statusCode: status, headers: { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: JSON.stringify(obj) };
 }
@@ -44,7 +44,7 @@ exports.handler = async function(event) {
   let body; try { body = JSON.parse(event.body || '{}'); } catch (e) { return reply(CORS, 400, { error: 'Invalid JSON', code: 'bad_request' }); }
   if (!admin.configured()) return reply(CORS, 503, { error: 'The server key is not set up yet.', code: 'not_configured' });
   const action = String(body.action || '');
-  if (['status', 'analyze', 'share', 'ai'].indexOf(action) === -1) return reply(CORS, 400, { error: 'Unknown action', code: 'bad_request' });
+  if (['status', 'analyze', 'share'].indexOf(action) === -1) return reply(CORS, 400, { error: 'Unknown action', code: 'bad_request' });
 
   let cx;
   try { cx = await context(who.uid); } catch (e) { console.error('couple: context failed', e.message); return reply(CORS, 502, { error: 'Could not read your couple record.', code: 'read_failed' }); }
@@ -105,28 +105,6 @@ exports.handler = async function(event) {
       return reply(CORS, 200, { ok: true });
     }
 
-    // ---- Step 3 conversation: the AI is given the partner's script here, on the server, and the browser never sees it.
-    // The page writes the token [[PARTNER_SCRIPT]] where that script belongs.
-    if (action === 'ai') {
-      const step = String(body.step || '3');
-      if (step !== '3') return reply(CORS, 400, { error: 'Unknown step', code: 'bad_request' });
-      const messages = body.messages;
-      if (!Array.isArray(messages) || !messages.length || messages.length > 200 || !messages.every(function(m) { return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'; })) return reply(CORS, 400, { error: 'messages required', code: 'bad_request' });
-      if (!claude.ready()) return reply(CORS, 500, { error: 'The AI is not set up on the server.', code: 'config' });
-      const limited = await checkLimits(who.uid, who.email, false);
-      if (limited) return reply(CORS, 429, { error: LIMIT_MESSAGE, code: 'daily_limit' });
-      let partnerText = '';
-      if (messages.some(function(m) { return m.content.indexOf('[[PARTNER_SCRIPT]]') !== -1; })) {
-        const theirs = cx.partnerUid ? await admin.getDoc('scripts/' + encodeURIComponent(cx.partnerUid)) : null;
-        partnerText = theirs ? scriptDataToText(theirs, 'your partner', myName) : '(your partner has not written a script yet)';
-      }
-      const filled = messages.map(function(m) { return { role: m.role, content: m.role === 'user' ? m.content.split('[[PARTNER_SCRIPT]]').join(partnerText) : m.content }; });
-      let out;
-      try { out = await claude.ask(filled, 4000); }
-      catch (e) { console.error('couple: ai failed', e.code || e.message); return reply(CORS, 502, { error: 'AI service error', code: e.code || 'ai_failed' }); }
-      await logUsage(who.uid, '3', claude.MODEL, 4000, out.usage);
-      return reply(CORS, 200, { text: out.text });
-    }
   } catch (err) {
     console.error('couple: ' + action + ' failed:', err.message);
     return reply(CORS, 502, { error: 'Something went wrong on the server.', code: 'server_error' });

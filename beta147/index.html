@@ -2867,7 +2867,7 @@ h1, h2, h3,
     </div>
     <div class="s45-tx-hd">Your Script Transcript</div>
     <div class="s45-tx" id="s4-transcript"></div>
-    <p class="s45-share-note" id="s4-share-note">Next, your partner will watch your script, and you will watch theirs. Only the script is shared: the lines, the scene and the name of the fight. Your story, your answers and your notes stay private.</p>
+    <p class="s45-share-note" id="s4-share-note">Next, your partner will watch your script, and you will watch theirs. Only the script is shared: the lines, the scene and the name of the argument. Your story, your answers and your notes stay private.</p>
     <p class="s45-share-err" id="s4-share-err" role="alert"></p>
     <button class="s45-continue" id="s4-continue" onclick="completeStep4()">I&rsquo;ve Watched, Share My Script and Continue to Step 5 &#8250;</button>
   </div>
@@ -4319,16 +4319,11 @@ function refreshTokenQuietly() {
   });
 }
 
-// A couple's Step 3 conversation goes through the couple function, which puts the partner's script into the request on
-// the server. Everything else goes to the ordinary AI function.
-function viaCoupleServer(step) { return String(step) === '3' && user && user.coupleId && user.accountType !== 'solo'; }
-
 function aiRequest(messages, step, retried) {
-  var couple = viaCoupleServer(step);
-  return fetch(couple ? '/.netlify/functions/couple' : '/.netlify/functions/ai', {
+  return fetch('/.netlify/functions/ai', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token || '') },
-    body: JSON.stringify(couple ? { action: 'ai', messages: messages, step: step } : { messages: messages, step: step || '1' })
+    body: JSON.stringify({ messages: messages, step: step || '1' })
   }).then(function(r) {
     if (r.status === 401 && !retried) {
       return refreshTokenQuietly().then(function() { return aiRequest(messages, step, true); });
@@ -4337,8 +4332,8 @@ function aiRequest(messages, step, retried) {
   });
 }
 
-// Asks the couple function to do something that needs the other partner's private script. The browser only gets back
-// the result, never the script. Renews the sign-in once if it ran out.
+// Asks the couple function to do something that needs the other partner's private script (the joint analysis, the shared
+// copy). The browser only gets back the result, never the script. Renews the sign-in once if it ran out.
 function coupleCall(action, extra) {
   var body = { action: action }; for (var k in (extra || {})) body[k] = extra[k];
   var payload = JSON.stringify(body);
@@ -5992,10 +5987,16 @@ function s3StartDelivery() {
   s3ShowTyping();
   Promise.all([
     fsGet('scripts/' + fdoc()),
-    fsGet('couples/' + user.coupleId)
+    fsGet('couples/' + user.coupleId),
+    // Only what the partner has already shared. Their private script is never given to this conversation.
+    fsGet('sharedScripts/' + user.uid).then(function(mine) {
+      if (!mine || !mine.fields || !user.partnerId) return null;
+      return fsGet('sharedScripts/' + user.partnerId).then(function(d) { return (d && d.fields) ? fromFields(d.fields) : null; });
+    }).catch(function() { return null; })
   ]).then(function(results) {
     var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
     var couple = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
+    var partnerShared = results[2];
     var analysis = couple.analysis || '';
     var myName = (user.displayName || 'Person A').split(' ')[0];
     var partnerName = 'your partner';
@@ -6005,8 +6006,7 @@ function s3StartDelivery() {
       analysis + '\n\n' +
       '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' +
       scriptDataToText(myScript, myName, partnerName) + '\n\n' +
-      '--- PARTNER\'S SCRIPT ---\n' +
-      '[[PARTNER_SCRIPT]]' + '\n\n' +   // the server puts the partner's script here; this page never reads it
+      (partnerShared ? '--- PARTNER\'S SHARED SCRIPT ---\n' + scriptDataToText(partnerShared, partnerName, myName) + '\n\n' : '') +
       'Now deliver ' + myName + '\'s personalized Mirror Moment. Begin with what you see in their script — their specific words, their recurring themes, the story they are telling themselves. Be warm, precise, and grounded in what they actually wrote. Do not be generic. Do not summarize both people equally. This is for ' + myName + ' only. Speak to them directly. Follow the Mirror Moment guidelines from your training: offer observations as possibilities, not verdicts. Invite reflection. After sharing your observations, ask an open question.';
 
     s3Messages = [{ role: 'user', content: setupPrompt }];
@@ -6945,7 +6945,7 @@ function openStep4() {
 function closeStep4() { hide('step4-screen'); document.body.style.overflow = ''; }
 
 // The one sharing moment. Continuing from Step 4 asks the server to write the shared copy of this person's script (the
-// lines, the scene, the name of the fight). Only then does Step 5 open. If it cannot be shared, the person stays here.
+// lines, the scene, the name of the argument). Only then does Step 5 open. If it cannot be shared, the person stays here.
 function completeStep4() {
   var btn = el('s4-continue'), err = el('s4-share-err');
   if (err) err.textContent = '';
