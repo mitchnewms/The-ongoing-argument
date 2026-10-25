@@ -85,20 +85,20 @@ service cloud.firestore {
       allow write: if signedIn() && ownsDoc(uid);
     }
 
-    // Scripts, intake answers and story answers: owner only. The Step 2/3/10
-    // analyses must run on the server so a partner's browser never needs this.
+    // Scripts, intake answers and story answers: owner only. The joint analysis and the Step 3 conversation
+    // run on the server, so a partner's browser never needs to read this.
     match /scripts/{uid} {
       allow read: if signedIn() && (ownsDoc(uid) || isCoach());
       allow write: if signedIn() && ownsDoc(uid);
     }
 
-    // The finished script (scene and lines only). Owner writes it; the partner
-    // can read it only once the couple has reached Step 5.
+    // The shared copy of a script (the lines, the scene, the name of the fight and the names, nothing else).
+    // It is written only by the server, at the one sharing moment when a person continues from Step 4 to Step 5.
+    // A linked partner can read it once they have shared their own, so the sharing is always both ways.
     match /sharedScripts/{uid} {
       allow read: if signedIn() && (me() == uid || isCoach()
-        || (sameCouple(uid)
-            && int(coupleData(userData(me()).get('coupleId', '')).get('currentStep', '1')) >= 5));
-      allow write: if signedIn() && me() == uid;
+        || (sameCouple(uid) && exists(/databases/$(database)/documents/sharedScripts/$(me()))));
+      allow write: if false;
     }
 
     // Everything else that belongs to one person.

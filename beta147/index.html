@@ -584,6 +584,11 @@ body.script-locked #scene-input { pointer-events: none; }
 .iv-en .iv-box { margin-top: 12px; min-height: 48px; }
 
 .pbh-remember { display: block; margin: 10px 0 0; padding: 10px 4px; background: none; border: none; color: #B84F00; font-family: inherit; font-size: 0.95rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+.s45-share-note { margin: 18px 0 4px; font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.8); }
+.s45-share-err { min-height: 1.2em; margin: 4px 0 0; font-size: 0.85rem; color: #E8A27A; }
+.s5-wait { margin: 16px 0; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 0.92rem; line-height: 1.5; }
+.s5-wait button { margin-top: 10px; padding: 10px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.4); border-radius: 6px; color: inherit; font: inherit; cursor: pointer; }
 </style>
 
 <style>
@@ -2862,7 +2867,9 @@ h1, h2, h3,
     </div>
     <div class="s45-tx-hd">Your Script Transcript</div>
     <div class="s45-tx" id="s4-transcript"></div>
-    <button class="s45-continue" onclick="completeStep4()">I&rsquo;ve Watched, Continue to Step 5 &#8250;</button>
+    <p class="s45-share-note" id="s4-share-note">Next, your partner will watch your script, and you will watch theirs. Only the script is shared: the lines, the scene and the name of the fight. Your story, your answers and your notes stay private.</p>
+    <p class="s45-share-err" id="s4-share-err" role="alert"></p>
+    <button class="s45-continue" id="s4-continue" onclick="completeStep4()">I&rsquo;ve Watched, Share My Script and Continue to Step 5 &#8250;</button>
   </div>
 </div>
 
@@ -4232,7 +4239,8 @@ function recordSafetyFlag(step) {
   fsAdd('coachFlags', rec).catch(function(err) { console.error('Could not log safety flag:', err); });
   user.safetyFlag = true;   // a flagged account never gets the Witness scene
   try { localStorage.setItem('oa_user', JSON.stringify(user)); } catch (e) {}
-  fsSet('users/' + user.uid, { safetyFlag: true }).catch(function() {});
+  // Kept in the person's own private record. The account record can be read by a linked partner, so it never goes there.
+  fsSet('private/' + user.uid, { safetyFlag: true }).catch(function() {});
   sendSafetyFlagEmail(rec, user.email || '');
 }
 
@@ -4311,16 +4319,39 @@ function refreshTokenQuietly() {
   });
 }
 
+// A couple's Step 3 conversation goes through the couple function, which puts the partner's script into the request on
+// the server. Everything else goes to the ordinary AI function.
+function viaCoupleServer(step) { return String(step) === '3' && user && user.coupleId && user.accountType !== 'solo'; }
+
 function aiRequest(messages, step, retried) {
-  return fetch('/.netlify/functions/ai', {
+  var couple = viaCoupleServer(step);
+  return fetch(couple ? '/.netlify/functions/couple' : '/.netlify/functions/ai', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token || '') },
-    body: JSON.stringify({ messages: messages, step: step || '1' })
+    body: JSON.stringify(couple ? { action: 'ai', messages: messages, step: step } : { messages: messages, step: step || '1' })
   }).then(function(r) {
     if (r.status === 401 && !retried) {
       return refreshTokenQuietly().then(function() { return aiRequest(messages, step, true); });
     }
     return r;
+  });
+}
+
+// Asks the couple function to do something that needs the other partner's private script. The browser only gets back
+// the result, never the script. Renews the sign-in once if it ran out.
+function coupleCall(action, extra) {
+  var body = { action: action }; for (var k in (extra || {})) body[k] = extra[k];
+  var payload = JSON.stringify(body);
+  function go() { return fetch('/.netlify/functions/couple', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token || '') }, body: payload }); }
+  return go().then(function(r) { return r.status === 401 ? refreshTokenQuietly().then(go, function() { return r; }) : r; }).then(function(r) {
+    return r.json().catch(function() { return {}; }).then(function(j) {
+      if (!r.ok) {
+        var e = new Error(j.error || ('couple ' + r.status)); e.status = r.status; e.code = j.code || '';
+        logFailure('couple_' + action, 'couple function', { status: r.status, code: e.code, message: e.message });
+        throw e;
+      }
+      return j;
+    });
   });
 }
 
@@ -4390,7 +4421,12 @@ function loadProfile() {
     var pcp = el('pc-privacy'); if (pcp) pcp.style.display = user.accountType === 'solo' ? 'none' : '';
     if (p.soloCurrentStep) user.soloCurrentStep = String(p.soloCurrentStep);
     if (p.currentFightId) user.currentFightId = String(p.currentFightId);
-    if (p.safetyFlag) user.safetyFlag = true;
+    if (p.safetyFlag) {   // an older account may still have it in the account record: move it to the private one
+      user.safetyFlag = true;
+      fsSet('private/' + user.uid, { safetyFlag: true }).then(function() { return fsSet('users/' + user.uid, { safetyFlag: '' }); }).catch(function() {});
+    } else {
+      fsGet('private/' + user.uid).then(function(pd) { if (pd && pd.fields && fromFields(pd.fields).safetyFlag === true) { user.safetyFlag = true; try { localStorage.setItem('oa_user', JSON.stringify(user)); } catch (e) {} } }).catch(function() {});
+    }
     if (user.accountType === 'solo' && p.readyForReview) soloMarkSubmitted();
     localStorage.setItem('oa_user', JSON.stringify(user));
     if (user.accountType === 'solo') { soloJourneyRoute(); return; }
@@ -5626,6 +5662,7 @@ function step2Init() {
       if (user.accountType === 'solo') { soloResumeAfterSubmit(s); return; }
       step2ShowSubmittedState();
       checkAnalysisReady();
+      checkPartnerAndAnalyze();   // if both have submitted and nothing was made, the server makes it now
     } else {
       el('step2-thinking').addEventListener('input', step2AutoSave);
       el('step2-feeling').addEventListener('input', step2AutoSave);
@@ -5710,14 +5747,21 @@ function step2ShowSubmittedState() {
   soloShowNote('');
 }
 
+// Step 2. The server checks whether both partners have submitted and, if so, builds the joint analysis from both scripts.
+// The page only learns "both submitted: yes or no" and then the analysis, which is stored in the shared couple record.
 function checkPartnerAndAnalyze() {
   if (!user.coupleId || !user.partnerId) return Promise.resolve();
-  return fsGet('scripts/' + user.partnerId).then(function(d) {
-    if (!d || !d.fields) { setTimeout(pollAnalysisReady, 30000); return; }
-    var partnerData = fromFields(d.fields);
-    if (!partnerData.submitted) { setTimeout(pollAnalysisReady, 30000); return; }
-    return runStep2Analysis(partnerData);
-  }).catch(function() { setTimeout(pollAnalysisReady, 30000); });
+  txt('step2-status', 'Checking whether your partner has submitted...');
+  return coupleCall('analyze').then(function(r) {
+    if (!r.bothSubmitted) { txt('step2-status', ''); setTimeout(pollAnalysisReady, 30000); return; }
+    if (r.analysisReady) { txt('step2-status', ''); showAnalysisBanner(); if (r.created) sendAnalysisReadyNotifications(); return; }
+    // Another browser is already making it. Look again shortly.
+    txt('step2-status', 'Both scripts received. Analysis in progress. This may take up to a minute...');
+    setTimeout(pollAnalysisReady, 15000);
+  }).catch(function() {
+    txt('step2-status', 'Analysis could not complete. Please refresh and try again.');
+    setTimeout(pollAnalysisReady, 30000);
+  });
 }
 
 // The energy words as the person gave them, in one line each.
@@ -5770,51 +5814,6 @@ function buildReflectBlock(name, partnerName, data) {
   if (data.storyThinking) l.push('The story they tell themselves about what ' + pn + ' is thinking: ' + data.storyThinking);
   if (data.storyFeeling) l.push('What they think ' + pn + ' is feeling: ' + data.storyFeeling);
   return l.length ? '--- WHAT ' + name.toUpperCase() + ' SAID AFTER SUBMITTING, BEFORE SEEING ANY RESULTS ---\n' + l.join('\n') + '\n---' : '';
-}
-
-function runStep2Analysis(partnerData) {
-  txt('step2-status', 'Both scripts received. Analysis in progress. This may take up to a minute...');
-  return Promise.all([
-    fsGet('scripts/' + fdoc()),
-    fsGet('warmup/' + user.uid).catch(function() { return null; })
-  ]).then(function(results) {
-    var d = results[0];
-    var warmupDoc = results[1];
-    var myData = fromFields(d.fields || {});
-    var myName = user.name || 'Partner A';
-    var partnerName = user.partner || 'Partner B';
-    var fightName = user.fight || 'The Ongoing Argument';
-    var myText = scriptDataToText(myData, myName, partnerName);
-    var partnerText = scriptDataToText(partnerData, partnerName, myName);
-    var warmupBlock = buildWarmupBlock(myName, warmupDoc);
-    var prompt = 'The couple\'s fight is called: ' + fightName + '\n\n' +
-      warmupBlock +
-      '— SCRIPT FROM ' + myName.toUpperCase() + ' —\n\n' + myText + '\n\n' +
-      myName + '\'s story about what ' + partnerName + ' is thinking:\n' +
-      (myData.storyThinking || '(no answer provided)') + '\n\n' +
-      myName + '\'s story about what ' + partnerName + ' is feeling:\n' +
-      (myData.storyFeeling || '(no answer provided)') +
-      (myData.pathChosen === 'b' ? '\n\n' + buildIntakeBlock(myName, myData, partnerName) : '') + '\n\n' +
-      '— SCRIPT FROM ' + partnerName.toUpperCase() + ' —\n\n' + partnerText + '\n\n' +
-      partnerName + '\'s story about what ' + myName + ' is thinking:\n' +
-      (partnerData.storyThinking || '(no answer provided)') + '\n\n' +
-      partnerName + '\'s story about what ' + myName + ' is feeling:\n' +
-      (partnerData.storyFeeling || '(no answer provided)') +
-      (partnerData.pathChosen === 'b' ? '\n\n' + buildIntakeBlock(partnerName, partnerData, myName) : '');
-    return callAI([{ role: 'user', content: prompt }], '2').then(function(analysisText) {
-      return fsSet('couples/' + user.coupleId, {
-        analysis: analysisText,
-        analysisReady: true,
-        analysisAt: new Date().toISOString(),
-        currentStep: '3'
-      }).then(function() {
-        showAnalysisBanner();
-        sendAnalysisReadyNotifications();
-      });
-    }).catch(function() {
-      txt('step2-status', 'Analysis could not complete. Please refresh and try again.');
-    });
-  });
 }
 
 function scriptDataToText(data, personName, partnerName) {
@@ -5993,12 +5992,10 @@ function s3StartDelivery() {
   s3ShowTyping();
   Promise.all([
     fsGet('scripts/' + fdoc()),
-    user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
     fsGet('couples/' + user.coupleId)
   ]).then(function(results) {
     var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
-    var partnerScript = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
-    var couple = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
+    var couple = results[1] && results[1].fields ? fromFields(results[1].fields) : {};
     var analysis = couple.analysis || '';
     var myName = (user.displayName || 'Person A').split(' ')[0];
     var partnerName = 'your partner';
@@ -6009,7 +6006,7 @@ function s3StartDelivery() {
       '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' +
       scriptDataToText(myScript, myName, partnerName) + '\n\n' +
       '--- PARTNER\'S SCRIPT ---\n' +
-      scriptDataToText(partnerScript, partnerName, myName) + '\n\n' +
+      '[[PARTNER_SCRIPT]]' + '\n\n' +   // the server puts the partner's script here; this page never reads it
       'Now deliver ' + myName + '\'s personalized Mirror Moment. Begin with what you see in their script — their specific words, their recurring themes, the story they are telling themselves. Be warm, precise, and grounded in what they actually wrote. Do not be generic. Do not summarize both people equally. This is for ' + myName + ' only. Speak to them directly. Follow the Mirror Moment guidelines from your training: offer observations as possibilities, not verdicts. Invite reflection. After sharing your observations, ask an open question.';
 
     s3Messages = [{ role: 'user', content: setupPrompt }];
@@ -6139,8 +6136,8 @@ function s3SaveConversation() {
 
 // ── JOURNEY ROUTING ─────────────────────────────────────────
 var JOURNEY_STEPS = {
-  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'The video performance is coming soon. Skip ahead. Your reflective questions are ready.', btn: 'Continue to Reflective Questions' },
-  '5': { label: 'Step 5', title: 'Watch Your Partner\'s Script', sub: 'The video performance is coming soon. Skip ahead.', btn: 'Continue to Next Step' },
+  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'The video performance is coming soon. For now, read your script as a transcript. When you continue, your partner will be able to read it too.', btn: 'Read My Script' },
+  '5': { label: 'Step 5', title: 'Watch Your Partner\'s Script', sub: 'The video performance is coming soon. For now, read your partner\'s script as a transcript. It appears once you have each shared yours.', btn: 'Read My Partner\'s Script' },
   '6': { label: 'Step 6', title: 'Reflective Questions', sub: 'Four questions. Private answers. In your own words, without your partner\'s influence. This is where insight becomes clarity.', btn: 'Answer the Questions' },
   '7': { label: 'Step 7', title: 'Your Individual Work', sub: 'Before the two of you can work together effectively, each person must do their own work first. There is no authentic we unless it starts with an I.', btn: 'Begin Individual Work' },
   '8': { label: 'Step 8', title: 'NVC Together', sub: 'Now equipped individually, you come back together to practice a new way of communicating. Out of story and into solution.', btn: 'Begin NVC Practice' },
@@ -6196,13 +6193,24 @@ function showJourneyBanner(step) {
 function openJourneyStep() {
   var step = currentJourneyStep;
   if (step && step.indexOf('solo-') === 0) { openJourneyStepSolo(step.replace('solo-', '')); return; }
-  if (step === '4' || step === '5') advanceStep('6');
+  if (step === '4') openStep4();
+  else if (step === '5') openStep5();
   else if (step === '6') openStep6();
   else if (step === '7') openStep7();
   else if (step === '8') openStep8();
   else if (step === '9') openStep9();
   else if (step === '10') openStep10();
   else if (step === '11') openStep11();
+}
+
+// Moves the shared couple step forward only. If the other partner is already further along, nothing goes backwards.
+function advanceStepAtLeast(newStep) {
+  if (!user || !user.coupleId) return Promise.resolve();
+  return fsGet('couples/' + user.coupleId).then(function(d) {
+    var cur = (d && d.fields) ? parseInt(fromFields(d.fields).currentStep || '1', 10) : 1;
+    if (cur >= parseInt(newStep, 10)) { currentJourneyStep = String(cur); if (JOURNEY_STEPS[String(cur)]) showJourneyBanner(String(cur)); return; }
+    return advanceStep(newStep);
+  }).catch(function() { return advanceStep(newStep); });
 }
 
 function advanceStep(newStep) {
@@ -6917,7 +6925,7 @@ function pollSoloAnalysisReady() {
 function completeStep3() {
   hide('step3-screen');
   document.body.style.overflow = '';
-  advanceStep('4');
+  advanceStepAtLeast('4');
 }
 
 // ── STEP 4: WATCH YOUR SCRIPT ─────────────────────────────────
@@ -6936,10 +6944,22 @@ function openStep4() {
 
 function closeStep4() { hide('step4-screen'); document.body.style.overflow = ''; }
 
+// The one sharing moment. Continuing from Step 4 asks the server to write the shared copy of this person's script (the
+// lines, the scene, the name of the fight). Only then does Step 5 open. If it cannot be shared, the person stays here.
 function completeStep4() {
-  fsSet('step4/' + user.uid, { completedAt: new Date().toISOString(), uid: user.uid }).catch(function() {});
-  closeStep4();
-  advanceStep('5');
+  var btn = el('s4-continue'), err = el('s4-share-err');
+  if (err) err.textContent = '';
+  if (btn) { btn.disabled = true; }
+  var share = (user.accountType !== 'solo' && user.coupleId) ? coupleCall('share') : Promise.resolve({ ok: true });
+  share.then(function() {
+    fsSet('step4/' + user.uid, { completedAt: new Date().toISOString(), uid: user.uid }).catch(function() {});
+    if (btn) btn.disabled = false;
+    closeStep4();
+    advanceStepAtLeast('5');
+  }).catch(function() {
+    if (btn) btn.disabled = false;
+    if (err) err.textContent = 'Your script could not be shared just now, so nothing has been shared. Please tap again.';
+  });
 }
 
 function renderScriptTranscript(data, containerId, myName, partnerName) {
@@ -6951,7 +6971,7 @@ function renderScriptTranscript(data, containerId, myName, partnerName) {
     var lines = typeof data.lines === 'string' ? JSON.parse(data.lines) : data.lines;
     lines.forEach(function(l) {
       if (l.type === 'line') {
-        var spk = l.char === 'a' ? myName : partnerName;
+        var spk = String(l.char || '').toUpperCase() === 'A' ? myName : partnerName;
         var beat = l.beat ? ' <em style="opacity:0.55">(' + esc(cueInner(l.beat)) + ')</em>' : '';
         html += '<div class="s45-tx-line"><span class="s45-tx-spk">' + esc(spk) + '</span>' + beat + esc(l.dialogue || '') + '</div>';
       } else if (l.type === 'direction' && l.text) {
@@ -6968,12 +6988,39 @@ function openStep5() {
   el('step5-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   el('s5-intro').textContent = 'Watching your own script is powerful. Watching your partner\'s version immediately after is extraordinary. The same fight from two completely different experiences. Watch as a witness to their journey.';
-  if (user.partnerId) {
-    fsGet('scripts/' + user.partnerId).then(function(d) {
-      if (!d || !d.fields) return;
-      renderScriptTranscript(fromFields(d.fields), 's5-transcript', user.partner || 'Partner', user.name || 'Me');
-    }).catch(function() {});
+  s5Load();
+}
+
+// Your partner's script appears here only from the copy they chose to share when they continued from Step 4, and only
+// once you have shared yours too. Until then the page says so plainly and shows nothing of theirs.
+function s5Load() {
+  var box = el('s5-transcript');
+  var cont = document.querySelector('#s5-inner .s45-continue');
+  box.innerHTML = '';
+  if (cont) cont.style.display = 'none';
+  function waitNote(msg) {
+    box.innerHTML = '';
+    var d = document.createElement('div'); d.className = 's5-wait';
+    d.appendChild(document.createTextNode(msg));
+    d.appendChild(document.createElement('br'));
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = 'Check again'; b.addEventListener('click', s5Load);
+    d.appendChild(b);
+    box.appendChild(d);
   }
+  if (!user.partnerId) { waitNote('Your partner has not joined yet.'); return; }
+  fsGet('sharedScripts/' + user.uid).then(function(mine) {
+    if (!mine || !mine.fields) {
+      waitNote('Finish Step 4 first. Your partner\'s script appears here once you have each shared yours.');
+      var g = document.createElement('button'); g.type = 'button'; g.textContent = 'Go to Step 4'; g.addEventListener('click', function() { closeStep5(); openStep4(); });
+      box.firstChild.appendChild(g);
+      return;
+    }
+    return fsGet('sharedScripts/' + user.partnerId).then(function(d) {
+      if (!d || !d.fields) { waitNote('Your partner has not reached this step yet. Their script will appear here when they continue from Step 4. You can come back at any time.'); return; }
+      renderScriptTranscript(fromFields(d.fields), 's5-transcript', user.partner || 'Partner', user.name || 'Me');
+      if (cont) cont.style.display = '';
+    });
+  }).catch(function() { waitNote('Your partner\'s script could not be loaded just now.'); });
 }
 
 function closeStep5() { hide('step5-screen'); document.body.style.overflow = ''; }
@@ -6981,7 +7028,7 @@ function closeStep5() { hide('step5-screen'); document.body.style.overflow = '';
 function completeStep5() {
   fsSet('step5/' + user.uid, { completedAt: new Date().toISOString(), uid: user.uid }).catch(function() {});
   closeStep5();
-  advanceStep('6');
+  advanceStepAtLeast('6');
 }
 
 // ── STEP 6: REFLECTIVE QUESTIONS ─────────────────────────────
@@ -7825,7 +7872,7 @@ function runRewriteAnalysis(rewriteText) {
   if (!user || !user.coupleId) return Promise.reject('no coupleId');
   return Promise.all([
     fsGet('scripts/' + fdoc()),
-    user.partnerId ? fsGet('scripts/' + user.partnerId) : Promise.resolve(null),
+    user.partnerId ? fsGet('sharedScripts/' + user.partnerId) : Promise.resolve(null),   // the copy they shared at Step 5, never their private script
     fsGet('couples/' + user.coupleId)
   ]).then(function(results) {
     var myScript = results[0] && results[0].fields ? fromFields(results[0].fields) : {};
@@ -7941,10 +7988,14 @@ function openStep11() {
     if (user.accountType === 'solo' || !user.partnerId) {
       el('s11-coach-section').style.display = 'block';
     } else {
-      fsGet('step11/' + user.partnerId).then(function(pd) {
-        if (pd && pd.fields && fromFields(pd.fields).reachedAt) {
-          el('s11-coach-section').style.display = 'block';
-        }
+      // Each partner marks that they reached the end in the shared couple record. Nobody reads the other's private record.
+      var coupleRef = 'couples/' + user.coupleId;
+      fsGet(coupleRef).then(function(cd) {
+        var c = (cd && cd.fields) ? fromFields(cd.fields) : {};
+        var mine = c.partnerAId === user.uid ? 'step11ReachedA' : 'step11ReachedB';
+        var theirs = mine === 'step11ReachedA' ? 'step11ReachedB' : 'step11ReachedA';
+        if (!c[mine]) { var w = {}; w[mine] = new Date().toISOString(); fsSet(coupleRef, w).catch(function() {}); }
+        if (c[theirs]) el('s11-coach-section').style.display = 'block';
       }).catch(function(){});
     }
   }).catch(function(){});
