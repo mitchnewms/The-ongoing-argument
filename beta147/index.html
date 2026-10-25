@@ -553,6 +553,20 @@ body.script-locked #scene-input { pointer-events: none; }
 @keyframes jbPulse { 0% { box-shadow: 0 0 0 0 rgba(224,101,0,0.55); } 100% { box-shadow: 0 0 0 18px rgba(224,101,0,0); } }
 #journey-banner.jb-pulse { animation: jbPulse 1.4s ease-out 2; }
 @media (prefers-reduced-motion: reduce) { #journey-banner.jb-pulse { animation: none; } }
+
+/* The choice sits right under the logo so it is on screen without scrolling */
+.lp-hero { min-height: 0 !important; padding: 28px 0 40px !important; justify-content: flex-start !important; }
+.lp-top-cta { width: 100%; max-width: 380px; margin: 14px auto 0; padding: 0 16px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
+.lp-top-cta .lp-choice { margin: 0 auto !important; }
+.lp-top-cta .lp-signin-link { margin-top: 2px; }
+@media (max-height: 800px) { .lp-hero-logo-wrap { max-height: 38vh; overflow: hidden; } }
+
+/* Create Account reached from Sign In asks first: one person or two */
+#form-create.ca-needs-choice > *:not(#ca-choice) { display: none !important; }
+#ca-choice { display: none; flex-direction: column; gap: 12px; text-align: center; padding: 6px 0; }
+#form-create.ca-needs-choice > #ca-choice { display: flex !important; }
+#ca-choice h2 { margin: 0 0 4px; font-size: 1.15rem; }
+#signin-back { display: block !important; }
 </style>
 
 <style>
@@ -2163,6 +2177,11 @@ h1, h2, h3,
     <div class="lp-hero-logo-wrap">
     <img src="/toa-logo.png?v=3" alt="The Ongoing Argument. Every argument is a knock at the door to a deeper connection." class="lp-hero-logo">
     </div>
+    <div class="lp-top-cta">
+      <button class="lp-btn lp-choice" id="lp-top-begin" onclick="lpRevealCommitment()"><span class="lp-choice-main">Start as a couple</span><span class="lp-choice-sub">You and your partner, each on your own phone</span></button>
+      <button class="lp-btn-solo lp-choice lp-choice-solo" id="lp-top-solo" onclick="lpRevealCommitmentSolo()"><span class="lp-choice-main">Start on your own</span><span class="lp-choice-sub">Just you. Your partner does not need to join.</span></button>
+      <button type="button" class="lp-signin-link" onclick="openSignIn()">Already have an account? Sign in</button>
+    </div>
   </section>
 
   <!-- S2: THE STORY -->
@@ -2293,6 +2312,11 @@ h1, h2, h3,
       <button type="button" id="btn-forgot" onclick="forgotPassword()" style="background:none;border:none;color:var(--ink-faint);font-family:'Courier Prime',monospace;font-size:0.75rem;font-style:italic;cursor:pointer;margin-top:8px;padding:0;text-decoration:underline;">Forgot password?</button>
     </div>
     <div id="form-create" aria-hidden="true" role="tabpanel" aria-labelledby="tab-create" tabindex="0">
+      <div id="ca-choice">
+        <h2>Just you, or you and your partner?</h2>
+        <button type="button" class="auth-submit" onclick="caChoose('solo')">Just me</button>
+        <button type="button" class="auth-submit" style="background:#FFFFFF;color:#B84F00;border:2px solid #E06500;" onclick="caChoose('couple')">Me and my partner</button>
+      </div>
       <div class="auth-sub">Set up your private script space.</div>
       <div class="auth-field"><label for="ca-name">Your First Name</label><input type="text" id="ca-name" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
       <div class="auth-field"><label for="ca-partner">Partner's First Name</label><input type="text" id="ca-partner" placeholder="e.g. Alex" autocomplete="off" /></div>
@@ -3468,6 +3492,7 @@ var scriptTarget = null;
 // Enrollment flow
 var enrollMode = null; // 'start' | 'join'
 var soloEnrollMode = false; // true when "Start on your own" chosen
+var accountChoice = null;    // 'solo' | 'couple' | 'join' once the person has said which. Never assumed.
 var pendingCoupleId = null; // set for Partner B (from URL or code lookup)
 var pendingPartnerAId = null; // set after code verified
 var pendingFightName = null; // carry fight name into auth
@@ -3521,7 +3546,7 @@ document.addEventListener('keydown', function(e) {
   // If Partner B arrived via /join/ URL and is not logged in, show their intro
   if (pendingJoinCoupleId && !user) {
     pendingCoupleId = pendingJoinCoupleId;
-    enrollMode = 'join';
+    enrollMode = 'join'; accountChoice = 'join';
     hide('landing-screen');
     history.replaceState({ screen: 'pb-intro' }, '');
     el('partner-b-intro-screen').style.display = 'block';
@@ -3650,8 +3675,34 @@ function switchTab(tab) {
   el('tab-create').setAttribute('aria-selected', isSI ? 'false' : 'true');
   el('form-signin').setAttribute('aria-hidden', isSI ? 'false' : 'true');
   el('form-create').setAttribute('aria-hidden', isSI ? 'true' : 'false');
+  caSync();
   // setTimeout lets the browser finish label→radio focus before we move focus
   setTimeout(function() { var f = el(isSI ? 'si-email' : 'ca-name'); if (f) f.focus(); }, 0);
+}
+
+// Create Account never decides couple or solo on its own. If the person has not chosen yet (for example they came
+// through Sign In), it asks first.
+function caNeedsChoice() { return !accountChoice && enrollMode !== 'join' && !soloEnrollMode; }
+function caApplyMode() {
+  var solo = soloEnrollMode;
+  var partnerRow = el('ca-partner') ? el('ca-partner').closest('.auth-field') : null;
+  if (partnerRow) partnerRow.style.display = solo ? 'none' : '';
+  var sub = document.querySelector('#form-create .auth-sub');
+  if (sub) sub.textContent = 'Set up your private script space.';
+  var fightLabel = el('ca-fight') ? el('ca-fight').previousElementSibling : null;
+  if (fightLabel) fightLabel.textContent = solo ? 'The fight, what do you call it?' : 'The Fight, what do you both call it?';
+}
+function caSync() {
+  var f = el('form-create');
+  if (!f) return;
+  f.classList.toggle('ca-needs-choice', caNeedsChoice());
+  caApplyMode();
+}
+function caChoose(mode) {
+  soloEnrollMode = (mode === 'solo');
+  accountChoice = mode;
+  caSync();
+  setTimeout(function() { var n = el('ca-name'); if (n) n.focus(); }, 0);
 }
 
 // AUTH
@@ -3694,6 +3745,7 @@ function forgotPassword() {
 function createAccount() {
   var name = val('ca-name'), partner = val('ca-partner'), email = val('ca-email'), emailConfirm = val('ca-email-confirm'), pass = el('ca-pass').value, passConfirm = (el('ca-pass-confirm') ? el('ca-pass-confirm').value : pass), fight = val('ca-fight');
   txt('ca-error', '');
+  if (caNeedsChoice()) { caSync(); return; }
   el('ca-email-match-err').style.display = 'none';
   el('ca-pass-match-err').style.display = 'none';
   el('ca-disclaimer-err').style.display = 'none';
@@ -3812,9 +3864,16 @@ function openSignIn() {
 
 function closeSignIn() {
   document.body.classList.remove('from-landing');
-  hide('auth-screen');
+  hide('auth-screen'); hide('buyin-screen');
+  // Back to the front screen as if it had just opened: nothing chosen yet.
+  soloEnrollMode = false; accountChoice = null; enrollMode = isJoinPath() ? 'join' : null; if (isJoinPath()) accountChoice = 'join';
+  Array.prototype.forEach.call(document.querySelectorAll('.lp-choice'), function(b) { b.disabled = false; });
+  ['lp-s6', 'lp-s7'].forEach(function(id) { var n = el(id); if (n) { n.style.display = 'none'; n.classList.remove('lp-in'); } });
+  var cb = el('lp-btn-commit'); if (cb) cb.disabled = false;
+  var cc = document.querySelector('.lp-commit-couples'), cs = document.querySelector('.lp-commit-solo');
+  if (cc) cc.style.display = ''; if (cs) cs.style.display = '';
   var lp = el('landing-screen');
-  if (lp && !isJoinPath()) lp.style.display = lp.getAttribute('data-prev-display') || '';
+  if (lp && !isJoinPath()) { lp.style.display = ''; lp.style.opacity = ''; lp.scrollTop = 0; }
   if (isJoinPath()) { var pb = el('partner-b-intro-screen'); if (pb) pb.style.display = 'block'; }
 }
 
@@ -3885,7 +3944,7 @@ function signOut() {
   user = null; token = null; acctDirty = null;
   localStorage.removeItem('oa_user');
   try { localStorage.removeItem('oa_pb_progress'); } catch (e) {}
-  enrollMode = null; soloEnrollMode = false; pendingCoupleId = null; pendingPartnerAId = null;
+  enrollMode = null; soloEnrollMode = false; accountChoice = null; pendingCoupleId = null; pendingPartnerAId = null;
   pendingFightName = null; pendingJoinCoupleId = null; pendingJoinCode = null; pendingCodeToUse = null; pcLastJoinUrl = null;
   hide('script-screen'); hide('coach-screen'); hide('al-fab');
   hide('couple-linked-status');
@@ -4800,12 +4859,12 @@ function lpScrollTo(t) {
 }
 
 function lpRevealCommitment() {
+  accountChoice = soloEnrollMode ? 'solo' : 'couple';
   var s6 = el('lp-s6');
   s6.style.display = 'block';
   void s6.offsetWidth;
   s6.classList.add('lp-in');
-  el('lp-btn-begin').disabled = true;
-  var solo = el('lp-btn-solo'); if (solo) solo.disabled = true;
+  Array.prototype.forEach.call(document.querySelectorAll('.lp-choice'), function(b) { b.disabled = true; });
   history.pushState({ lp: 'commitment' }, '');
   setTimeout(function() { lpScrollTo(s6); }, 60);
 }
@@ -4853,12 +4912,7 @@ function lpProceed() {
     lp.style.opacity = '';
     if (soloEnrollMode) {
       // Individual path: skip buyin-screen entirely — go straight to account creation
-      var partnerRow = el('ca-partner') ? el('ca-partner').closest('.auth-field') : null;
-      if (partnerRow) partnerRow.style.display = 'none';
-      var sub = document.querySelector('#form-create .auth-sub');
-      if (sub) sub.textContent = 'Set up your private script space.';
-      var fightLabel = el('ca-fight') ? el('ca-fight').previousElementSibling : null;
-      if (fightLabel) fightLabel.textContent = 'The fight, what do you call it?';
+      caApplyMode();
       var btn = el('btn-create'); if (btn) btn.textContent = 'Create Account';
       if (pendingFightName) { var fi = el('ca-fight'); if (fi) fi.value = pendingFightName; }
       history.pushState({ screen: 'auth' }, '');
