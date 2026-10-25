@@ -4046,45 +4046,97 @@ function afterLogin() {
 function fightId() { return (user && user.currentFightId) || 'f1'; }
 function fdoc() { return fightId() === 'f1' ? user.uid : user.uid + '_' + fightId(); }
 
+// Every account database call goes through here. If the sign-in token has run out (HTTP 401), the token is renewed once
+// and the same call is made again, so a long session never turns into mysterious save failures.
+function fsFetch(url, opts) {
+  function go() {
+    var o = {}; for (var k in opts) o[k] = opts[k];
+    o.headers = {}; for (var h in (opts.headers || {})) o.headers[h] = opts.headers[h];
+    o.headers['Authorization'] = 'Bearer ' + token;
+    return fetch(url, o);
+  }
+  return go().then(function(r) {
+    if (r.status !== 401) return r;
+    return refreshTokenQuietly().then(go, function() { return r; });
+  });
+}
+
+// What a failed write looked like, without any of the words the person wrote: each field's name and size in characters.
+function fieldSizes(data) {
+  return Object.keys(data || {}).map(function(k) {
+    var v = data[k];
+    if (v === undefined) return k + ':UNDEFINED';
+    return k + ':' + (typeof v === 'string' ? v.length : JSON.stringify(v).length);
+  }).join(',');
+}
+
+// Tells the server what really went wrong, so the admin page can show it. Never carries what the person wrote.
+var failLogSeen = {};
+function logFailure(kind, where, info) {
+  try {
+    if (!user || !token) return;
+    info = info || {};
+    var key = kind + '|' + where + '|' + (info.status || '') + '|' + String(info.detail || info.message || '').slice(0, 60);
+    if (failLogSeen[key]) return;
+    failLogSeen[key] = 1; setTimeout(function() { delete failLogSeen[key]; }, 60000);
+    var body = JSON.stringify({ kind: kind, where: where, info: info, page: location.pathname, agent: String(navigator.userAgent || '').slice(0, 120) });
+    var send = function() { return fetch('/.netlify/functions/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: body }); };
+    send().then(function(r) { if (r.status === 401) return refreshTokenQuietly().then(send); }).catch(function() {});
+  } catch (e) {}
+}
+
+function saveFailure(r, j, path, data) {
+  var msg = (j && j.error && (j.error.message || j.error.status)) || '';
+  var e = new Error('save failed');
+  e.code = 'save_failed'; e.status = r.status; e.detail = String(msg).slice(0, 300); e.path = path; e.fields = fieldSizes(data);
+  logFailure('save_failed', path.replace(/\/[^\/]*$/, '/…'), { status: r.status, code: (j && j.error && j.error.status) || '', message: 'The database refused the write', detail: e.detail, fields: e.fields });
+  return e;
+}
+
 function fsGet(path) {
-  return fetch(DB + '/' + path, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.json(); });
+  return fsFetch(DB + '/' + path, {}).then(function(r) { return r.json(); });
 }
 
 function fsSet(path, data) {
   var fields = toFields(data);
   var mask = Object.keys(data).map(function(k) { return 'updateMask.fieldPaths=' + k; }).join('&');
-  return fetch(DB + '/' + path + '?' + mask, {
+  return fsFetch(DB + '/' + path + '?' + mask, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields: fields })
-  }).then(function(r) { return r.json(); });
+  }).then(function(r) {
+    return r.json().catch(function() { return {}; }).then(function(j) {
+      if (!r.ok || (j && j.error)) saveFailure(r, j, path, data);   // logged; the callers of this one never stop for it
+      return j;
+    });
+  });
 }
 
 // Like fsSet, but a refused or failed write is an error. Used where a silent failure would mislead the person.
 function fsSetStrict(path, data) {
   var mask = Object.keys(data).map(function(k) { return 'updateMask.fieldPaths=' + k; }).join('&');
-  return fetch(DB + '/' + path + '?' + mask, {
+  return fsFetch(DB + '/' + path + '?' + mask, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields: toFields(data) })
   }).then(function(r) {
     return r.json().catch(function() { return {}; }).then(function(j) {
-      if (!r.ok || (j && j.error)) { var e = new Error('save failed'); e.code = 'save_failed'; throw e; }
+      if (!r.ok || (j && j.error)) throw saveFailure(r, j, path, data);
       return j;
     });
   });
 }
 
 function fsAdd(col, data) {
-  return fetch(DB + '/' + col, {
+  return fsFetch(DB + '/' + col, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields: toFields(data) })
   }).then(function(r) { return r.json(); });
 }
 
 function fsList(col) {
-  return fetch(DB + '/' + col, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.json(); });
+  return fsFetch(DB + '/' + col, {}).then(function(r) { return r.json(); });
 }
 
 function fsQuery(col, field, value) {
@@ -4142,6 +4194,7 @@ function toFields(obj) {
     var v = obj[k];
     if (typeof v === 'string') f[k] = { stringValue: v };
     else if (typeof v === 'boolean') f[k] = { booleanValue: v };
+    else if (v === undefined) f[k] = { stringValue: '' };   // an empty value would make the database refuse the whole write
     else f[k] = { stringValue: JSON.stringify(v) };
   }
   return f;
@@ -4290,6 +4343,7 @@ function callAI(messages, step) {
         err.code = body.code || '';
         err.detail = String(t || '').slice(0, 300);
         window._lastAIError = { status: err.status, code: err.code, detail: err.detail, step: step || '' };
+        logFailure('ai_error', 'step ' + (step || '?'), { status: err.status, code: err.code, message: err.message, detail: err.detail });
         if (err.code === 'daily_limit') showDailyLimit(err.message);
         throw err;
       });
@@ -4306,6 +4360,9 @@ function callAI(messages, step) {
       recordSafetyFlag(step);
     }
     return text;
+  }).catch(function(e) {
+    if (e && !e.status && !e._logged) { e._logged = true; logFailure('ai_network', 'step ' + (step || '?'), { message: e.message }); }
+    throw e;
   });
 }
 
@@ -6490,7 +6547,7 @@ function soloGenerateAnalysis() {
 function callAIWithTimeout(messages, step, ms) {
   return new Promise(function(resolve, reject) {
     var done = false;
-    var t = setTimeout(function() { if (!done) { done = true; var e = new Error('The AI took too long.'); e.code = 'timeout'; reject(e); } }, ms || 120000);
+    var t = setTimeout(function() { if (!done) { done = true; var e = new Error('The AI took too long.'); e.code = 'timeout'; logFailure('ai_timeout', 'step ' + (step || '?'), { code: 'timeout', message: 'No answer after ' + Math.round((ms || 120000) / 1000) + ' seconds' }); reject(e); } }, ms || 120000);
     callAI(messages, step).then(function(x) { if (!done) { done = true; clearTimeout(t); resolve(x); } },
                                 function(e) { if (!done) { done = true; clearTimeout(t); reject(e); } });
   });
@@ -6511,6 +6568,7 @@ function runSoloAnalysis() {
   }).catch(function(err) {
     // The script is already saved, so offer a retry instead of a dead end.
     soloRun.failed = true;
+    logFailure('analysis_failed', 'solo analysis', { status: err && err.status, code: err && err.code, message: err && err.message, detail: (err && (err.detail || err.path)) || '', fields: (err && err.fields) || '' });
     hide('step1-waiting-banner');
     soloShowNote((err && err.code === 'save_failed')
       ? 'Your analysis could not be saved just now, so it is not ready yet. Your script is saved. Please try again.'
@@ -6567,7 +6625,8 @@ function wInputs(sd, items) {
   if (en) { var you = wEn(en.me), partner = wEn(en.partner); if (you || partner) out.energy = { you: you, partner: partner }; }
   if (sd.cue) {
     var at = sd.cuePlacement ? wCueIndex(items, sd.cuePlacement) : -1;
-    out.cue = { text: String(sd.cue), after: at >= 0 ? at : null };
+    out.cue = { text: String(sd.cue) };
+    if (at >= 0) out.cue.after = at;   // "Not sure" sends no line at all
   }
   return out;
 }
@@ -6586,7 +6645,8 @@ function soloWitnessGenerate() {
     var hash = wScriptHash(sd, items);
     var body = { you: soloMyName(), partner: soloPartnerName(), lines: items };
     var inp = wInputs(sd, items); if (inp.energy) body.energy = inp.energy; if (inp.cue) body.cue = inp.cue;
-    return wRequest(body).then(function(r) { return r.json().catch(function() { return {}; }); }).then(function(res) {
+    return wRequest(body).then(function(r) { return r.json().catch(function() { return {}; }).then(function(j) { if (!r.ok) logFailure('scene_failed', 'scene call', { status: r.status, code: (j && j.code) || '', message: (j && j.error) || '' }); return j; }); }).then(function(res) {
+      if (res && res.skipped && res.skipped !== 'safety') logFailure('scene_skipped', 'scene call', { code: res.skipped, message: 'The scene reply did not pass the checks, so no scene was made' });
       if (!res || !res.beats || !res.beats.length) return null;
       return fsGet('solo-analysis/' + fdoc()).then(function(a) {
         var cur = (a && a.fields) ? fromFields(a.fields) : {};
@@ -6595,7 +6655,7 @@ function soloWitnessGenerate() {
         return fsSetStrict('solo-analysis/' + fdoc(), { witness: JSON.stringify(map), witnessSeen: false });
       }).then(function() { return { hash: hash, beats: res.beats, items: items, seen: false }; });
     });
-  }).catch(function(err) { console.error('Witness scene could not be made:', err); return null; });
+  }).catch(function(err) { console.error('Witness scene could not be made:', err); logFailure('scene_failed', 'scene save', { status: err && err.status, code: err && err.code, message: err && err.message, detail: (err && err.detail) || '', fields: (err && err.fields) || '' }); return null; });
 }
 
 // The saved scene for the script as it is now (or null).

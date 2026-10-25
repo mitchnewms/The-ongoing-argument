@@ -71,6 +71,12 @@
     </div>
     <!-- TEST TOOLS. REMOVE BEFORE LAUNCH (this block, the script below it, and netlify/functions/admin-test-tools.js) -->
     <div class="card">
+      <h2>Recent failures</h2>
+      <p class="fine">The real cause when a save or an AI step fails: where, the status, and the service's own message. It never holds what anyone wrote.</p>
+      <div class="scroll"><table id="errs"></table></div>
+    </div>
+
+    <div class="card">
       <h2>Where people stop</h2>
       <p class="fine">The last question each person reached in the story questions. It is saved as they go.</p>
       <div id="drop-tally" class="fine"></div>
@@ -119,6 +125,7 @@ function load() {
   return Promise.all([api('usage'), api('waitlist')]).then(function(r) {
     $('login').style.display = 'none'; $('app').style.display = 'block';
     showUsage(r[0]); showList(r[1]);
+    api('errors').then(showErrs).catch(function() { $('errs').innerHTML = '<tr><td>Could not load this list.</td></tr>'; });
     api('dropoff').then(showDrop).catch(function() { $('drop').innerHTML = '<tr><td>Could not load this list.</td></tr>'; });
   }).catch(function(e) {
     token = ''; $('go').disabled = false;
@@ -147,6 +154,12 @@ function showUsage(u) {
     (u.topAccounts.map(function(t) { return '<tr><td>' + esc(t.name) + '</td><td>' + esc(t.email) + '</td><td class="n">' + t.calls + '</td><td class="n">' + usd(t.cost) + '</td></tr>'; }).join('') || '<tr><td colspan="4">Nothing yet.</td></tr>');
 }
 
+function showErrs(d) {
+  $('errs').innerHTML = '<tr><th>When</th><th>Account</th><th>What</th><th>Where</th><th>Status</th><th>Real cause</th><th>Fields (name:size)</th></tr>' +
+    (d.rows.map(function(r) {
+      return '<tr><td>' + esc(String(r.at).slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.kind) + '</td><td>' + esc(r.where) + '</td><td>' + esc(r.status) + '</td><td style="white-space:normal;min-width:240px">' + esc([r.code, r.message, r.detail].filter(Boolean).join(' | ')) + '</td><td style="white-space:normal;min-width:160px">' + esc(r.fields) + '</td></tr>';
+    }).join('') || '<tr><td colspan="7">No failures recorded.</td></tr>');
+}
 var DROP_NAMES = { here: 'Here\u2019s what I heard', lines: 'Lines you hear', sound: 'How each of you sounds', start: 'How it starts', gets: 'What gets to you', story: 'The story you tell yourself', feel: 'What they feel', want: 'What you want understood', end: 'How it ends', review: 'Final review', telling: 'Telling the story', extract: 'Reading the story', done: 'Building the draft' };
 function showDrop(d) {
   var keys = Object.keys(d.tally);

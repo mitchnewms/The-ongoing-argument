@@ -94,7 +94,7 @@ exports.handler = async function(event) {
   }
   if (body.cue && typeof body.cue === 'object' && body.cue.text) {
     input.cue = { text: String(body.cue.text).slice(0, 60) };
-    const after = Number(body.cue.after);
+    const after = body.cue.after === null || body.cue.after === undefined || body.cue.after === '' ? NaN : Number(body.cue.after);
     if (Number.isInteger(after) && after >= 0 && after < lines.length) input.cue.follows_line = after;
   }
 

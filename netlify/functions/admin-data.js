@@ -103,6 +103,14 @@ exports.handler = async function(event) {
         return { email: x.email, createdAt: x.createdAt, noticeSent: x.noticeSent === true ? true : (x.noticeSent === false ? false : null), noticeError: x.noticeError || '' };
       }) });
     }
+    if (view === 'errors') {
+      // The real cause of recent failures, newest first (written by log-error).
+      const rows = await admin.listAll('errorLog', 2000);
+      rows.sort(function(a, b) { return String(b.at).localeCompare(String(a.at)); });
+      return reply(CORS, 200, { rows: rows.slice(0, 100).map(function(r) {
+        return { at: r.at, email: r.email || r.uid, kind: r.kind, where: r.where, status: r.status, code: r.code, message: r.message, detail: r.detail, fields: r.fields, page: r.page };
+      }) });
+    }
     if (view === 'dropoff') {
       // Where people stop in the questions: the last question each person reached, saved as they went.
       const parts = await Promise.all([admin.listAll('private', 20000), admin.listAll('users', 20000), admin.listAll('scripts', 20000)]);
