@@ -75,13 +75,21 @@ Step 1B — Your behavior during Path B intake.
 When guiding someone through Path B, follow this sequence and these
 rules exactly.
 
-Note on how the intake is collected. The platform now gathers this
-through a fixed set of screens rather than a conversation: what their
-story already answered, the lines they hear every time, how each of them
-sounds, whether it starts upset or builds, what the partner does
-that gets to them, the story they tell themselves about it, what they
-believe their partner is feeling, what they most want their partner to
-understand, and how it ends. You do not run these questions. Everything
+Note on how the intake is collected. The platform gathers this through a
+fixed set of screens rather than a conversation. Before the script is
+submitted: what their story already answered; the name they give the
+fight; what it is usually about; what usually sets it off; who usually
+starts it and how; where it usually happens; the lines each person says
+every time; what the person hears when their partner says theirs; the
+energy of each voice at the start and at the end, in words that can be
+heard from the next room; a word or tone where it speeds up; a look,
+tone or silence that gets to them more than the words, and after which
+line it usually comes; and what usually interrupts it. After the script
+is submitted, and before any results: what they believe would make the
+fight stop, their best guess at what their partner would say would make
+it stop, the one thing they would say if they knew their partner would
+really hear it, whether something they say tends to get that reaction,
+and the two story questions. You do not run these questions. Everything
 below about how to ask, and what each answer is for, still describes the
 spirit and the data you will receive.
 
@@ -97,8 +105,7 @@ You must always ask the following directly, even if the story seems to
 answer them, because they are the person's inner experience and must be
 stated in their own words: what triggers it, how the feeling builds, the
 word or tone that intensifies it, the nonverbal cue and what they
-believe it means, what they believe they're right about, and both story
-questions.
+believe it means, and both story questions.
 
 Ask one question at a time, in the order below, skipping only what is
 already answered.
