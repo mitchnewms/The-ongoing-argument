@@ -5743,6 +5743,8 @@ function buildIntakeBlock(name, data, partnerName) {
   if (data.setting || data.fightLocation) lines.push('Where it usually happens: ' + (data.setting || data.fightLocation));
   if (data.startingMoment) lines.push('The first line that starts it: ' + data.startingMoment);
   if (data.beatByBeat) lines.push('How it unfolds beat by beat: ' + data.beatByBeat);
+  if (data.sayEveryTime) lines.push('What ' + name + ' says every time: ' + String(data.sayEveryTime).replace(/\n/g, ' / '));
+  if (data.theySayEveryTime) lines.push('What ' + pn + ' says every time: ' + String(data.theySayEveryTime).replace(/\n/g, ' / '));
   if (data.heardWhenTheySayThat) lines.push('What they hear when ' + pn + ' says their usual line (their version, not what ' + pn + ' meant): ' + data.heardWhenTheySayThat);
   if (data.speedsUpAt || data.intensifyingTrigger) lines.push('A word or tone where it speeds up: ' + (data.speedsUpAt || data.intensifyingTrigger));
   var en = energyLines(data.energy, name, pn);
@@ -7098,6 +7100,8 @@ function s7StartDelivery() {
       'Here is all the context you need:\n\n' +
       analysisLabel + '\n' + analysisText + '\n\n' +
       '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
+      (myScript.pathChosen === 'b' ? buildIntakeBlock(myName, myScript, partnerName) + '\n\n' : '') +
+      (buildReflectBlock(myName, partnerName, myScript) ? buildReflectBlock(myName, partnerName, myScript) + '\n\n' : '') +
       '--- ' + myName.toUpperCase() + '\'S REFLECTIONS (Step 6) ---\n' +
       'Q1: ' + (step6.q1 || '(not answered)') + '\n' +
       'Q2: ' + (step6.q2 || '(not answered)') + '\n' +
@@ -8236,8 +8240,8 @@ function storySpeechSupported() { return !!(window.SpeechRecognition || window.w
 
 // STORY (free-form retelling by voice or typing)
 var pbStory = { text: '', voice: false, typed: false };
-// Keep false until the Phase 1 Firestore rules are published: private/{uid} must be owner-only first.
-var STORE_RETELLING = false;
+// The person's own story, as first told, is kept in their private record (owner only: the rules let no one else read private/).
+var STORE_RETELLING = true;
 var storyDict = null;
 
 function showStatus(id, boxId, msg, help) {
@@ -9424,6 +9428,7 @@ function ivToLegacy() {
   var cue = ivReal(iv.cue), after = ivReal(iv.cueAfter);
   pbAnswers = {
     q1: ivReal(iv.about) || iv.here.topic, q2: ivReal(iv.trigger), q3: ivReal(iv.setting) || iv.here.where, q4: iv.here.first, q4b: ivReal(iv.starter),
+    sayMe: meLines, sayThem: themLines,
     q5: spoken, q6: energy, q7: ivReal(iv.speedup), q7b: rep.join('\n'), q8: ivReal(iv.interrupt), q9: cue, q9b: '',
     cueAfter: cue ? after : '', heard: ivReal(iv.heard), notes: notes,
     qRead: '', qWant: '', q10: ''
@@ -9647,7 +9652,7 @@ function pbGenerateDraft(isRetry) {
 function pbSaveRetelling() {
   if (!STORE_RETELLING || !user || !pbStory.text) return;
   var method = (pbStory.voice && pbStory.typed) ? 'mixed' : (pbStory.voice ? 'voice' : 'typed');
-  fsSet('private/' + user.uid, { initialRetelling: pbStory.text, inputMethod: method, partnerExperienceRead: pbAnswers.qRead || '', mostWantUnderstood: pbAnswers.qWant || '' }).catch(function() {});
+  fsSet('private/' + fdoc(), { initialRetelling: pbStory.text, inputMethod: method, retoldAt: new Date().toISOString() }).catch(function() {});
 }
 
 // ---- saved progress ----
@@ -9946,6 +9951,8 @@ function pbLoadDraftIntoTool(parsed, inserted) {
     fightName: iv.fightName || '',
     setting: pbAnswers.q3 || '',
     whoStartsIt: pbAnswers.q4b || '',
+    sayEveryTime: pbAnswers.sayMe || '',
+    theySayEveryTime: pbAnswers.sayThem || '',
     heardWhenTheySayThat: pbAnswers.heard || '',
     speedsUpAt: pbAnswers.q7 || '',
     cue: pbAnswers.q9 || '',

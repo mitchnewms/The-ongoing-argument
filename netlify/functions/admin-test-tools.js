@@ -48,6 +48,8 @@ const SAMPLE_INTAKE = {
   fightTopic: 'Buying a drone without talking first',
   fightTrigger: 'A package arriving that nobody talked about',
   whoStartsIt: 'Dana asks what is in the box and how much it was',
+  sayEveryTime: "Nobody asked you to.\nThat's what you always do.",
+  theySayEveryTime: "I was asking to be included.\nYou hide things and then I'm the bad guy.",
   setting: 'The kitchen',
   fightLocation: 'The kitchen',
   startingMoment: "There's a box on the porch with your name on it.",
