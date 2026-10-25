@@ -4560,14 +4560,16 @@ function soloSubmit() {
   var now = new Date().toISOString();
   fsSetStrict('scripts/' + fdoc(), { scene: el('scene-input').value, lines: JSON.stringify(lines), userId: user.uid, updatedAt: now, submitted: true, submittedAt: now })
   .then(function() {
-    fsSet('users/' + user.uid, { readyForReview: 'true', submittedAt: now }).catch(function() {});
+    // The script is saved from here on. Nothing below may tell the person it was not submitted.
+    function step(name, fn) { try { fn(); } catch (err) { console.error('After submit, ' + name + ' failed:', err); logFailure('submit_after_save', name, { message: err && err.message, detail: String((err && err.stack) || '').slice(0, 300) }); } }
+    step('mark ready', function() { fsSet('users/' + user.uid, { readyForReview: 'true', submittedAt: now }).catch(function() {}); });
     status('');
-    soloLock();
-    soloMarkSubmitted();
+    step('lock script', function() { soloLock(); soloMarkSubmitted(); });
     soloRun = { started: true, analysisDone: false, sent: false };
-    soloShowQuestions(false, { lines: JSON.stringify(lines), fightTopic: (pbAnswers && pbAnswers.q1) || '' });
-    runSoloAnalysis();
-  }).catch(function() {
+    step('open questions', function() { soloShowQuestions(false, { lines: JSON.stringify(lines), fightTopic: (typeof pbAnswers === 'object' && pbAnswers && pbAnswers.q1) || '' }); });
+    step('start analysis', function() { runSoloAnalysis(); });
+  }, function() {
+    // The write itself failed (the real status and message are logged for the admin page).
     btn.disabled = false; btn.textContent = 'Submit my script';
     status('Your script could not be submitted just now. It is still on the page. Please try again.');
   });
