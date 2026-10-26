@@ -589,6 +589,21 @@ body.script-locked #scene-input { pointer-events: none; }
 .s45-share-err { min-height: 1.2em; margin: 4px 0 0; font-size: 0.85rem; color: #E8A27A; }
 .s5-wait { margin: 16px 0; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 0.92rem; line-height: 1.5; }
 .s5-wait button { margin-top: 10px; padding: 10px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.4); border-radius: 6px; color: inherit; font: inherit; cursor: pointer; }
+
+/* The mic is a small icon inside the corner of each box, like the one on the draft lines. There is no Talk pill. */
+.iv-boxwrap { position: relative; width: 100%; }
+.iv-boxwrap textarea { padding-right: 52px; }
+.iv-mic { position: absolute; right: 10px; bottom: 12px; width: 34px; height: 34px; padding: 0; border-radius: 50%; border: 1px solid #E2DED8; background: #FFFFFF; color: #888888; line-height: 0; cursor: pointer; touch-action: manipulation; -webkit-appearance: none; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+.iv-mic svg { width: 16px; height: 16px; display: block; margin: auto; }
+.iv-mic:hover { border-color: #E06500; color: #E06500; }
+.iv-mic.live { background: #E06500; border-color: #E06500; color: #FFFFFF; }
+.iv-mic:focus-visible { outline: 2px solid #E06500; outline-offset: 2px; }
+.iv-talk-status:empty { display: none; }
+.iv-talk-status { font-size: 0.82rem; color: #6A6458; line-height: 1.35; margin: 6px 0 0; }
+.iv-note-link { display: inline-block; background: none; border: none; padding: 8px 0; color: #6A6458; font-family: inherit; font-size: 0.9rem; text-decoration: underline; cursor: pointer; }
+.iv-note-body { display: none; }
+.iv-note.open .iv-note-body { display: block; }
+.iv-note.open .iv-note-link { display: none; }
 </style>
 
 <style>
@@ -2200,8 +2215,6 @@ h1, h2, h3,
     <img src="/toa-logo.png?v=3" alt="The Ongoing Argument. Every argument is a knock at the door to a deeper connection." class="lp-hero-logo">
     </div>
     <div class="lp-top-cta">
-      <button class="lp-btn lp-choice" id="lp-top-begin" onclick="lpRevealCommitment()"><span class="lp-choice-main">Start as a couple</span><span class="lp-choice-sub">You and your partner, each on your own device</span></button>
-      <button class="lp-btn-solo lp-choice lp-choice-solo" id="lp-top-solo" onclick="lpRevealCommitmentSolo()"><span class="lp-choice-main">Start on your own</span><span class="lp-choice-sub">Just you. Your partner does not need to join.</span></button>
       <button type="button" class="lp-signin-link" onclick="openSignIn()">Already have an account? Sign in</button>
     </div>
   </section>
@@ -2699,45 +2712,22 @@ h1, h2, h3,
   <div class="pc-wrap" style="position:relative;">
     <button class="pc-home-btn" onclick="navHome()">← Home</button>
     <div class="pc-eyebrow">Script Writing</div>
-    <div class="pc-heading">Just tell me what happened.</div>
-    <p class="pc-sub">Talk or type, the way you'd tell a friend. You don't need to write a script. The AI shapes it into one for you.</p>
     <div id="pc-resume" style="display:none; margin: 0 0 18px; padding: 16px; background: #FFF3C4; border-radius: 10px; text-align: center;">
       <div style="font-size:0.92rem; color:#4A3F10; margin-bottom:4px;">You have an unfinished story. Your answers are saved to your account.</div>
       <div id="pc-resume-where" style="font-size:0.88rem; color:#4A3F10; margin-bottom:12px;"></div>
       <button type="button" class="pbd-btn pbd-primary" style="width:100%;" onclick="pbResume()">Continue where you left off</button>
       <button type="button" class="pbd-btn" style="width:100%; margin-top:8px;" onclick="pbStartOverAsk()">Start over</button>
     </div>
-    <p class="pc-breath">Take a breath. You're telling the story, not reliving it.</p>
-    <div class="pc-inputs" id="pc-inputs">
-      <button type="button" class="pc-input-btn pc-input-mic" id="pc-btn-talk" onclick="startStory('voice')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-        <span>Talk it out</span>
-      </button>
-      <button type="button" class="pc-input-btn" id="pc-btn-type" onclick="startStory('typed')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6.01" y2="10"/><line x1="10" y1="10" x2="10.01" y2="10"/><line x1="14" y1="10" x2="14.01" y2="10"/><line x1="18" y1="10" x2="18.01" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>
-        <span>Type it out</span>
-      </button>
-    </div>
-    <p class="pc-mic-note" id="pc-mic-note">Only the words are saved. No audio is recorded.</p>
-    <p class="pc-mic-note" id="pc-mic-tip" style="display:none">Tip: you can also tap the microphone on your keyboard to talk.</p>
-    <button type="button" class="pc-quiet-link" onclick="choosePathA()">Prefer to write it yourself?</button>
-    <div class="pc-privacy" id="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
-  </div>
-</div>
-
-<!-- START SCREEN: what we are about to do, in a few plain lines -->
-<div id="start-screen">
-  <div class="story-wrap">
-    <button class="ls-back" onclick="s0Back()">&larr; Back</button>
-    <div class="pc-eyebrow">Script Writing</div>
     <div class="pc-heading">Here's what we're doing</div>
     <p class="story-prompt">We're going to build your version of this argument as a script, as close to how it really goes as we can get.</p>
     <p class="story-prompt">The more you tell us now, the better the draft. Hopefully you'll only need small adjustments.</p>
     <p class="story-prompt">And once you see it on the page, more will probably come back to you. That's normal, and there's plenty of room to add it.</p>
     <p class="pc-breath" style="margin-top:6px;">Take a breath. You're telling the story, not reliving it.</p>
     <div class="story-controls">
-      <button type="button" class="story-continue" onclick="s0Start()">Start</button>
+      <button type="button" class="story-continue" id="pc-start" onclick="startStory()">Start</button>
     </div>
+    <button type="button" class="pc-quiet-link" onclick="choosePathA()">Prefer to write it yourself?</button>
+    <div class="pc-privacy" id="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
   </div>
 </div>
 
@@ -2763,16 +2753,15 @@ h1, h2, h3,
     <div class="pc-eyebrow">Script Writing</div>
     <div class="pc-heading">Tell me what happened.</div>
     <p class="story-prompt">Start wherever it starts for you. Include what your partner said, as close to their actual words as you can.</p>
-    <textarea id="story-text" placeholder="Start here…" aria-label="Your story" autocomplete="off"></textarea>
+    <div class="iv-boxwrap" id="story-boxwrap">
+      <textarea id="story-text" placeholder="Start here. Type it, or tap the microphone and tell it out loud." aria-label="Your story" autocomplete="off"></textarea>
+      <button type="button" class="iv-mic" id="story-mic" onclick="storyToggleMic()" aria-label="Talk instead of typing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    </div>
     <p class="story-status" id="story-status" role="status" aria-live="polite"></p>
+    <p class="pc-mic-note" id="story-mic-note">Only the words are saved. No audio is recorded.</p>
     <div class="story-controls">
-      <button type="button" class="story-mic" id="story-mic" onclick="storyToggleMic()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-        <span id="story-mic-label">Talk</span>
-      </button>
       <button type="button" class="story-continue" id="story-continue" onclick="storyDone()">Continue</button>
     </div>
-    <p class="pc-mic-note" id="story-mic-note">Only the words are saved. No audio is recorded.</p>
   </div>
 </div>
 
@@ -2812,16 +2801,15 @@ h1, h2, h3,
     <div class="pc-eyebrow">Edit with AI</div>
     <div class="pc-heading" id="ai-edit-heading">What would you like changed?</div>
     <p class="story-prompt" id="ai-edit-intro">Describe the changes, by talking or typing. You can ask for several at once. The AI changes only what you ask for, and every line it touches is highlighted.</p>
-    <textarea id="ai-edit-text" placeholder="For example: in the third line, change &quot;never&quot; to &quot;always&quot;." aria-label="Describe the changes" autocomplete="off"></textarea>
+    <div class="iv-boxwrap">
+      <textarea id="ai-edit-text" placeholder="For example: in the third line, change &quot;never&quot; to &quot;always&quot;." aria-label="Describe the changes" autocomplete="off"></textarea>
+      <button type="button" class="iv-mic" id="ai-edit-mic" onclick="aiEditDict.toggle()" aria-label="Talk instead of typing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    </div>
     <p class="story-status" id="ai-edit-status" role="status" aria-live="polite"></p>
+    <p class="pc-mic-note" id="ai-edit-mic-note">Only the words are saved. No audio is recorded.</p>
     <div class="story-controls">
-      <button type="button" class="story-mic" id="ai-edit-mic" onclick="aiEditDict.toggle()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-        <span id="ai-edit-mic-label">Talk</span>
-      </button>
       <button type="button" class="story-continue" id="ai-edit-apply" onclick="aiEditApply()">Make these changes</button>
     </div>
-    <p class="pc-mic-note" id="ai-edit-mic-note">Only the words are saved. No audio is recorded.</p>
   </div>
 </div>
 
@@ -5634,8 +5622,9 @@ function step2AddTalk() {
     var t = el(id);
     if (!t || t.getAttribute('data-talk')) return;
     t.setAttribute('data-talk', '1');
-    var row = ivTalk(id, step2AutoSave);
-    t.parentNode.insertBefore(row, t.nextSibling);
+    var st = ivTalk(id, step2AutoSave);
+    var w = t.parentNode;   // the box is now inside its wrapper; the status line goes under it
+    w.parentNode.insertBefore(st, w.nextSibling);
   });
 }
 
@@ -8191,18 +8180,8 @@ function createDictation(taId, hooks) {
   var st = { rec: null, want: false, live: false, base: '', startedAt: 0, quickEnds: 0 };
   function box() { return el(taId); }
   function say(m, help) { if (hooks.onStatus) hooks.onStatus(m || '', !!help); }
-  function micProblem(err) {
-    var blocked = 'The microphone is blocked for this page. On an iPad, open Settings, then Chrome, and turn on Microphone. You can also tap the lock icon next to the address and allow it. Then tap Talk again.';
-    if (err === 'service-not-allowed') {
-      say('Voice typing is not available in this browser right now. On an iPad, make sure Dictation is on in Settings, General, Keyboard. It may also not work in a private tab.', true);
-      return;
-    }
-    try {
-      navigator.permissions.query({ name: 'microphone' }).then(function(r) {
-        say(r.state === 'prompt' ? 'The microphone was not allowed yet. Tap Talk again and choose Allow when it asks.' : blocked, true);
-      }, function() { say(blocked, true); });
-    } catch (e) { say(blocked, true); }
-  }
+  // If the person says no, or the device cannot do it, they are never left stuck: typing, or the keyboard's own mic, works.
+  function micProblem(err) { say('No problem. You can also tap the mic on your keyboard.', true); }
   function changed() { if (hooks.onChange) hooks.onChange(); }
   function join(base, add) { add = (add || '').trim(); if (!base) return add; return add ? base + ' ' + add : base; }
   function start(auto) {
@@ -8210,6 +8189,8 @@ function createDictation(taId, hooks) {
     var ta = box();
     if (!SpeechRec || !ta) return;
     if (st.rec) { try { st.rec.abort(); } catch(e) {} st.rec = null; }
+    // The first time, say what is about to happen before the browser's own question appears.
+    if (!auto && !window._micWarned) { window._micWarned = true; say('Your device will ask to use the microphone. Tap Allow.'); }
     var rec = new SpeechRec();
     rec.continuous = true;
     rec.interimResults = true;
@@ -8316,10 +8297,9 @@ function storyToggleMic() { if (storyDict) storyDict.toggle(); }
 function storyRenderControls() {
   var supported = storySpeechSupported();
   var live = !!(storyDict && storyDict.state.live);
-  var mic = el('story-mic'), label = el('story-mic-label'), cont = el('story-continue'), note = el('story-mic-note');
-  if (mic) { mic.style.display = supported ? 'flex' : 'none'; mic.classList.toggle('story-mic-live', live); }
+  var mic = el('story-mic'), cont = el('story-continue'), note = el('story-mic-note');
+  if (mic) { mic.style.display = supported ? 'block' : 'none'; mic.classList.toggle('live', live); }
   if (note) note.style.display = supported ? 'block' : 'none';
-  if (label) label.textContent = live ? 'Tap to pause' : (pbStory.voice ? 'Tap to keep talking' : 'Talk');
   var hasText = !!(el('story-text') && el('story-text').value.trim());
   if (cont) { cont.textContent = live ? 'Done' : 'Continue'; }
 }
@@ -8722,23 +8702,7 @@ function pbShort(t) {
 var pnMode = 'typed';
 function pnNeeded() { return pbPlaceholderName(user && user.partner); }
 
-var s0Mode = 'typed';
-function startStory(mode) {
-  s0Mode = mode;
-  el('path-choice-screen').style.display = 'none';
-  navPush('start');
-  showFlex('start-screen');
-  document.body.style.overflow = 'hidden';
-}
-function s0Back() {
-  if (appNavStack[appNavStack.length - 1] === 'start') navBack();
-  else { hide('start-screen'); showFlex('path-choice-screen'); }
-}
-function s0Start() {
-  hide('start-screen');
-  if (appNavStack[appNavStack.length - 1] === 'start') appNavStack.pop();
-  startStoryAfterIntro(s0Mode);
-}
+function startStory() { startStoryAfterIntro('typed'); }
 
 function startStoryAfterIntro(mode) {
   if (pnNeeded()) {
@@ -9018,32 +8982,40 @@ function ivLineChips(who) {
 var ivDicts = [], ivPaints = {};
 function ivStopTalk() { ivDicts.forEach(function(d) { try { d.stop(); } catch (e) {} }); ivDicts = []; ivPaints = {}; }
 
-// Talk beside a box: the spoken words land in the box so they can be edited. Only the words are kept.
+// A small mic icon in the corner inside the box, like the one on the draft lines. The spoken words land in the box so
+// they can be edited. Only the words are kept. Returns a small line for status messages, to go under the box.
+var IV_MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>';
 function ivTalk(boxId, afterChange) {
-  var wrap = ivNode('div', 'iv-talkrow');
-  var status = ivNode('span', 'iv-talk-status', '');
+  var ta = el(boxId);
+  var status = ivNode('div', 'iv-talk-status', '');
+  status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+  if (!ta || !storySpeechSupported()) { status.style.display = 'none'; return status; }
+  var wrap = ivNode('div', 'iv-boxwrap');
+  ta.parentNode.insertBefore(wrap, ta); wrap.appendChild(ta);
   var dict = null;
-  var btn = ivButton('Talk', 'iv-talk', function() { if (dict) dict.toggle(); });
-  btn.setAttribute('aria-label', 'Talk instead of typing');
-  btn.setAttribute('data-for', boxId);
-  wrap.appendChild(btn); wrap.appendChild(status);
-  if (!storySpeechSupported()) { wrap.style.display = 'none'; return wrap; }
-  setTimeout(function() {
-    if (!el(boxId)) return;
-    dict = createDictation(boxId, {
-      onStatus: function(m) { status.textContent = m || ''; },
-      onChange: function() {
-        btn.textContent = dict && dict.state.live ? 'Tap to pause' : 'Talk';
-        btn.classList.toggle('iv-talk-live', !!(dict && dict.state.live));
-        if (ivLive) { ivCapture(); ivSaveProgress(); }
-        if (rfActive) rfAutosave();
-        (ivPaints[boxId] || []).forEach(function(f) { f(); });
-        if (afterChange) afterChange();
+  var btn = ivNode('button', 'iv-mic');
+  btn.type = 'button'; btn.innerHTML = IV_MIC_SVG; btn.setAttribute('aria-label', 'Talk instead of typing');
+  btn.addEventListener('click', function() { if (dict) dict.toggle(); });
+  wrap.appendChild(btn);
+  dict = createDictation(boxId, {
+    onStatus: function(m, help) {
+      status.textContent = m || '';
+      if (help && m) {
+        var t = document.createElement('button'); t.type = 'button'; t.className = 'story-type-btn'; t.textContent = 'Type instead';
+        t.addEventListener('click', function() { status.textContent = ''; ta.focus(); });
+        status.appendChild(document.createElement('br')); status.appendChild(t);
       }
-    });
-    ivDicts.push(dict);
-  }, 0);
-  return wrap;
+    },
+    onChange: function() {
+      btn.classList.toggle('live', !!(dict && dict.state.live));
+      if (ivLive) { ivCapture(); ivSaveProgress(); }
+      if (rfActive) rfAutosave();
+      (ivPaints[boxId] || []).forEach(function(f) { f(); });
+      if (afterChange) afterChange();
+    }
+  });
+  ivDicts.push(dict);
+  return status;
 }
 
 function ivClear() {
@@ -9269,16 +9241,23 @@ function ivRenderQuestion(key) {
   });
 }
 
-// The small, calm box that is on every question. Seeing the options often brings something else to mind.
+// The optional "anything this reminds you of" box. It starts as a small link so it never crowds the question, and opens
+// when tapped (or already open if something was written there).
 function ivNoteBox(body, key) {
   var wrap = ivNode('div', 'iv-note');
-  wrap.appendChild(ivNode('div', 'iv-note-label', 'Anything this reminds you of? Add it here.'));
+  var has = iv.notes && iv.notes[key] && String(iv.notes[key]).trim();
+  wrap.appendChild(ivButton('Anything this reminds you of? Add it here.', 'iv-note-link', function() {
+    wrap.classList.add('open'); var t = el('iv-note'); if (t) t.focus();
+  }));
+  var inner = ivNode('div', 'iv-note-body');
   var nb = ivBox('iv-note', 2);
-  nb.value = (iv.notes && iv.notes[key]) || '';
-  nb.placeholder = 'Optional';
-  wrap.appendChild(nb);
-  wrap.appendChild(ivTalk('iv-note'));
+  nb.value = has ? iv.notes[key] : '';
+  nb.placeholder = 'Optional. Anything else that comes to mind.';
+  inner.appendChild(nb);
+  wrap.appendChild(inner);
   body.appendChild(wrap);
+  inner.appendChild(ivTalk('iv-note'));
+  if (has) wrap.classList.add('open');
 }
 
 // The name is asked here, once, and carried everywhere: the draft, the analysis, the scene, the conversation.
@@ -10131,10 +10110,9 @@ var aiEditBusy = false;
 function aiEditRender() {
   var supported = storySpeechSupported();
   var live = !!(aiEditDict && aiEditDict.state.live);
-  var mic = el('ai-edit-mic'), label = el('ai-edit-mic-label'), apply = el('ai-edit-apply'), note = el('ai-edit-mic-note'), ta = el('ai-edit-text');
-  if (mic) { mic.style.display = supported ? 'flex' : 'none'; mic.classList.toggle('story-mic-live', live); }
+  var mic = el('ai-edit-mic'), apply = el('ai-edit-apply'), note = el('ai-edit-mic-note'), ta = el('ai-edit-text');
+  if (mic) { mic.style.display = supported ? 'block' : 'none'; mic.classList.toggle('live', live); }
   if (note) note.style.display = supported ? 'block' : 'none';
-  if (label) label.textContent = live ? 'Tap to pause' : 'Talk';
   if (apply) {
     apply.disabled = aiEditBusy;
     apply.textContent = aiEditBusy ? 'Working…' : (live ? 'Done' : 'Make these changes');
@@ -10468,9 +10446,8 @@ window.addEventListener('popstate', function(e) {
   var storyEl = el('story-screen');
   var nameEl = el('partner-name-screen');
   var ivEl = el('iv-screen');
-  var startEl = el('start-screen');
   var shown = function(e) { return e && (e.style.display === 'block' || e.style.display === 'flex'); };
-  if (shown(scriptEl) || shown(coachEl) || shown(pathChoiceEl) || shown(pathBEl) || shown(storyEl) || shown(nameEl) || shown(ivEl) || shown(startEl)) {
+  if (shown(scriptEl) || shown(coachEl) || shown(pathChoiceEl) || shown(pathBEl) || shown(storyEl) || shown(nameEl) || shown(ivEl)) {
     // Try in-app back first; if there's nothing to pop, just re-anchor
     if (appNavStack.length > 1) {
       navBack();
