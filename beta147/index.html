@@ -589,6 +589,30 @@ body.script-locked #scene-input { pointer-events: none; }
 .s45-share-err { min-height: 1.2em; margin: 4px 0 0; font-size: 0.85rem; color: #E8A27A; }
 .s5-wait { margin: 16px 0; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 0.92rem; line-height: 1.5; }
 .s5-wait button { margin-top: 10px; padding: 10px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.4); border-radius: 6px; color: inherit; font: inherit; cursor: pointer; }
+
+/* The mic is a small icon inside the corner of each box, like the one on the draft lines. There is no Talk pill. */
+.iv-boxwrap { position: relative; width: 100%; }
+.iv-boxwrap textarea { padding-right: 52px; }
+.iv-mic { position: absolute; right: 10px; bottom: 12px; width: 34px; height: 34px; padding: 0; border-radius: 50%; border: 1px solid #E2DED8; background: #FFFFFF; color: #888888; line-height: 0; cursor: pointer; touch-action: manipulation; -webkit-appearance: none; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+.iv-mic svg { width: 16px; height: 16px; display: block; margin: auto; }
+.iv-mic:hover { border-color: #E06500; color: #E06500; }
+.iv-mic.live { background: #E06500; border-color: #E06500; color: #FFFFFF; }
+.iv-mic:focus-visible { outline: 2px solid #E06500; outline-offset: 2px; }
+.iv-talk-status:empty { display: none; }
+.iv-talk-status { font-size: 0.82rem; color: #6A6458; line-height: 1.35; margin: 6px 0 0; }
+.iv-note-link { display: inline-block; background: none; border: none; padding: 8px 0; color: #6A6458; font-family: inherit; font-size: 0.9rem; text-decoration: underline; cursor: pointer; }
+.iv-note-body { display: none; }
+.iv-note.open .iv-note-body { display: block; }
+.iv-note.open .iv-note-link { display: none; }
+
+/* Next scrolls with the page and comes after the last item. It is no longer pinned over the chips. */
+.iv-actions { position: static !important; padding-bottom: 36px; }
+#iv-screen { padding-bottom: 24px; }
+.iv-next.iv-next-wait { background: #FFFFFF; color: #8A4A00; border: 1.5px solid #E06500; }
+#iv-more { display: none; position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 210; padding: 9px 16px; background: #111111; color: #FFFFFF; border: none; border-radius: 20px; font: 700 0.85rem system-ui, -apple-system, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,0.25); cursor: pointer; touch-action: manipulation; }
+.iv-lines-copy { text-align: left; }
+.iv-lines-example { font-size: 0.92rem; color: #6A6458; margin: 4px 0 10px; line-height: 1.5; white-space: pre-line; }
+.iv-add-another { display: block; margin: 6px 0 0; }
 </style>
 
 <style>
@@ -2147,11 +2171,11 @@ h1, h2, h3,
     </div>
     <div class="pb-section">
       <div class="pb-body">
-        <p>The fight you keep having. The one that never gets resolved. Your partner has named it and started the work. Now it's your turn.</p>
+        <p>The argument you keep having. The one that never gets resolved. Your partner has named it and started the work. Now it's your turn.</p>
         <p>This process was built by Mitch Newman, relationship adviser and former screenwriter, to help couples do what TV writers do every week, which is to find the solution to the ongoing conflict.</p>
       </div>
       <div class="pb-body">
-        <p>When both people are fully in it, something real becomes possible. You'll write your version of the fight privately, watch it performed by avatars, do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
+        <p>When both people are fully in it, something real becomes possible. You'll write your version of the argument privately, watch it performed by avatars, do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
       </div>
       <div class="pb-reminder">
         <p>You are about to commit to something your partner has already started. Take your time before continuing. This only works if you are both genuinely in it.</p>
@@ -2182,8 +2206,8 @@ h1, h2, h3,
     <div class="bi-eyebrow">Before you create your account</div>
     <div class="bi-body">
       <p>Your partner has already committed to this process. This is where we check that you are in too, not because we doubt you, but because this only works when both people are genuinely here.</p>
-      <p>You are about to create an account and write your version of the fight. Privately. Honestly. Without your partner seeing it first.</p>
-      <p>This is not something you do because your partner signed up. This is something you do because you want to resolve the fight too.</p>
+      <p>You are about to create an account and write your version of the argument. Privately. Honestly. Without your partner seeing it first.</p>
+      <p>This is not something you do because your partner signed up. This is something you do because you want to resolve the argument too.</p>
       <p>Are you in this because you actually want to be?</p>
     </div>
     <button class="bi-cta" onclick="pbCommitConfirm()">Yes. I am in. Create My Account →</button>
@@ -2200,8 +2224,6 @@ h1, h2, h3,
     <img src="/toa-logo.png?v=3" alt="The Ongoing Argument. Every argument is a knock at the door to a deeper connection." class="lp-hero-logo">
     </div>
     <div class="lp-top-cta">
-      <button class="lp-btn lp-choice" id="lp-top-begin" onclick="lpRevealCommitment()"><span class="lp-choice-main">Start as a couple</span><span class="lp-choice-sub">You and your partner, each on your own phone</span></button>
-      <button class="lp-btn-solo lp-choice lp-choice-solo" id="lp-top-solo" onclick="lpRevealCommitmentSolo()"><span class="lp-choice-main">Start on your own</span><span class="lp-choice-sub">Just you. Your partner does not need to join.</span></button>
       <button type="button" class="lp-signin-link" onclick="openSignIn()">Already have an account? Sign in</button>
     </div>
   </section>
@@ -2217,7 +2239,7 @@ h1, h2, h3,
       <p>When you write for a sitcom you have twenty two minutes.</p>
       <p>Twenty two minutes to set up a conflict, build it, and resolve it. Every week. Tell a story. Resolve the conflict. Done.</p>
       <p>Then I became a relationship coach.</p>
-      <p>And I discovered that the same conflicts I was resolving on screen in twenty two minutes were playing out in real relationships for years. Sometimes decades. The same fight. The same lines. No resolution. No end in sight.</p>
+      <p>And I discovered that the same conflicts I was resolving on screen in twenty two minutes were playing out in real relationships for years. Sometimes decades. The same argument. The same lines. No resolution. No end in sight.</p>
       <p>Just to be continued.</p>
       <p>So I married what I knew as a screenwriter with what I learned as a coach. And created a process that helps couples do what TV writers do every week.</p>
       <p><strong>Find the solution.</strong></p>
@@ -2238,7 +2260,7 @@ h1, h2, h3,
   <section class="lp-section">
     <div class="lp-heading">How It Works</div>
     <ol class="lp-steps">
-      <li class="lp-step"><span class="lp-step-n">1.</span><span class="lp-step-t">Name the fight you keep having. Together.</span></li>
+      <li class="lp-step"><span class="lp-step-n">1.</span><span class="lp-step-t">Name the argument you keep having. Together.</span></li>
       <li class="lp-step"><span class="lp-step-n">2.</span><span class="lp-step-t">Each of you writes your version. Separately. Privately.</span></li>
       <li class="lp-step"><span class="lp-step-n">3.</span><span class="lp-step-t">The system analyzes the conflict and the dynamics. Out of story. Into solution.</span></li>
       <li class="lp-step"><span class="lp-step-n">4.</span><span class="lp-step-t">Grab some popcorn. Watch your argument performed by avatar actors. <em style="font-style:italic;opacity:0.6;font-size:0.9em;">(Coming soon.)</em></span></li>
@@ -2254,14 +2276,14 @@ h1, h2, h3,
   <section class="lp-section">
     <div class="lp-truth">
       <p>It is no coincidence that you found each other. We often seek the one person who will ultimately challenge us to reconsider the parts of ourselves we fear the most by activating those parts. And in kind and in reaction we then know exactly what to say to share that gift back for them. And I do mean gift. Change. Healing. Both tend to sting a bit before we get to the good parts.</p>
-      <p>Here is what is important to know. Most people want the same things. What differs is how they were each taught to achieve them. The fight is not evidence that something is broken. It is evidence that something needs to be broken open to reveal one's greatest capacity for loving. Underneath every ongoing argument is an unmet need that has never been named and clearly not met.</p>
+      <p>Here is what is important to know. Most people want the same things. What differs is how they were each taught to achieve them. The argument is not evidence that something is broken. It is evidence that something needs to be broken open to reveal one's greatest capacity for loving. Underneath every ongoing argument is an unmet need that has never been named and clearly not met.</p>
       <p>Name it. Meet it. And watch what magic becomes possible.</p>
     </div>
   </section>
 
   <!-- S5: CTA -->
   <div class="lp-cta">
-    <button class="lp-btn lp-choice" id="lp-btn-begin" onclick="lpRevealCommitment()"><span class="lp-choice-main">Start as a couple</span><span class="lp-choice-sub">You and your partner, each on your own phone</span></button>
+    <button class="lp-btn lp-choice" id="lp-btn-begin" onclick="lpRevealCommitment()"><span class="lp-choice-main">Start as a couple</span><span class="lp-choice-sub">You and your partner, each on your own device</span></button>
     <div class="lp-choice-or" aria-hidden="true">or</div>
     <button class="lp-btn-solo lp-choice lp-choice-solo" id="lp-btn-solo" onclick="lpRevealCommitmentSolo()"><span class="lp-choice-main">Start on your own</span><span class="lp-choice-sub">Just you. Your partner does not need to join.</span></button>
     <button type="button" class="lp-signin-link" id="lp-signin" onclick="openSignIn()">Already have an account? Sign in</button>
@@ -2293,7 +2315,7 @@ h1, h2, h3,
   <!-- S7: NAME THE FIGHT — hidden until S6 button clicked -->
   <div id="lp-s7">
     <div class="lp-cta">
-      <div class="lp-fight-hd" id="lp-fight-hd">What do you both call this fight?</div>
+      <div class="lp-fight-hd" id="lp-fight-hd">What do you both call this argument?</div>
       <div class="lp-fight-sub" id="lp-fight-sub">The one you both know. Agree on a name together. Right now.</div>
       <div class="lp-fight-eg">The Money Thing. The Way You Talk To Me. The Kids. The Job.</div>
       <div class="lp-fight-err" id="lp-fight-err"></div>
@@ -2346,7 +2368,7 @@ h1, h2, h3,
       <div class="auth-field"><label for="ca-email-confirm">Confirm Email</label><input type="email" id="ca-email-confirm" placeholder="your@email.com" autocomplete="email" /><div id="ca-email-match-err" class="field-error">Emails do not match. Please try again.</div></div>
       <div class="auth-field"><label for="ca-pass">Password (6+ characters)</label><div class="pw-wrap"><input type="password" id="ca-pass" placeholder="••••••••" autocomplete="new-password" /><button type="button" class="pw-eye" onclick="togglePw('ca-pass',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
       <div class="auth-field"><label for="ca-pass-confirm">Confirm Password</label><div class="pw-wrap"><input type="password" id="ca-pass-confirm" placeholder="••••••••" autocomplete="new-password" /><button type="button" class="pw-eye" onclick="togglePw('ca-pass-confirm',this)" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div id="ca-pass-match-err" class="field-error">Passwords do not match. Please try again.</div></div>
-      <div class="auth-field"><label for="ca-fight">The Fight, what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
+      <div class="auth-field"><label for="ca-fight">The Argument, what do you both call it?</label><input type="text" id="ca-fight" placeholder="e.g. The One About Time, The Money Thing…" /></div>
       <div class="auth-disclaimer">
         <div class="auth-disclaimer-box">
           <p>The Ongoing Argument is a self-guided communication tool for couples. It is designed to support more effective communication, ownership of feelings, personal responsibility, and a genuine desire to strengthen the integrity within yourself and within your relationship.</p>
@@ -2380,11 +2402,11 @@ h1, h2, h3,
   <!-- PATH B: HANDOFF BANNER — shown above script page after AI draft generated -->
   <div id="pb-handoff-banner">
     <div class="pbh-eyebrow">Your Draft</div>
-    <div class="pbh-heading">Here's your draft. Tap any line to change it.</div>
-    <p class="pbh-body">It's built from your own words. Go through it line by line, change what doesn't fit, and cut anything that isn't true. Nothing is submitted until you approve it as yours.</p>
+    <div class="pbh-heading">This is your rough cut.</div>
+    <p class="pbh-body">Read it like a script. This is a living draft, so nothing here is set in stone. Take your time. No rush. Check two things: the words, and the feeling under each name. Change anything until it feels authentic and accurate to you, not flattering. The closer it is to the real thing, the sharper your analysis.</p>
+    <p class="pbh-body">Nothing is submitted until you approve it as yours.</p>
     <p class="pbh-body" id="pb-handoff-note" style="display:none; font-weight:700;"></p>
     <button class="pbh-dismiss" onclick="pbDismissHandoff()">Got it, start editing</button>
-    <button type="button" class="pbh-remember" onclick="openAiEdit('remember')">Add something I remembered</button>
   </div>
 
   <!-- PATH A: OPTIONAL WRITING GUIDE — shown only for Path A, not collected, not sent to AI -->
@@ -2392,7 +2414,7 @@ h1, h2, h3,
     <div class="pa-guide-inner">
       <div class="pa-guide-label">Prompts to help you get started</div>
       <ul class="pa-guide-list">
-        <li>What is this fight about?</li>
+        <li>What is this argument about?</li>
         <li>What usually triggers it?</li>
         <li>Where does it usually happen?</li>
         <li>How does it typically start, the first thing said or done?</li>
@@ -2408,7 +2430,7 @@ h1, h2, h3,
   <div class="script-page">
     <div class="script-title-header" id="script-title-header">THE ONGOING ARGUMENT</div>
     <div id="pb-remember-top" style="display:none;text-align:center;"><button type="button" class="pbh-remember" style="display:inline-block;" onclick="openAiEdit('remember')">Add something I remembered</button></div>
-    <div class="privacy-tag">🔒 Your version. Private until you share with <span id="privacy-partner-name">your partner</span></div>
+    <div class="privacy-tag" id="privacy-tag">🔒 Your version. Private until you share with <span id="privacy-partner-name">your partner</span></div>
     <div class="name-row">
       <div class="name-row-label">Add Names Here</div>
       <div class="name-field"><label for="input-name-a">Your name</label><input type="text" id="input-name-a" placeholder="e.g. Jordan" autocomplete="given-name" /></div>
@@ -2699,45 +2721,22 @@ h1, h2, h3,
   <div class="pc-wrap" style="position:relative;">
     <button class="pc-home-btn" onclick="navHome()">← Home</button>
     <div class="pc-eyebrow">Script Writing</div>
-    <div class="pc-heading">Just tell me what happened.</div>
-    <p class="pc-sub">Talk or type, the way you'd tell a friend. You don't need to write a script. The AI shapes it into one for you.</p>
     <div id="pc-resume" style="display:none; margin: 0 0 18px; padding: 16px; background: #FFF3C4; border-radius: 10px; text-align: center;">
       <div style="font-size:0.92rem; color:#4A3F10; margin-bottom:4px;">You have an unfinished story. Your answers are saved to your account.</div>
       <div id="pc-resume-where" style="font-size:0.88rem; color:#4A3F10; margin-bottom:12px;"></div>
       <button type="button" class="pbd-btn pbd-primary" style="width:100%;" onclick="pbResume()">Continue where you left off</button>
       <button type="button" class="pbd-btn" style="width:100%; margin-top:8px;" onclick="pbStartOverAsk()">Start over</button>
     </div>
-    <p class="pc-breath">Take a breath. You're telling the story, not reliving it.</p>
-    <div class="pc-inputs" id="pc-inputs">
-      <button type="button" class="pc-input-btn pc-input-mic" id="pc-btn-talk" onclick="startStory('voice')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-        <span>Talk it out</span>
-      </button>
-      <button type="button" class="pc-input-btn" id="pc-btn-type" onclick="startStory('typed')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6.01" y2="10"/><line x1="10" y1="10" x2="10.01" y2="10"/><line x1="14" y1="10" x2="14.01" y2="10"/><line x1="18" y1="10" x2="18.01" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>
-        <span>Type it out</span>
-      </button>
-    </div>
-    <p class="pc-mic-note" id="pc-mic-note">Only the words are saved. No audio is recorded.</p>
-    <p class="pc-mic-note" id="pc-mic-tip" style="display:none">Tip: you can also tap the microphone on your keyboard to talk.</p>
-    <button type="button" class="pc-quiet-link" onclick="choosePathA()">Prefer to write it yourself?</button>
-    <div class="pc-privacy" id="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
-  </div>
-</div>
-
-<!-- START SCREEN: what we are about to do, in a few plain lines -->
-<div id="start-screen">
-  <div class="story-wrap">
-    <button class="ls-back" onclick="s0Back()">&larr; Back</button>
-    <div class="pc-eyebrow">Script Writing</div>
     <div class="pc-heading">Here's what we're doing</div>
-    <p class="story-prompt">We're going to build your version of this fight as a script, as close to how it really goes as we can get.</p>
+    <p class="story-prompt">We're going to build your version of this argument as a script, as close to how it really goes as we can get.</p>
     <p class="story-prompt">The more you tell us now, the better the draft. Hopefully you'll only need small adjustments.</p>
     <p class="story-prompt">And once you see it on the page, more will probably come back to you. That's normal, and there's plenty of room to add it.</p>
     <p class="pc-breath" style="margin-top:6px;">Take a breath. You're telling the story, not reliving it.</p>
     <div class="story-controls">
-      <button type="button" class="story-continue" onclick="s0Start()">Start</button>
+      <button type="button" class="story-continue" id="pc-start" onclick="startStory()">Start</button>
     </div>
+    <button type="button" class="pc-quiet-link" onclick="choosePathA()">Prefer to write it yourself?</button>
+    <div class="pc-privacy" id="pc-privacy">Your choice is private and does not affect your partner's experience.</div>
   </div>
 </div>
 
@@ -2746,7 +2745,7 @@ h1, h2, h3,
   <div class="story-wrap">
     <button class="ls-back" onclick="pnBack()">← Back</button>
     <div class="pc-eyebrow">Script Writing</div>
-    <div class="pc-heading">Who is this fight with?</div>
+    <div class="pc-heading">Who is this argument with?</div>
     <p class="story-prompt" id="pn-sub"></p>
     <input type="text" id="pn-input" maxlength="40" autocomplete="off" aria-label="Your partner's first name" placeholder="Their first name" onkeydown="if(event.key==='Enter')pnContinue()" />
     <p class="story-status" id="pn-error" role="alert"></p>
@@ -2763,16 +2762,15 @@ h1, h2, h3,
     <div class="pc-eyebrow">Script Writing</div>
     <div class="pc-heading">Tell me what happened.</div>
     <p class="story-prompt">Start wherever it starts for you. Include what your partner said, as close to their actual words as you can.</p>
-    <textarea id="story-text" placeholder="Start here…" aria-label="Your story" autocomplete="off"></textarea>
+    <div class="iv-boxwrap" id="story-boxwrap">
+      <textarea id="story-text" placeholder="Start here. Type it, or tap the microphone and tell it out loud." aria-label="Your story" autocomplete="off"></textarea>
+      <button type="button" class="iv-mic" id="story-mic" onclick="storyToggleMic()" aria-label="Talk instead of typing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    </div>
     <p class="story-status" id="story-status" role="status" aria-live="polite"></p>
+    <p class="pc-mic-note" id="story-mic-note">Only the words are saved. No audio is recorded.</p>
     <div class="story-controls">
-      <button type="button" class="story-mic" id="story-mic" onclick="storyToggleMic()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-        <span id="story-mic-label">Talk</span>
-      </button>
       <button type="button" class="story-continue" id="story-continue" onclick="storyDone()">Continue</button>
     </div>
-    <p class="pc-mic-note" id="story-mic-note">Only the words are saved. No audio is recorded.</p>
   </div>
 </div>
 
@@ -2793,6 +2791,7 @@ h1, h2, h3,
 
 <!-- INTERVIEW: one screen per question -->
 <div id="iv-screen">
+  <button type="button" id="iv-more" onclick="ivMoreTap()">More below &#8595;</button>
   <div class="story-wrap">
     <button class="ls-back" onclick="ivBack()">← Back</button>
     <div class="pc-eyebrow">Script Writing</div>
@@ -2812,16 +2811,15 @@ h1, h2, h3,
     <div class="pc-eyebrow">Edit with AI</div>
     <div class="pc-heading" id="ai-edit-heading">What would you like changed?</div>
     <p class="story-prompt" id="ai-edit-intro">Describe the changes, by talking or typing. You can ask for several at once. The AI changes only what you ask for, and every line it touches is highlighted.</p>
-    <textarea id="ai-edit-text" placeholder="For example: in the third line, change &quot;never&quot; to &quot;always&quot;." aria-label="Describe the changes" autocomplete="off"></textarea>
+    <div class="iv-boxwrap">
+      <textarea id="ai-edit-text" placeholder="For example: in the third line, change &quot;never&quot; to &quot;always&quot;." aria-label="Describe the changes" autocomplete="off"></textarea>
+      <button type="button" class="iv-mic" id="ai-edit-mic" onclick="aiEditDict.toggle()" aria-label="Talk instead of typing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    </div>
     <p class="story-status" id="ai-edit-status" role="status" aria-live="polite"></p>
+    <p class="pc-mic-note" id="ai-edit-mic-note">Only the words are saved. No audio is recorded.</p>
     <div class="story-controls">
-      <button type="button" class="story-mic" id="ai-edit-mic" onclick="aiEditDict.toggle()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
-        <span id="ai-edit-mic-label">Talk</span>
-      </button>
       <button type="button" class="story-continue" id="ai-edit-apply" onclick="aiEditApply()">Make these changes</button>
     </div>
-    <p class="pc-mic-note" id="ai-edit-mic-note">Only the words are saved. No audio is recorded.</p>
   </div>
 </div>
 
@@ -2912,7 +2910,7 @@ h1, h2, h3,
     </div>
     <div class="s6-q-block">
       <span class="s6-q-num">Question 3</span>
-      <label class="s6-q-label">Did anything shift in how you understand what was happening for them in this fight?</label>
+      <label class="s6-q-label">Did anything shift in how you understand what was happening for them in this argument?</label>
       <textarea class="s6-textarea" id="s6-q3" placeholder="Your honest answer..."></textarea>
     </div>
     <div class="s6-q-block">
@@ -3001,7 +2999,7 @@ h1, h2, h3,
   <!-- Phase 2: Writing -->
   <div id="s9-writing" class="s9-writing" style="display:none;">
   <div class="s9-scroll">
-    <p class="s9-intro">Before you write a single word, read the Before and Better example below. A real fight. Two versions. See what is possible before you attempt your own.</p>
+    <p class="s9-intro">Before you write a single word, read the Before and Better example below. A real argument. Two versions. See what is possible before you attempt your own.</p>
     <button class="s9-example-toggle" id="s9-example-toggle" onclick="s9ToggleExample()">&#9654; Read the Before &amp; Better Example</button>
     <div class="s9-example-pane" id="s9-example-pane">
       <div class="s9-example-hd">Before</div>
@@ -3109,7 +3107,7 @@ Me too.</div>
     <p class="s9-intro" style="margin-bottom:16px">The AI is right here with you throughout this rewrite. If you get triggered, stuck, or uncertain, tap the AI button. You do not have to figure it out alone.</p>
     <div class="s9-checkin" id="s9-checkin" style="display:none"></div>
     <span class="s9-rewrite-label">Your Rewrite. Write it differently this time</span>
-    <textarea class="s9-rewrite-area" id="s9-rewrite-area" placeholder="Write the same fight differently. Together. Not perfectly. Honestly.&#10;&#10;Start with your setting. Then your first line..." oninput="s9AutoSave()"></textarea>
+    <textarea class="s9-rewrite-area" id="s9-rewrite-area" placeholder="Write the same argument differently. Together. Not perfectly. Honestly.&#10;&#10;Start with your setting. Then your first line..." oninput="s9AutoSave()"></textarea>
     <!-- Proofing feedback — shown after click one -->
     <div id="s9-proofing" class="s9-proofing" style="display:none;">
       <div class="s9-proofing-eyebrow">The AI has read your rewrite</div>
@@ -3375,7 +3373,7 @@ Me too.</div>
     <div class="ls-heading">Let's set the scene.</div>
     <div class="ls-sub">A few quick details to get you started. You can change any of these once you're inside.</div>
     <div class="ls-field">
-      <label class="ls-label" for="ls-location">Where does this fight usually happen?</label>
+      <label class="ls-label" for="ls-location">Where does this argument usually happen?</label>
       <input type="text" id="ls-location" class="ls-input" placeholder="e.g. The kitchen, The car, The bedroom" autocomplete="off" />
     </div>
     <div class="ls-field">
@@ -3685,7 +3683,7 @@ function caApplyMode() {
   var sub = document.querySelector('#form-create .auth-sub');
   if (sub) sub.textContent = 'Set up your private script space.';
   var fightLabel = el('ca-fight') ? el('ca-fight').previousElementSibling : null;
-  if (fightLabel) fightLabel.textContent = solo ? 'The fight, what do you call it?' : 'The Fight, what do you both call it?';
+  if (fightLabel) fightLabel.textContent = solo ? 'The argument, what do you call it?' : 'The Argument, what do you both call it?';
 }
 function caSync() {
   var f = el('form-create');
@@ -3750,7 +3748,7 @@ function createAccount() {
   if (email !== emailConfirm) { el('ca-email-match-err').style.display = 'block'; el('ca-email-confirm').focus(); return; }
   if (!pass || pass.length < 6) { txt('ca-error', 'Password needs at least 6 characters.'); return; }
   if (pass !== passConfirm) { el('ca-pass-match-err').style.display = 'block'; el('ca-pass-confirm').focus(); return; }
-  if (!fight && !soloEnrollMode) { txt('ca-error', 'Please name the fight.'); return; }
+  if (!fight && !soloEnrollMode) { txt('ca-error', 'Please name the argument.'); return; }
   if (!el('ca-disclaimer-check').checked) { el('ca-disclaimer-err').style.display = 'block'; el('ca-disclaimer-err').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return; }
   el('btn-create').disabled = true;
   el('btn-create').textContent = 'Creating account…';
@@ -4270,11 +4268,11 @@ function sendSafetyFlagEmail(rec, email) {
 }
 
 var SAFETY_SCREEN_LABELS = {
-  here: "Here's what I heard", fightname: 'The name they gave the fight', about: 'What the fight is about', trigger: 'What usually sets it off',
+  here: "Here's what I heard", fightname: 'The name they gave the argument', about: 'What the argument is about', trigger: 'What usually sets it off',
   starter: 'Who starts it and how', setting: 'Where it happens', sayme: 'What they say every time', saythem: 'What their partner says every time',
-  heard: 'What they hear when their partner says that', energy: 'The energy', speedup: 'Where it speeds up', cue: 'A look, tone or silence that gets to them',
+  heard: 'What they hear when their partner says those things', energy: 'The energy', energyp: 'The energy (partner)', energym: 'The energy (themselves)', speedup: 'Where it speeds up', cue: 'A look, tone or silence that gets to them',
   cueplace: 'Which line the cue follows', interrupt: 'What usually interrupts it', extra: 'Something they added at the end',
-  'rf-stop': 'What would make the fight stop', 'rf-partnerstop': 'What their partner would say would make it stop', 'rf-onething': 'The one thing they would say',
+  'rf-stop': 'What would make the argument stop', 'rf-partnerstop': 'What their partner would say would make it stop', 'rf-onething': 'The one thing they would say',
   'rf-trigger': 'Something they say that gets that reaction', 'rf-thinking': 'What they think their partner is thinking', 'rf-feeling': 'What they think their partner is feeling',
   lines: 'The lines you hear every time', gets: 'What gets to them', story: 'The story they tell themselves', feel: 'What they believe their partner feels',
   want: 'What they most want understood', end: 'How it ends'
@@ -4412,6 +4410,7 @@ function loadProfile() {
     if (p.partnerNameConfirmed) user.partnerConfirmed = true;
     if (p.partnerId) user.partnerId = p.partnerId;
     if (p.accountType) user.accountType = p.accountType;
+    syncPrivacyTag();
     var sbn = el('btn-submit'); if (sbn && !sbn.disabled) sbn.textContent = user.accountType === 'solo' ? 'Submit my script' : 'Submit for Review';
     var pcp = el('pc-privacy'); if (pcp) pcp.style.display = user.accountType === 'solo' ? 'none' : '';
     if (p.soloCurrentStep) user.soloCurrentStep = String(p.soloCurrentStep);
@@ -4639,124 +4638,185 @@ function soloShowNote(msg) {
 // ask what the person sees now, before they see the analysis, so their answers are not shaped by it.
 // ====================================================================================================
 var rfActive = false, rfIndex = 0;
-var RF_KEYS = ['intro', 'stop', 'partnerstop', 'onething', 'trigger', 'thinking', 'feeling'];
-var RF_FIELD = { stop: 'stopBelief', partnerstop: 'partnerStopGuess', onething: 'oneThingToSay', trigger: 'triggerLine', thinking: 'storyThinking', feeling: 'storyFeeling' };
-var rfA = { stopBelief: '', partnerStopGuess: '', oneThingToSay: '', triggerLine: '', storyThinking: '', storyFeeling: '' };
-var rfSaveTimer = null, rfMyLines = [];
+var RF_KEYS = ['intro', 'stop', 'partnerstop', 'onething', 'trigger', 'whatimean', 'thinking', 'feeling'];
+var RF_FIELD = { stop: 'stopBelief', partnerstop: 'partnerStopGuess', onething: 'oneThingToSay', trigger: 'triggerLine', whatimean: 'whatIMean', thinking: 'storyThinking', feeling: 'storyFeeling' };
+var rfA = { stopBelief: '', partnerStopGuess: '', oneThingToSay: '', triggerLine: '', whatIMean: '', storyThinking: '', storyFeeling: '' };
+var rfSaveTimer = null, rfSayLines = [];
+var RF_NONE = 'Not that I notice';
+
+// The follow up (what I mean) only appears when the person picked a line or a way of saying it.
+function rfActiveKey(k) { if (k === 'whatimean') { var t = String(rfA.triggerLine || '').trim(); return !!t && t.indexOf(RF_NONE) === -1; } return true; }
+function rfNumbered() { return RF_KEYS.filter(function(k) { return k !== 'intro' && k !== 'whatimean'; }); }
+function rfProgressLabel(key) {
+  if (key === 'intro') return 'COMMERCIAL BREAK';
+  var n = rfNumbered();
+  if (key === 'whatimean') return 'A follow up to question ' + (n.indexOf('trigger') + 1) + ' of ' + n.length;
+  return 'Question ' + (n.indexOf(key) + 1) + ' of ' + n.length;
+}
 
 function rfHeading(key) {
   var N = pbName();
   switch (key) {
     case 'intro': return 'Before your results';
-    case 'stop': return 'In your view, what would make this fight stop?';
+    case 'stop': return 'In your view, what would make this argument stop?';
     case 'partnerstop': return 'Your best guess: what would ' + N + ' say would make it stop?';
-    case 'onething': return 'If you could say one thing and know ' + N + ' would really hear it, what would you say?';
-    case 'trigger': return 'Is there something you say that tends to get that reaction from ' + N + '?';
-    case 'thinking': return 'What do you think ' + N + ' is thinking?';
-    case 'feeling': return 'What do you think ' + N + ' is feeling?';
+    case 'onething': return "What's the one thing you want " + N + ' to really hear?';
+    case 'trigger': return 'In your arguments with ' + N + ', is there something you say, or the way you say it, that tends to get a strong reaction?';
+    case 'whatimean': return 'Think about the line or the tone you just picked.';
+    case 'thinking': return 'The story I tell myself is that ' + N + '...';
+    case 'feeling': return 'I think ' + N + ' is feeling...';
   }
   return '';
 }
-function rfExample(key) {
+function rfSub(key) {
+  var N = pbName();
   switch (key) {
-    case 'stop': return 'For example: if my partner would really listen.';
     case 'partnerstop': return 'For example: if I stopped bringing it up.';
-    case 'onething': return 'In your own words. A starter is fine if it helps.';
-    case 'trigger': return 'Tap a line you said, or say it in your own words.';
-    case 'thinking': return 'The story you tell yourself about what is going on in their head.';
+    case 'onething': return "Say it the way you'd say it to " + N + '.';
+    case 'trigger': return 'Think about all of your arguments, not just this one.';
+    case 'whatimean': return 'What I mean is...';
+    case 'thinking': return "The story you tell yourself about what's going on in " + N + "'s head.";
     case 'feeling': return 'Your best guess is fine.';
   }
   return '';
 }
+// Each group has a label ending in "...". The saved answer is the label and the chip joined into one sentence, so it
+// reads correctly on its own: "If Wendy really listened to me".
+function rfGroup(label, chips) {
+  var lead = label.replace(/\.\.\.$/, '');
+  return { label: label, chips: chips.map(function(c) { return { text: c, full: lead + ' ' + c }; }) };
+}
 function rfGroups(key) {
   var N = pbName();
+  var we = ['talked before it builds', 'agreed on how we handle this', 'felt like a team again', 'both listened without jumping in', 'both stopped blaming', 'both slowed down'];
   if (key === 'stop') return [
-    { label: 'About ' + N, chips: ["They'd really listen to me", "They'd stop getting defensive", "They'd follow through on what we agree"] },
-    { label: 'About you', chips: ["I'd stay calmer", "I'd say what I need sooner", "I'd stop bringing it up the same way"] },
-    { label: 'About the two of us', chips: ["We'd talk before it builds", "We'd agree on how we handle this", "We'd feel like a team again"] },
-    { label: 'About both of us', chips: ["We'd both listen without jumping in", "We'd both stop blaming", "We'd both slow down"] }
+    rfGroup('If ' + N + '...', ['really listened to me', 'stopped getting defensive', 'followed through on what we agree']),
+    rfGroup('If I...', ['stayed calmer', 'said what I need sooner', 'stopped bringing it up the same way']),
+    rfGroup('If we...', we)
   ];
   if (key === 'partnerstop') return [
-    { label: 'About you', chips: ["I'd really listen to them", "I'd stop getting defensive", "I'd follow through on what we agree"] },
-    { label: 'About ' + N, chips: ["They'd stay calmer", "They'd say what they need sooner", "They'd stop bringing it up the same way"] },
-    { label: 'About the two of us', chips: ["We'd talk before it builds", "We'd agree on how we handle this", "We'd feel like a team again"] },
-    { label: 'About both of us', chips: ["We'd both listen without jumping in", "We'd both stop blaming", "We'd both slow down"] }
+    rfGroup('If I...', ['really listened to ' + N, 'stopped getting defensive', 'followed through on what we agree']),
+    rfGroup('If ' + N + '...', ['stayed calmer', "said what's wrong sooner", 'stopped bringing it up the same way']),
+    rfGroup('If we...', we)
   ];
+  if (key === 'trigger') {
+    var g = [];
+    if (rfSayLines.length) g.push({ label: 'What I say', chips: rfSayLines.slice(0, 6).map(function(x) { return { text: x, full: x }; }) });
+    g.push({ label: 'How I say it', chips: ['a sharp tone', 'a raised voice', 'sarcasm', 'talking over ' + N].map(function(x) { return { text: x, full: x }; }) });
+    g.push({ label: '', chips: [{ text: RF_NONE, full: RF_NONE }] });
+    return g;
+  }
   return null;
 }
 function rfChips(key) {
-  var N = pbName(), topic = String((window._intakeTopic || '')).toLowerCase();
-  if (key === 'onething') return { chips: ["I need you to know that", "I'm not trying to", "What I really want is", "It hurts when"], mode: 'line' };
-  if (key === 'trigger') return { chips: rfMyLines.slice(0, 4).concat(['Not that I notice']), mode: 'line' };
-  if (key === 'thinking') return { chips: [N + " thinks I'm wrong", "I'm being judged", N + " doesn't respect me", N + " thinks they're always right", N + " is trying to control me", N + " is keeping score"], mode: 'comma' };
-  if (key === 'feeling') return { chips: [/money|spend|dollar|bill|budget|debt/.test(topic) ? 'worried about money' : 'worried', 'tired of carrying it', 'trying to hold it together', 'overwhelmed', 'resentful'], mode: 'comma' };
+  var N = pbName(), topic = String(window._intakeTopic || '').toLowerCase();
+  if (key === 'thinking') return { chips: ["thinks I'm wrong", "thinks I'm the problem", 'is judging me', "doesn't respect me", 'is trying to control me', 'is keeping score', 'wants this to stop too', 'is tired of this'].map(function(c) { return { text: c, full: N + ' ' + c }; }), mode: 'comma' };
+  if (key === 'feeling') return { chips: ['hurt', 'angry', 'worried', 'overwhelmed', 'tired', 'resentful', 'sad', 'scared'], mode: 'comma' };
   return { chips: [], mode: 'comma' };
 }
+var RF_STARTERS = ['I need you to know...', 'What I really want is...', 'It hurts when...', "I'm afraid that..."];
 
 function rfStart(sd) {
   rfActive = true; ivLive = false;
   Object.keys(rfA).forEach(function(k) { rfA[k] = sd && sd[k] ? String(sd[k]) : ''; });
   window._intakeTopic = (sd && (sd.fightTopic || '')) || '';
-  rfMyLines = [];
-  try {
-    var lines = sd && sd.lines ? (typeof sd.lines === 'string' ? JSON.parse(sd.lines) : sd.lines) : [];
-    (lines || []).forEach(function(l) { if (l.type === 'line' && String(l.char).toUpperCase() === 'A' && l.dialogue && String(l.dialogue).trim().length < 120) rfMyLines.push(String(l.dialogue).trim()); });
-  } catch (e) {}
+  // "What I say" offers only the lines this person gave on their own lines screen, never facts from the story.
+  rfSayLines = String((sd && sd.sayEveryTime) || '').split('\n').map(function(x) { return x.trim(); }).filter(function(x) { return x && IV_NONE.indexOf(x.toLowerCase()) === -1; });
   var first = 0;
   var answered = RF_KEYS.some(function(k) { return k !== 'intro' && rfA[RF_FIELD[k]]; });
-  if (answered) { first = 1; for (var i = 1; i < RF_KEYS.length; i++) { if (!rfA[RF_FIELD[RF_KEYS[i]]]) { first = i; break; } first = i; } }
+  if (answered) { first = 1; for (var i = 1; i < RF_KEYS.length; i++) { var k = RF_KEYS[i]; if (!rfActiveKey(k) || k === 'whatimean') continue; first = i; if (!rfA[RF_FIELD[k]]) break; } }
   document.body.style.overflow = 'hidden';
   showFlex('iv-screen');
   rfShow(first);
 }
 
+// What is still missing, in words. Only the required questions ask for an answer; "what I mean" is optional.
+function rfNeed(key) {
+  if (key === 'intro' || key === 'whatimean') return '';
+  var b = el('iv-main'), v = b ? b.value.trim() : rfA[RF_FIELD[key]];
+  return v ? '' : 'Tap one, or write your own to continue';   // PLACEHOLDER wording
+}
+function rfSyncNext() {
+  var b = document.querySelector('#iv-actions .iv-next');
+  if (!b || !rfActive) return;
+  var need = rfNeed(RF_KEYS[rfIndex]);
+  b.textContent = need || b.getAttribute('data-label') || 'Next';
+  b.classList.toggle('iv-next-wait', !!need);
+  b.setAttribute('aria-disabled', need ? 'true' : 'false');
+}
+
 function rfShow(i) {
+  var dir = i >= rfIndex ? 1 : -1;
   rfIndex = Math.max(0, Math.min(RF_KEYS.length - 1, i));
+  while (!rfActiveKey(RF_KEYS[rfIndex]) && rfIndex + dir >= 0 && rfIndex + dir < RF_KEYS.length) rfIndex += dir;
   var key = RF_KEYS[rfIndex];
   ivClear();
-  txt('iv-progress', key === 'intro' ? '' : 'Question ' + rfIndex + ' of ' + (RF_KEYS.length - 1));
+  txt('iv-progress', rfProgressLabel(key));
   txt('iv-heading', rfHeading(key));
   var body = el('iv-body');
   if (key === 'intro') {
-    ['Thank you for telling it straight.',
-     'Your feelings and your experience are real, and they\'re yours.',
-     'And when we\'re hurt, it\'s natural to see our partner\'s part clearly and our own part less clearly. That\'s true for everyone, including your partner.',
-     'So your results won\'t pick a side. They invite both of you to take a deeper look at your own part: what you say, what you do, and how you show up. And to look at each other with fresh eyes.',
+    var solo = user && user.accountType === 'solo';
+    ['Take a breath. This is a rerun, not a verdict. Read it like a note from a friend who\'s seen the show.',
+     'Your feelings and your experience are real, and they\'re yours. Nobody gets to talk you out of them, including you.',
+     'When we\'re hurt, it\'s not unusual to see our partner\'s part sometimes more clearly than our own. That\'s true for everyone, and yes, that includes your partner.',
+     solo ? 'So your results won\'t pick a side. They invite you to take a deeper look at your own part in all of this: what you say, what you do, and how you show up. And hopefully, to see your partner with fresh eyes.'
+          : 'So your results won\'t pick a side. They invite both of you to take a deeper look at your own part in all of this: what you say, what you do, and how you show up. And hopefully, to look at each other with fresh eyes.',
      'That\'s where things start to shift.'].forEach(function(t) { body.appendChild(ivNode('p', 'story-prompt', t)); });
     ivActions(null, 'Continue', function() { rfShow(1); });
   } else {
-    txt('iv-sub', rfExample(key));
-    var box = ivBox('iv-main', 3);
+    txt('iv-sub', rfSub(key));
+    var box = ivBox('iv-main', key === 'whatimean' ? 2 : 3);
     box.value = rfA[RF_FIELD[key]] || '';
-    body.appendChild(box);
-    body.appendChild(ivTalk('iv-main'));
+    if (key === 'whatimean') box.placeholder = "For example: I'm trying to be clear and direct.";
     var groups = rfGroups(key);
+    body.appendChild(box);   // the box is in the page first, so the answers can light up and fill it; the answers sit above it
+    function put(n) { body.insertBefore(n, box); }
+    if (key === 'onething') {
+      put(ivNode('div', 'iv-label', 'Need a way in? Start with one of these:'));
+      var row = ivNode('div', 'iv-opts');
+      RF_STARTERS.forEach(function(st) {
+        row.appendChild(ivButton(st, 'iv-opt', function() {
+          var t = el('iv-main'), cur = t.value.replace(/\s+$/, '');
+          t.value = (cur ? cur + '\n' : '') + st.replace(/\.\.\.$/, '... ');
+          t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+          rfAutosave();
+        }));
+      });
+      put(row);
+    }
+    var elseBtn = function() { return ivButton('Something else, in my own words', 'iv-opt iv-opt-wide', function() { el('iv-main').focus(); }); };
     if (groups) {
       groups.forEach(function(g) {
-        body.appendChild(ivNode('div', 'iv-label', g.label));
-        body.appendChild(ivOptions(g.chips, null, '', 'iv-main', 'comma'));
+        if (g.label) put(ivNode('div', 'iv-label', g.label));
+        put(ivOptions(g.chips, null, '', 'iv-main', 'comma'));
       });
-      var other = ivButton('Something else, in my own words', 'iv-opt iv-opt-wide', function() { box.focus(); });
-      body.appendChild(other);
+      put(elseBtn());
     } else {
       var spec = rfChips(key);
-      if (spec.chips.length) body.appendChild(ivOptions(spec.chips, null, '', 'iv-main', spec.mode));
+      if (spec.chips.length) put(ivOptions(spec.chips, null, '', 'iv-main', spec.mode));
+      if (key === 'thinking' || key === 'feeling') put(elseBtn());
     }
-    var last = rfIndex === RF_KEYS.length - 1;
+    body.appendChild(ivTalk('iv-main'));
+    var last = key === 'feeling';
     ivActions(null, last ? 'Show me my results' : 'Next', function() {
       rfCapture();
-      if (!rfA[RF_FIELD[key]]) { ivErr('Tap one, or say it in your own words.'); return; }
-      pbSafetyCheck('rf-' + key, rfHeading(key), rfA[RF_FIELD[key]]);
+      var need = rfNeed(key);
+      if (need) { ivErr(need); return; }
+      if (rfA[RF_FIELD[key]]) pbSafetyCheck('rf-' + key, rfHeading(key), rfA[RF_FIELD[key]]);
       if (last) rfFinish(); else { rfSave(false); rfShow(rfIndex + 1); }
     });
+    rfSyncNext();
   }
   window.scrollTo(0, 0);
   var sc = el('iv-screen'); if (sc) sc.scrollTop = 0;
+  setTimeout(ivUpdateMore, 60); setTimeout(ivUpdateMore, 500);
 }
 
 function rfCapture() {
   var key = RF_KEYS[rfIndex], b = el('iv-main');
   if (b && RF_FIELD[key]) rfA[RF_FIELD[key]] = b.value.trim();
+  if (key === 'trigger' && !rfActiveKey('whatimean')) rfA.whatIMean = '';   // no follow up, so nothing to keep
+  rfSyncNext();
 }
 function rfAutosave() { rfCapture(); clearTimeout(rfSaveTimer); rfSaveTimer = setTimeout(function() { rfSave(false); }, 1200); }
 function rfPayload(final) {
@@ -4805,7 +4865,13 @@ function rfFinish() {
 
 function soloShowQuestions(alreadyReady, sd) {
   soloShowNote(alreadyReady ? 'Your analysis is ready. Answer these to see it.' : 'Your script is in and locked. The AI is reading it now, which takes about a minute.');
-  rfStart(sd || null);
+  // The saved script record carries the lines the person gave and the answers so far.
+  fsGet('scripts/' + fdoc()).then(function(d) {
+    var doc = (d && d.fields) ? fromFields(d.fields) : {}, merged = {}, k;
+    for (k in (sd || {})) merged[k] = sd[k];
+    for (k in doc) merged[k] = doc[k];
+    rfStart(merged);
+  }).catch(function() { rfStart(sd || null); });
 }
 
 // The analysis is shown only when it is ready and the answers are in.
@@ -5118,7 +5184,7 @@ function lpRevealFight() {
 function lpProceed() {
   var fightName = el('lp-fight-input').value.trim();
   if (!fightName && !soloEnrollMode) {
-    el('lp-fight-err').textContent = 'Give your fight a name before you begin.';
+    el('lp-fight-err').textContent = 'Give your argument a name before you begin.';
     el('lp-fight-input').focus();
     return;
   }
@@ -5634,8 +5700,9 @@ function step2AddTalk() {
     var t = el(id);
     if (!t || t.getAttribute('data-talk')) return;
     t.setAttribute('data-talk', '1');
-    var row = ivTalk(id, step2AutoSave);
-    t.parentNode.insertBefore(row, t.nextSibling);
+    var st = ivTalk(id, step2AutoSave);
+    var w = t.parentNode;   // the box is now inside its wrapper; the status line goes under it
+    w.parentNode.insertBefore(st, w.nextSibling);
   });
 }
 
@@ -6141,7 +6208,7 @@ var JOURNEY_STEPS = {
   '6': { label: 'Step 6', title: 'Reflective Questions', sub: 'Four questions. Private answers. In your own words, without your partner\'s influence. This is where insight becomes clarity.', btn: 'Answer the Questions' },
   '7': { label: 'Step 7', title: 'Your Individual Work', sub: 'Before the two of you can work together effectively, each person must do their own work first. There is no authentic we unless it starts with an I.', btn: 'Begin Individual Work' },
   '8': { label: 'Step 8', title: 'NVC Together', sub: 'Now equipped individually, you come back together to practice a new way of communicating. Out of story and into solution.', btn: 'Begin NVC Practice' },
-  '9': { label: 'Step 9', title: 'The Rewrite', sub: 'You have everything you need. The same fight. New tools. New eyes. Write it differently this time. Not perfectly. Honestly. And together.', btn: 'Begin the Rewrite' },
+  '9': { label: 'Step 9', title: 'The Rewrite', sub: 'You have everything you need. The same argument. New tools. New eyes. Write it differently this time. Not perfectly. Honestly. And together.', btn: 'Begin the Rewrite' },
   '10': { label: 'Step 10', title: 'Your Feedback Is Ready', sub: 'Something worth reading is waiting for you. The AI has read your rewrite. Whenever you\'re ready.', btn: 'Read the Feedback' },
   '11': { label: 'Step 11', title: 'The Bridge', sub: 'You\'ve done the work. Now find out where it takes you.', btn: 'Continue' }
 };
@@ -6201,6 +6268,16 @@ function openJourneyStep() {
   else if (step === '9') openStep9();
   else if (step === '10') openStep10();
   else if (step === '11') openStep11();
+}
+
+// The lock line under the title. A couple's version is private until they share it; an individual's is private to them.
+function syncPrivacyTag() {
+  var t = el('privacy-tag');
+  if (!t || !user) return;
+  if (user.accountType === 'solo') { t.textContent = '🔒 Your version. Private to you.'; return; }
+  var first = ((user.partner || user.partnerName || '').split(' ')[0]) || 'your partner';
+  t.innerHTML = '🔒 Your version. Private until you share with <span id="privacy-partner-name"></span>';
+  txt('privacy-partner-name', first);
 }
 
 // Moves the shared couple step forward only. If the other partner is already further along, nothing goes backwards.
@@ -6598,7 +6675,7 @@ var W_COST = { blame: 0.14, dismiss: 0.14, push: 0.16, defend: 0.10, withdraw: 0
 var W_TEMP_STEP = { 0: -8, 1: 6, 2: 14, 3: 25 };
 var W_END = {
   gone:   { text: 'Instead of moving closer together, they moved further apart.', note: 'Defending is a move away. What comes out while moving away can be a push. That push and pull is what drives people apart.' },
-  thin:   { text: 'The fight stopped before the warmth was gone.', note: 'Defending is a move away. What comes out while moving away can be a push. Some of what was between you was still there when it stopped.' },
+  thin:   { text: 'The argument stopped before the warmth was gone.', note: 'Defending is a move away. What comes out while moving away can be a push. Some of what was between you was still there when it stopped.' },
   intact: { text: 'In this version, the words did not pull you far apart.', note: 'Even so, notice where the space between you changed.' }
 };
 var W_WAIT_MS = 90000;   // how long the analysis card waits for the scene before it shows without it
@@ -6987,7 +7064,7 @@ function openStep5() {
   if (!user) return;
   el('step5-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  el('s5-intro').textContent = 'Watching your own script is powerful. Watching your partner\'s version immediately after is extraordinary. The same fight from two completely different experiences. Watch as a witness to their journey.';
+  el('s5-intro').textContent = 'Watching your own script is powerful. Watching your partner\'s version immediately after is extraordinary. The same argument from two completely different experiences. Watch as a witness to their journey.';
   s5Load();
 }
 
@@ -8191,18 +8268,8 @@ function createDictation(taId, hooks) {
   var st = { rec: null, want: false, live: false, base: '', startedAt: 0, quickEnds: 0 };
   function box() { return el(taId); }
   function say(m, help) { if (hooks.onStatus) hooks.onStatus(m || '', !!help); }
-  function micProblem(err) {
-    var blocked = 'The microphone is blocked for this page. On an iPad, open Settings, then Chrome, and turn on Microphone. You can also tap the lock icon next to the address and allow it. Then tap Talk again.';
-    if (err === 'service-not-allowed') {
-      say('Voice typing is not available in this browser right now. On an iPad, make sure Dictation is on in Settings, General, Keyboard. It may also not work in a private tab.', true);
-      return;
-    }
-    try {
-      navigator.permissions.query({ name: 'microphone' }).then(function(r) {
-        say(r.state === 'prompt' ? 'The microphone was not allowed yet. Tap Talk again and choose Allow when it asks.' : blocked, true);
-      }, function() { say(blocked, true); });
-    } catch (e) { say(blocked, true); }
-  }
+  // If the person says no, or the device cannot do it, they are never left stuck: typing, or the keyboard's own mic, works.
+  function micProblem(err) { say('No problem. You can also tap the mic on your keyboard.', true); }
   function changed() { if (hooks.onChange) hooks.onChange(); }
   function join(base, add) { add = (add || '').trim(); if (!base) return add; return add ? base + ' ' + add : base; }
   function start(auto) {
@@ -8210,6 +8277,8 @@ function createDictation(taId, hooks) {
     var ta = box();
     if (!SpeechRec || !ta) return;
     if (st.rec) { try { st.rec.abort(); } catch(e) {} st.rec = null; }
+    // The first time, say what is about to happen before the browser's own question appears.
+    if (!auto && !window._micWarned) { window._micWarned = true; say('Your device will ask to use the microphone. Tap Allow.'); }
     var rec = new SpeechRec();
     rec.continuous = true;
     rec.interimResults = true;
@@ -8316,10 +8385,9 @@ function storyToggleMic() { if (storyDict) storyDict.toggle(); }
 function storyRenderControls() {
   var supported = storySpeechSupported();
   var live = !!(storyDict && storyDict.state.live);
-  var mic = el('story-mic'), label = el('story-mic-label'), cont = el('story-continue'), note = el('story-mic-note');
-  if (mic) { mic.style.display = supported ? 'flex' : 'none'; mic.classList.toggle('story-mic-live', live); }
+  var mic = el('story-mic'), cont = el('story-continue'), note = el('story-mic-note');
+  if (mic) { mic.style.display = supported ? 'block' : 'none'; mic.classList.toggle('live', live); }
   if (note) note.style.display = supported ? 'block' : 'none';
-  if (label) label.textContent = live ? 'Tap to pause' : (pbStory.voice ? 'Tap to keep talking' : 'Talk');
   var hasText = !!(el('story-text') && el('story-text').value.trim());
   if (cont) { cont.textContent = live ? 'Done' : 'Continue'; }
 }
@@ -8655,7 +8723,7 @@ function pbAutoGrow(el) {
 
 
 // ===== AI interview as screens: story first, then one screen per question =====
-var IV_SCREENS = ['here', 'fightname', 'about', 'trigger', 'starter', 'setting', 'sayme', 'saythem', 'heard', 'energy', 'speedup', 'cue', 'cueplace', 'interrupt', 'review'];
+var IV_SCREENS = ['here', 'fightname', 'about', 'trigger', 'starter', 'setting', 'sayme', 'saythem', 'heard', 'energyp', 'energym', 'speedup', 'cue', 'cueplace', 'interrupt', 'review'];
 var IV_SCAN = ['q1', 'q3', 'q4'];
 var ivScreens = IV_SCREENS.slice();
 var ivIndex = 0;
@@ -8722,23 +8790,7 @@ function pbShort(t) {
 var pnMode = 'typed';
 function pnNeeded() { return pbPlaceholderName(user && user.partner); }
 
-var s0Mode = 'typed';
-function startStory(mode) {
-  s0Mode = mode;
-  el('path-choice-screen').style.display = 'none';
-  navPush('start');
-  showFlex('start-screen');
-  document.body.style.overflow = 'hidden';
-}
-function s0Back() {
-  if (appNavStack[appNavStack.length - 1] === 'start') navBack();
-  else { hide('start-screen'); showFlex('path-choice-screen'); }
-}
-function s0Start() {
-  hide('start-screen');
-  if (appNavStack[appNavStack.length - 1] === 'start') appNavStack.pop();
-  startStoryAfterIntro(s0Mode);
-}
+function startStory() { startStoryAfterIntro('typed'); }
 
 function startStoryAfterIntro(mode) {
   if (pnNeeded()) {
@@ -8917,7 +8969,8 @@ var IV_ABOUT = ['Money', 'Time', 'The kids', 'Chores', 'Feeling close'];
 var IV_SETTINGS = ['The kitchen', 'The bedroom', 'The car', 'The living room', 'Over text'];
 var IV_ENERGY = ['Calm', 'Casual', 'Firm', 'Quiet', 'Quick', 'Snappy', 'Sarcastic', 'Loud', 'Cold', 'Tired', 'Worn out', 'Beaten down'];
 var IV_CUES = ['eye roll', 'heavy sigh', 'crossed arms', 'looks away', 'makes a face', 'goes quiet', 'walks away', 'shakes their head', 'stops answering', 'checks the phone'];
-var IV_SPEEDUP = ['"You always"', 'A sigh', 'A raised voice', 'A certain word'];
+var IV_SPEEDUP = ['"You always"', '"Here we go again"', 'A certain word'];   // words only: looks, sighs and silences are the next question
+var IV_HEAVY = ['loud', 'cold', 'sarcastic', 'beaten down', 'worn out'];   // energy words that make the last question gentler
 
 function pbNoDash(t) { return String(t || '').replace(/\s*[—–]\s*/g, ', ').replace(/\s-\s/g, ', '); }
 
@@ -8943,29 +8996,45 @@ function ivCueLines() {
   return out;
 }
 
+// The theme the person gave (or the read back found), for the sentence on the lines screens.
+function ivTheme() { return String(ivReal(iv.about) || iv.here.topic || '').toLowerCase().replace(/,\s*/g, ' and '); }
+// True when the energy words are heavy or a safety flag is set: the last question then uses the plain wording.
+function ivHeavy() {
+  if (user && user.safetyFlag) return true;
+  var en = iv.energy || {}, hit = false;
+  ['me', 'partner'].forEach(function(w) { var e = en[w] || {}; [e.start, e.end, e.other].forEach(function(x) { if (x && IV_HEAVY.indexOf(String(x).toLowerCase().trim()) !== -1) hit = true; }); });
+  return hit;
+}
+
 function ivHeading(key) {
   var N = pbName();
   switch (key) {
     case 'here': return "Here's what I heard";
-    case 'fightname': return 'What would you call this fight?';
-    case 'about': return 'What is this fight usually about?';
+    case 'fightname': return 'What would you call this argument?';
+    case 'about': return 'What is this argument usually about?';
     case 'trigger': return 'What usually sets it off?';
     case 'starter': return 'Who usually starts it, and how does it begin?';
     case 'setting': return 'Where does it usually happen?';
-    case 'sayme': return 'What do you say every time?';
-    case 'saythem': return 'What does ' + N + ' say every time?';
-    case 'heard': return 'What do you hear when ' + N + ' says that?';
-    case 'energy': return "What's the energy?";
-    case 'speedup': return 'Is there a word or a tone where it speeds up?';
-    case 'cue': return 'Is there a look, tone or silence that gets to you more than the words?';
-    case 'cueplace': return 'After which line does it usually happen?';
-    case 'interrupt': return 'What usually interrupts it?';
+    case 'sayme': return 'The lines you say every time';
+    case 'saythem': return 'The lines ' + N + ' says every time';   // DRAFT: the mirror of the approved wording, not yet approved
+    case 'heard': return 'What do you hear when ' + N + ' says those things?';
+    case 'energyp': case 'energym': return "What's the energy?";
+    case 'speedup': return 'Is there a word or phrase that especially gets to you and sends the argument into overdrive?';
+    case 'cue': return 'Is there a look, gesture or silence that gets to you more than the words do?';
+    case 'cueplace': return 'After which line does that usually happen?';
+    case 'interrupt': return ivHeavy() ? 'How does the argument usually get interrupted?' : "What's the 'to be continued' moment?";
     case 'review': return "Here's everything I heard";
   }
   return '';
 }
+// On the review screen the two energy screens say whose energy each one is.
+function ivReviewLabel(key) {
+  if (key === 'energyp') return "What's the energy? (" + pbName() + ')';
+  if (key === 'energym') return "What's the energy? (you)";
+  return ivHeading(key);
+}
 
-// The short "for example", made from what this person said, never a fixed one.
+// The short line under the question, made from what this person said, never a fixed example.
 function ivExample(key) {
   var ex = iv.ex || {};
   switch (key) {
@@ -8974,13 +9043,11 @@ function ivExample(key) {
     case 'trigger': return ex.trigger ? 'For example: ' + ex.trigger : '';
     case 'starter': return ex.starter ? 'For example: ' + ex.starter : '';
     case 'setting': return 'This becomes the setting of your script.';
-    case 'sayme': return 'Your exact words, the way you would say them out loud to ' + pbName() + '.';
-    case 'saythem': return 'Their exact words, the way ' + pbName() + ' would say them out loud to you.';
-    case 'heard': return 'Not what they meant. What it sounds like to you.';
-    case 'speedup': return 'For example: "you always", a sigh, a raised voice.';
-    case 'cue': return 'Something you can see or hear, not something you feel inside.';
-    case 'cueplace': return 'Tap a line from either of you, or choose Not sure.';
-    case 'interrupt': return 'The fight gets interrupted more often than it gets finished.';
+    case 'heard': return "It's not necessarily what they meant. It's what it sounds like to you.";
+    case 'speedup': return "For example: 'You always,' 'Here we go again.'";
+    case 'cue': return 'Something they do without saying anything.';
+    case 'cueplace': return 'Best guess is fine. You can fix it later.';
+    case 'interrupt': return ivHeavy() ? '' : 'These arguments rarely get an ending. Something cuts them off. What usually does?';
   }
   return '';
 }
@@ -8993,8 +9060,7 @@ function ivChipsFor(key) {
     case 'trigger': return { chips: (ex.triggerChips || []).slice(0, 3).concat(['Not sure']), mode: 'comma' };
     case 'starter': return { chips: ['I start it', N + ' starts it', 'It builds between us', 'Not sure'], mode: 'comma' };
     case 'setting': return { chips: IV_SETTINGS.concat(['Not sure']), mode: 'comma' };
-    case 'sayme': return { chips: ivLineChips('me').concat(['Not sure']), mode: 'line' };
-    case 'saythem': return { chips: ivLineChips('partner').concat(['Not sure']), mode: 'line' };
+    case 'sayme': case 'saythem': return { chips: [], mode: 'line' };   // no tappable lines: people say them in their own words
     case 'heard': return { chips: (ex.heardChips || []).slice(0, 4).concat(['Not sure']), mode: 'comma' };
     case 'speedup': return { chips: IV_SPEEDUP.concat(['Nothing in particular']), mode: 'comma' };
     case 'cue': return { chips: IV_CUES.concat(['Nothing in particular']), mode: 'comma' };
@@ -9018,32 +9084,40 @@ function ivLineChips(who) {
 var ivDicts = [], ivPaints = {};
 function ivStopTalk() { ivDicts.forEach(function(d) { try { d.stop(); } catch (e) {} }); ivDicts = []; ivPaints = {}; }
 
-// Talk beside a box: the spoken words land in the box so they can be edited. Only the words are kept.
+// A small mic icon in the corner inside the box, like the one on the draft lines. The spoken words land in the box so
+// they can be edited. Only the words are kept. Returns a small line for status messages, to go under the box.
+var IV_MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>';
 function ivTalk(boxId, afterChange) {
-  var wrap = ivNode('div', 'iv-talkrow');
-  var status = ivNode('span', 'iv-talk-status', '');
+  var ta = el(boxId);
+  var status = ivNode('div', 'iv-talk-status', '');
+  status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+  if (!ta || !storySpeechSupported()) { status.style.display = 'none'; return status; }
+  var wrap = ivNode('div', 'iv-boxwrap');
+  ta.parentNode.insertBefore(wrap, ta); wrap.appendChild(ta);
   var dict = null;
-  var btn = ivButton('Talk', 'iv-talk', function() { if (dict) dict.toggle(); });
-  btn.setAttribute('aria-label', 'Talk instead of typing');
-  btn.setAttribute('data-for', boxId);
-  wrap.appendChild(btn); wrap.appendChild(status);
-  if (!storySpeechSupported()) { wrap.style.display = 'none'; return wrap; }
-  setTimeout(function() {
-    if (!el(boxId)) return;
-    dict = createDictation(boxId, {
-      onStatus: function(m) { status.textContent = m || ''; },
-      onChange: function() {
-        btn.textContent = dict && dict.state.live ? 'Tap to pause' : 'Talk';
-        btn.classList.toggle('iv-talk-live', !!(dict && dict.state.live));
-        if (ivLive) { ivCapture(); ivSaveProgress(); }
-        if (rfActive) rfAutosave();
-        (ivPaints[boxId] || []).forEach(function(f) { f(); });
-        if (afterChange) afterChange();
+  var btn = ivNode('button', 'iv-mic');
+  btn.type = 'button'; btn.innerHTML = IV_MIC_SVG; btn.setAttribute('aria-label', 'Talk instead of typing');
+  btn.addEventListener('click', function() { if (dict) dict.toggle(); });
+  wrap.appendChild(btn);
+  dict = createDictation(boxId, {
+    onStatus: function(m, help) {
+      status.textContent = m || '';
+      if (help && m) {
+        var t = document.createElement('button'); t.type = 'button'; t.className = 'story-type-btn'; t.textContent = 'Type instead';
+        t.addEventListener('click', function() { status.textContent = ''; ta.focus(); });
+        status.appendChild(document.createElement('br')); status.appendChild(t);
       }
-    });
-    ivDicts.push(dict);
-  }, 0);
-  return wrap;
+    },
+    onChange: function() {
+      btn.classList.toggle('live', !!(dict && dict.state.live));
+      if (ivLive) { ivCapture(); ivSaveProgress(); }
+      if (rfActive) rfAutosave();
+      (ivPaints[boxId] || []).forEach(function(f) { f(); });
+      if (afterChange) afterChange();
+    }
+  });
+  ivDicts.push(dict);
+  return status;
 }
 
 function ivClear() {
@@ -9096,7 +9170,7 @@ function ivOptions(labels, onTap, wrapClass, boxId, mode) {
     });
   }
   labels.forEach(function(l) {
-    var b = ivButton(l, 'iv-opt', function() {
+    var b = ivButton(typeof l === 'string' ? l : l.text, 'iv-opt', function() {
       if (boxId) {
         var t = el(boxId);
         var full = this.getAttribute('data-full');
@@ -9112,7 +9186,7 @@ function ivOptions(labels, onTap, wrapClass, boxId, mode) {
         paint();
       } else onTap(l, this);
     });
-    b.setAttribute('data-full', l.full || l);
+    b.setAttribute('data-full', typeof l === 'string' ? l : (l.full || l.text));
     btns.push(b); row.appendChild(b);
   });
   if (boxId) {
@@ -9127,13 +9201,57 @@ function ivActions(skipFn, nextLabel, nextFn) {
   var a = el('iv-actions');
   a.innerHTML = '';
   if (skipFn) a.appendChild(ivButton('Fix something', 'iv-skip', skipFn));   // only the read back uses a first button
-  if (nextFn) a.appendChild(ivButton(nextLabel || 'Next', 'iv-next', nextFn));
+  if (nextFn) { var nb = ivButton(nextLabel || 'Next', 'iv-next', nextFn); nb.setAttribute('data-label', nextLabel || 'Next'); a.appendChild(nb); }
 }
 function ivErr(m) { txt('iv-error', m); }
 
 var ivLive = false;       // a question is on screen (not the busy or retry screens)
 var ivReturn = false;     // the person came here from the final review to change one answer
 function ivReviewIndex() { return ivScreens.indexOf('review'); }
+
+// The numbered questions. A follow up that only appears after an answer (which line the cue follows) is not numbered,
+// so the total is the same from the first question to the last.
+function ivNumberedKeys() { return ivScreens.filter(function(k) { return k !== 'review' && k !== 'cueplace' && ivActive(k); }); }
+function ivProgressLabel(key) {
+  if (key === 'review') return 'Last look';
+  var nums = ivNumberedKeys();
+  if (key === 'cueplace') return 'A follow up to question ' + (nums.indexOf('cue') + 1) + ' of ' + nums.length;
+  return 'Question ' + (nums.indexOf(key) + 1) + ' of ' + nums.length;
+}
+
+// What is still missing on this screen, in words, or nothing when the person can go on.
+function ivNeed(key) {
+  if (key === 'here' || key === 'review' || key === 'fightname') return '';
+  if (key === 'energyp' || key === 'energym') {
+    var w = key === 'energyp' ? 'partner' : 'me', e = iv.energy[w], who = w === 'me' ? 'you' : pbName();
+    return (e.same || (e.start && e.end) || String(e.other || '').trim()) ? '' : 'Pick a start and an end for ' + who;   // PLACEHOLDER wording
+  }
+  var b = el('iv-main'), v = b ? b.value.trim() : ivGet(key);
+  return v ? '' : 'Add an answer to continue';   // PLACEHOLDER wording
+}
+// The Next button says what is missing until it is not.
+function ivSyncNext() {
+  var b = document.querySelector('#iv-actions .iv-next');
+  if (!b || !ivLive) return;
+  var need = ivNeed(ivScreens[ivIndex]);
+  b.textContent = need || b.getAttribute('data-label') || 'Next';
+  b.classList.toggle('iv-next-wait', !!need);
+  b.setAttribute('aria-disabled', need ? 'true' : 'false');
+}
+
+// "More below": a small cue wherever a screen runs past the bottom of the page.
+function ivUpdateMore() {
+  var sc = el('iv-screen'), m = el('iv-more');
+  if (!sc || !m) return;
+  var shown = getComputedStyle(sc).display !== 'none';
+  m.style.display = (shown && sc.scrollHeight - sc.scrollTop - sc.clientHeight > 60) ? 'block' : 'none';
+}
+function ivMoreTap() { var sc = el('iv-screen'); if (sc) sc.scrollBy({ top: Math.round(sc.clientHeight * 0.8), behavior: 'smooth' }); }
+(function() {
+  var sc = el('iv-screen'); if (sc) sc.addEventListener('scroll', ivUpdateMore);
+  window.addEventListener('resize', ivUpdateMore);
+  setInterval(ivUpdateMore, 700);
+})();
 
 function ivShow(i, dir) {
   i = Math.max(0, Math.min(ivScreens.length - 1, i));
@@ -9143,16 +9261,18 @@ function ivShow(i, dir) {
   var key = ivScreens[ivIndex];
   ivClear();
   ivLive = true;
-  var act = ivActiveKeys().filter(function(k) { return k !== 'review'; });
-  txt('iv-progress', key === 'review' ? 'Last look' : 'Question ' + (act.indexOf(key) + 1) + ' of ' + act.length);
+  txt('iv-progress', ivProgressLabel(key));
   txt('iv-heading', ivHeading(key));
   ivSaveProgress();
   if (key === 'here') ivRenderHere();
-  else if (key === 'energy') ivRenderEnergy();
+  else if (key === 'energyp' || key === 'energym') ivRenderEnergy(key === 'energyp' ? 'partner' : 'me', key);
   else if (key === 'review') ivRenderReview();
+  else if (key === 'sayme' || key === 'saythem') ivRenderLines(key);
   else ivRenderQuestion(key);
+  ivSyncNext();
   window.scrollTo(0, 0);
   var sc = el('iv-screen'); if (sc) sc.scrollTop = 0;
+  setTimeout(ivUpdateMore, 60); setTimeout(ivUpdateMore, 500);
 }
 
 function ivNextIndex(from) {
@@ -9188,14 +9308,15 @@ function ivCapture() {
   var v;
   if (key === 'here') {
     Array.prototype.forEach.call(document.querySelectorAll('#iv-body input.iv-input'), function(i) { iv.here[i.getAttribute('data-key')] = i.value.trim(); });
-  } else if (key === 'energy') {
-    ['me', 'partner'].forEach(function(w) { var o = val('iv-en-other-' + w); if (o !== null) iv.energy[w].other = o; });
+  } else if (key === 'energyp' || key === 'energym') {
+    var ew = key === 'energyp' ? 'partner' : 'me', eo = val('iv-en-other-' + ew); if (eo !== null) iv.energy[ew].other = eo;
   } else if (key === 'review') {
     if ((v = val('iv-extra')) !== null) iv.extra = v;
   } else if (IV_FIELD[key]) {
     if ((v = val('iv-main')) !== null) ivSet(key, v);
   }
   if (key !== 'review' && (v = val('iv-note')) !== null) iv.notes[key] = v;
+  ivSyncNext();
 }
 
 var IV_HERE_ROWS = [['where', 'Where'], ['topic', 'What it is about'], ['first', 'First line']];
@@ -9262,23 +9383,61 @@ function ivRenderQuestion(key) {
   ivActions(null, 'Next', function() {
     var v = el('iv-main').value.trim();
     ivCapture();
-    if (!v && key !== 'fightname') { ivErr('Tap one, or say it in your own words.'); return; }
+    if (!v && key !== 'fightname') { ivErr(ivNeed(key) || 'Add an answer to continue'); return; }
     if (v) pbSafetyCheck(key, ivHeading(key), v);
     if (key === 'fightname') ivApplyFightName();
     ivNext();
   });
 }
 
-// The small, calm box that is on every question. Seeing the options often brings something else to mind.
+// The optional "anything this reminds you of" box. It starts as a small link so it never crowds the question, and opens
+// when tapped (or already open if something was written there).
 function ivNoteBox(body, key) {
   var wrap = ivNode('div', 'iv-note');
-  wrap.appendChild(ivNode('div', 'iv-note-label', 'Anything this reminds you of? Add it here.'));
+  var has = iv.notes && iv.notes[key] && String(iv.notes[key]).trim();
+  wrap.appendChild(ivButton('Anything this reminds you of? Add it here.', 'iv-note-link', function() {
+    wrap.classList.add('open'); var t = el('iv-note'); if (t) t.focus();
+  }));
+  var inner = ivNode('div', 'iv-note-body');
   var nb = ivBox('iv-note', 2);
-  nb.value = (iv.notes && iv.notes[key]) || '';
-  nb.placeholder = 'Optional';
-  wrap.appendChild(nb);
-  wrap.appendChild(ivTalk('iv-note'));
+  nb.value = has ? iv.notes[key] : '';
+  nb.placeholder = 'Optional. Anything else that comes to mind.';
+  inner.appendChild(nb);
+  wrap.appendChild(inner);
   body.appendChild(wrap);
+  inner.appendChild(ivTalk('iv-note'));
+  if (has) wrap.classList.add('open');
+}
+
+// ---- The lines each person says every time. No tappable lines: people say them in their own words, in one box,
+// one line after another. Examples, when there are any, are plain text.
+function ivRenderLines(key) {
+  var body = el('iv-body'), N = pbName(), mine = key === 'sayme', theme = ivTheme();
+  var about = theme ? 'about ' + theme : '';
+  var copy = mine
+    ? "We often say the same lines over and over in arguments, and sometimes catch ourselves mid-sentence. Think about your past arguments" + (about ? ' ' + about : '') + ", including this one. What lines do you remember saying? Your exact words, the way you'd say them to " + N + ". Take a moment. Try saying them out loud and speak them right into the box. The right words often come faster when you speak than when you type."
+    // DRAFT, NOT APPROVED: the mirror of the approved wording for the partner's lines
+    : "We often hear the same lines over and over in arguments. Think about your past arguments" + (about ? ' ' + about : '') + ", including this one. What lines do you remember " + N + " saying? Their exact words, the way " + N + " would say them to you. Take a moment. Try saying them out loud and speak them right into the box.";
+  body.appendChild(ivNode('p', 'story-prompt iv-lines-copy', copy));
+  var ex = ivLineChips(mine ? 'me' : 'partner').slice(0, 2);
+  if (ex.length) body.appendChild(ivNode('p', 'iv-lines-example', 'For example: ' + ex.map(function(x) { return '"' + x + '"'; }).join('  ') ));   // PLACEHOLDER label; the lines are the person\'s own, from their story
+  body.appendChild(ivNode('p', 'story-prompt iv-lines-copy', 'What are some of the lines? List as many as come to mind. Nobody has just one.'));
+  var box = ivBox('iv-main', 5);
+  box.value = ivGet(key);
+  box.placeholder = 'One line after another. Type here, or tap the microphone and say them.';
+  body.appendChild(box);
+  body.appendChild(ivTalk('iv-main'));
+  body.appendChild(ivButton('Add another', 'iv-note-link iv-add-another', function() {
+    var t = el('iv-main'); var cur = t.value.replace(/\s+$/, ''); t.value = cur ? cur + '\n' : ''; t.focus(); t.setSelectionRange(t.value.length, t.value.length); ivCapture();
+  }));
+  ivNoteBox(body, key);
+  ivActions(null, 'Next', function() {
+    var v = el('iv-main').value.trim();
+    ivCapture();
+    if (!v) { ivErr(ivNeed(key)); return; }
+    pbSafetyCheck(key, ivHeading(key), v);
+    ivNext();
+  });
 }
 
 // The name is asked here, once, and carried everywhere: the draft, the analysis, the scene, the conversation.
@@ -9295,50 +9454,45 @@ function ivApplyFightName() {
   }
 }
 
-// ---- What's the energy? Heard from the next room, not felt inside ----
-function ivRenderEnergy() {
+// ---- What's the energy? Heard from the next room, not felt inside. One screen for each person, the partner first. ----
+function ivRenderEnergy(who, key) {
   var body = el('iv-body'), N = pbName();
   txt('iv-sub', 'Think of how it sounds from the next room, not how it feels inside.');
-  function person(who, label) {
-    var e = iv.energy[who];
-    var card = ivNode('div', 'iv-en');
-    card.appendChild(ivNode('div', 'iv-label', label));
-    function slot(which, lead) {
-      card.appendChild(ivNode('div', 'iv-en-lead', lead));
-      var row = ivNode('div', 'iv-opts');
-      var btns = [];
-      function paint() { btns.forEach(function(b) { var on = !e.same && e[which] === b.textContent; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
-      IV_ENERGY.forEach(function(w) {
-        var b = ivButton(w, 'iv-opt', function() { e.same = false; e[which] = (e[which] === w) ? '' : w; ivEnergyPaintAll(); ivSaveProgress(); });
-        btns.push(b); row.appendChild(b);
-      });
-      row._paint = paint;
-      card.appendChild(row);
-      ivEnergyRows.push(row);
-    }
-    slot('start', 'At the start, the energy is');
-    slot('end', "By the end, it's");
-    var same = ivButton('Stays the same the whole time', 'iv-opt iv-opt-wide', function() { e.same = !e.same; if (e.same) { e.start = ''; e.end = ''; } ivEnergyPaintAll(); ivSaveProgress(); });
-    same.setAttribute('data-same', who);
-    ivEnergySame[who] = same;
-    card.appendChild(same);
-    var other = ivBox('iv-en-other-' + who, 1);
-    other.placeholder = 'Another word';
-    other.value = e.other || '';
-    card.appendChild(other);
-    card.appendChild(ivTalk('iv-en-other-' + who));
-    body.appendChild(card);
-  }
+  var e = iv.energy[who];
+  var card = ivNode('div', 'iv-en');
+  card.appendChild(ivNode('div', 'iv-label', who === 'me' ? 'You' : N));
   ivEnergyRows = []; ivEnergySame = {};
-  person('partner', N);
-  person('me', 'You');
+  function slot(which, lead) {
+    card.appendChild(ivNode('div', 'iv-en-lead', lead));
+    var row = ivNode('div', 'iv-opts');
+    var btns = [];
+    function paint() { btns.forEach(function(b) { var on = !e.same && e[which] === b.textContent; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+    IV_ENERGY.forEach(function(w) {
+      var b = ivButton(w, 'iv-opt', function() { e.same = false; e[which] = (e[which] === w) ? '' : w; ivEnergyPaintAll(); ivSaveProgress(); ivSyncNext(); });
+      btns.push(b); row.appendChild(b);
+    });
+    row._paint = paint;
+    card.appendChild(row);
+    ivEnergyRows.push(row);
+  }
+  slot('start', 'At the start, the energy is...');
+  slot('end', "By the end, it's...");
+  var same = ivButton('Stays the same the whole time', 'iv-opt iv-opt-wide', function() { e.same = !e.same; if (e.same) { e.start = ''; e.end = ''; } ivEnergyPaintAll(); ivSaveProgress(); ivSyncNext(); });
+  ivEnergySame[who] = same;
+  card.appendChild(same);
+  var other = ivBox('iv-en-other-' + who, 1);
+  other.placeholder = 'Another word';
+  other.value = e.other || '';
+  card.appendChild(other);
+  card.appendChild(ivTalk('iv-en-other-' + who));
+  body.appendChild(card);
   ivEnergyPaintAll();
-  ivNoteBox(body, 'energy');
+  ivNoteBox(body, key);
   ivActions(null, 'Next', function() {
     ivCapture();
-    var ok = ['partner', 'me'].every(function(w) { var e = iv.energy[w]; return e.same || (e.start && e.end) || String(e.other || '').trim(); });
-    if (!ok) { ivErr('Pick a word for the start and the end for each of you, or choose that it stays the same.'); return; }
-    ['partner', 'me'].forEach(function(w) { if (iv.energy[w].other) pbSafetyCheck('energy', 'A word they used for the energy', iv.energy[w].other); });
+    var need = ivNeed(key);
+    if (need) { ivErr(need); return; }
+    if (e.other) pbSafetyCheck(key, 'A word they used for the energy', e.other);
     ivNext();
   });
 }
@@ -9358,7 +9512,8 @@ function ivEnergyText(w) {
 function ivSummary(key) {
   var N = pbName();
   if (key === 'here') return [iv.here.where && 'Where: ' + iv.here.where, iv.here.topic && 'About: ' + iv.here.topic, iv.here.first && 'First line: "' + iv.here.first + '"'].filter(Boolean).join('\n');
-  if (key === 'energy') return [ivEnergyText('partner'), ivEnergyText('me')].filter(Boolean).join('\n');
+  if (key === 'energyp') return ivEnergyText('partner');
+  if (key === 'energym') return ivEnergyText('me');
   return ivGet(key);
 }
 function ivEditFrom(key) {
@@ -9373,7 +9528,7 @@ function ivRenderReview() {
   ivActiveKeys().forEach(function(key) {
     if (key === 'review') return;
     var row = ivNode('div', 'iv-review-row');
-    row.appendChild(ivNode('div', 'iv-fact-label', ivHeading(key)));
+    row.appendChild(ivNode('div', 'iv-fact-label', ivReviewLabel(key)));
     var v = ivSummary(key);
     row.appendChild(ivNode('div', 'iv-review-val' + (v ? '' : ' iv-review-skipped'), v || 'No answer'));
     row.appendChild(ivButton('Edit', 'iv-skip iv-review-edit', function() { ivEditFrom(key); }));
@@ -9456,7 +9611,7 @@ function ivFightLabel() {
 }
 
 // What each screen is called when a note was written on it.
-function ivNoteLabel(key) { return key === 'energy' ? 'the energy' : ivHeading(key).replace(/\?$/, '').toLowerCase(); }
+function ivNoteLabel(key) { return (key === 'energyp' || key === 'energym' || key === 'energy') ? 'the energy' : ivHeading(key).replace(/\?$/, '').toLowerCase(); }
 
 // The energy words as they are saved to the account and sent to the scene: start, end, same the whole time, own word.
 function ivEnergyForSave() {
@@ -9820,7 +9975,7 @@ function pbResume() {
 // Where a saved set of answers should reopen. Older saves only know a number, from the order before the
 // feelings question was removed.
 function ivResumeIndex(pr) {
-  var at = ivScreens.indexOf(pr.key || '');
+  var at = ivScreens.indexOf(pr.key === 'energy' ? 'energyp' : (pr.key || ''));
   return at === -1 ? 0 : at;
 }
 
@@ -10131,10 +10286,9 @@ var aiEditBusy = false;
 function aiEditRender() {
   var supported = storySpeechSupported();
   var live = !!(aiEditDict && aiEditDict.state.live);
-  var mic = el('ai-edit-mic'), label = el('ai-edit-mic-label'), apply = el('ai-edit-apply'), note = el('ai-edit-mic-note'), ta = el('ai-edit-text');
-  if (mic) { mic.style.display = supported ? 'flex' : 'none'; mic.classList.toggle('story-mic-live', live); }
+  var mic = el('ai-edit-mic'), apply = el('ai-edit-apply'), note = el('ai-edit-mic-note'), ta = el('ai-edit-text');
+  if (mic) { mic.style.display = supported ? 'block' : 'none'; mic.classList.toggle('live', live); }
   if (note) note.style.display = supported ? 'block' : 'none';
-  if (label) label.textContent = live ? 'Tap to pause' : 'Talk';
   if (apply) {
     apply.disabled = aiEditBusy;
     apply.textContent = aiEditBusy ? 'Working…' : (live ? 'Done' : 'Make these changes');
@@ -10384,8 +10538,8 @@ function ivActiveNumber(o) {
   try {
     if (!o.iv || o.iv.v !== 2) return 0;
     iv = o.iv;
-    var act = ivScreens.filter(ivActive).filter(function(k) { return k !== 'review'; });
-    var at = act.indexOf(o.key);
+    var act = ivNumberedKeys();
+    var at = act.indexOf(o.key === 'cueplace' ? 'cue' : o.key);
     return at === -1 ? 0 : at + 1;
   } finally { iv = keep; }
 }
@@ -10395,8 +10549,8 @@ function ivProgressWords(pr) {
   var keep = iv, key = pr.key;
   iv = pr.iv;
   try {
-    var act = ivScreens.filter(ivActive).filter(function(k) { return k !== 'review'; });
-    var at = act.indexOf(key);
+    var act = ivNumberedKeys();
+    var at = act.indexOf(key === 'cueplace' ? 'cue' : key);
     if (key === 'review') return 'You got as far as the last look.';
     return at === -1 ? 'Your answers are saved.' : 'You got as far as question ' + (at + 1) + ' of ' + act.length + '.';
   } finally { iv = keep; }
@@ -10468,9 +10622,8 @@ window.addEventListener('popstate', function(e) {
   var storyEl = el('story-screen');
   var nameEl = el('partner-name-screen');
   var ivEl = el('iv-screen');
-  var startEl = el('start-screen');
   var shown = function(e) { return e && (e.style.display === 'block' || e.style.display === 'flex'); };
-  if (shown(scriptEl) || shown(coachEl) || shown(pathChoiceEl) || shown(pathBEl) || shown(storyEl) || shown(nameEl) || shown(ivEl) || shown(startEl)) {
+  if (shown(scriptEl) || shown(coachEl) || shown(pathChoiceEl) || shown(pathBEl) || shown(storyEl) || shown(nameEl) || shown(ivEl)) {
     // Try in-app back first; if there's nothing to pop, just re-anchor
     if (appNavStack.length > 1) {
       navBack();
@@ -10529,7 +10682,7 @@ window.addEventListener('popstate', function(e) {
     if (couplesCopy) couplesCopy.style.display = 'block';
     if (soloCopy) soloCopy.style.display = 'none';
     // Reset fight heading to couples version
-    txt('lp-fight-hd', 'What do you both call this fight?');
+    txt('lp-fight-hd', 'What do you both call this argument?');
     txt('lp-fight-sub', 'The one you both know. Agree on a name together. Right now.');
     lpEl.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (lpState === 'commitment') {
