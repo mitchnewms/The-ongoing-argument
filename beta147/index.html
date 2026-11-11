@@ -303,6 +303,9 @@ body {
 .solo-closing-divider { width: 40px; height: 1px; background: rgba(184,160,112,0.35); margin: 40px auto; }
 .solo-closing-cap { font-family: 'Courier Prime', monospace; font-size: 0.8rem; color: rgba(255,255,255,0.4); line-height: 1.75; text-align: center; max-width: 380px; }
 
+/* Video and avatar text is switched off until the video is built. To switch it back on: set VIDEO_ON to true in the script and delete this one rule. */
+.video-off { display: none !important; }
+
 /* ── STEPS 4 & 5: VIDEO PLACEHOLDER ──────────────────────── */
 .s45-scroll { flex: 1; overflow-y: auto; padding: 24px 18px 40px; }
 .s45-intro { font-family: 'Courier Prime', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.82); line-height: 1.75; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
@@ -2175,7 +2178,7 @@ h1, h2, h3,
         <p>This process was built by Mitch Newman, relationship adviser and former screenwriter, to help couples do what TV writers do every week, which is to find the solution to the ongoing conflict.</p>
       </div>
       <div class="pb-body">
-        <p>When both people are fully in it, something real becomes possible. You'll write your version of the argument privately, watch it performed by avatars, do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
+        <p>When both people are fully in it, something real becomes possible. You'll write your version of the argument privately, <span class="video-off">watch it performed by avatars, </span>do the individual work, rewrite the script together, and walk away with a new language for the relationship.</p>
       </div>
       <div class="pb-reminder">
         <p>You are about to commit to something your partner has already started. Take your time before continuing. This only works if you are both genuinely in it.</p>
@@ -2263,11 +2266,11 @@ h1, h2, h3,
       <li class="lp-step"><span class="lp-step-n">1.</span><span class="lp-step-t">Name the argument you keep having. Together.</span></li>
       <li class="lp-step"><span class="lp-step-n">2.</span><span class="lp-step-t">Each of you writes your version. Separately. Privately.</span></li>
       <li class="lp-step"><span class="lp-step-n">3.</span><span class="lp-step-t">The system analyzes the conflict and the dynamics. Out of story. Into solution.</span></li>
-      <li class="lp-step"><span class="lp-step-n">4.</span><span class="lp-step-t">Grab some popcorn. Watch your argument performed by avatar actors. <em style="font-style:italic;opacity:0.6;font-size:0.9em;">(Coming soon.)</em></span></li>
-      <li class="lp-step"><span class="lp-step-n">5.</span><span class="lp-step-t">See how the breakdown is really the breakthrough you've needed.</span></li>
-      <li class="lp-step"><span class="lp-step-n">6.</span><span class="lp-step-t">Do the individual work. Get into Relationshape.</span></li>
-      <li class="lp-step"><span class="lp-step-n">7.</span><span class="lp-step-t">Learn a new language. Out of blame. Out of confrontation. Into conversation.</span></li>
-      <li class="lp-step"><span class="lp-step-n">8.</span><span class="lp-step-t">Rewrite the script. Alone if necessary. Ideally together. Give your relationship a chance to win.</span></li>
+      <li class="lp-step video-off"><span class="lp-step-n">4.</span><span class="lp-step-t">Grab some popcorn. Watch your argument performed by avatar actors. <em style="font-style:italic;opacity:0.6;font-size:0.9em;">(Coming soon.)</em></span></li>
+      <li class="lp-step"><span class="lp-step-n">4.</span><span class="lp-step-t">See how the breakdown is really the breakthrough you've needed.</span></li>
+      <li class="lp-step"><span class="lp-step-n">5.</span><span class="lp-step-t">Do the individual work. Get into Relationshape.</span></li>
+      <li class="lp-step"><span class="lp-step-n">6.</span><span class="lp-step-t">Learn a new language. Out of blame. Out of confrontation. Into conversation.</span></li>
+      <li class="lp-step"><span class="lp-step-n">7.</span><span class="lp-step-t">Rewrite the script. Alone if necessary. Ideally together. Give your relationship a chance to win.</span></li>
     </ol>
     <p class="lp-solo-note">Doing this on your own? Every step still applies, you&rsquo;re just doing your part of it first.</p>
   </section>
@@ -2527,7 +2530,7 @@ h1, h2, h3,
   </div>
 
   <!-- AVATAR VIDEO WAITING STATE — shown at steps 4/5 until HeyGen videos are ready -->
-  <div id="video-waiting-banner">
+  <div id="video-waiting-banner" class="video-off">
     <div class="wb-inner">
       <div class="wb-heading">Your avatar videos are being created now.</div>
       <p class="wb-body">This takes a little time to get right. You do not need to keep checking. You will get an email the moment they are ready to watch.</p>
@@ -2854,20 +2857,20 @@ h1, h2, h3,
 <div id="step4-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep4()">&#8592;</button>
-    <span class="s3-title">Step 4. Watch Your Script</span>
+    <span class="s3-title">Step 4. Read Your Script</span>
   </div>
   <div class="s45-scroll" id="s4-inner">
     <p class="s45-intro" id="s4-intro"></p>
-    <div class="s45-video-ph">
+    <div class="s45-video-ph video-off">
       <div class="s45-play-icon">&#9654;</div>
       <div class="s45-ph-label">Avatar Video, Coming Soon</div>
       <div class="s45-ph-note">HeyGen integration will appear here. Read your transcript below.</div>
     </div>
     <div class="s45-tx-hd">Your Script Transcript</div>
     <div class="s45-tx" id="s4-transcript"></div>
-    <p class="s45-share-note" id="s4-share-note">Next, your partner will watch your script, and you will watch theirs. Only the script is shared: the lines, the scene and the name of the argument. Your story, your answers and your notes stay private.</p>
+    <p class="s45-share-note" id="s4-share-note">Next, your partner will read your script, and you will read theirs. Only the script is shared: the lines, the scene and the name of the argument. Your story, your answers and your notes stay private.</p>
     <p class="s45-share-err" id="s4-share-err" role="alert"></p>
-    <button class="s45-continue" id="s4-continue" onclick="completeStep4()">I&rsquo;ve Watched, Share My Script and Continue to Step 5 &#8250;</button>
+    <button class="s45-continue" id="s4-continue" onclick="completeStep4()">I&rsquo;ve Read It, Share My Script and Continue to Step 5 &#8250;</button>
   </div>
 </div>
 
@@ -2875,18 +2878,18 @@ h1, h2, h3,
 <div id="step5-screen">
   <div class="s3-header">
     <button class="s3-back" onclick="closeStep5()">&#8592;</button>
-    <span class="s3-title">Step 5. Watch Your Partner&rsquo;s Script</span>
+    <span class="s3-title">Step 5. Read Your Partner&rsquo;s Script</span>
   </div>
   <div class="s45-scroll" id="s5-inner">
     <p class="s45-intro" id="s5-intro"></p>
-    <div class="s45-video-ph">
+    <div class="s45-video-ph video-off">
       <div class="s45-play-icon">&#9654;</div>
       <div class="s45-ph-label">Avatar Video, Coming Soon</div>
       <div class="s45-ph-note">HeyGen integration will appear here. Read the transcript below.</div>
     </div>
     <div class="s45-tx-hd">Partner&rsquo;s Script Transcript</div>
     <div class="s45-tx" id="s5-transcript"></div>
-    <button class="s45-continue" onclick="completeStep5()">I&rsquo;ve Watched, Continue to Step 6 &#8250;</button>
+    <button class="s45-continue" onclick="completeStep5()">I&rsquo;ve Read It, Continue to Step 6 &#8250;</button>
   </div>
 </div>
 
@@ -3135,7 +3138,7 @@ Me too.</div>
     </div>
     <div id="s10-body" class="s10-body" style="display:none"></div>
     <!-- Rewrite avatar video -->
-    <div id="s10-video-section" class="s10-video-section" style="display:none;">
+    <div id="s10-video-section" class="s10-video-section video-off" style="display:none;">
       <div class="s10-video-eyebrow">Your Rewrite. Watch It Back</div>
       <p class="s10-video-note">You wrote it differently. Now watch it back. The same care you saw in Steps 4 and 5, now applied to what you just built together.</p>
       <div id="s10-video-container" class="s10-video-ph">
@@ -6010,8 +6013,27 @@ function s3UpdateSoloComplete() {
   if (replies >= 3) {
     cb.textContent = 'I am ready to move on ›';
     cb.style.display = 'block';
-    cb.onclick = function() { hide('step3-screen'); document.body.style.overflow = ''; s3Mode = ''; soloAdvanceStep('3'); };
+    cb.onclick = s3ReadyForStep7;
   }
+}
+
+// "I am ready to move on": saves step 4, then opens Step 7 straight away. A failed save is logged and the person is told.
+function s3ReadyForStep7() {
+  if (!user || !user.uid) return;
+  var cb = el('s3-complete-btn');
+  if (cb) { cb.disabled = true; cb.textContent = 'Saving…'; }
+  function undo() { if (cb) { cb.disabled = false; cb.textContent = 'I am ready to move on ›'; } }
+  fsSetStrict('users/' + user.uid, { soloCurrentStep: '4' }).then(function() {
+    user.soloCurrentStep = '4';
+    try { localStorage.setItem('oa_user', JSON.stringify(user)); } catch (e) {}
+    hide('step3-screen'); s3Mode = '';
+    showSoloJourneyBanner('4');
+    openStep7();
+  }).catch(function(err) {
+    if (!err || err.code !== 'save_failed') logFailure('save_failed', 'users/…', { message: 'Moving on from the Mirror Moment could not save', detail: String(err && err.message || err).slice(0, 300) });
+    undo();
+    s3AppendError('Your place could not be saved just now, so we have not moved you on. Nothing is lost. Please try again.', s3ReadyForStep7);
+  });
 }
 
 function viewAnalysis() {
@@ -6202,9 +6224,12 @@ function s3SaveConversation() {
 }
 
 // ── JOURNEY ROUTING ─────────────────────────────────────────
+// Set to true when the video is built. It switches the video and avatar text and screens back on (with the .video-off rule above).
+var VIDEO_ON = false;
+
 var JOURNEY_STEPS = {
-  '4': { label: 'Step 4', title: 'Watch Your Script', sub: 'The video performance is coming soon. For now, read your script as a transcript. When you continue, your partner will be able to read it too.', btn: 'Read My Script' },
-  '5': { label: 'Step 5', title: 'Watch Your Partner\'s Script', sub: 'The video performance is coming soon. For now, read your partner\'s script as a transcript. It appears once you have each shared yours.', btn: 'Read My Partner\'s Script' },
+  '4': { label: 'Step 4', title: 'Read Your Script', sub: 'Read your script as a transcript. When you continue, your partner will be able to read it too.', btn: 'Read My Script' },
+  '5': { label: 'Step 5', title: 'Read Your Partner\'s Script', sub: 'Read your partner\'s script as a transcript. It appears once you have each shared yours.', btn: 'Read My Partner\'s Script' },
   '6': { label: 'Step 6', title: 'Reflective Questions', sub: 'Four questions. Private answers. In your own words, without your partner\'s influence. This is where insight becomes clarity.', btn: 'Answer the Questions' },
   '7': { label: 'Step 7', title: 'Your Individual Work', sub: 'Before the two of you can work together effectively, each person must do their own work first. There is no authentic we unless it starts with an I.', btn: 'Begin Individual Work' },
   '8': { label: 'Step 8', title: 'NVC Together', sub: 'Now equipped individually, you come back together to practice a new way of communicating. Out of story and into solution.', btn: 'Begin NVC Practice' },
@@ -6312,6 +6337,7 @@ function soloJourneyRoute() {
   if (!user || !user.uid) return;
   // Firestore hands numbers back as numbers, so make the step a string before comparing it
   var step = String(user.soloCurrentStep || '1');
+  if (step === '3' && !VIDEO_ON) { step = '4'; user.soloCurrentStep = '4'; fsSet('users/' + user.uid, { soloCurrentStep: '4' }).catch(function() {}); }   // an account left on the video card moves on
   currentJourneyStep = step;
   hide('partner-waiting-banner');
   if (step === '1') {
@@ -6359,6 +6385,7 @@ function openJourneyStepSolo(step) {
 
 function soloAdvanceStep(newStep) {
   if (!user || !user.uid) return;
+  if (newStep === '3' && !VIDEO_ON) newStep = '4';   // the "Your Story on Screen" card waits for the video
   user.soloCurrentStep = newStep;
   localStorage.setItem('oa_user', JSON.stringify(user));
   fsSet('users/' + user.uid, { soloCurrentStep: newStep }).catch(function(){});
@@ -7010,7 +7037,7 @@ function openStep4() {
   if (!user) return;
   el('step4-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  el('s4-intro').textContent = 'Watch with curiosity. Consider who you see in your own role. Does it sound like you at your best? Does one of the characters remind you of someone from your past? Watch without judgment. Just notice.';
+  el('s4-intro').textContent = 'Read with curiosity. Consider who you see in your own role. Does it sound like you at your best? Does one of the characters remind you of someone from your past? Read without judgment. Just notice.';
   if (user.uid) {
     fsGet('scripts/' + fdoc()).then(function(d) {
       if (!d || !d.fields) return;
@@ -7929,7 +7956,7 @@ function finalizeRewrite() {
   var text = (el('s9-rewrite-area').value || '').trim();
   var btn = el('s9-finalize-btn');
   btn.disabled = true; btn.textContent = 'Finalizing...';
-  txt('s9-status', 'Submitting for avatar generation...');
+  txt('s9-status', 'Saving your rewrite...');
   fsSet('couples/' + user.coupleId, {
     rewrite: text,
     rewriteProofingComplete: true,
@@ -8016,8 +8043,7 @@ function renderS10Feedback(text) {
   el('s10-waiting').style.display = 'none';
   body.style.display = 'block';
   // Show video section and start polling for rewrite video
-  showFlex('s10-video-section');
-  checkRewriteVideo();
+  if (VIDEO_ON) { showFlex('s10-video-section'); checkRewriteVideo(); }
   // Fallback: show continue button after 15 minutes if video hasn't arrived
   s10VideoTimeout = setTimeout(function() {
     if (el('s10-continue-btn').style.display === 'none') {
@@ -8224,6 +8250,7 @@ function pollVideoReady(step) {
 }
 
 function showVideoWaiting() {
+  if (!VIDEO_ON) return;
   hide('journey-banner');
   el('video-waiting-banner').style.display = 'block';
 }
