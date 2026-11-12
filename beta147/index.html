@@ -4682,7 +4682,7 @@ function rfHeading(key) {
     case 'stop': return 'In your view, what would make this argument stop?';
     case 'partnerstop': return 'Your best guess: what would ' + N + ' say would make it stop?';
     case 'onething': return "What's the one thing you want " + N + ' to really hear?';
-    case 'trigger': return 'In your arguments with ' + N + ', is there something you say, or the way you say it, that tends to get a strong reaction?';
+    case 'trigger': return 'In your arguments with ' + N + ', is there something you say that tends to get a strong reaction?';
     case 'whatimean': return 'Think about the line or the tone you just picked.';
     case 'thinking': return 'The story I tell myself is that ' + N + '...';
     case 'feeling': return 'I think ' + N + ' is feeling...';
@@ -4723,7 +4723,7 @@ function rfGroups(key) {
   if (key === 'trigger') {
     var g = [];
     if (rfSayLines.length) g.push({ label: 'What I say', chips: rfSayLines.slice(0, 6).map(function(x) { return { text: x, full: x }; }) });
-    g.push({ label: 'How I say it', chips: ['a sharp tone', 'a raised voice', 'sarcasm', 'talking over ' + N].map(function(x) { return { text: x, full: x }; }) });
+    g.push({ label: 'Or the way I say it', chips: ['a sharp tone', 'a raised voice', 'sarcasm', 'talking over ' + N].map(function(x) { return { text: x, full: x }; }) });
     g.push({ label: '', chips: [{ text: RF_NONE, full: RF_NONE }] });
     return g;
   }
@@ -5981,6 +5981,7 @@ var s3Mode = '';   // 'solo' when the conversation is the individual path's Mirr
 // The AI speaks first and is given everything it needs, so it never asks for what it already has.
 function openMirrorMomentSolo() {
   if (!user || !user.uid) return;
+  soloRelabel();
   s3Mode = 'solo';
   el('step3-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -6325,7 +6326,7 @@ function showJourneyBanner(step) {
   var cfg = JOURNEY_STEPS[step];
   if (!cfg) return;
   currentJourneyStep = step; alSync();
-  txt('jb-step', cfg.label);
+  txt('jb-step', cfg.label); el('jb-step').style.display = '';
   txt('jb-title', cfg.title);
   txt('jb-sub', cfg.sub);
   txt('jb-btn', cfg.btn);
@@ -6378,15 +6379,29 @@ function advanceStep(newStep) {
 // ── SOLO PATHWAY ─────────────────────────────────────────────
 
 var SOLO_JOURNEY_STEPS = {
-  '2': { label: 'Step 2', title: 'Your Analysis', sub: 'What the AI noticed in your script.', btn: 'Read My Analysis' },
-  '3': { label: 'Step 3', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead. Your tool is ready.', btn: 'Continue to Your Tool' },
-  '4': { label: 'Step 4', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
-  '5': { label: 'Step 5', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
-  '6': { label: 'Step 6', title: 'You\'ve Done the Work', sub: '', btn: 'Read This' }
+  '2': { label: '', title: 'Your Analysis', sub: 'What the AI noticed in your script.', btn: 'Read My Analysis' },
+  '3': { label: '', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead. Your tool is ready.', btn: 'Continue to Your Tool' },
+  '4': { label: '', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
+  '5': { label: '', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
+  '6': { label: '', title: 'You\'ve Done the Work', sub: '', btn: 'Read This' }
 };
+
+// The individual path never shows the couple step numbers (it skips steps), so its headers and the Step 7 buttons are
+// named by what the screen is. Couples keep the numbers.
+function soloRelabel() {
+  var solo = !!(user && user.accountType === 'solo');
+  function set(sel, solotext, coupletext) { var n = document.querySelector(sel); if (n) n.textContent = solo ? solotext : coupletext; }
+  set('#analysis-screen .ap-title', 'Your Analysis', 'Step 2');
+  set('#step3-screen .s3-title', 'Mirror Moment', 'Step 3. Mirror Moment');
+  set('#step7-screen .s3-title', 'Individual Work', 'Step 7. Individual Work');
+  set('#step9-screen .s3-title', 'Practice Round', 'Step 9. The Rewrite');
+  set('#s7-complete-btn', 'Complete ›', 'Complete Step 7 ›');
+  set('#step7-screen .s7-ot-save', 'Continue to practice', 'Save & Continue to Step 8 ›');
+}
 
 function soloJourneyRoute() {
   if (!user || !user.uid) return;
+  soloRelabel();
   // Firestore hands numbers back as numbers, so make the step a string before comparing it
   var step = String(user.soloCurrentStep || '1');
   if (step === '3' && !VIDEO_ON) { step = '4'; user.soloCurrentStep = '4'; fsSet('users/' + user.uid, { soloCurrentStep: '4' }).catch(function() {}); }   // an account left on the video card moves on
@@ -6420,7 +6435,7 @@ function showSoloJourneyBanner(step) {
   if (!cfg) return;
   alSync();
   if (step === '2') return soloShowStep2Banner();
-  txt('jb-step', cfg.label);
+  txt('jb-step', cfg.label); el('jb-step').style.display = cfg.label ? '' : 'none';   // the individual path has no step numbers
   txt('jb-title', cfg.title);
   txt('jb-sub', cfg.sub);
   txt('jb-btn', cfg.btn);
@@ -7002,7 +7017,7 @@ function soloShowStep2Banner() {
   b.style.display = 'none';
   function done(mode) {
     soloCard2 = mode;
-    txt('jb-step', cfg.label);
+    txt('jb-step', cfg.label); el('jb-step').style.display = cfg.label ? '' : 'none';
     if (mode === 'watch') { txt('jb-title', 'Your analysis is ready.'); txt('jb-sub', 'First, watch your argument.'); txt('jb-btn', 'Watch it'); }
     else { txt('jb-title', cfg.title); txt('jb-sub', cfg.sub); txt('jb-btn', cfg.btn); }
     b.style.display = 'block';
@@ -7019,6 +7034,7 @@ function apState(msg, showRetry) {
 }
 function openAnalysisPage() {
   if (!user || !user.uid) return;
+  soloRelabel();
   el('analysis-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   el('ap-body').innerHTML = '';
@@ -7260,6 +7276,7 @@ var s7Messages = [];
 var s7Sending = false;
 
 function openStep7() {
+  soloRelabel();
   el('step7-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   fsGet('step7/' + user.uid).then(function(d) {
@@ -7520,6 +7537,7 @@ var S9_CHECKINS = [
 ];
 
 function openStep9() {
+  soloRelabel();
   el('step9-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   if (user && user.accountType === 'solo') {
@@ -8191,6 +8209,31 @@ function s11SaveEmail() {
 function s11CoachConnect() { coachConnectAction('s11-coach-btn', 's11-coach-confirm'); }
 function scCoachConnect() { coachConnectAction('sc-coach-btn', 'sc-coach-confirm'); }
 
+// The three EmailJS values come from Netlify (see netlify/functions/email-config.js), never from this file.
+var emailCfgPromise = null;
+function emailConfig() {
+  if (!emailCfgPromise) {
+    emailCfgPromise = fetch('/.netlify/functions/email-config', { headers: { 'Authorization': 'Bearer ' + (token || '') } }).then(function(r) {
+      if (!r.ok) { var e = new Error('email-config ' + r.status); e.status = r.status; throw e; }
+      return r.json();
+    }).catch(function(e) { emailCfgPromise = null; throw e; });
+  }
+  return emailCfgPromise;
+}
+function sendCoachEmail(record) {
+  try {
+    if (typeof emailjs === 'undefined') { logFailure('coach_email', 'EmailJS script', { message: 'The EmailJS script did not load, so no email was sent' }); return; }
+    emailConfig().then(function(c) {
+      if (!c || !c.configured) { logFailure('coach_email', 'not set up', { message: 'The EmailJS values are not set in Netlify yet, so no email was sent' }); return; }
+      emailjs.init({ publicKey: c.publicKey });
+      return emailjs.send(c.serviceId, c.templateId, {
+        name: record.name, email: record.email, account_type: record.accountType, uid: record.uid,
+        couple_id: record.coupleId || '', timestamp: record.timestamp
+      }).catch(function(err) { logFailure('coach_email', 'send', { status: err && err.status, message: 'EmailJS did not send the email', detail: String((err && (err.text || err.message)) || err || '').slice(0, 200) }); });
+    }).catch(function(err) { logFailure('coach_email', 'setup lookup', { status: err && err.status, message: 'Could not read the EmailJS values', detail: String((err && err.message) || err || '').slice(0, 200) }); });
+  } catch (e) { logFailure('coach_email', 'send', { message: 'The email step stopped', detail: String(e && e.message || e).slice(0, 200) }); }
+}
+
 function coachConnectAction(btnId, confirmId) {
   if (!user) return;
   var btn = el(btnId);
@@ -8205,21 +8248,7 @@ function coachConnectAction(btnId, confirmId) {
   if (user.coupleId) record.coupleId = user.coupleId;
   fsAdd('coachInterest', record).catch(function(){});
   fsSet('step11/' + user.uid, { coachConnectedAt: new Date().toISOString() }).catch(function(){});
-  // Email Mitch
-  if (typeof emailjs !== 'undefined') {
-    var serviceId = window.EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
-    var coachTemplateId = window.EMAILJS_COACH_TEMPLATE_ID || 'YOUR_COACH_TEMPLATE_ID';
-    var publicKey = window.EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
-    emailjs.init({ publicKey: publicKey });
-    emailjs.send(serviceId, coachTemplateId, {
-      name: record.name,
-      email: record.email,
-      account_type: record.accountType,
-      uid: record.uid,
-      couple_id: record.coupleId || '',
-      timestamp: record.timestamp
-    }).catch(function(err) { console.error('Coach interest email error:', err); });
-  }
+  sendCoachEmail(record);   // in the background: a failed send is logged and never holds the person up
   btn.style.display = 'none';
   el(confirmId).style.display = 'block';
 }
@@ -8938,7 +8967,7 @@ function pbScanPrompt() {
   return 'A person is telling me about a recurring ' + pbWord() + ' with their partner, ' + N + '. Here is what they said.\n\n' +
     'STORY:\n"""\n' + pbStory.text + '\n"""\n\n' +
     'For each item below, copy the exact words from the story that clearly state it. Copy, never paraphrase or summarize, and never add anything. If an item is not clearly stated, leave its evidence empty. You may use "..." between two separate passages.\n\n' +
-    'q1: what it is about. Also give "label": a short plain topic of 3 to 8 words in your own plain words, for example "Buying a drone without talking first". Never paste a piece of the story as the label.\n' +
+    'q1: what it is about. Also give "label": a short plain topic of 3 to 8 words. Use the person\'s own nouns and verbs, and keep who did what exactly as the story says. If the story describes one person doing something, the label says that person did it. Never write "each other", "both of us", "between us" or "we" unless the story says both people did it. Never paste a piece of the story as the label. For example: "Buying a drone without talking first".\n' +
     'q3: where the fight itself happens, only if they say where the two of them are when it happens (also give "label": a short name for the place, for example "the bedroom"). A place where an object is, or where something else happened, is not where the fight happens: a package on the porch does not mean the fight is on the porch. If they did not say, leave it empty.\n' +
     'q4: the first thing said out loud that starts it, copied exactly. It must be a spoken line, not narration and not something someone did.\n\n' +
     'Also list every line that is quoted or clearly reported as spoken in the story, in the order spoken. Each has "who" ("me" for the person telling the story, "partner" for ' + N + '), "text" (copied exactly from the story without the words that introduce it, like "she says"), and "say": the same line written exactly as that person would say it out loud to the other person, in their own first person, with a capital letter and normal punctuation. In a line that is only reported, "I" and "me" mean the person telling the story, and "she", "he" or "her" mean ' + N + '. Examples: the person telling the story reports "nobody asked her to" as their own line, which becomes "Nobody asked you to."; they report that ' + N + ' said "I hide things and then she is the bad guy", which becomes, for ' + N + ', "You hide things and then I\'m the bad guy." Never change who is speaking and never add meaning that is not there. Include a line even if it is short. A line written as a script, in quotes, or where ' + N + ' is talking about ' + N + 'self, such as "I\'m not asking for permission, I\'m asking to be included", stays exactly as written.\n\n' +
@@ -8981,7 +9010,11 @@ function pbParseScan(text) {
     var ev = typeof it.evidence === 'string' ? it.evidence.trim() : '';
     if (ev.length < 3) return;
     if (!pbEvidenceOk(pbStory.text, ev)) { pbExtractDebug.rejected.push(q + ': not found word for word'); return; }
-    out.items[q] = { evidence: ev, label: typeof it.label === 'string' ? pbNoDash(it.label.trim()).slice(0, 60) : '' };
+    var lab = typeof it.label === 'string' ? pbNoDash(it.label.trim()).slice(0, 60) : '';
+    // A label that makes the argument mutual ("each other", "both of us", "between us") when the story does not is dropped,
+    // so the read back skips that row and the interview asks it instead.
+    if (/\b(each other|both of us|between us)\b/i.test(lab) && !/\b(each other|both of us|between us)\b/i.test(pbStory.text || '')) { lab = ''; pbExtractDebug.rejected.push(q + ': label made it mutual, dropped'); }
+    out.items[q] = { evidence: ev, label: lab };
     pbExtractDebug.accepted.push(q);
   });
   (Array.isArray(obj.lines) ? obj.lines : []).forEach(function(l) {
