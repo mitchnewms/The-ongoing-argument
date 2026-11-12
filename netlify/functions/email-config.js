@@ -1,8 +1,8 @@
 'use strict';
 
-// Hands the signed-in browser the three EmailJS values it needs to send the "connect me with someone" email.
+// Hands the signed-in browser the EmailJS values it needs to send the "connect me with someone" email and the safety flag alert.
 // The values live in Netlify, never in the code. They are meant for the browser (EmailJS is a browser service), so
-// this only keeps them out of the repository. Until all three are set, the answer is { configured: false }.
+// this only keeps them out of the repository. Anything not set comes back empty, and the page logs it for the admin instead of sending.
 const { verifyFirebaseUser } = require('../lib/firebase-auth');
 const { corsHeaders } = require('../lib/stripe-common');
 
@@ -18,8 +18,11 @@ exports.handler = async function(event) {
   if (who === 'unavailable') return reply(CORS, 503, { error: 'Sign-in check unavailable.', code: 'auth_unavailable' });
   if (!who) return reply(CORS, 401, { error: 'Please sign in.', code: 'unauthorized' });
   const serviceId = (process.env.EMAILJS_SERVICE_ID || '').trim();
-  const templateId = (process.env.EMAILJS_COACH_TEMPLATE_ID || '').trim();
   const publicKey = (process.env.EMAILJS_PUBLIC_KEY || '').trim();
-  if (!serviceId || !templateId || !publicKey) return reply(CORS, 200, { configured: false });
-  return reply(CORS, 200, { configured: true, serviceId, templateId, publicKey });
+  const templateId = (process.env.EMAILJS_COACH_TEMPLATE_ID || '').trim();        // "connect me with someone"
+  const flagTemplateId = (process.env.EMAILJS_FLAG_TEMPLATE_ID || '').trim();     // safety flag alert (falls back to the coach one)
+  return reply(CORS, 200, {
+    configured: !!(serviceId && publicKey && templateId),
+    serviceId, publicKey, templateId, flagTemplateId
+  });
 };

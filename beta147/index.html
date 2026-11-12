@@ -268,6 +268,7 @@ body {
 .jb-step { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 4px; }
 .jb-hd { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 6px; }
 .jb-sub { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 16px; line-height: 1.55; }
+.jb-link { display: block; margin: 14px auto 0; padding: 8px 4px; background: none; border: none; color: #B84F00; font-family: system-ui, -apple-system, sans-serif; font-size: 0.95rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
 .jb-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
 
 /* ── SHARED FULL-SCREEN STEP SCREENS ──────────────────────── */
@@ -295,6 +296,7 @@ body {
 .tl-actions { display: flex; gap: 10px; margin-top: 40px; flex-wrap: wrap; align-items: center; }
 .tl-action-btn { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.5); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
 .tl-continue-btn { font-family: 'Courier Prime', monospace; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 24px; background: #E06500; color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; margin-left: auto; }
+.sc-home-btn { margin-top: 36px; min-height: 46px; padding: 12px 26px; background: #E06500; color: #FFFFFF; border: none; border-radius: 6px; font-family: system-ui, -apple-system, sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; touch-action: manipulation; }
 .solo-closing-inner { max-width: 520px; margin: 0 auto; padding: 64px 24px 100px; display: flex; flex-direction: column; align-items: center; }
 .solo-closing-eyebrow { font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 40px; text-align: center; }
 .solo-closing-text { font-family: 'Lora', Georgia, serif; font-size: clamp(1rem, 2.8vw, 1.15rem); line-height: 2.0; color: rgba(255,255,255,0.82); text-align: center; margin-bottom: 56px; }
@@ -2544,6 +2546,7 @@ h1, h2, h3,
       <div class="jb-hd" id="jb-title"></div>
       <div class="jb-sub" id="jb-sub"></div>
       <button class="jb-btn" id="jb-btn" onclick="openJourneyStep()"></button>
+      <button type="button" class="jb-link" id="jb-takeaways" style="display:none" onclick="soloReopenTakeaways()">Your takeaways</button>
     </div>
   </div>
 
@@ -3306,6 +3309,7 @@ Me too.</div>
       <button class="s11-coach-btn" id="sc-coach-btn" onclick="scCoachConnect()">Yes, connect me with someone.</button>
       <div class="s11-coach-confirm" id="sc-coach-confirm" style="display:none">Thanks, we&rsquo;ll be in touch.</div>
     </div>
+    <button type="button" class="sc-home-btn" id="sc-home-btn" onclick="soloBackHome()">Back to home</button>
   </div>
 </div>
 
@@ -4264,28 +4268,29 @@ function recordSafetyFlag(step) {
 }
 
 function sendSafetyFlagEmail(rec, email) {
+  // In the background. A failed send is logged for the admin and never holds the person up or hides a support message.
   try {
-    if (typeof emailjs === 'undefined') return;
+    if (typeof emailjs === 'undefined') { logFailure('safety_email', 'EmailJS script', { message: 'The EmailJS script did not load, so no safety email was sent' }); return; }
     var key = rec.triggeredByUid + '|' + rec.step;
     var now = Date.now();
     if (FLAG_EMAIL_SENT[key] && now - FLAG_EMAIL_SENT[key] < 120000) return;
     FLAG_EMAIL_SENT[key] = now;
-    var serviceId = window.EMAILJS_SERVICE_ID;
-    var templateId = window.EMAILJS_FLAG_TEMPLATE_ID || window.EMAILJS_COACH_TEMPLATE_ID;
-    var publicKey = window.EMAILJS_PUBLIC_KEY;
-    if (!serviceId || !templateId || !publicKey) return;
-    emailjs.init({ publicKey: publicKey });
-    emailjs.send(serviceId, templateId, {
-      name: rec.triggeredBy || 'Unknown',
-      email: email,
-      account_type: 'SAFETY FLAG (' + safetyStepLabel(rec.step) + '), ' + rec.accountType,
-      uid: rec.triggeredByUid,
-      couple_id: rec.coupleId,
-      timestamp: rec.timestamp,
-      flag_type: 'Safety Pattern',
-      flag_where: safetyStepLabel(rec.step)
-    }).catch(function(err) { console.error('Safety flag email error:', err); });
-  } catch (e) { console.error('Safety flag email error:', e); }
+    emailConfig().then(function(c) {
+      var templateId = c && (c.flagTemplateId || c.templateId);
+      if (!c || !c.serviceId || !c.publicKey || !templateId) { logFailure('safety_email', 'not set up', { message: 'The EmailJS values are not set in Netlify yet, so no safety email was sent' }); return; }
+      emailjs.init({ publicKey: c.publicKey });
+      return emailjs.send(c.serviceId, templateId, {
+        name: rec.triggeredBy || 'Unknown',
+        email: email,
+        account_type: 'SAFETY FLAG (' + safetyStepLabel(rec.step) + '), ' + rec.accountType,
+        uid: rec.triggeredByUid,
+        couple_id: rec.coupleId || '',
+        timestamp: rec.timestamp,
+        flag_type: 'Safety Pattern',
+        flag_where: safetyStepLabel(rec.step)
+      }).catch(function(err) { logFailure('safety_email', 'send', { status: err && err.status, message: 'EmailJS did not send the safety email', detail: String((err && (err.text || err.message)) || err || '').slice(0, 200) }); });
+    }).catch(function(err) { logFailure('safety_email', 'setup lookup', { status: err && err.status, message: 'Could not read the EmailJS values', detail: String((err && err.message) || err || '').slice(0, 200) }); });
+  } catch (e) { logFailure('safety_email', 'send', { message: 'The safety email step stopped', detail: String(e && e.message || e).slice(0, 200) }); }
 }
 
 var SAFETY_SCREEN_LABELS = {
@@ -6383,6 +6388,9 @@ var SOLO_JOURNEY_STEPS = {
   '3': { label: '', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead. Your tool is ready.', btn: 'Continue to Your Tool' },
   '4': { label: '', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
   '5': { label: '', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
+  // PROPOSED wording for the two stages between practice and the closing screen
+  '5b': { label: '', title: 'Your Takeaways', sub: 'The list to keep.', btn: 'Open My Takeaways' },
+  '5c': { label: '', title: 'A few quick questions', sub: 'Help us make this better for the next person.', btn: 'Answer Them' },
   '6': { label: '', title: 'You\'ve Done the Work', sub: '', btn: 'Read This' }
 };
 
@@ -6396,6 +6404,8 @@ function soloRelabel() {
   set('#step7-screen .s3-title', 'Individual Work', 'Step 7. Individual Work');
   set('#step9-screen .s3-title', 'Practice Round', 'Step 9. The Rewrite');
   set('#s7-complete-btn', 'Complete ›', 'Complete Step 7 ›');
+  var wb = document.querySelector('#step1-waiting-banner .wb-body');
+  if (wb) { if (!wb.getAttribute('data-couple')) wb.setAttribute('data-couple', wb.textContent); wb.textContent = solo ? wb.getAttribute('data-couple').replace('The AI is reading both scripts now.', 'The AI is reading your script now.') : wb.getAttribute('data-couple'); }
   set('#step7-screen .s7-ot-save', 'Continue to practice', 'Save & Continue to Step 8 ›');
 }
 
@@ -6425,6 +6435,13 @@ function soloJourneyRoute() {
       hide('step2-card');
       setTimeout(pollSoloAnalysisReady, 30000);
     });
+  } else if (step === '5') {
+    // The practice record is saved the moment practice finishes. If it is there, the next unfinished screen is the takeaways.
+    fsGet('practice/' + user.uid).then(function(d) {
+      var done = !!(d && d.fields && fromFields(d.fields).completedAt);
+      if (done) { user.soloCurrentStep = '5b'; fsSet('users/' + user.uid, { soloCurrentStep: '5b' }).catch(function() {}); showSoloJourneyBanner('5b'); }
+      else showSoloJourneyBanner('5');
+    }).catch(function() { showSoloJourneyBanner('5'); });
   } else if (SOLO_JOURNEY_STEPS[step]) {
     showSoloJourneyBanner(step);
   }
@@ -6441,13 +6458,28 @@ function showSoloJourneyBanner(step) {
   txt('jb-btn', cfg.btn);
   currentJourneyStep = 'solo-' + step;
   el('journey-banner').style.display = 'block';
+  soloSyncTakeawaysLink(step);
 }
+
+// Once the takeaways have been made, the person can open them again from their home card (from the saved copy).
+function soloSyncTakeawaysLink(step) {
+  var l = el('jb-takeaways'); if (!l) return;
+  l.style.display = 'none';
+  if (!user || user.accountType !== 'solo' || (step !== '5c' && step !== '6')) return;
+  fsGet('step11/' + user.uid).then(function(d) {
+    if (d && d.fields && fromFields(d.fields).takeawaysAt) l.style.display = 'block';
+  }).catch(function() {});
+}
+var tlReopened = false;
+function soloReopenTakeaways() { tlReopened = true; openTakeawayScreen(); }
 
 function openJourneyStepSolo(step) {
   if (step === '2') { if (soloCard2 === 'watch') openWitness(); else openAnalysisPage(); }
   else if (step === '3') soloAdvanceStep('4');
   else if (step === '4') openStep7();
   else if (step === '5') openStep9();
+  else if (step === '5b') openTakeawayScreen();
+  else if (step === '5c') soloOpenFeedback();
   else if (step === '6') openSoloClosing();
 }
 
@@ -6464,6 +6496,7 @@ function soloAdvanceStep(newStep) {
 function openSoloAnalysis() { openAnalysisPage(); }
 
 function openSoloClosing() {
+  if (user && user.accountType === 'solo' && String(user.soloCurrentStep) !== '6') soloAdvanceStep('6');   // the path is finished here
   el('solo-closing-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   el('sc-coach-section').style.display = 'block';
@@ -6473,6 +6506,13 @@ function openSoloClosing() {
       el('sc-coach-confirm').style.display = 'block';
     }
   }).catch(function(){});
+}
+
+// From the closing screen back to the person's home screen. Nothing on the closing screen changes.
+function soloBackHome() {
+  closeSoloClosing();
+  window.scrollTo(0, 0);
+  soloJourneyRoute();
 }
 
 function closeSoloClosing() {
@@ -6571,7 +6611,17 @@ function openTakeawayScreen() {
   document.body.style.overflow = 'hidden';
   hide('tl-content');
   show('tl-loading');
-  generatePersonalizedTakeaways();
+  // If the lists were made before, they are shown from the saved copy and the AI is not asked again.
+  if (!user || !user.uid) { generatePersonalizedTakeaways(); return; }
+  fsGet('step11/' + user.uid).then(function(d) {
+    var sv = (d && d.fields) ? fromFields(d.fields) : {};
+    if (sv.takeawaysAt) {
+      var a = [], b = [];
+      function lst(v) { try { var x = typeof v === 'string' ? JSON.parse(v || '[]') : v; return Array.isArray(x) ? x : []; } catch (e) { return []; } }   // the page's reader may already have turned the saved text back into a list
+      a = lst(sv.takeawaysTodo); b = lst(sv.takeawaysTobe);
+      tlShowContent(a, b);
+    } else generatePersonalizedTakeaways();
+  }).catch(function() { generatePersonalizedTakeaways(); });
 }
 
 function closeTakeawayScreen() {
@@ -6615,6 +6665,10 @@ function generatePersonalizedTakeaways() {
     if (todoMatch) todoItems = todoMatch[1].trim().split('\n').map(function(l) { return l.replace(/^[-*•]\s*/, '').trim(); }).filter(Boolean);
     if (tobeMatch) tobeItems = tobeMatch[1].trim().split('\n').map(function(l) { return l.replace(/^[-*•]\s*/, '').trim(); }).filter(Boolean);
     tlShowContent(todoItems, tobeItems);
+    // Saved once, in the person's step 11 record (not the script record, which is locked at Submit)
+    if ((todoItems.length || tobeItems.length) && user && user.uid) {
+      fsSet('step11/' + user.uid, { takeawaysTodo: JSON.stringify(todoItems), takeawaysTobe: JSON.stringify(tobeItems), takeawaysAt: new Date().toISOString() }).catch(function() {});
+    }
   }).catch(function() { tlShowContent([], []); });
 }
 
@@ -6637,14 +6691,16 @@ function tlShowContent(todoItems, tobeItems) {
 
 function tlContinue() {
   closeTakeawayScreen();
-  openFeedbackScreen(function() {
-    if (tlFromPath === 'solo') {
-      openSoloClosing();
-    } else {
-      advanceStep('11');
-    }
-  });
+  if (tlFromPath === 'solo') {
+    if (tlReopened) { tlReopened = false; soloJourneyRoute(); return; }   // opened again from home: just go back
+    soloAdvanceStep('5c');
+    soloOpenFeedback();
+    return;
+  }
+  openFeedbackScreen(function() { advanceStep('11'); });
 }
+// The feedback questions for the individual path. Submitting them leads to the closing screen.
+function soloOpenFeedback() { openFeedbackScreen(function() { openSoloClosing(); }); }
 
 function tlPrint() { window.print(); }
 
@@ -7753,7 +7809,7 @@ function s9RenderPractice() {
     var healthyResp2 = s9PracticeContent ? s9PracticeContent.pass2Response : '';
     body.innerHTML =
       '<div class="s9-pr-eyebrow">Practice Round &middot; Part One &middot; Pass Two</div>' +
-      '<p class="s9-pr-context-note">This is how you wrote your partner&rsquo;s line. Here&rsquo;s what a healthy response from you might sound like.</p>' +
+      '<p class="s9-pr-context-note">' + (user && user.accountType === 'solo' ? 'This is how you remember ' + esc(soloPartnerName()) + '&rsquo;s line.' : 'This is how you wrote your partner&rsquo;s line.') + ' Here&rsquo;s what a healthy response from you might sound like.</p>' +
       (ln2 ?
         '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(pName) + '</div>' +
         (ln2.beat ? '<div class="s9-pr-beat">(' + esc(cueInner(ln2.beat)) + ')</div>' : '') +
@@ -7938,7 +7994,7 @@ function s9FinishPractice() {
     }).catch(function(){});
   }
   if (user && user.accountType === 'solo') {
-    soloAdvanceStep('6');
+    soloAdvanceStep('5b');   // practice is done; the path is not finished until the closing screen is reached
     closeStep9();
     openTakeawayScreen();
     return;
