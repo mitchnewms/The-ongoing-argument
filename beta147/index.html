@@ -616,6 +616,23 @@ body.script-locked #scene-input { pointer-events: none; }
 .iv-lines-copy { text-align: left; }
 .iv-lines-example { font-size: 0.92rem; color: #6A6458; margin: 4px 0 10px; line-height: 1.5; white-space: pre-line; }
 .iv-add-another { display: block; margin: 6px 0 0; }
+.iv-box.iv-added { box-shadow: 0 0 0 2px rgba(224,101,0,0.45); transition: box-shadow 0.4s; }
+/* Energy screens: no empty divider lines, and chips a little tighter so the button is closer to the top of the page */
+.iv-en { border-bottom: none; padding-bottom: 0; margin-bottom: 8px; }
+.iv-note:not(.open) { border-top: none; padding-top: 0; margin-top: 10px; }   /* a closed note is only a small link, with no empty line above it */
+.iv-en .iv-opt { padding-top: 8px; padding-bottom: 8px; min-height: 40px; }
+.iv-en .iv-opts { gap: 8px; }
+.iv-actions { padding-bottom: 96px !important; }   /* room above the iPad keyboard bar */
+/* The Awareness Log card and the + Log button stay hidden until after the analysis (hidden, not removed) */
+body.al-off #awareness-log, body.al-off #al-fab { display: none !important; }
+.submit-lock-line { margin: 10px 2px 0; font-size: 0.88rem; line-height: 1.45; color: #6A6458; }
+/* Real buttons for the two links that were faint or cut off */
+#s3-complete-btn.s3-complete { display: block; width: auto; min-height: 46px; margin: 10px auto 0; padding: 12px 22px; background: #E06500 !important; color: #FFFFFF !important; border: none; border-radius: 6px; font-family: system-ui, -apple-system, sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0; text-align: center; }
+.s78-top-row { flex-wrap: wrap; gap: 8px; }
+#s7-complete-btn.s7-complete-btn { min-height: 44px; margin-left: auto; padding: 10px 18px; background: #E06500 !important; color: #FFFFFF !important; border: none; border-radius: 6px; font-family: system-ui, -apple-system, sans-serif; font-size: 0.9rem !important; font-weight: 700; letter-spacing: 0; white-space: nowrap; }
+.s78-input-area { padding-right: max(18px, env(safe-area-inset-right)); padding-left: max(18px, env(safe-area-inset-left)); }
+/* When the iPad keyboard is up, the two conversation screens fit above it so the Respond box is not hidden */
+html.kb-open #step3-screen, html.kb-open #step7-screen { bottom: auto; height: var(--vvh, 100%); }
 </style>
 
 <style>
@@ -2462,6 +2479,7 @@ h1, h2, h3,
     <button class="action-btn action-btn-quiet" id="btn-save">Save Progress</button>
     <button class="action-btn" id="btn-submit" style="background:var(--accent);">Submit for Review</button>
   </div>
+  <p class="submit-lock-line" id="submit-lock-line" style="display:none">Once you submit, this is your script. You can read it, but you cannot change it.</p>
   <div id="status-msg"></div>
   <div id="solo-next-note" role="status" style="display:none;margin:14px 16px 0;padding:14px 16px;background:#FFF4E5;border:1px solid #E8C48F;border-radius:4px;font-size:0.92rem;line-height:1.5;color:#3B2F1A;"></div>
 
@@ -4717,14 +4735,30 @@ function rfChips(key) {
   if (key === 'feeling') return { chips: ['hurt', 'angry', 'worried', 'overwhelmed', 'tired', 'resentful', 'sad', 'scared'], mode: 'comma' };
   return { chips: [], mode: 'comma' };
 }
-var RF_STARTERS = ['I need you to know...', 'What I really want is...', 'It hurts when...', "I'm afraid that..."];
+var RF_STARTERS = ['I need you to know...', 'What I really want is...', 'It hurts when...', "I'm afraid that..."];   // the label keeps its dots; the box gets the words and a space
+
+// A line typed on the lines screen may have a typo the draft already tidied. The answers show the line as the script has it.
+function rfAsDrafted(raw, sd) {
+  var lines = [];
+  try { lines = typeof (sd && sd.lines) === 'string' ? JSON.parse(sd.lines) : ((sd && sd.lines) || []); } catch (e) { lines = []; }
+  var want = pbMeaning(raw), best = '', bestHit = 0;
+  if (!want.length) return raw;
+  lines.forEach(function(l) {
+    if (!l || l.type !== 'line' || String(l.char || '').toUpperCase() !== 'A' || !l.dialogue) return;
+    var have = pbMeaning(l.dialogue);
+    var hit = want.filter(function(w) { return pbSeenIn(w, l.dialogue); }).length / want.length;
+    var back = have.length ? have.filter(function(h) { return pbSeenIn(h, raw); }).length / have.length : 0;
+    if (hit >= 0.8 && back >= 0.8 && hit + back > bestHit) { bestHit = hit + back; best = String(l.dialogue).trim(); }
+  });
+  return best || raw;
+}
 
 function rfStart(sd) {
   rfActive = true; ivLive = false;
   Object.keys(rfA).forEach(function(k) { rfA[k] = sd && sd[k] ? String(sd[k]) : ''; });
   window._intakeTopic = (sd && (sd.fightTopic || '')) || '';
   // "What I say" offers only the lines this person gave on their own lines screen, never facts from the story.
-  rfSayLines = String((sd && sd.sayEveryTime) || '').split('\n').map(function(x) { return x.trim(); }).filter(function(x) { return x && IV_NONE.indexOf(x.toLowerCase()) === -1; });
+  rfSayLines = String((sd && sd.sayEveryTime) || '').split('\n').map(function(x) { return x.trim(); }).filter(function(x) { return x && IV_NONE.indexOf(x.toLowerCase()) === -1; }).map(function(x) { return rfAsDrafted(x, sd); });
   var first = 0;
   var answered = RF_KEYS.some(function(k) { return k !== 'intro' && rfA[RF_FIELD[k]]; });
   if (answered) { first = 1; for (var i = 1; i < RF_KEYS.length; i++) { var k = RF_KEYS[i]; if (!rfActiveKey(k) || k === 'whatimean') continue; first = i; if (!rfA[RF_FIELD[k]]) break; } }
@@ -4780,8 +4814,8 @@ function rfShow(i) {
       RF_STARTERS.forEach(function(st) {
         row.appendChild(ivButton(st, 'iv-opt', function() {
           var t = el('iv-main'), cur = t.value.replace(/\s+$/, '');
-          t.value = (cur ? cur + '\n' : '') + st.replace(/\.\.\.$/, '... ');
-          t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+          t.value = (cur ? cur + '\n' : '') + st.replace(/\.\.\.$/, '') + ' ';
+          t.focus(); t.setSelectionRange(t.value.length, t.value.length);   // the cursor sits after the space, ready to finish the sentence
           rfAutosave();
         }));
       });
@@ -6026,6 +6060,7 @@ function s3ReadyForStep7() {
   fsSetStrict('users/' + user.uid, { soloCurrentStep: '4' }).then(function() {
     user.soloCurrentStep = '4';
     try { localStorage.setItem('oa_user', JSON.stringify(user)); } catch (e) {}
+    alSync();
     hide('step3-screen'); s3Mode = '';
     showSoloJourneyBanner('4');
     openStep7();
@@ -6240,6 +6275,17 @@ var JOURNEY_STEPS = {
 
 var currentJourneyStep = null;
 
+// The Awareness Log card and the + Log button stay hidden until after the analysis (the Mirror Moment is done).
+// They are hidden, not removed. The coach login is never held back.
+function alSync() {
+  var on = false;
+  if (user && user.email === COACH) on = true;
+  else if (user && user.accountType === 'solo') on = parseInt(user.soloCurrentStep || '1', 10) >= 4;
+  else if (user) on = parseInt(currentJourneyStep || '1', 10) >= 4;
+  document.body.classList.toggle('al-off', !on);
+}
+setInterval(alSync, 1000);
+
 function journeyRoute() {
   if (!user || !user.coupleId) return;
   fsGet('couples/' + user.coupleId).then(function(d) {
@@ -6274,6 +6320,7 @@ function journeyRoute() {
 function showJourneyBanner(step) {
   var cfg = JOURNEY_STEPS[step];
   if (!cfg) return;
+  currentJourneyStep = step; alSync();
   txt('jb-step', cfg.label);
   txt('jb-title', cfg.title);
   txt('jb-sub', cfg.sub);
@@ -6299,6 +6346,7 @@ function openJourneyStep() {
 function syncPrivacyTag() {
   var t = el('privacy-tag');
   if (!t || !user) return;
+  var ll = el('submit-lock-line'); if (ll) ll.style.display = user.accountType === 'solo' ? 'block' : 'none';   // the lock is for the individual path
   if (user.accountType === 'solo') { t.textContent = '🔒 Your version. Private to you.'; return; }
   var first = ((user.partner || user.partnerName || '').split(' ')[0]) || 'your partner';
   t.innerHTML = '🔒 Your version. Private until you share with <span id="privacy-partner-name"></span>';
@@ -6366,6 +6414,7 @@ function soloJourneyRoute() {
 function showSoloJourneyBanner(step) {
   var cfg = SOLO_JOURNEY_STEPS[step];
   if (!cfg) return;
+  alSync();
   if (step === '2') return soloShowStep2Banner();
   txt('jb-step', cfg.label);
   txt('jb-title', cfg.title);
@@ -6389,6 +6438,7 @@ function soloAdvanceStep(newStep) {
   user.soloCurrentStep = newStep;
   localStorage.setItem('oa_user', JSON.stringify(user));
   fsSet('users/' + user.uid, { soloCurrentStep: newStep }).catch(function(){});
+  alSync();
   if (SOLO_JOURNEY_STEPS[newStep]) showSoloJourneyBanner(newStep);
 }
 
@@ -8890,6 +8940,13 @@ function pbScanPrompt() {
     'Return only one JSON object shaped like {"items":{"q1":{"evidence":"","label":""},"q3":{"evidence":"","label":""},"q4":{"evidence":""}},"lines":[{"who":"me","text":"","say":""},{"who":"partner","text":"","say":""}],"examples":{"fightName":["","",""],"trigger":"","starter":"","triggerChips":["","",""],"heardChips":["","","",""]}}. Include every item key listed above. Your safety guidance still applies: if what they have said describes fear, control or coercion, include the safety flag from your guidance in your response in addition to the JSON.';
 }
 
+// A suggested answer is kept only when most of its meaning words are in the person's own story.
+function pbChipInStory(chip) {
+  var want = pbMeaning(chip), text = pbStory.text || '';
+  if (!want.length) return false;
+  var hit = want.filter(function(w) { return pbSeenIn(w, text); }).length;
+  return hit / want.length >= 0.5;
+}
 // A rewritten line is accepted only when it is in someone's own voice and says what the story's words say.
 function pbSayOk(say, raw) {
   say = String(say || '').trim();
@@ -8934,10 +8991,10 @@ function pbParseScan(text) {
   });
   var ex = obj.examples || {};
   out.examples = {
-    fightName: pbCleanList(ex.fightName, 3, 40),
+    fightName: pbCleanList(ex.fightName, 3, 40).map(function(x) { return x.replace(/\bfights\b/gi, function(m) { return m.charAt(0) === 'F' ? 'Arguments' : 'arguments'; }).replace(/\bfight\b/gi, function(m) { return m.charAt(0) === 'F' ? 'Argument' : 'argument'; }); }),
     trigger: pbNoDash(String(ex.trigger || '')).replace(/\s+/g, ' ').trim().slice(0, 140),
     starter: pbNoDash(String(ex.starter || '')).replace(/\s+/g, ' ').trim().slice(0, 140),
-    triggerChips: pbCleanList(ex.triggerChips, 3, 60),
+    triggerChips: pbCleanList(ex.triggerChips, 6, 60).filter(pbChipInStory).slice(0, 3),   // an invented chip, with nothing in the story behind it, is dropped
     heardChips: pbCleanList(ex.heardChips, 4, 60)
   };
   return out;
@@ -8954,13 +9011,16 @@ function ivApplyScan(parsed) {
   if ((it = parsed.items.q1) && it.label) { iv.here.topic = pbTidy(it.label); iv.found.topic = true; }
   if (parsed.lines.length) pbSpoken = parsed.lines;
   if ((it = parsed.items.q4)) {
-    var spoken = pbSpoken.some(function(l) {
+    var spoken = null;
+    pbSpoken.forEach(function(l) {
+      if (spoken) return;
       var a = pbMeaning(l.raw || l.text), b = pbMeaning(it.evidence);
-      if (!a.length || !b.length) return false;
+      if (!a.length || !b.length) return;
       var hit = b.filter(function(x) { return a.indexOf(x) !== -1; }).length;
-      return hit / b.length >= 0.6 || (a.filter(function(x) { return b.indexOf(x) !== -1; }).length / a.length) >= 0.6;
+      if (hit / b.length >= 0.6 || (a.filter(function(x) { return b.indexOf(x) !== -1; }).length / a.length) >= 0.6) spoken = l;
     });
-    if (spoken) { iv.here.first = pbTidy(it.evidence.replace(/^["'“‘]+|["'”’]+$/g, '')); iv.found.first = true; }
+    // The line is shown as it was written in the story (the one spoken line), not a summary of it
+    if (spoken) { iv.here.first = pbTidy(String(spoken.raw || spoken.text || it.evidence).replace(/^["'“‘]+|["'”’]+$/g, '')); iv.found.first = true; }
   }
   iv.ex = parsed.examples || {};
   // A couple agreed a name when they signed up, so it is shown for them to confirm. It is not asked a second time from scratch.
@@ -9079,20 +9139,21 @@ function ivExample(key) {
   return '';
 }
 
+function capFirst(x) { x = String(x || ''); return x.charAt(0).toUpperCase() + x.slice(1); }
 function ivChipsFor(key) {
   var N = pbName(), ex = iv.ex || {};
   switch (key) {
     case 'fightname': return { chips: (ex.fightName || []).slice(0, 3), mode: 'replace' };
     case 'about': return { chips: IV_ABOUT.concat(['Something else']), mode: 'comma' };
-    case 'trigger': return { chips: (ex.triggerChips || []).slice(0, 3).concat(['Not sure']), mode: 'comma' };
+    case 'trigger': return { chips: (ex.triggerChips || []).slice(0, 3).map(capFirst).concat(['Not sure']), mode: 'comma' };
     case 'starter': return { chips: ['I start it', N + ' starts it', 'It builds between us', 'Not sure'], mode: 'comma' };
     case 'setting': return { chips: IV_SETTINGS.concat(['Not sure']), mode: 'comma' };
     case 'sayme': case 'saythem': return { chips: [], mode: 'line' };   // no tappable lines: people say them in their own words
-    case 'heard': return { chips: (ex.heardChips || []).slice(0, 4).concat(['Not sure']), mode: 'comma' };
+    case 'heard': return { chips: (ex.heardChips || []).slice(0, 4).map(capFirst).concat(['Not sure']), mode: 'comma' };
     case 'speedup': return { chips: IV_SPEEDUP.concat(['Nothing in particular']), mode: 'comma' };
-    case 'cue': return { chips: IV_CUES.concat(['Nothing in particular']), mode: 'comma' };
+    case 'cue': return { chips: IV_CUES.map(function(c) { return { text: capFirst(c), full: c }; }).concat(['Nothing in particular']), mode: 'comma' };
     case 'cueplace': return { chips: ivCueLines().map(function(l) { return pbShort(l); }).concat(['Not sure']), mode: 'replace' };
-    case 'interrupt': return { chips: [N + ' leaves the room', 'I leave', 'The kids walk in', 'A phone rings', 'We both run out of energy', N + ' goes silent', 'I go silent'], mode: 'comma' };
+    case 'interrupt': return { chips: [N + ' leaves the room', 'I leave', 'A phone rings', 'We both run out of energy', N + ' goes silent', 'I go silent'], mode: 'comma' };
   }
   return { chips: [], mode: 'comma' };
 }
@@ -9166,16 +9227,18 @@ function ivBox(id, rows) {
 function ivAppend(boxId, text) {
   var t = el(boxId);
   if (!t) return;
-  var cur = t.value.trim();
+  var cur = t.value.trim().replace(/[.,;:]+$/, '');   // "permission." plus a chip reads "permission, a sharp tone"
   t.value = cur ? cur + ', ' + text : text;
-  t.focus();
+  ivFocusEnd(t);
 }
+// Touch screens: tapping an answer must not pop the keyboard over the rest of the answers.
+function ivFocusEnd(t) { if (!('ontouchstart' in window)) { t.focus(); } }
 function ivAppendLine(boxId, text) {
   var t = el(boxId);
   if (!t) return;
   var cur = t.value.trim();
   t.value = cur ? cur + '\n' + text : text;
-  t.focus();
+  ivFocusEnd(t);
 }
 function ivParts(v, mode) {
   return String(v || '').split(mode === 'line' ? /\n/ : /\s*,\s*(?=[A-Za-z"'])/).map(function(x) { return x.trim(); }).filter(Boolean);
@@ -9185,7 +9248,7 @@ function ivParts(v, mode) {
 function ivOptions(labels, onTap, wrapClass, boxId, mode) {
   var row = ivNode('div', 'iv-opts' + (wrapClass ? ' ' + wrapClass : ''));
   var btns = [];
-  function same(a, b) { return String(a).toLowerCase() === String(b).toLowerCase(); }
+  function same(a, b) { function n(x) { return String(x).trim().replace(/[.,;:]+$/, '').toLowerCase(); } return n(a) === n(b); }
   function paint() {
     if (!boxId) return;
     var t = el(boxId);
@@ -9260,11 +9323,34 @@ function ivNeed(key) {
 function ivSyncNext() {
   var b = document.querySelector('#iv-actions .iv-next');
   if (!b || !ivLive) return;
-  var need = ivNeed(ivScreens[ivIndex]);
+  var key = ivScreens[ivIndex], need = ivNeed(key);
   b.textContent = need || b.getAttribute('data-label') || 'Next';
   b.classList.toggle('iv-next-wait', !!need);
   b.setAttribute('aria-disabled', need ? 'true' : 'false');
+  // On the tall screens, once the answer is in, the button comes into view (it still scrolls with the page)
+  if (ivWasWaiting && !need && (key === 'energyp' || key === 'energym' || key === 'cueplace') && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
+  ivWasWaiting = !!need;
 }
+var ivWasWaiting = false;
+
+// iPad keyboard: when a box is tapped, bring it into view above the keyboard. The two conversation screens shrink to the
+// part of the page the keyboard leaves free, so the Respond box is never hidden.
+(function() {
+  var vv = window.visualViewport;
+  function fit() {
+    if (!vv) return;
+    var open = vv.height < window.innerHeight - 120;
+    document.documentElement.classList.toggle('kb-open', open);
+    document.documentElement.style.setProperty('--vvh', Math.round(vv.height) + 'px');
+    if (open) { var a = document.activeElement; if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && a.scrollIntoView) { try { a.scrollIntoView({ block: 'center' }); } catch (e) {} } var t = el('s7-thread'); if (t && el('step7-screen') && el('step7-screen').style.display === 'flex') t.scrollTop = t.scrollHeight; }
+  }
+  if (vv) { vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); }
+  document.addEventListener('focusin', function(e) {
+    var a = e.target;
+    if (!a || !/^(TEXTAREA|INPUT)$/.test(a.tagName)) return;
+    setTimeout(function() { if (a.scrollIntoView) { try { a.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (x) {} } }, 350);
+  });
+})();
 
 // "More below": a small cue wherever a screen runs past the bottom of the page.
 function ivUpdateMore() {
@@ -9286,6 +9372,8 @@ function ivShow(i, dir) {
   while (!ivActive(ivScreens[i]) && i + step >= 0 && i + step < ivScreens.length) i += step;
   ivIndex = i;
   var key = ivScreens[ivIndex];
+  try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (e) {}   // close the keyboard before the next screen draws
+  ivWasWaiting = false;
   ivClear();
   ivLive = true;
   txt('iv-progress', ivProgressLabel(key));
@@ -9297,9 +9385,13 @@ function ivShow(i, dir) {
   else if (key === 'sayme' || key === 'saythem') ivRenderLines(key);
   else ivRenderQuestion(key);
   ivSyncNext();
-  window.scrollTo(0, 0);
-  var sc = el('iv-screen'); if (sc) sc.scrollTop = 0;
+  ivResetScroll();
   setTimeout(ivUpdateMore, 60); setTimeout(ivUpdateMore, 500);
+}
+// After the iPad keyboard closes, Safari can leave the page shifted so taps land a row low. Put the view back at the top.
+function ivResetScroll() {
+  function go() { window.scrollTo(0, 0); var sc = el('iv-screen'); if (sc) sc.scrollTop = 0; }
+  go(); setTimeout(go, 120); setTimeout(go, 450);
 }
 
 function ivNextIndex(from) {
@@ -9455,7 +9547,15 @@ function ivRenderLines(key) {
   body.appendChild(box);
   body.appendChild(ivTalk('iv-main'));
   body.appendChild(ivButton('Add another', 'iv-note-link iv-add-another', function() {
-    var t = el('iv-main'); var cur = t.value.replace(/\s+$/, ''); t.value = cur ? cur + '\n' : ''; t.focus(); t.setSelectionRange(t.value.length, t.value.length); ivCapture();
+    var t = el('iv-main'); var cur = t.value.replace(/\s+$/, '');
+    if (!cur) { t.focus(); return; }   // nothing to add after yet
+    t.value = cur + '\n';
+    t.rows = Math.max(5, t.value.split('\n').length + 1);   // grow, so the new line is on screen
+    t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+    t.scrollTop = t.scrollHeight;
+    t.classList.add('iv-added'); setTimeout(function() { t.classList.remove('iv-added'); }, 700);
+    if (t.scrollIntoView) t.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    ivCapture();
   }));
   ivNoteBox(body, key);
   ivActions(null, 'Next', function() {
@@ -9538,7 +9638,7 @@ function ivEnergyText(w) {
 // ---- Last screen: everything they told me, each answer with an Edit button, and room for anything new ----
 function ivSummary(key) {
   var N = pbName();
-  if (key === 'here') return [iv.here.where && 'Where: ' + iv.here.where, iv.here.topic && 'About: ' + iv.here.topic, iv.here.first && 'First line: "' + iv.here.first + '"'].filter(Boolean).join('\n');
+  if (key === 'here') return [(ivReal(iv.setting) || iv.here.where) && 'Where: ' + (ivReal(iv.setting) || iv.here.where), iv.here.topic && 'About: ' + iv.here.topic, iv.here.first && 'First line: "' + iv.here.first + '"'].filter(Boolean).join('\n');
   if (key === 'energyp') return ivEnergyText('partner');
   if (key === 'energym') return ivEnergyText('me');
   return ivGet(key);
@@ -9786,6 +9886,26 @@ function pbWordsOf(t) {
   }
   return out;
 }
+// Two words that differ only by a typo ("yoiu" and "you") count as the same word.
+function pbNear(a, b) {
+  if (a === b) return true;
+  var la = a.length, lb = b.length;
+  if (Math.abs(la - lb) > 1 || Math.min(la, lb) < 3) return false;
+  var allow = Math.max(la, lb) >= 7 ? 2 : 1;
+  var prev = [], cur = [], i, j;
+  for (j = 0; j <= lb; j++) prev[j] = j;
+  for (i = 1; i <= la; i++) {
+    cur = [i];
+    for (j = 1; j <= lb; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+    prev = cur;
+  }
+  return prev[lb] <= allow;
+}
+// Does this word (or a one-typo version of it) appear in the text, as a meaning word or as any word at all?
+function pbSeenIn(w, text) {
+  var stems = pbMeaning(text), raws = pbWordsOf(text);
+  return stems.some(function(h) { return pbNear(w, h); }) || raws.some(function(h) { return pbNear(w, h); });
+}
 function pbMeaning(t) {
   var out = [];
   pbWordsOf(t).forEach(function(w) { if (PB_SMALL.indexOf(w) === -1) out.push(pbStem(w)); });
@@ -9798,8 +9918,7 @@ function pbInDraft(sp, lines) {
   var all = pbWordsOf(sp.text).join(' ');
   function hits(text) {
     if (!want.length) return pbWordsOf(text).join(' ').indexOf(all) !== -1 ? 1 : 0;
-    var have = pbMeaning(text);
-    return want.filter(function(w) { return have.indexOf(w) !== -1; }).length / want.length;
+    return want.filter(function(w) { return pbSeenIn(w, text); }).length / want.length;   // a typo in the remembered line is not a missing line
   }
   var k;
   for (k = 0; k < spoken.length; k++) { if (hits(lines[spoken[k]].dialogue) >= 0.7) return spoken[k]; }
@@ -10131,7 +10250,7 @@ function pbLoadDraftIntoTool(parsed, inserted) {
   var note = el('pb-handoff-note');
   if (note) {
     note.textContent = inserted.length
-      ? 'I added ' + (inserted.length === 1 ? 'one line' : inserted.length + ' lines') + ' you told me about that the draft had left out.'
+      ? 'I added ' + (inserted.length === 1 ? 'one line' : inserted.length + ' lines') + ' you told me about that the draft had left out: ' + inserted.map(function(ix) { var l = parsed.lines[ix]; return '"' + String((l && l.dialogue) || '').trim() + '"'; }).join(' ')
       : '';
     note.style.display = inserted.length ? 'block' : 'none';
   }
