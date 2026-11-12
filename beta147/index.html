@@ -4317,7 +4317,7 @@ function sendSafetyFlagEmail(rec, email) {
 
 var SAFETY_SCREEN_LABELS = {
   here: "Here's what I heard", fightname: 'The name they gave the argument', about: 'What the argument is about', trigger: 'What usually sets it off',
-  starter: 'Who starts it and how', setting: 'Where it happens', sayme: 'What they say every time', saythem: 'What their partner says every time',
+  starter: 'Who starts it', setting: 'Where it happens', sayme: 'What they say every time', saythem: 'What their partner says every time',
   heard: 'What they hear when their partner says those things', energy: 'The energy', energyp: 'The energy (partner)', energym: 'The energy (themselves)', speedup: 'Where it speeds up', cue: 'A look, tone or silence that gets to them',
   cueplace: 'Which line the cue follows', interrupt: 'What usually interrupts it', extra: 'Something they added at the end',
   'rf-stop': 'What would make the argument stop', 'rf-partnerstop': 'What their partner would say would make it stop', 'rf-onething': 'The one thing they would say',
@@ -5912,7 +5912,7 @@ function buildIntakeBlock(name, data, partnerName) {
   if (data.initialRetelling) lines.push('Their own retelling, as first told: ' + data.initialRetelling);
   if (data.fightTopic) lines.push('What they say the fight is about: ' + data.fightTopic);
   if (data.fightTrigger) lines.push('What usually sets it off: ' + data.fightTrigger);
-  if (data.whoStartsIt) lines.push('Who usually starts it, and how: ' + data.whoStartsIt);
+  if (data.whoStartsIt) lines.push('Who usually starts it: ' + data.whoStartsIt);
   if (data.setting || data.fightLocation) lines.push('Where it usually happens: ' + (data.setting || data.fightLocation));
   if (data.startingMoment) lines.push('The first line that starts it: ' + data.startingMoment);
   if (data.beatByBeat) lines.push('How it unfolds beat by beat: ' + data.beatByBeat);
@@ -9048,7 +9048,7 @@ var IV_THEMES = [
   { key: 'inlaws', label: 'In-laws', word: 'in-laws', title: 'The In-Laws Argument', set: ['A visit coming up', 'A call from family', 'A holiday plan'] },
   { key: 'sex', label: 'Sex', word: 'sex', title: 'The Sex Argument', set: ['Different moods at bedtime', 'A comment about how often', 'Feeling turned down'] },
   { key: 'flame', label: 'An old relationship or old flame', word: 'an old relationship or old flame', title: 'The Old Flame Argument', set: ['A name that comes up', 'A photo or a message', 'A comment about the past'] },
-  { key: 'close', label: 'Feeling close', word: 'feeling close', title: 'The Closeness Argument', set: ['A busy week', 'Time apart', 'One of us pulling back'] },
+  { key: 'close', label: 'Connection', word: 'connection', title: 'The Connection Argument', set: ['A busy week', 'Time apart', 'One of us pulling back'] },
   { key: 'other', label: 'Something else', word: '', title: '', set: [] },
   { key: 'notsure', label: 'Not sure', word: '', title: 'Our Ongoing Argument', set: [] }
 ];
@@ -9313,7 +9313,7 @@ function ivReal(v, mode) {
   return parts.filter(function(x) { return IV_NONE.indexOf(x.toLowerCase()) === -1; }).join(mode === 'line' ? '\n' : ', ');
 }
 var IV_FIELD = { fightname: 'fightName', about: 'about', trigger: 'trigger', starter: 'starter', setting: 'setting', sayme: 'sayMe', saythem: 'sayThem', heard: 'heard', speedup: 'speedup', cue: 'cue', cueplace: 'cueAfter', interrupt: 'interrupt' };
-var IV_ABOUT = ['Money', 'Time', 'The kids', 'Chores', 'Feeling close'];
+var IV_ABOUT = ['Money', 'Time', 'The kids', 'Chores', 'Connection'];
 var IV_SETTINGS = ['The kitchen', 'The bedroom', 'The car', 'The living room', 'Over text'];
 var IV_ENERGY = ['Calm', 'Casual', 'Firm', 'Quiet', 'Quick', 'Snappy', 'Sarcastic', 'Loud', 'Cold', 'Tired', 'Worn out', 'Beaten down'];
 var IV_CUES = ['eye roll', 'heavy sigh', 'crossed arms', 'looks away', 'makes a face', 'goes quiet', 'walks away', 'shakes their head', 'stops answering', 'checks the phone'];
@@ -9394,7 +9394,7 @@ function ivExample(key) {
   var ex = iv.ex || {};
   switch (key) {
     case 'fightname': return (ex.fightName && ex.fightName.length) ? 'For example: ' + ex.fightName.slice(0, 3).map(function(x) { return '"' + x + '"'; }).join(', ') + '.' : 'For example: "The Money Thing".';
-    case 'about': return 'For example: money, time, the kids, chores, feeling close.';
+    case 'about': return 'For example: money, time, the kids, chores, connection.';
     case 'trigger': { var st = ivThemeSet(); return st.length ? 'For example: ' + st.map(function(x) { return x.charAt(0).toLowerCase() + x.slice(1); }).join(', ') + '.' : 'Think about what usually starts it, not only this time.'; }   // about the pattern, never this one argument
     case 'starter': return '';   // only who: how it begins is caught by the first line question
     case 'setting': return 'This becomes the setting of your script.';
@@ -10088,7 +10088,7 @@ function pbBuildPrompt() {
     'WHAT THEY CONFIRMED OR ADDED (use these for the scene, directions and beats; never as a source of new dialogue):\n\n' +
     'What the fight is about: ' + A('q1') + '\n\n' +
     (A('q2') ? 'What usually sets it off: ' + A('q2') + '\n\n' : '') +
-    (A('q4b') ? 'Who usually starts it, and how it begins: ' + A('q4b') + '\n\n' : '') +
+    (A('q4b') ? 'Who usually starts it: ' + A('q4b') + '\n\n' : '') +
     'Physical setting: ' + A('q3') + '\n\n' +
     'The first line or moment that starts it: ' + A('q4') + '\n\n' +
     'Lines they hear every time:\n' + A('q7b') + '\n\n' +
@@ -10100,7 +10100,7 @@ function pbBuildPrompt() {
     'Format the script exactly as follows. Start with:\nSCENE: [brief location from the setting described above]\n\n' +
     'For each line of dialogue:\n[CHARACTER NAME IN CAPS]\n([emotional beat or tone in parentheses])\n[What they say]\n\n' +
     'For stage directions:\nDIRECTION: [brief description]\n\n' +
-    'Include every exchange the person described and no others. Let the script rise as far as the person\'s own account and answers show, and no further. A DIRECTION only for a physical action or change of setting they described. Place each repeated line where the account shows it. Do not take turns between the two people\'s lists. If a repeated line has no place in the account, you may use it at the moment the person says it speeds up, or leave it out. A line that appears in their account is the same line: never put the same line in the script twice. ' +
+    'Include every exchange the person described and no others. Let the script rise as far as the person\'s own account and answers show, and no further. A DIRECTION is only for a physical action, a change of setting, or the overdrive moment described in THE RISE. Place each repeated line where the account shows it. Do not take turns between the two people\'s lists. If a repeated line has no place in the account, you may use it at the moment the person says it speeds up, or leave it out. A line that appears in their account is the same line: never put the same line in the script twice. ' +
     'TONE NOTES. Give every line a short tone note in parentheses, one to three words, chosen from that specific line and from the energy arc the person gave for each of them. Use the real range of an argument, for example casual, calm, measured, guarded, defensive, sarcastic, dismissive, hurt, pleading, frustrated, flat, worn out, going quiet. Follow the shape of a real fight: the first line is usually measured, the feeling rises, then it falls or goes quiet. Never give one character the same tone note on more than two lines in a row. Do not invent a feeling the person did not signal; when you are unsure, use a neutral note such as (evenly) or (plainly). ' +
     'THE RISE. Shape the rise from the person\'s own answers. They told you each person\'s energy at the start and at the end, the word or moment that sends the argument into overdrive (in their own words), the line after which it usually happens, and the look or silence that gets to them. Make each person\'s tone notes move from their start energy to their end energy across the script. Put a short stage direction at the overdrive moment, using the person\'s own words. Place the cue where they said it happens. Do not add any line or event they did not describe. ' +
     'THE ENDING. These fights do not end, they get interrupted. If the script needs a closing DIRECTION, make it an interruption, for example someone leaves the room, someone goes quiet, a phone rings. Never end on peace, agreement, resolution or a settled moment such as silence settling over the day. If the person described how it ends, use that, in their words. ' +
