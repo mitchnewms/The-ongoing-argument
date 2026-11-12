@@ -4692,7 +4692,7 @@ function rfHeading(key) {
 function rfSub(key) {
   var N = pbName();
   switch (key) {
-    case 'partnerstop': return 'For example: if I stopped bringing it up.';
+    case 'partnerstop': return 'For example: if we talked before the argument escalates.';
     case 'onething': return "Say it the way you'd say it to " + N + '.';
     case 'trigger': return 'Think about all of your arguments, not just this one.';
     case 'whatimean': return 'What I mean is...';
@@ -4731,7 +4731,7 @@ function rfGroups(key) {
 }
 function rfChips(key) {
   var N = pbName(), topic = String(window._intakeTopic || '').toLowerCase();
-  if (key === 'thinking') return { chips: ["thinks I'm wrong", "thinks I'm the problem", 'is judging me', "doesn't respect me", 'is trying to control me', 'is keeping score', 'wants this to stop too', 'is tired of this'].map(function(c) { return { text: c, full: N + ' ' + c }; }), mode: 'comma' };
+  if (key === 'thinking') return { chips: ["thinks I'm wrong", "thinks I'm the problem", 'is judging me', "doesn't respect me", 'is trying to control me', 'is keeping score', 'wants this to stop too', 'is tired of this', 'is trying to protect something', 'wants to feel heard', 'is worried'].map(function(c) { return { text: c, full: N + ' ' + c }; }), mode: 'comma' };
   if (key === 'feeling') return { chips: ['hurt', 'angry', 'worried', 'overwhelmed', 'tired', 'resentful', 'sad', 'scared'], mode: 'comma' };
   return { chips: [], mode: 'comma' };
 }
@@ -4804,7 +4804,7 @@ function rfShow(i) {
     txt('iv-sub', rfSub(key));
     var box = ivBox('iv-main', key === 'whatimean' ? 2 : 3);
     box.value = rfA[RF_FIELD[key]] || '';
-    if (key === 'whatimean') box.placeholder = "For example: I'm trying to be clear and direct.";
+    if (key === 'whatimean') box.placeholder = 'Say it in your own words.';
     var groups = rfGroups(key);
     body.appendChild(box);   // the box is in the page first, so the answers can light up and fill it; the answers sit above it
     function put(n) { body.insertBefore(n, box); }
@@ -4813,8 +4813,11 @@ function rfShow(i) {
       var row = ivNode('div', 'iv-opts');
       RF_STARTERS.forEach(function(st) {
         row.appendChild(ivButton(st, 'iv-opt', function() {
-          var t = el('iv-main'), cur = t.value.replace(/\s+$/, '');
-          t.value = (cur ? cur + '\n' : '') + st.replace(/\.\.\.$/, '') + ' ';
+          var t = el('iv-main'), cur = t.value.replace(/\s+$/, ''), ls = cur ? cur.split('\n') : [], lastLine = ls.length ? ls[ls.length - 1].trim() : '';
+          var base = st.replace(/\.\.\.$/, ''), unfinished = RF_STARTERS.some(function(x) { return x.replace(/\.\.\.$/, '') === lastLine; });
+          if (unfinished) ls.pop();   // nothing was typed after the first starter: the new one replaces it
+          ls.push(base + ' ');         // otherwise it goes on a new line below and nothing they wrote is lost
+          t.value = ls.join('\n');
           t.focus(); t.setSelectionRange(t.value.length, t.value.length);   // the cursor sits after the space, ready to finish the sentence
           rfAutosave();
         }));
@@ -9003,12 +9006,42 @@ function pbParseScan(text) {
   return out;
 }
 
+// Places named around the passage the AI picked as "where", in the order the story gives them. The AI gives one place;
+// a story that moves from one room to another ("the garage, then the garden") must show every place, in order.
+var PB_PLACE_RX = /\b(?:(?:the|our|my|her|his|a)\s+)?(living room|dining room|family room|laundry room|front yard|back yard|backyard|parking lot|kitchen|bedroom|bathroom|garage|garden|yard|driveway|porch|patio|deck|basement|attic|hallway|office|car|truck|van|restaurant|store|shop|park|street|beach|church|school|hospital|airport|stairs|nursery|study|balcony|lobby)\b|\b(over text|by text|texting)\b/gi;
+function pbPlacesInOrder(story, evidence) {
+  story = String(story || '');
+  var sentences = story.match(/[^.!?]+[.!?]*/g) || [story];
+  var segs = String(evidence || '').split('...').map(function(x) { return x.trim().toLowerCase(); }).filter(function(x) { return x.length > 2; });
+  var found = [];
+  sentences.forEach(function(sn, i) { var l = sn.toLowerCase(); if (segs.some(function(g) { return l.indexOf(g) !== -1; })) found.push(i); });
+  if (!found.length) return [];
+  var cue = /\b(then|moved|went|started|began|followed|ended up|outside|inside|later|into)\b/i;
+  var from = found[0], to = found[found.length - 1];
+  function ok(i) { return i >= 0 && i < sentences.length && cue.test(sentences[i]) && !/\b(package|parcel|delivery|box)\b/i.test(sentences[i]); }
+  if (ok(from - 1)) from--;
+  if (ok(to + 1)) to++;
+  var text = sentences.slice(from, to + 1).join(' '), out = [], m;
+  PB_PLACE_RX.lastIndex = 0;
+  while ((m = PB_PLACE_RX.exec(text))) {
+    var name = (m[1] || m[2] || '').toLowerCase().replace('back yard', 'backyard');
+    if (name === 'by text' || name === 'texting') name = 'over text';
+    if (out.indexOf(name) === -1) out.push(name);
+  }
+  return out;
+}
+function pbPlacesText(list) {
+  return list.map(function(n, i) { var t = n === 'over text' ? 'over text' : 'the ' + n; return i === 0 ? t.charAt(0).toUpperCase() + t.slice(1) : 'then ' + t; }).join(', ');
+}
+
 // What the story clearly said goes on the read back. Where is never guessed, the topic is a short plain label,
 // and the first line must be something said out loud.
 function ivApplyScan(parsed) {
   var it;
   if ((it = parsed.items.q3)) {
     var w = it.label || (it.evidence.length <= 40 ? it.evidence : '');
+    var places = pbPlacesInOrder(pbStory.text, it.evidence);
+    if (places.length >= 2) w = pbPlacesText(places);   // every place, in order
     if (w) { iv.here.where = pbTidy(w); iv.found.where = true; }
   }
   if ((it = parsed.items.q1) && it.label) { iv.here.topic = pbTidy(it.label); iv.found.topic = true; }
@@ -9103,7 +9136,7 @@ function ivHeading(key) {
     case 'fightname': return 'What would you call this argument?';
     case 'about': return 'What is this argument usually about?';
     case 'trigger': return 'What usually sets it off?';
-    case 'starter': return 'Who usually starts it, and how does it begin?';
+    case 'starter': return 'Who usually starts it?';
     case 'setting': return 'Where does it usually happen?';
     case 'sayme': return 'The lines you say every time';
     case 'saythem': return 'The lines ' + N + ' says every time';   // DRAFT: the mirror of the approved wording, not yet approved
@@ -9131,7 +9164,7 @@ function ivExample(key) {
     case 'fightname': return (ex.fightName && ex.fightName.length) ? 'For example: ' + ex.fightName.slice(0, 3).map(function(x) { return '"' + x + '"'; }).join(', ') + '.' : 'For example: "The Money Thing".';
     case 'about': return 'For example: money, time, the kids, chores, feeling close.';
     case 'trigger': return ex.trigger ? 'For example: ' + ex.trigger : '';
-    case 'starter': return ex.starter ? 'For example: ' + ex.starter : '';
+    case 'starter': return '';   // only who: how it begins is caught by the first line question
     case 'setting': return 'This becomes the setting of your script.';
     case 'heard': return "It's not necessarily what they meant. It's what it sounds like to you.";
     case 'speedup': return "For example: 'You always,' 'Here we go again.'";
@@ -9152,7 +9185,7 @@ function ivChipsFor(key) {
     case 'starter': return { chips: ['I start it', N + ' starts it', 'It builds between us', 'Not sure'], mode: 'comma' };
     case 'setting': return { chips: IV_SETTINGS.concat(['Not sure']), mode: 'comma' };
     case 'sayme': case 'saythem': return { chips: [], mode: 'line' };   // no tappable lines: people say them in their own words
-    case 'heard': return { chips: (ex.heardChips || []).slice(0, 4).map(capFirst).concat(['Not sure']), mode: 'comma' };
+    case 'heard': return { chips: ["I'm not being heard", "I'm being judged", "I'm not trusted", "I'm being blamed", N + ' is worried', 'Not sure'], mode: 'comma' };   // approved set; nothing invented, nothing loaded
     case 'speedup': return { chips: IV_SPEEDUP.concat(['Nothing in particular']), mode: 'comma' };
     case 'cue': return { chips: IV_CUES.map(function(c) { return { text: capFirst(c), full: c }; }).concat(['Nothing in particular']), mode: 'comma' };
     case 'cueplace': return { chips: ivCueLines().map(function(l) { return pbShort(l); }).concat(['Not sure']), mode: 'replace' };
@@ -9537,9 +9570,8 @@ function ivRenderLines(key) {
   var body = el('iv-body'), N = pbName(), mine = key === 'sayme', theme = ivTheme();
   var about = theme ? 'about ' + theme : '';
   var copy = mine
-    ? "We often say the same lines over and over in arguments, and sometimes catch ourselves mid-sentence. Think about your past arguments" + (about ? ' ' + about : '') + ", including this one. What lines do you remember saying? Your exact words, the way you'd say them to " + N + ". Take a moment. Try saying them out loud and speak them right into the box. The right words often come faster when you speak than when you type."
-    // DRAFT, NOT APPROVED: the mirror of the approved wording for the partner's lines
-    : "We often hear the same lines over and over in arguments. Think about your past arguments" + (about ? ' ' + about : '') + ", including this one. What lines do you remember " + N + " saying? Their exact words, the way " + N + " would say them to you. Take a moment. Try saying them out loud and speak them right into the box.";
+    ? "We often say the same lines in arguments, and sometimes we hear ourselves saying them while we are saying them. Think about your past arguments" + (about ? ' ' + about : '') + ", including this one. What lines do you remember saying, or catching yourself saying? Your exact words, the way you'd say them to " + N + ". Speaking them into the box can be easier than typing."
+    : "We often hear the same lines from our partner too, sometimes before they finish. What lines do you remember " + N + " saying? Their exact words, the way they'd say them to you. Speaking them into the box can be easier than typing.";
   body.appendChild(ivNode('p', 'story-prompt iv-lines-copy', copy));
   var ex = ivLineChips(mine ? 'me' : 'partner').slice(0, 2);
   if (ex.length) body.appendChild(ivNode('p', 'iv-lines-example', 'For example: ' + ex.map(function(x) { return '"' + x + '"'; }).join('  ') ));   // PLACEHOLDER label; the lines are the person\'s own, from their story
