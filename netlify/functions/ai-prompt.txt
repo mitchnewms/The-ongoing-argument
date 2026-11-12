@@ -1036,13 +1036,13 @@ Every script has two layers. You read for both simultaneously.
 The Text
 
 What is written. What the person says they want. The surface of the
-argument. The stated position. This is what the fight appears to be
+argument. The stated position. This is what the argument appears to be
 about.
 
 The Subtext
 
 What the person means. What they actually need that is not being met.
-The emotional truth living underneath the words. This is what the fight
+The emotional truth living underneath the words. This is what the argument
 is really about.
 
 The text is what they want. The subtext is what they need. And it is
