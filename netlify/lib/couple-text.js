@@ -52,7 +52,7 @@ function buildIntakeBlock(name, data, partnerName) {
   if (data.initialRetelling) lines.push('Their own retelling, as first told: ' + data.initialRetelling);
   if (data.fightTopic) lines.push('What they say the fight is about: ' + data.fightTopic);
   if (data.fightTrigger) lines.push('What usually sets it off: ' + data.fightTrigger);
-  if (data.whoStartsIt) lines.push('Who usually starts it, and how: ' + data.whoStartsIt);
+  if (data.whoStartsIt) lines.push('Who usually starts it: ' + data.whoStartsIt);
   if (data.setting || data.fightLocation) lines.push('Where it usually happens: ' + (data.setting || data.fightLocation));
   if (data.startingMoment) lines.push('The first line that starts it: ' + data.startingMoment);
   if (data.beatByBeat) lines.push('How it unfolds beat by beat: ' + data.beatByBeat);
