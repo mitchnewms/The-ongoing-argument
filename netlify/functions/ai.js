@@ -37,7 +37,8 @@ const ALLOWED_ORIGINS = [
   'https://www.theongoingargument.com',
   'https://mitchnewman.com',
   'https://www.mitchnewman.com',
-  'https://imaginative-starburst-a1bbd9.netlify.app'
+  'https://imaginative-starburst-a1bbd9.netlify.app',
+  'https://claude-combined-test-nov12--imaginative-starburst-a1bbd9.netlify.app'   // TEST BRANCH ONLY: remove before this goes to main
 ];
 
 const MAX_BODY_CHARS = 300000;
