@@ -5878,6 +5878,7 @@ function buildReflectBlock(name, partnerName, data) {
   if (data.triggerLine) l.push('Something they say that tends to get that reaction: ' + data.triggerLine);
   if (data.storyThinking) l.push('The story they tell themselves about what ' + pn + ' is thinking: ' + data.storyThinking);
   if (data.storyFeeling) l.push('What they think ' + pn + ' is feeling: ' + data.storyFeeling);
+  if (data.whatIMean) l.push('What they say they mean (their words, which outrank any reading of them): ' + data.whatIMean);
   return l.length ? '--- WHAT ' + name.toUpperCase() + ' SAID AFTER SUBMITTING, BEFORE SEEING ANY RESULTS ---\n' + l.join('\n') + '\n---' : '';
 }
 
@@ -6643,11 +6644,11 @@ function soloGenerateAnalysis() {
       '--- SCRIPT FROM ' + myName.toUpperCase() + ' ---\n\n' + scriptText + '\n\n' +
       (myData.pathChosen === 'b' ? buildIntakeBlock(myName, myData, soloPartnerName()) + '\n\n' : '') +
       'Analyze this script from the inside of ' + myName + '\'s experience. Do NOT compare two scripts — only one was written. Surface:\n' +
-      '- The pattern ' + myName + ' is expressing in their lines (their language, their dynamic, what their choices reveal about how they show up in this conflict)\n' +
-      '- What they appear to be reaching for — what do they want but cannot quite say?\n' +
-      '- What this pattern costs them — what does it get them, and what does it take from them?\n' +
-      '- One specific pattern they carry into this conflict that they may not be fully aware of\n\n' +
-      'Do not mention a partner perspective beyond what ' + myName + ' projected. Do not use right/wrong language. Write in second person directly to ' + myName + '. Warm, honest, reflective. 3-4 paragraphs.';
+      '- What the lines on the page show about how ' + myName + ' shows up in this argument, in their own words.\n' +
+      '- What they appear to be reaching for, offered as a possibility.\n' +
+      '- What this pattern may cost them and what it may give them, offered as a possibility.\n' +
+      '- One line from the script, quoted exactly, that may land differently than they intend, offered as a question.\n\n' +
+      'Do not use right/wrong language. Follow Section 0. Write in second person directly to ' + myName + '. Use possibility language for anything about feelings or wants. Three or four short paragraphs, under about 250 words, ending with one question.';
     return callAIWithTimeout([{ role: 'user', content: prompt }], '2', 150000);
   }).then(function(analysisText) {
     if (!analysisText || String(analysisText).trim().length < 40) throw new Error('empty analysis');
@@ -7247,17 +7248,19 @@ function s7StartDelivery() {
     var step6 = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
     var analysisText = isSolo ? (analysisDoc.analysis || '(none)') : (analysisDoc.analysis || '(none)');
     var analysisLabel = isSolo ? '--- INDIVIDUAL ANALYSIS ---' : '--- COUPLE\'S ANALYSIS (from Step 2) ---';
+    var step6Any = !!(step6.q1 || step6.q2 || step6.q3 || step6.q4);   // a solo account has none, so the block is left out
+    var step6Block = step6Any ? '--- ' + myName.toUpperCase() + '\'S REFLECTIONS (Step 6) ---\n' +
+      'Q1: ' + (step6.q1 || '(not answered)') + '\n' +
+      'Q2: ' + (step6.q2 || '(not answered)') + '\n' +
+      'Q3: ' + (step6.q3 || '(not answered)') + '\n' +
+      'Q4: ' + (step6.q4 || '(not answered)') : '';
     var setupPrompt = 'You are now beginning Step 7 — Individual Work — with ' + myName + '.' + (isSolo ? ' This person is using the solo pathway — their partner is not participating.' : '') + '\n\n' +
       'Here is all the context you need:\n\n' +
       analysisLabel + '\n' + analysisText + '\n\n' +
       '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
       (myScript.pathChosen === 'b' ? buildIntakeBlock(myName, myScript, partnerName) + '\n\n' : '') +
       (buildReflectBlock(myName, partnerName, myScript) ? buildReflectBlock(myName, partnerName, myScript) + '\n\n' : '') +
-      '--- ' + myName.toUpperCase() + '\'S REFLECTIONS (Step 6) ---\n' +
-      'Q1: ' + (step6.q1 || '(not answered)') + '\n' +
-      'Q2: ' + (step6.q2 || '(not answered)') + '\n' +
-      'Q3: ' + (step6.q3 || '(not answered)') + '\n' +
-      'Q4: ' + (step6.q4 || '(not answered)') + '\n\n' +
+      (step6Block ? step6Block + '\n\n' : '') +
       'Begin Step 7 with ' + myName + '. Start with the Language Awareness Work — turn attention to the actual words on the page. Not who they want to be in the argument. Who they want to be in the exchange that would turn it from a confrontation into a conversation. Identify specific words and phrases from their script that might be landing as attacks, carrying old charge, or projecting a belief onto ' + (isSolo ? 'their partner' : partnerName) + '. Prompt them to consider new language. When insight surfaces, invite them to add it to their Awareness Log. Eventually guide them to "The One Thing" — one concrete thing they are willing to try differently next time. Follow the Step 7 guidelines from your training exactly.';
     s7Messages = [{ role: 'user', content: setupPrompt }];
     return callAI(s7Messages, '7');
