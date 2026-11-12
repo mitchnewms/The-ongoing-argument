@@ -268,6 +268,7 @@ body {
 .jb-step { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); font-family: 'Courier Prime', monospace; margin-bottom: 4px; }
 .jb-hd { font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 6px; }
 .jb-sub { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; margin-bottom: 16px; line-height: 1.55; }
+.jb-link { display: block; margin: 14px auto 0; padding: 8px 4px; background: none; border: none; color: #B84F00; font-family: system-ui, -apple-system, sans-serif; font-size: 0.95rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
 .jb-btn { font-family: 'Special Elite', cursive; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
 
 /* ── SHARED FULL-SCREEN STEP SCREENS ──────────────────────── */
@@ -295,6 +296,7 @@ body {
 .tl-actions { display: flex; gap: 10px; margin-top: 40px; flex-wrap: wrap; align-items: center; }
 .tl-action-btn { font-family: 'Courier Prime', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.5); cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; }
 .tl-continue-btn { font-family: 'Courier Prime', monospace; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 24px; background: #E06500; color: white; border: none; cursor: pointer; border-radius: 1px; -webkit-appearance: none; touch-action: manipulation; margin-left: auto; }
+.sc-home-btn { margin-top: 36px; min-height: 46px; padding: 12px 26px; background: #E06500; color: #FFFFFF; border: none; border-radius: 6px; font-family: system-ui, -apple-system, sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; touch-action: manipulation; }
 .solo-closing-inner { max-width: 520px; margin: 0 auto; padding: 64px 24px 100px; display: flex; flex-direction: column; align-items: center; }
 .solo-closing-eyebrow { font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(184,160,112,0.65); font-family: 'Courier Prime', monospace; margin-bottom: 40px; text-align: center; }
 .solo-closing-text { font-family: 'Lora', Georgia, serif; font-size: clamp(1rem, 2.8vw, 1.15rem); line-height: 2.0; color: rgba(255,255,255,0.82); text-align: center; margin-bottom: 56px; }
@@ -616,6 +618,23 @@ body.script-locked #scene-input { pointer-events: none; }
 .iv-lines-copy { text-align: left; }
 .iv-lines-example { font-size: 0.92rem; color: #6A6458; margin: 4px 0 10px; line-height: 1.5; white-space: pre-line; }
 .iv-add-another { display: block; margin: 6px 0 0; }
+.iv-box.iv-added { box-shadow: 0 0 0 2px rgba(224,101,0,0.45); transition: box-shadow 0.4s; }
+/* Energy screens: no empty divider lines, and chips a little tighter so the button is closer to the top of the page */
+.iv-en { border-bottom: none; padding-bottom: 0; margin-bottom: 8px; }
+.iv-note:not(.open) { border-top: none; padding-top: 0; margin-top: 10px; }   /* a closed note is only a small link, with no empty line above it */
+.iv-en .iv-opt { padding-top: 8px; padding-bottom: 8px; min-height: 40px; }
+.iv-en .iv-opts { gap: 8px; }
+.iv-actions { padding-bottom: 96px !important; }   /* room above the iPad keyboard bar */
+/* The Awareness Log card and the + Log button stay hidden until after the analysis (hidden, not removed) */
+body.al-off #awareness-log, body.al-off #al-fab { display: none !important; }
+.submit-lock-line { margin: 10px 2px 0; font-size: 0.88rem; line-height: 1.45; color: #6A6458; }
+/* Real buttons for the two links that were faint or cut off */
+#s3-complete-btn.s3-complete { display: block; width: auto; min-height: 46px; margin: 10px auto 0; padding: 12px 22px; background: #E06500 !important; color: #FFFFFF !important; border: none; border-radius: 6px; font-family: system-ui, -apple-system, sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0; text-align: center; }
+.s78-top-row { flex-wrap: wrap; gap: 8px; }
+#s7-complete-btn.s7-complete-btn { min-height: 44px; margin-left: auto; padding: 10px 18px; background: #E06500 !important; color: #FFFFFF !important; border: none; border-radius: 6px; font-family: system-ui, -apple-system, sans-serif; font-size: 0.9rem !important; font-weight: 700; letter-spacing: 0; white-space: nowrap; }
+.s78-input-area { padding-right: max(18px, env(safe-area-inset-right)); padding-left: max(18px, env(safe-area-inset-left)); }
+/* When the iPad keyboard is up, the two conversation screens fit above it so the Respond box is not hidden */
+html.kb-open #step3-screen, html.kb-open #step7-screen { bottom: auto; height: var(--vvh, 100%); }
 </style>
 
 <style>
@@ -2462,6 +2481,7 @@ h1, h2, h3,
     <button class="action-btn action-btn-quiet" id="btn-save">Save Progress</button>
     <button class="action-btn" id="btn-submit" style="background:var(--accent);">Submit for Review</button>
   </div>
+  <p class="submit-lock-line" id="submit-lock-line" style="display:none">Once you submit, this is your script. You can read it, but you cannot change it.</p>
   <div id="status-msg"></div>
   <div id="solo-next-note" role="status" style="display:none;margin:14px 16px 0;padding:14px 16px;background:#FFF4E5;border:1px solid #E8C48F;border-radius:4px;font-size:0.92rem;line-height:1.5;color:#3B2F1A;"></div>
 
@@ -2526,6 +2546,7 @@ h1, h2, h3,
       <div class="jb-hd" id="jb-title"></div>
       <div class="jb-sub" id="jb-sub"></div>
       <button class="jb-btn" id="jb-btn" onclick="openJourneyStep()"></button>
+      <button type="button" class="jb-link" id="jb-takeaways" style="display:none" onclick="soloReopenTakeaways()">Your takeaways</button>
     </div>
   </div>
 
@@ -3288,6 +3309,7 @@ Me too.</div>
       <button class="s11-coach-btn" id="sc-coach-btn" onclick="scCoachConnect()">Yes, connect me with someone.</button>
       <div class="s11-coach-confirm" id="sc-coach-confirm" style="display:none">Thanks, we&rsquo;ll be in touch.</div>
     </div>
+    <button type="button" class="sc-home-btn" id="sc-home-btn" onclick="soloBackHome()">Back to home</button>
   </div>
 </div>
 
@@ -4246,28 +4268,29 @@ function recordSafetyFlag(step) {
 }
 
 function sendSafetyFlagEmail(rec, email) {
+  // In the background. A failed send is logged for the admin and never holds the person up or hides a support message.
   try {
-    if (typeof emailjs === 'undefined') return;
+    if (typeof emailjs === 'undefined') { logFailure('safety_email', 'EmailJS script', { message: 'The EmailJS script did not load, so no safety email was sent' }); return; }
     var key = rec.triggeredByUid + '|' + rec.step;
     var now = Date.now();
     if (FLAG_EMAIL_SENT[key] && now - FLAG_EMAIL_SENT[key] < 120000) return;
     FLAG_EMAIL_SENT[key] = now;
-    var serviceId = window.EMAILJS_SERVICE_ID;
-    var templateId = window.EMAILJS_FLAG_TEMPLATE_ID || window.EMAILJS_COACH_TEMPLATE_ID;
-    var publicKey = window.EMAILJS_PUBLIC_KEY;
-    if (!serviceId || !templateId || !publicKey) return;
-    emailjs.init({ publicKey: publicKey });
-    emailjs.send(serviceId, templateId, {
-      name: rec.triggeredBy || 'Unknown',
-      email: email,
-      account_type: 'SAFETY FLAG (' + safetyStepLabel(rec.step) + '), ' + rec.accountType,
-      uid: rec.triggeredByUid,
-      couple_id: rec.coupleId,
-      timestamp: rec.timestamp,
-      flag_type: 'Safety Pattern',
-      flag_where: safetyStepLabel(rec.step)
-    }).catch(function(err) { console.error('Safety flag email error:', err); });
-  } catch (e) { console.error('Safety flag email error:', e); }
+    emailConfig().then(function(c) {
+      var templateId = c && (c.flagTemplateId || c.templateId);
+      if (!c || !c.serviceId || !c.publicKey || !templateId) { logFailure('safety_email', 'not set up', { message: 'The EmailJS values are not set in Netlify yet, so no safety email was sent' }); return; }
+      emailjs.init({ publicKey: c.publicKey });
+      return emailjs.send(c.serviceId, templateId, {
+        name: rec.triggeredBy || 'Unknown',
+        email: email,
+        account_type: 'SAFETY FLAG (' + safetyStepLabel(rec.step) + '), ' + rec.accountType,
+        uid: rec.triggeredByUid,
+        couple_id: rec.coupleId || '',
+        timestamp: rec.timestamp,
+        flag_type: 'Safety Pattern',
+        flag_where: safetyStepLabel(rec.step)
+      }).catch(function(err) { logFailure('safety_email', 'send', { status: err && err.status, message: 'EmailJS did not send the safety email', detail: String((err && (err.text || err.message)) || err || '').slice(0, 200) }); });
+    }).catch(function(err) { logFailure('safety_email', 'setup lookup', { status: err && err.status, message: 'Could not read the EmailJS values', detail: String((err && err.message) || err || '').slice(0, 200) }); });
+  } catch (e) { logFailure('safety_email', 'send', { message: 'The safety email step stopped', detail: String(e && e.message || e).slice(0, 200) }); }
 }
 
 var SAFETY_SCREEN_LABELS = {
@@ -4664,7 +4687,7 @@ function rfHeading(key) {
     case 'stop': return 'In your view, what would make this argument stop?';
     case 'partnerstop': return 'Your best guess: what would ' + N + ' say would make it stop?';
     case 'onething': return "What's the one thing you want " + N + ' to really hear?';
-    case 'trigger': return 'In your arguments with ' + N + ', is there something you say, or the way you say it, that tends to get a strong reaction?';
+    case 'trigger': return 'In your arguments with ' + N + ', is there something you say that tends to get a strong reaction?';
     case 'whatimean': return 'Think about the line or the tone you just picked.';
     case 'thinking': return 'The story I tell myself is that ' + N + '...';
     case 'feeling': return 'I think ' + N + ' is feeling...';
@@ -4674,7 +4697,7 @@ function rfHeading(key) {
 function rfSub(key) {
   var N = pbName();
   switch (key) {
-    case 'partnerstop': return 'For example: if I stopped bringing it up.';
+    case 'partnerstop': return 'For example: if we talked before the argument escalates.';
     case 'onething': return "Say it the way you'd say it to " + N + '.';
     case 'trigger': return 'Think about all of your arguments, not just this one.';
     case 'whatimean': return 'What I mean is...';
@@ -4705,7 +4728,7 @@ function rfGroups(key) {
   if (key === 'trigger') {
     var g = [];
     if (rfSayLines.length) g.push({ label: 'What I say', chips: rfSayLines.slice(0, 6).map(function(x) { return { text: x, full: x }; }) });
-    g.push({ label: 'How I say it', chips: ['a sharp tone', 'a raised voice', 'sarcasm', 'talking over ' + N].map(function(x) { return { text: x, full: x }; }) });
+    g.push({ label: 'Or the way I say it', chips: ['a sharp tone', 'a raised voice', 'sarcasm', 'talking over ' + N].map(function(x) { return { text: x, full: x }; }) });
     g.push({ label: '', chips: [{ text: RF_NONE, full: RF_NONE }] });
     return g;
   }
@@ -4713,18 +4736,34 @@ function rfGroups(key) {
 }
 function rfChips(key) {
   var N = pbName(), topic = String(window._intakeTopic || '').toLowerCase();
-  if (key === 'thinking') return { chips: ["thinks I'm wrong", "thinks I'm the problem", 'is judging me', "doesn't respect me", 'is trying to control me', 'is keeping score', 'wants this to stop too', 'is tired of this'].map(function(c) { return { text: c, full: N + ' ' + c }; }), mode: 'comma' };
+  if (key === 'thinking') return { chips: ["thinks I'm wrong", "thinks I'm the problem", 'is judging me', "doesn't respect me", 'is trying to control me', 'is keeping score', 'wants this to stop too', 'is tired of this', 'is trying to protect something', 'wants to feel heard', 'is worried'].map(function(c) { return { text: c, full: N + ' ' + c }; }), mode: 'comma' };
   if (key === 'feeling') return { chips: ['hurt', 'angry', 'worried', 'overwhelmed', 'tired', 'resentful', 'sad', 'scared'], mode: 'comma' };
   return { chips: [], mode: 'comma' };
 }
-var RF_STARTERS = ['I need you to know...', 'What I really want is...', 'It hurts when...', "I'm afraid that..."];
+var RF_STARTERS = ['I need you to know...', 'What I really want is...', 'It hurts when...', "I'm afraid that..."];   // the label keeps its dots; the box gets the words and a space
+
+// A line typed on the lines screen may have a typo the draft already tidied. The answers show the line as the script has it.
+function rfAsDrafted(raw, sd) {
+  var lines = [];
+  try { lines = typeof (sd && sd.lines) === 'string' ? JSON.parse(sd.lines) : ((sd && sd.lines) || []); } catch (e) { lines = []; }
+  var want = pbMeaning(raw), best = '', bestHit = 0;
+  if (!want.length) return raw;
+  lines.forEach(function(l) {
+    if (!l || l.type !== 'line' || String(l.char || '').toUpperCase() !== 'A' || !l.dialogue) return;
+    var have = pbMeaning(l.dialogue);
+    var hit = want.filter(function(w) { return pbSeenIn(w, l.dialogue); }).length / want.length;
+    var back = have.length ? have.filter(function(h) { return pbSeenIn(h, raw); }).length / have.length : 0;
+    if (hit >= 0.8 && back >= 0.8 && hit + back > bestHit) { bestHit = hit + back; best = String(l.dialogue).trim(); }
+  });
+  return best || raw;
+}
 
 function rfStart(sd) {
   rfActive = true; ivLive = false;
   Object.keys(rfA).forEach(function(k) { rfA[k] = sd && sd[k] ? String(sd[k]) : ''; });
   window._intakeTopic = (sd && (sd.fightTopic || '')) || '';
   // "What I say" offers only the lines this person gave on their own lines screen, never facts from the story.
-  rfSayLines = String((sd && sd.sayEveryTime) || '').split('\n').map(function(x) { return x.trim(); }).filter(function(x) { return x && IV_NONE.indexOf(x.toLowerCase()) === -1; });
+  rfSayLines = String((sd && sd.sayEveryTime) || '').split('\n').map(function(x) { return x.trim(); }).filter(function(x) { return x && IV_NONE.indexOf(x.toLowerCase()) === -1; }).map(function(x) { return rfAsDrafted(x, sd); });
   var first = 0;
   var answered = RF_KEYS.some(function(k) { return k !== 'intro' && rfA[RF_FIELD[k]]; });
   if (answered) { first = 1; for (var i = 1; i < RF_KEYS.length; i++) { var k = RF_KEYS[i]; if (!rfActiveKey(k) || k === 'whatimean') continue; first = i; if (!rfA[RF_FIELD[k]]) break; } }
@@ -4770,7 +4809,7 @@ function rfShow(i) {
     txt('iv-sub', rfSub(key));
     var box = ivBox('iv-main', key === 'whatimean' ? 2 : 3);
     box.value = rfA[RF_FIELD[key]] || '';
-    if (key === 'whatimean') box.placeholder = "For example: I'm trying to be clear and direct.";
+    if (key === 'whatimean') box.placeholder = 'Say it in your own words.';
     var groups = rfGroups(key);
     body.appendChild(box);   // the box is in the page first, so the answers can light up and fill it; the answers sit above it
     function put(n) { body.insertBefore(n, box); }
@@ -4779,9 +4818,12 @@ function rfShow(i) {
       var row = ivNode('div', 'iv-opts');
       RF_STARTERS.forEach(function(st) {
         row.appendChild(ivButton(st, 'iv-opt', function() {
-          var t = el('iv-main'), cur = t.value.replace(/\s+$/, '');
-          t.value = (cur ? cur + '\n' : '') + st.replace(/\.\.\.$/, '... ');
-          t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+          var t = el('iv-main'), cur = t.value.replace(/\s+$/, ''), ls = cur ? cur.split('\n') : [], lastLine = ls.length ? ls[ls.length - 1].trim() : '';
+          var base = st.replace(/\.\.\.$/, ''), unfinished = RF_STARTERS.some(function(x) { return x.replace(/\.\.\.$/, '') === lastLine; });
+          if (unfinished) ls.pop();   // nothing was typed after the first starter: the new one replaces it
+          ls.push(base + ' ');         // otherwise it goes on a new line below and nothing they wrote is lost
+          t.value = ls.join('\n');
+          t.focus(); t.setSelectionRange(t.value.length, t.value.length);   // the cursor sits after the space, ready to finish the sentence
           rfAutosave();
         }));
       });
@@ -5878,6 +5920,7 @@ function buildReflectBlock(name, partnerName, data) {
   if (data.triggerLine) l.push('Something they say that tends to get that reaction: ' + data.triggerLine);
   if (data.storyThinking) l.push('The story they tell themselves about what ' + pn + ' is thinking: ' + data.storyThinking);
   if (data.storyFeeling) l.push('What they think ' + pn + ' is feeling: ' + data.storyFeeling);
+  if (data.whatIMean) l.push('What they say they mean (their words, which outrank any reading of them): ' + data.whatIMean);
   return l.length ? '--- WHAT ' + name.toUpperCase() + ' SAID AFTER SUBMITTING, BEFORE SEEING ANY RESULTS ---\n' + l.join('\n') + '\n---' : '';
 }
 
@@ -5943,6 +5986,7 @@ var s3Mode = '';   // 'solo' when the conversation is the individual path's Mirr
 // The AI speaks first and is given everything it needs, so it never asks for what it already has.
 function openMirrorMomentSolo() {
   if (!user || !user.uid) return;
+  soloRelabel();
   s3Mode = 'solo';
   el('step3-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -6026,6 +6070,7 @@ function s3ReadyForStep7() {
   fsSetStrict('users/' + user.uid, { soloCurrentStep: '4' }).then(function() {
     user.soloCurrentStep = '4';
     try { localStorage.setItem('oa_user', JSON.stringify(user)); } catch (e) {}
+    alSync();
     hide('step3-screen'); s3Mode = '';
     showSoloJourneyBanner('4');
     openStep7();
@@ -6240,6 +6285,17 @@ var JOURNEY_STEPS = {
 
 var currentJourneyStep = null;
 
+// The Awareness Log card and the + Log button stay hidden until after the analysis (the Mirror Moment is done).
+// They are hidden, not removed. The coach login is never held back.
+function alSync() {
+  var on = false;
+  if (user && user.email === COACH) on = true;
+  else if (user && user.accountType === 'solo') on = parseInt(user.soloCurrentStep || '1', 10) >= 4;
+  else if (user) on = parseInt(currentJourneyStep || '1', 10) >= 4;
+  document.body.classList.toggle('al-off', !on);
+}
+setInterval(alSync, 1000);
+
 function journeyRoute() {
   if (!user || !user.coupleId) return;
   fsGet('couples/' + user.coupleId).then(function(d) {
@@ -6274,7 +6330,8 @@ function journeyRoute() {
 function showJourneyBanner(step) {
   var cfg = JOURNEY_STEPS[step];
   if (!cfg) return;
-  txt('jb-step', cfg.label);
+  currentJourneyStep = step; alSync();
+  txt('jb-step', cfg.label); el('jb-step').style.display = '';
   txt('jb-title', cfg.title);
   txt('jb-sub', cfg.sub);
   txt('jb-btn', cfg.btn);
@@ -6299,6 +6356,7 @@ function openJourneyStep() {
 function syncPrivacyTag() {
   var t = el('privacy-tag');
   if (!t || !user) return;
+  var ll = el('submit-lock-line'); if (ll) ll.style.display = user.accountType === 'solo' ? 'block' : 'none';   // the lock is for the individual path
   if (user.accountType === 'solo') { t.textContent = '🔒 Your version. Private to you.'; return; }
   var first = ((user.partner || user.partnerName || '').split(' ')[0]) || 'your partner';
   t.innerHTML = '🔒 Your version. Private until you share with <span id="privacy-partner-name"></span>';
@@ -6326,15 +6384,34 @@ function advanceStep(newStep) {
 // ── SOLO PATHWAY ─────────────────────────────────────────────
 
 var SOLO_JOURNEY_STEPS = {
-  '2': { label: 'Step 2', title: 'Your Analysis', sub: 'What the AI noticed in your script.', btn: 'Read My Analysis' },
-  '3': { label: 'Step 3', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead. Your tool is ready.', btn: 'Continue to Your Tool' },
-  '4': { label: 'Step 4', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
-  '5': { label: 'Step 5', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
-  '6': { label: 'Step 6', title: 'You\'ve Done the Work', sub: '', btn: 'Read This' }
+  '2': { label: '', title: 'Your Analysis', sub: 'What the AI noticed in your script.', btn: 'Read My Analysis' },
+  '3': { label: '', title: 'Your Story on Screen', sub: 'The video performance is coming soon. Skip ahead. Your tool is ready.', btn: 'Continue to Your Tool' },
+  '4': { label: '', title: 'Your Tool', sub: 'One thing to practice. One awareness to build.', btn: 'Open Your Session' },
+  '5': { label: '', title: 'Practice Round', sub: 'Put what you\'ve learned to work.', btn: 'Begin Practice' },
+  // PROPOSED wording for the two stages between practice and the closing screen
+  '5b': { label: '', title: 'Your Takeaways', sub: 'The list to keep.', btn: 'Open My Takeaways' },
+  '5c': { label: '', title: 'A few quick questions', sub: 'Help us make this better for the next person.', btn: 'Answer Them' },
+  '6': { label: '', title: 'You\'ve Done the Work', sub: '', btn: 'Read This' }
 };
+
+// The individual path never shows the couple step numbers (it skips steps), so its headers and the Step 7 buttons are
+// named by what the screen is. Couples keep the numbers.
+function soloRelabel() {
+  var solo = !!(user && user.accountType === 'solo');
+  function set(sel, solotext, coupletext) { var n = document.querySelector(sel); if (n) n.textContent = solo ? solotext : coupletext; }
+  set('#analysis-screen .ap-title', 'Your Analysis', 'Step 2');
+  set('#step3-screen .s3-title', 'Mirror Moment', 'Step 3. Mirror Moment');
+  set('#step7-screen .s3-title', 'Individual Work', 'Step 7. Individual Work');
+  set('#step9-screen .s3-title', 'Practice Round', 'Step 9. The Rewrite');
+  set('#s7-complete-btn', 'Complete ›', 'Complete Step 7 ›');
+  var wb = document.querySelector('#step1-waiting-banner .wb-body');
+  if (wb) { if (!wb.getAttribute('data-couple')) wb.setAttribute('data-couple', wb.textContent); wb.textContent = solo ? wb.getAttribute('data-couple').replace('The AI is reading both scripts now.', 'The AI is reading your script now.') : wb.getAttribute('data-couple'); }
+  set('#step7-screen .s7-ot-save', 'Continue to practice', 'Save & Continue to Step 8 ›');
+}
 
 function soloJourneyRoute() {
   if (!user || !user.uid) return;
+  soloRelabel();
   // Firestore hands numbers back as numbers, so make the step a string before comparing it
   var step = String(user.soloCurrentStep || '1');
   if (step === '3' && !VIDEO_ON) { step = '4'; user.soloCurrentStep = '4'; fsSet('users/' + user.uid, { soloCurrentStep: '4' }).catch(function() {}); }   // an account left on the video card moves on
@@ -6358,6 +6435,13 @@ function soloJourneyRoute() {
       hide('step2-card');
       setTimeout(pollSoloAnalysisReady, 30000);
     });
+  } else if (step === '5') {
+    // The practice record is saved the moment practice finishes. If it is there, the next unfinished screen is the takeaways.
+    fsGet('practice/' + user.uid).then(function(d) {
+      var done = !!(d && d.fields && fromFields(d.fields).completedAt);
+      if (done) { user.soloCurrentStep = '5b'; fsSet('users/' + user.uid, { soloCurrentStep: '5b' }).catch(function() {}); showSoloJourneyBanner('5b'); }
+      else showSoloJourneyBanner('5');
+    }).catch(function() { showSoloJourneyBanner('5'); });
   } else if (SOLO_JOURNEY_STEPS[step]) {
     showSoloJourneyBanner(step);
   }
@@ -6366,20 +6450,36 @@ function soloJourneyRoute() {
 function showSoloJourneyBanner(step) {
   var cfg = SOLO_JOURNEY_STEPS[step];
   if (!cfg) return;
+  alSync();
   if (step === '2') return soloShowStep2Banner();
-  txt('jb-step', cfg.label);
+  txt('jb-step', cfg.label); el('jb-step').style.display = cfg.label ? '' : 'none';   // the individual path has no step numbers
   txt('jb-title', cfg.title);
   txt('jb-sub', cfg.sub);
   txt('jb-btn', cfg.btn);
   currentJourneyStep = 'solo-' + step;
   el('journey-banner').style.display = 'block';
+  soloSyncTakeawaysLink(step);
 }
+
+// Once the takeaways have been made, the person can open them again from their home card (from the saved copy).
+function soloSyncTakeawaysLink(step) {
+  var l = el('jb-takeaways'); if (!l) return;
+  l.style.display = 'none';
+  if (!user || user.accountType !== 'solo' || (step !== '5c' && step !== '6')) return;
+  fsGet('step11/' + user.uid).then(function(d) {
+    if (d && d.fields && fromFields(d.fields).takeawaysAt) l.style.display = 'block';
+  }).catch(function() {});
+}
+var tlReopened = false;
+function soloReopenTakeaways() { tlReopened = true; openTakeawayScreen(); }
 
 function openJourneyStepSolo(step) {
   if (step === '2') { if (soloCard2 === 'watch') openWitness(); else openAnalysisPage(); }
   else if (step === '3') soloAdvanceStep('4');
   else if (step === '4') openStep7();
   else if (step === '5') openStep9();
+  else if (step === '5b') openTakeawayScreen();
+  else if (step === '5c') soloOpenFeedback();
   else if (step === '6') openSoloClosing();
 }
 
@@ -6389,12 +6489,14 @@ function soloAdvanceStep(newStep) {
   user.soloCurrentStep = newStep;
   localStorage.setItem('oa_user', JSON.stringify(user));
   fsSet('users/' + user.uid, { soloCurrentStep: newStep }).catch(function(){});
+  alSync();
   if (SOLO_JOURNEY_STEPS[newStep]) showSoloJourneyBanner(newStep);
 }
 
 function openSoloAnalysis() { openAnalysisPage(); }
 
 function openSoloClosing() {
+  if (user && user.accountType === 'solo' && String(user.soloCurrentStep) !== '6') soloAdvanceStep('6');   // the path is finished here
   el('solo-closing-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   el('sc-coach-section').style.display = 'block';
@@ -6404,6 +6506,13 @@ function openSoloClosing() {
       el('sc-coach-confirm').style.display = 'block';
     }
   }).catch(function(){});
+}
+
+// From the closing screen back to the person's home screen. Nothing on the closing screen changes.
+function soloBackHome() {
+  closeSoloClosing();
+  window.scrollTo(0, 0);
+  soloJourneyRoute();
 }
 
 function closeSoloClosing() {
@@ -6502,7 +6611,17 @@ function openTakeawayScreen() {
   document.body.style.overflow = 'hidden';
   hide('tl-content');
   show('tl-loading');
-  generatePersonalizedTakeaways();
+  // If the lists were made before, they are shown from the saved copy and the AI is not asked again.
+  if (!user || !user.uid) { generatePersonalizedTakeaways(); return; }
+  fsGet('step11/' + user.uid).then(function(d) {
+    var sv = (d && d.fields) ? fromFields(d.fields) : {};
+    if (sv.takeawaysAt) {
+      var a = [], b = [];
+      function lst(v) { try { var x = typeof v === 'string' ? JSON.parse(v || '[]') : v; return Array.isArray(x) ? x : []; } catch (e) { return []; } }   // the page's reader may already have turned the saved text back into a list
+      a = lst(sv.takeawaysTodo); b = lst(sv.takeawaysTobe);
+      tlShowContent(a, b);
+    } else generatePersonalizedTakeaways();
+  }).catch(function() { generatePersonalizedTakeaways(); });
 }
 
 function closeTakeawayScreen() {
@@ -6546,6 +6665,10 @@ function generatePersonalizedTakeaways() {
     if (todoMatch) todoItems = todoMatch[1].trim().split('\n').map(function(l) { return l.replace(/^[-*•]\s*/, '').trim(); }).filter(Boolean);
     if (tobeMatch) tobeItems = tobeMatch[1].trim().split('\n').map(function(l) { return l.replace(/^[-*•]\s*/, '').trim(); }).filter(Boolean);
     tlShowContent(todoItems, tobeItems);
+    // Saved once, in the person's step 11 record (not the script record, which is locked at Submit)
+    if ((todoItems.length || tobeItems.length) && user && user.uid) {
+      fsSet('step11/' + user.uid, { takeawaysTodo: JSON.stringify(todoItems), takeawaysTobe: JSON.stringify(tobeItems), takeawaysAt: new Date().toISOString() }).catch(function() {});
+    }
   }).catch(function() { tlShowContent([], []); });
 }
 
@@ -6568,14 +6691,16 @@ function tlShowContent(todoItems, tobeItems) {
 
 function tlContinue() {
   closeTakeawayScreen();
-  openFeedbackScreen(function() {
-    if (tlFromPath === 'solo') {
-      openSoloClosing();
-    } else {
-      advanceStep('11');
-    }
-  });
+  if (tlFromPath === 'solo') {
+    if (tlReopened) { tlReopened = false; soloJourneyRoute(); return; }   // opened again from home: just go back
+    soloAdvanceStep('5c');
+    soloOpenFeedback();
+    return;
+  }
+  openFeedbackScreen(function() { advanceStep('11'); });
 }
+// The feedback questions for the individual path. Submitting them leads to the closing screen.
+function soloOpenFeedback() { openFeedbackScreen(function() { openSoloClosing(); }); }
 
 function tlPrint() { window.print(); }
 
@@ -6643,11 +6768,11 @@ function soloGenerateAnalysis() {
       '--- SCRIPT FROM ' + myName.toUpperCase() + ' ---\n\n' + scriptText + '\n\n' +
       (myData.pathChosen === 'b' ? buildIntakeBlock(myName, myData, soloPartnerName()) + '\n\n' : '') +
       'Analyze this script from the inside of ' + myName + '\'s experience. Do NOT compare two scripts — only one was written. Surface:\n' +
-      '- The pattern ' + myName + ' is expressing in their lines (their language, their dynamic, what their choices reveal about how they show up in this conflict)\n' +
-      '- What they appear to be reaching for — what do they want but cannot quite say?\n' +
-      '- What this pattern costs them — what does it get them, and what does it take from them?\n' +
-      '- One specific pattern they carry into this conflict that they may not be fully aware of\n\n' +
-      'Do not mention a partner perspective beyond what ' + myName + ' projected. Do not use right/wrong language. Write in second person directly to ' + myName + '. Warm, honest, reflective. 3-4 paragraphs.';
+      '- What the lines on the page show about how ' + myName + ' shows up in this argument, in their own words.\n' +
+      '- What they appear to be reaching for, offered as a possibility.\n' +
+      '- What this pattern may cost them and what it may give them, offered as a possibility.\n' +
+      '- One line from the script, quoted exactly, that may land differently than they intend, offered as a question.\n\n' +
+      'Do not use right/wrong language. Follow Section 0. Write in second person directly to ' + myName + '. Use possibility language for anything about feelings or wants. Three or four short paragraphs, under about 250 words, ending with one question.';
     return callAIWithTimeout([{ role: 'user', content: prompt }], '2', 150000);
   }).then(function(analysisText) {
     if (!analysisText || String(analysisText).trim().length < 40) throw new Error('empty analysis');
@@ -6948,7 +7073,7 @@ function soloShowStep2Banner() {
   b.style.display = 'none';
   function done(mode) {
     soloCard2 = mode;
-    txt('jb-step', cfg.label);
+    txt('jb-step', cfg.label); el('jb-step').style.display = cfg.label ? '' : 'none';
     if (mode === 'watch') { txt('jb-title', 'Your analysis is ready.'); txt('jb-sub', 'First, watch your argument.'); txt('jb-btn', 'Watch it'); }
     else { txt('jb-title', cfg.title); txt('jb-sub', cfg.sub); txt('jb-btn', cfg.btn); }
     b.style.display = 'block';
@@ -6965,6 +7090,7 @@ function apState(msg, showRetry) {
 }
 function openAnalysisPage() {
   if (!user || !user.uid) return;
+  soloRelabel();
   el('analysis-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   el('ap-body').innerHTML = '';
@@ -7206,6 +7332,7 @@ var s7Messages = [];
 var s7Sending = false;
 
 function openStep7() {
+  soloRelabel();
   el('step7-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   fsGet('step7/' + user.uid).then(function(d) {
@@ -7247,17 +7374,19 @@ function s7StartDelivery() {
     var step6 = results[2] && results[2].fields ? fromFields(results[2].fields) : {};
     var analysisText = isSolo ? (analysisDoc.analysis || '(none)') : (analysisDoc.analysis || '(none)');
     var analysisLabel = isSolo ? '--- INDIVIDUAL ANALYSIS ---' : '--- COUPLE\'S ANALYSIS (from Step 2) ---';
+    var step6Any = !!(step6.q1 || step6.q2 || step6.q3 || step6.q4);   // a solo account has none, so the block is left out
+    var step6Block = step6Any ? '--- ' + myName.toUpperCase() + '\'S REFLECTIONS (Step 6) ---\n' +
+      'Q1: ' + (step6.q1 || '(not answered)') + '\n' +
+      'Q2: ' + (step6.q2 || '(not answered)') + '\n' +
+      'Q3: ' + (step6.q3 || '(not answered)') + '\n' +
+      'Q4: ' + (step6.q4 || '(not answered)') : '';
     var setupPrompt = 'You are now beginning Step 7 — Individual Work — with ' + myName + '.' + (isSolo ? ' This person is using the solo pathway — their partner is not participating.' : '') + '\n\n' +
       'Here is all the context you need:\n\n' +
       analysisLabel + '\n' + analysisText + '\n\n' +
       '--- ' + myName.toUpperCase() + '\'S SCRIPT ---\n' + scriptDataToText(myScript, myName, partnerName) + '\n\n' +
       (myScript.pathChosen === 'b' ? buildIntakeBlock(myName, myScript, partnerName) + '\n\n' : '') +
       (buildReflectBlock(myName, partnerName, myScript) ? buildReflectBlock(myName, partnerName, myScript) + '\n\n' : '') +
-      '--- ' + myName.toUpperCase() + '\'S REFLECTIONS (Step 6) ---\n' +
-      'Q1: ' + (step6.q1 || '(not answered)') + '\n' +
-      'Q2: ' + (step6.q2 || '(not answered)') + '\n' +
-      'Q3: ' + (step6.q3 || '(not answered)') + '\n' +
-      'Q4: ' + (step6.q4 || '(not answered)') + '\n\n' +
+      (step6Block ? step6Block + '\n\n' : '') +
       'Begin Step 7 with ' + myName + '. Start with the Language Awareness Work — turn attention to the actual words on the page. Not who they want to be in the argument. Who they want to be in the exchange that would turn it from a confrontation into a conversation. Identify specific words and phrases from their script that might be landing as attacks, carrying old charge, or projecting a belief onto ' + (isSolo ? 'their partner' : partnerName) + '. Prompt them to consider new language. When insight surfaces, invite them to add it to their Awareness Log. Eventually guide them to "The One Thing" — one concrete thing they are willing to try differently next time. Follow the Step 7 guidelines from your training exactly.';
     s7Messages = [{ role: 'user', content: setupPrompt }];
     return callAI(s7Messages, '7');
@@ -7464,6 +7593,7 @@ var S9_CHECKINS = [
 ];
 
 function openStep9() {
+  soloRelabel();
   el('step9-screen').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   if (user && user.accountType === 'solo') {
@@ -7679,7 +7809,7 @@ function s9RenderPractice() {
     var healthyResp2 = s9PracticeContent ? s9PracticeContent.pass2Response : '';
     body.innerHTML =
       '<div class="s9-pr-eyebrow">Practice Round &middot; Part One &middot; Pass Two</div>' +
-      '<p class="s9-pr-context-note">This is how you wrote your partner&rsquo;s line. Here&rsquo;s what a healthy response from you might sound like.</p>' +
+      '<p class="s9-pr-context-note">' + (user && user.accountType === 'solo' ? 'This is how you remember ' + esc(soloPartnerName()) + '&rsquo;s line.' : 'This is how you wrote your partner&rsquo;s line.') + ' Here&rsquo;s what a healthy response from you might sound like.</p>' +
       (ln2 ?
         '<div class="s9-pr-line-block"><div class="s9-pr-char-name">' + esc(pName) + '</div>' +
         (ln2.beat ? '<div class="s9-pr-beat">(' + esc(cueInner(ln2.beat)) + ')</div>' : '') +
@@ -7864,7 +7994,7 @@ function s9FinishPractice() {
     }).catch(function(){});
   }
   if (user && user.accountType === 'solo') {
-    soloAdvanceStep('6');
+    soloAdvanceStep('5b');   // practice is done; the path is not finished until the closing screen is reached
     closeStep9();
     openTakeawayScreen();
     return;
@@ -8135,6 +8265,31 @@ function s11SaveEmail() {
 function s11CoachConnect() { coachConnectAction('s11-coach-btn', 's11-coach-confirm'); }
 function scCoachConnect() { coachConnectAction('sc-coach-btn', 'sc-coach-confirm'); }
 
+// The three EmailJS values come from Netlify (see netlify/functions/email-config.js), never from this file.
+var emailCfgPromise = null;
+function emailConfig() {
+  if (!emailCfgPromise) {
+    emailCfgPromise = fetch('/.netlify/functions/email-config', { headers: { 'Authorization': 'Bearer ' + (token || '') } }).then(function(r) {
+      if (!r.ok) { var e = new Error('email-config ' + r.status); e.status = r.status; throw e; }
+      return r.json();
+    }).catch(function(e) { emailCfgPromise = null; throw e; });
+  }
+  return emailCfgPromise;
+}
+function sendCoachEmail(record) {
+  try {
+    if (typeof emailjs === 'undefined') { logFailure('coach_email', 'EmailJS script', { message: 'The EmailJS script did not load, so no email was sent' }); return; }
+    emailConfig().then(function(c) {
+      if (!c || !c.configured) { logFailure('coach_email', 'not set up', { message: 'The EmailJS values are not set in Netlify yet, so no email was sent' }); return; }
+      emailjs.init({ publicKey: c.publicKey });
+      return emailjs.send(c.serviceId, c.templateId, {
+        name: record.name, email: record.email, account_type: record.accountType, uid: record.uid,
+        couple_id: record.coupleId || '', timestamp: record.timestamp
+      }).catch(function(err) { logFailure('coach_email', 'send', { status: err && err.status, message: 'EmailJS did not send the email', detail: String((err && (err.text || err.message)) || err || '').slice(0, 200) }); });
+    }).catch(function(err) { logFailure('coach_email', 'setup lookup', { status: err && err.status, message: 'Could not read the EmailJS values', detail: String((err && err.message) || err || '').slice(0, 200) }); });
+  } catch (e) { logFailure('coach_email', 'send', { message: 'The email step stopped', detail: String(e && e.message || e).slice(0, 200) }); }
+}
+
 function coachConnectAction(btnId, confirmId) {
   if (!user) return;
   var btn = el(btnId);
@@ -8149,21 +8304,7 @@ function coachConnectAction(btnId, confirmId) {
   if (user.coupleId) record.coupleId = user.coupleId;
   fsAdd('coachInterest', record).catch(function(){});
   fsSet('step11/' + user.uid, { coachConnectedAt: new Date().toISOString() }).catch(function(){});
-  // Email Mitch
-  if (typeof emailjs !== 'undefined') {
-    var serviceId = window.EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
-    var coachTemplateId = window.EMAILJS_COACH_TEMPLATE_ID || 'YOUR_COACH_TEMPLATE_ID';
-    var publicKey = window.EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
-    emailjs.init({ publicKey: publicKey });
-    emailjs.send(serviceId, coachTemplateId, {
-      name: record.name,
-      email: record.email,
-      account_type: record.accountType,
-      uid: record.uid,
-      couple_id: record.coupleId || '',
-      timestamp: record.timestamp
-    }).catch(function(err) { console.error('Coach interest email error:', err); });
-  }
+  sendCoachEmail(record);   // in the background: a failed send is logged and never holds the person up
   btn.style.display = 'none';
   el(confirmId).style.display = 'block';
 }
@@ -8882,7 +9023,7 @@ function pbScanPrompt() {
   return 'A person is telling me about a recurring ' + pbWord() + ' with their partner, ' + N + '. Here is what they said.\n\n' +
     'STORY:\n"""\n' + pbStory.text + '\n"""\n\n' +
     'For each item below, copy the exact words from the story that clearly state it. Copy, never paraphrase or summarize, and never add anything. If an item is not clearly stated, leave its evidence empty. You may use "..." between two separate passages.\n\n' +
-    'q1: what it is about. Also give "label": a short plain topic of 3 to 8 words in your own plain words, for example "Buying a drone without talking first". Never paste a piece of the story as the label.\n' +
+    'q1: what it is about. Also give "label": a short plain topic of 3 to 8 words. Use the person\'s own nouns and verbs, and keep who did what exactly as the story says. If the story describes one person doing something, the label says that person did it. Never write "each other", "both of us", "between us" or "we" unless the story says both people did it. Never paste a piece of the story as the label. For example: "Buying a drone without talking first".\n' +
     'q3: where the fight itself happens, only if they say where the two of them are when it happens (also give "label": a short name for the place, for example "the bedroom"). A place where an object is, or where something else happened, is not where the fight happens: a package on the porch does not mean the fight is on the porch. If they did not say, leave it empty.\n' +
     'q4: the first thing said out loud that starts it, copied exactly. It must be a spoken line, not narration and not something someone did.\n\n' +
     'Also list every line that is quoted or clearly reported as spoken in the story, in the order spoken. Each has "who" ("me" for the person telling the story, "partner" for ' + N + '), "text" (copied exactly from the story without the words that introduce it, like "she says"), and "say": the same line written exactly as that person would say it out loud to the other person, in their own first person, with a capital letter and normal punctuation. In a line that is only reported, "I" and "me" mean the person telling the story, and "she", "he" or "her" mean ' + N + '. Examples: the person telling the story reports "nobody asked her to" as their own line, which becomes "Nobody asked you to."; they report that ' + N + ' said "I hide things and then she is the bad guy", which becomes, for ' + N + ', "You hide things and then I\'m the bad guy." Never change who is speaking and never add meaning that is not there. Include a line even if it is short. A line written as a script, in quotes, or where ' + N + ' is talking about ' + N + 'self, such as "I\'m not asking for permission, I\'m asking to be included", stays exactly as written.\n\n' +
@@ -8890,6 +9031,13 @@ function pbScanPrompt() {
     'Return only one JSON object shaped like {"items":{"q1":{"evidence":"","label":""},"q3":{"evidence":"","label":""},"q4":{"evidence":""}},"lines":[{"who":"me","text":"","say":""},{"who":"partner","text":"","say":""}],"examples":{"fightName":["","",""],"trigger":"","starter":"","triggerChips":["","",""],"heardChips":["","","",""]}}. Include every item key listed above. Your safety guidance still applies: if what they have said describes fear, control or coercion, include the safety flag from your guidance in your response in addition to the JSON.';
 }
 
+// A suggested answer is kept only when most of its meaning words are in the person's own story.
+function pbChipInStory(chip) {
+  var want = pbMeaning(chip), text = pbStory.text || '';
+  if (!want.length) return false;
+  var hit = want.filter(function(w) { return pbSeenIn(w, text); }).length;
+  return hit / want.length >= 0.5;
+}
 // A rewritten line is accepted only when it is in someone's own voice and says what the story's words say.
 function pbSayOk(say, raw) {
   say = String(say || '').trim();
@@ -8918,7 +9066,11 @@ function pbParseScan(text) {
     var ev = typeof it.evidence === 'string' ? it.evidence.trim() : '';
     if (ev.length < 3) return;
     if (!pbEvidenceOk(pbStory.text, ev)) { pbExtractDebug.rejected.push(q + ': not found word for word'); return; }
-    out.items[q] = { evidence: ev, label: typeof it.label === 'string' ? pbNoDash(it.label.trim()).slice(0, 60) : '' };
+    var lab = typeof it.label === 'string' ? pbNoDash(it.label.trim()).slice(0, 60) : '';
+    // A label that makes the argument mutual ("each other", "both of us", "between us") when the story does not is dropped,
+    // so the read back skips that row and the interview asks it instead.
+    if (/\b(each other|both of us|between us)\b/i.test(lab) && !/\b(each other|both of us|between us)\b/i.test(pbStory.text || '')) { lab = ''; pbExtractDebug.rejected.push(q + ': label made it mutual, dropped'); }
+    out.items[q] = { evidence: ev, label: lab };
     pbExtractDebug.accepted.push(q);
   });
   (Array.isArray(obj.lines) ? obj.lines : []).forEach(function(l) {
@@ -8934,13 +9086,41 @@ function pbParseScan(text) {
   });
   var ex = obj.examples || {};
   out.examples = {
-    fightName: pbCleanList(ex.fightName, 3, 40),
+    fightName: pbCleanList(ex.fightName, 3, 40).map(function(x) { return x.replace(/\bfights\b/gi, function(m) { return m.charAt(0) === 'F' ? 'Arguments' : 'arguments'; }).replace(/\bfight\b/gi, function(m) { return m.charAt(0) === 'F' ? 'Argument' : 'argument'; }); }),
     trigger: pbNoDash(String(ex.trigger || '')).replace(/\s+/g, ' ').trim().slice(0, 140),
     starter: pbNoDash(String(ex.starter || '')).replace(/\s+/g, ' ').trim().slice(0, 140),
-    triggerChips: pbCleanList(ex.triggerChips, 3, 60),
+    triggerChips: pbCleanList(ex.triggerChips, 6, 60).filter(pbChipInStory).slice(0, 3),   // an invented chip, with nothing in the story behind it, is dropped
     heardChips: pbCleanList(ex.heardChips, 4, 60)
   };
   return out;
+}
+
+// Places named around the passage the AI picked as "where", in the order the story gives them. The AI gives one place;
+// a story that moves from one room to another ("the garage, then the garden") must show every place, in order.
+var PB_PLACE_RX = /\b(?:(?:the|our|my|her|his|a)\s+)?(living room|dining room|family room|laundry room|front yard|back yard|backyard|parking lot|kitchen|bedroom|bathroom|garage|garden|yard|driveway|porch|patio|deck|basement|attic|hallway|office|car|truck|van|restaurant|store|shop|park|street|beach|church|school|hospital|airport|stairs|nursery|study|balcony|lobby)\b|\b(over text|by text|texting)\b/gi;
+function pbPlacesInOrder(story, evidence) {
+  story = String(story || '');
+  var sentences = story.match(/[^.!?]+[.!?]*/g) || [story];
+  var segs = String(evidence || '').split('...').map(function(x) { return x.trim().toLowerCase(); }).filter(function(x) { return x.length > 2; });
+  var found = [];
+  sentences.forEach(function(sn, i) { var l = sn.toLowerCase(); if (segs.some(function(g) { return l.indexOf(g) !== -1; })) found.push(i); });
+  if (!found.length) return [];
+  var cue = /\b(then|moved|went|started|began|followed|ended up|outside|inside|later|into)\b/i;
+  var from = found[0], to = found[found.length - 1];
+  function ok(i) { return i >= 0 && i < sentences.length && cue.test(sentences[i]) && !/\b(package|parcel|delivery|box)\b/i.test(sentences[i]); }
+  if (ok(from - 1)) from--;
+  if (ok(to + 1)) to++;
+  var text = sentences.slice(from, to + 1).join(' '), out = [], m;
+  PB_PLACE_RX.lastIndex = 0;
+  while ((m = PB_PLACE_RX.exec(text))) {
+    var name = (m[1] || m[2] || '').toLowerCase().replace('back yard', 'backyard');
+    if (name === 'by text' || name === 'texting') name = 'over text';
+    if (out.indexOf(name) === -1) out.push(name);
+  }
+  return out;
+}
+function pbPlacesText(list) {
+  return list.map(function(n, i) { var t = n === 'over text' ? 'over text' : 'the ' + n; return i === 0 ? t.charAt(0).toUpperCase() + t.slice(1) : 'then ' + t; }).join(', ');
 }
 
 // What the story clearly said goes on the read back. Where is never guessed, the topic is a short plain label,
@@ -8949,18 +9129,23 @@ function ivApplyScan(parsed) {
   var it;
   if ((it = parsed.items.q3)) {
     var w = it.label || (it.evidence.length <= 40 ? it.evidence : '');
+    var places = pbPlacesInOrder(pbStory.text, it.evidence);
+    if (places.length >= 2) w = pbPlacesText(places);   // every place, in order
     if (w) { iv.here.where = pbTidy(w); iv.found.where = true; }
   }
   if ((it = parsed.items.q1) && it.label) { iv.here.topic = pbTidy(it.label); iv.found.topic = true; }
   if (parsed.lines.length) pbSpoken = parsed.lines;
   if ((it = parsed.items.q4)) {
-    var spoken = pbSpoken.some(function(l) {
+    var spoken = null;
+    pbSpoken.forEach(function(l) {
+      if (spoken) return;
       var a = pbMeaning(l.raw || l.text), b = pbMeaning(it.evidence);
-      if (!a.length || !b.length) return false;
+      if (!a.length || !b.length) return;
       var hit = b.filter(function(x) { return a.indexOf(x) !== -1; }).length;
-      return hit / b.length >= 0.6 || (a.filter(function(x) { return b.indexOf(x) !== -1; }).length / a.length) >= 0.6;
+      if (hit / b.length >= 0.6 || (a.filter(function(x) { return b.indexOf(x) !== -1; }).length / a.length) >= 0.6) spoken = l;
     });
-    if (spoken) { iv.here.first = pbTidy(it.evidence.replace(/^["'“‘]+|["'”’]+$/g, '')); iv.found.first = true; }
+    // The line is shown as it was written in the story (the one spoken line), not a summary of it
+    if (spoken) { iv.here.first = pbTidy(String(spoken.raw || spoken.text || it.evidence).replace(/^["'“‘]+|["'”’]+$/g, '')); iv.found.first = true; }
   }
   iv.ex = parsed.examples || {};
   // A couple agreed a name when they signed up, so it is shown for them to confirm. It is not asked a second time from scratch.
@@ -9040,7 +9225,7 @@ function ivHeading(key) {
     case 'fightname': return 'What would you call this argument?';
     case 'about': return 'What is this argument usually about?';
     case 'trigger': return 'What usually sets it off?';
-    case 'starter': return 'Who usually starts it, and how does it begin?';
+    case 'starter': return 'Who usually starts it?';
     case 'setting': return 'Where does it usually happen?';
     case 'sayme': return 'The lines you say every time';
     case 'saythem': return 'The lines ' + N + ' says every time';   // DRAFT: the mirror of the approved wording, not yet approved
@@ -9068,7 +9253,7 @@ function ivExample(key) {
     case 'fightname': return (ex.fightName && ex.fightName.length) ? 'For example: ' + ex.fightName.slice(0, 3).map(function(x) { return '"' + x + '"'; }).join(', ') + '.' : 'For example: "The Money Thing".';
     case 'about': return 'For example: money, time, the kids, chores, feeling close.';
     case 'trigger': return ex.trigger ? 'For example: ' + ex.trigger : '';
-    case 'starter': return ex.starter ? 'For example: ' + ex.starter : '';
+    case 'starter': return '';   // only who: how it begins is caught by the first line question
     case 'setting': return 'This becomes the setting of your script.';
     case 'heard': return "It's not necessarily what they meant. It's what it sounds like to you.";
     case 'speedup': return "For example: 'You always,' 'Here we go again.'";
@@ -9079,20 +9264,21 @@ function ivExample(key) {
   return '';
 }
 
+function capFirst(x) { x = String(x || ''); return x.charAt(0).toUpperCase() + x.slice(1); }
 function ivChipsFor(key) {
   var N = pbName(), ex = iv.ex || {};
   switch (key) {
     case 'fightname': return { chips: (ex.fightName || []).slice(0, 3), mode: 'replace' };
     case 'about': return { chips: IV_ABOUT.concat(['Something else']), mode: 'comma' };
-    case 'trigger': return { chips: (ex.triggerChips || []).slice(0, 3).concat(['Not sure']), mode: 'comma' };
+    case 'trigger': return { chips: (ex.triggerChips || []).slice(0, 3).map(capFirst).concat(['Not sure']), mode: 'comma' };
     case 'starter': return { chips: ['I start it', N + ' starts it', 'It builds between us', 'Not sure'], mode: 'comma' };
     case 'setting': return { chips: IV_SETTINGS.concat(['Not sure']), mode: 'comma' };
     case 'sayme': case 'saythem': return { chips: [], mode: 'line' };   // no tappable lines: people say them in their own words
-    case 'heard': return { chips: (ex.heardChips || []).slice(0, 4).concat(['Not sure']), mode: 'comma' };
+    case 'heard': return { chips: ["I'm not being heard", "I'm being judged", "I'm not trusted", "I'm being blamed", N + ' is worried', 'Not sure'], mode: 'comma' };   // approved set; nothing invented, nothing loaded
     case 'speedup': return { chips: IV_SPEEDUP.concat(['Nothing in particular']), mode: 'comma' };
-    case 'cue': return { chips: IV_CUES.concat(['Nothing in particular']), mode: 'comma' };
+    case 'cue': return { chips: IV_CUES.map(function(c) { return { text: capFirst(c), full: c }; }).concat(['Nothing in particular']), mode: 'comma' };
     case 'cueplace': return { chips: ivCueLines().map(function(l) { return pbShort(l); }).concat(['Not sure']), mode: 'replace' };
-    case 'interrupt': return { chips: [N + ' leaves the room', 'I leave', 'The kids walk in', 'A phone rings', 'We both run out of energy', N + ' goes silent', 'I go silent'], mode: 'comma' };
+    case 'interrupt': return { chips: [N + ' leaves the room', 'I leave', 'A phone rings', 'We both run out of energy', N + ' goes silent', 'I go silent'], mode: 'comma' };
   }
   return { chips: [], mode: 'comma' };
 }
@@ -9166,16 +9352,18 @@ function ivBox(id, rows) {
 function ivAppend(boxId, text) {
   var t = el(boxId);
   if (!t) return;
-  var cur = t.value.trim();
+  var cur = t.value.trim().replace(/[.,;:]+$/, '');   // "permission." plus a chip reads "permission, a sharp tone"
   t.value = cur ? cur + ', ' + text : text;
-  t.focus();
+  ivFocusEnd(t);
 }
+// Touch screens: tapping an answer must not pop the keyboard over the rest of the answers.
+function ivFocusEnd(t) { if (!('ontouchstart' in window)) { t.focus(); } }
 function ivAppendLine(boxId, text) {
   var t = el(boxId);
   if (!t) return;
   var cur = t.value.trim();
   t.value = cur ? cur + '\n' + text : text;
-  t.focus();
+  ivFocusEnd(t);
 }
 function ivParts(v, mode) {
   return String(v || '').split(mode === 'line' ? /\n/ : /\s*,\s*(?=[A-Za-z"'])/).map(function(x) { return x.trim(); }).filter(Boolean);
@@ -9185,7 +9373,7 @@ function ivParts(v, mode) {
 function ivOptions(labels, onTap, wrapClass, boxId, mode) {
   var row = ivNode('div', 'iv-opts' + (wrapClass ? ' ' + wrapClass : ''));
   var btns = [];
-  function same(a, b) { return String(a).toLowerCase() === String(b).toLowerCase(); }
+  function same(a, b) { function n(x) { return String(x).trim().replace(/[.,;:]+$/, '').toLowerCase(); } return n(a) === n(b); }
   function paint() {
     if (!boxId) return;
     var t = el(boxId);
@@ -9260,11 +9448,34 @@ function ivNeed(key) {
 function ivSyncNext() {
   var b = document.querySelector('#iv-actions .iv-next');
   if (!b || !ivLive) return;
-  var need = ivNeed(ivScreens[ivIndex]);
+  var key = ivScreens[ivIndex], need = ivNeed(key);
   b.textContent = need || b.getAttribute('data-label') || 'Next';
   b.classList.toggle('iv-next-wait', !!need);
   b.setAttribute('aria-disabled', need ? 'true' : 'false');
+  // On the tall screens, once the answer is in, the button comes into view (it still scrolls with the page)
+  if (ivWasWaiting && !need && (key === 'energyp' || key === 'energym' || key === 'cueplace') && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
+  ivWasWaiting = !!need;
 }
+var ivWasWaiting = false;
+
+// iPad keyboard: when a box is tapped, bring it into view above the keyboard. The two conversation screens shrink to the
+// part of the page the keyboard leaves free, so the Respond box is never hidden.
+(function() {
+  var vv = window.visualViewport;
+  function fit() {
+    if (!vv) return;
+    var open = vv.height < window.innerHeight - 120;
+    document.documentElement.classList.toggle('kb-open', open);
+    document.documentElement.style.setProperty('--vvh', Math.round(vv.height) + 'px');
+    if (open) { var a = document.activeElement; if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && a.scrollIntoView) { try { a.scrollIntoView({ block: 'center' }); } catch (e) {} } var t = el('s7-thread'); if (t && el('step7-screen') && el('step7-screen').style.display === 'flex') t.scrollTop = t.scrollHeight; }
+  }
+  if (vv) { vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); }
+  document.addEventListener('focusin', function(e) {
+    var a = e.target;
+    if (!a || !/^(TEXTAREA|INPUT)$/.test(a.tagName)) return;
+    setTimeout(function() { if (a.scrollIntoView) { try { a.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (x) {} } }, 350);
+  });
+})();
 
 // "More below": a small cue wherever a screen runs past the bottom of the page.
 function ivUpdateMore() {
@@ -9286,6 +9497,8 @@ function ivShow(i, dir) {
   while (!ivActive(ivScreens[i]) && i + step >= 0 && i + step < ivScreens.length) i += step;
   ivIndex = i;
   var key = ivScreens[ivIndex];
+  try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (e) {}   // close the keyboard before the next screen draws
+  ivWasWaiting = false;
   ivClear();
   ivLive = true;
   txt('iv-progress', ivProgressLabel(key));
@@ -9297,9 +9510,13 @@ function ivShow(i, dir) {
   else if (key === 'sayme' || key === 'saythem') ivRenderLines(key);
   else ivRenderQuestion(key);
   ivSyncNext();
-  window.scrollTo(0, 0);
-  var sc = el('iv-screen'); if (sc) sc.scrollTop = 0;
+  ivResetScroll();
   setTimeout(ivUpdateMore, 60); setTimeout(ivUpdateMore, 500);
+}
+// After the iPad keyboard closes, Safari can leave the page shifted so taps land a row low. Put the view back at the top.
+function ivResetScroll() {
+  function go() { window.scrollTo(0, 0); var sc = el('iv-screen'); if (sc) sc.scrollTop = 0; }
+  go(); setTimeout(go, 120); setTimeout(go, 450);
 }
 
 function ivNextIndex(from) {
@@ -9442,9 +9659,8 @@ function ivRenderLines(key) {
   var body = el('iv-body'), N = pbName(), mine = key === 'sayme', theme = ivTheme();
   var about = theme ? 'about ' + theme : '';
   var copy = mine
-    ? "We often say the same lines over and over in arguments, and sometimes catch ourselves mid-sentence. Think about your past arguments" + (about ? ' ' + about : '') + ", including this one. What lines do you remember saying? Your exact words, the way you'd say them to " + N + ". Take a moment. Try saying them out loud and speak them right into the box. The right words often come faster when you speak than when you type."
-    // DRAFT, NOT APPROVED: the mirror of the approved wording for the partner's lines
-    : "We often hear the same lines over and over in arguments. Think about your past arguments" + (about ? ' ' + about : '') + ", including this one. What lines do you remember " + N + " saying? Their exact words, the way " + N + " would say them to you. Take a moment. Try saying them out loud and speak them right into the box.";
+    ? "We often say the same lines in arguments, and sometimes we hear ourselves saying them while we are saying them. Think about your past arguments" + (about ? ' ' + about : '') + ", including this one. What lines do you remember saying, or catching yourself saying? Your exact words, the way you'd say them to " + N + ". Speaking them into the box can be easier than typing."
+    : "We often hear the same lines from our partner too, sometimes before they finish. What lines do you remember " + N + " saying? Their exact words, the way they'd say them to you. Speaking them into the box can be easier than typing.";
   body.appendChild(ivNode('p', 'story-prompt iv-lines-copy', copy));
   var ex = ivLineChips(mine ? 'me' : 'partner').slice(0, 2);
   if (ex.length) body.appendChild(ivNode('p', 'iv-lines-example', 'For example: ' + ex.map(function(x) { return '"' + x + '"'; }).join('  ') ));   // PLACEHOLDER label; the lines are the person\'s own, from their story
@@ -9455,7 +9671,15 @@ function ivRenderLines(key) {
   body.appendChild(box);
   body.appendChild(ivTalk('iv-main'));
   body.appendChild(ivButton('Add another', 'iv-note-link iv-add-another', function() {
-    var t = el('iv-main'); var cur = t.value.replace(/\s+$/, ''); t.value = cur ? cur + '\n' : ''; t.focus(); t.setSelectionRange(t.value.length, t.value.length); ivCapture();
+    var t = el('iv-main'); var cur = t.value.replace(/\s+$/, '');
+    if (!cur) { t.focus(); return; }   // nothing to add after yet
+    t.value = cur + '\n';
+    t.rows = Math.max(5, t.value.split('\n').length + 1);   // grow, so the new line is on screen
+    t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+    t.scrollTop = t.scrollHeight;
+    t.classList.add('iv-added'); setTimeout(function() { t.classList.remove('iv-added'); }, 700);
+    if (t.scrollIntoView) t.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    ivCapture();
   }));
   ivNoteBox(body, key);
   ivActions(null, 'Next', function() {
@@ -9538,7 +9762,7 @@ function ivEnergyText(w) {
 // ---- Last screen: everything they told me, each answer with an Edit button, and room for anything new ----
 function ivSummary(key) {
   var N = pbName();
-  if (key === 'here') return [iv.here.where && 'Where: ' + iv.here.where, iv.here.topic && 'About: ' + iv.here.topic, iv.here.first && 'First line: "' + iv.here.first + '"'].filter(Boolean).join('\n');
+  if (key === 'here') return [(ivReal(iv.setting) || iv.here.where) && 'Where: ' + (ivReal(iv.setting) || iv.here.where), iv.here.topic && 'About: ' + iv.here.topic, iv.here.first && 'First line: "' + iv.here.first + '"'].filter(Boolean).join('\n');
   if (key === 'energyp') return ivEnergyText('partner');
   if (key === 'energym') return ivEnergyText('me');
   return ivGet(key);
@@ -9786,6 +10010,26 @@ function pbWordsOf(t) {
   }
   return out;
 }
+// Two words that differ only by a typo ("yoiu" and "you") count as the same word.
+function pbNear(a, b) {
+  if (a === b) return true;
+  var la = a.length, lb = b.length;
+  if (Math.abs(la - lb) > 1 || Math.min(la, lb) < 3) return false;
+  var allow = Math.max(la, lb) >= 7 ? 2 : 1;
+  var prev = [], cur = [], i, j;
+  for (j = 0; j <= lb; j++) prev[j] = j;
+  for (i = 1; i <= la; i++) {
+    cur = [i];
+    for (j = 1; j <= lb; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+    prev = cur;
+  }
+  return prev[lb] <= allow;
+}
+// Does this word (or a one-typo version of it) appear in the text, as a meaning word or as any word at all?
+function pbSeenIn(w, text) {
+  var stems = pbMeaning(text), raws = pbWordsOf(text);
+  return stems.some(function(h) { return pbNear(w, h); }) || raws.some(function(h) { return pbNear(w, h); });
+}
 function pbMeaning(t) {
   var out = [];
   pbWordsOf(t).forEach(function(w) { if (PB_SMALL.indexOf(w) === -1) out.push(pbStem(w)); });
@@ -9798,8 +10042,7 @@ function pbInDraft(sp, lines) {
   var all = pbWordsOf(sp.text).join(' ');
   function hits(text) {
     if (!want.length) return pbWordsOf(text).join(' ').indexOf(all) !== -1 ? 1 : 0;
-    var have = pbMeaning(text);
-    return want.filter(function(w) { return have.indexOf(w) !== -1; }).length / want.length;
+    return want.filter(function(w) { return pbSeenIn(w, text); }).length / want.length;   // a typo in the remembered line is not a missing line
   }
   var k;
   for (k = 0; k < spoken.length; k++) { if (hits(lines[spoken[k]].dialogue) >= 0.7) return spoken[k]; }
@@ -10131,7 +10374,7 @@ function pbLoadDraftIntoTool(parsed, inserted) {
   var note = el('pb-handoff-note');
   if (note) {
     note.textContent = inserted.length
-      ? 'I added ' + (inserted.length === 1 ? 'one line' : inserted.length + ' lines') + ' you told me about that the draft had left out.'
+      ? 'I added ' + (inserted.length === 1 ? 'one line' : inserted.length + ' lines') + ' you told me about that the draft had left out: ' + inserted.map(function(ix) { var l = parsed.lines[ix]; return '"' + String((l && l.dialogue) || '').trim() + '"'; }).join(' ')
       : '';
     note.style.display = inserted.length ? 'block' : 'none';
   }

@@ -87,9 +87,24 @@ service cloud.firestore {
 
     // Scripts, intake answers and story answers: owner only. The joint analysis and the Step 3 conversation
     // run on the server, so a partner's browser never needs to read this.
+    //
+    // THE SUBMIT LOCK. Once a script is marked submitted, its owner can no longer change the lines, the scene or any
+    // other content field, cannot clear the submitted mark, and cannot delete it. The only writes still allowed are the
+    // after-submit answers (the six questions and "What I mean is"), which are asked after Submit. The server bypasses
+    // these rules, so the analysis, the admin test tools and the couple functions are not affected. Couples' scripts
+    // are never marked submitted, so they stay editable as before.
     match /scripts/{uid} {
+      function scriptIsSubmitted() { return resource.data.get('submitted', false) in [true, 'true']; }
+      function afterSubmitFields() {
+        return ['stopBelief', 'partnerStopGuess', 'oneThingToSay', 'triggerLine', 'whatIMean',
+                'storyThinking', 'storyFeeling', 'privateStory', 'storySent', 'handoffSeen'];
+      }
       allow read: if signedIn() && (ownsDoc(uid) || isCoach());
-      allow write: if signedIn() && ownsDoc(uid);
+      allow create: if signedIn() && ownsDoc(uid);
+      allow update: if signedIn() && ownsDoc(uid)
+        && (!scriptIsSubmitted()
+            || request.resource.data.diff(resource.data).affectedKeys().hasOnly(afterSubmitFields()));
+      allow delete: if signedIn() && ownsDoc(uid) && !scriptIsSubmitted();
     }
 
     // The shared copy of a script (the lines, the scene, the name of the fight and the names, nothing else).
