@@ -30,7 +30,7 @@ exports.handler = async function(event) {
     const u = res.usage || {};
     const checks = core.analyze(res.text, ctx);
     await admin.setFields('draftTests/' + runId + '_' + caseId, Object.assign({}, base, {
-      status: 'done', draft: res.text, checks: JSON.stringify(checks),
+      status: 'done', draft: res.text, raw: res.raw || '', stopReason: res.stopReason || '', checks: JSON.stringify(checks),
       inTok: u.input_tokens || 0, outTok: u.output_tokens || 0, cacheRead: u.cache_read_input_tokens || 0, cacheWrite: u.cache_creation_input_tokens || 0,
       cost: core.costOf(setup.model, u), seconds: res.seconds
     }));

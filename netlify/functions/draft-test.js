@@ -52,7 +52,7 @@ exports.handler = async function(event) {
       const out = cases.map(function(c) {
         const d = mine[c.caseId];
         if (!d) return { caseId: c.caseId, story: c.story, letter: c.letter, run: c.run, status: 'pending' };
-        return { caseId: c.caseId, story: c.story, letter: c.letter, run: c.run, status: d.status, error: d.error || '', draft: d.draft || '', checks: d.checks ? JSON.parse(d.checks) : null,
+        return { caseId: c.caseId, story: c.story, letter: c.letter, run: c.run, status: d.status, error: d.error || '', draft: d.draft || '', raw: d.raw || '', stopReason: d.stopReason || '', checks: d.checks ? JSON.parse(d.checks) : null,
           tokens: { input: num(d.inTok), output: num(d.outTok), cacheRead: num(d.cacheRead), cacheWrite: num(d.cacheWrite) }, cost: num(d.cost), seconds: num(d.seconds) };
       });
       return reply(CORS, 200, { runId: runId, results: out, done: out.filter(function(x) { return x.status === 'done' || x.status === 'error'; }).length, total: out.length });

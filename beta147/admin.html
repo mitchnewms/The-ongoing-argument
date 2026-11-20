@@ -308,6 +308,23 @@ function dtChecks(x) {
     '<li><b>Length:</b> ' + c.lines + ' spoken lines, ' + c.directions + ' stage directions</li>' +
     '<li><b>Cost and time:</b> ' + usd(x.cost) + ', ' + x.seconds + ' seconds (tokens in ' + x.tokens.input + ', cached read ' + x.tokens.cacheRead + ', cached write ' + x.tokens.cacheWrite + ', out ' + x.tokens.output + ')</li></ul>';
 }
+// The draft, and always the raw response when the checker could not read a spoken line (or there is no text at all).
+function dtShape(r) {
+  var blocks = []; try { blocks = r.raw ? JSON.parse(r.raw) : []; } catch (e) { blocks = []; }
+  if (!r.raw) return 'This run saved only the first block of the response, not the raw response. ' + r.tokens.output + ' output tokens were written.';
+  return 'Response blocks: ' + (blocks.length ? blocks.map(function(b) { var n = (b.text || b.thinking || '').length; return esc(b.type) + ' (' + n + ' characters)'; }).join(', ') : 'none') + '. Stop reason: ' + esc(r.stopReason || 'not given') + '. ' + r.tokens.output + ' output tokens.';
+}
+function dtDraft(r) {
+  var html = r.draft && r.draft.trim() ? '<pre class="dt-pre">' + esc(r.draft) + '</pre>' : '<p class="err">No script text came back in the text of this draft.</p>';
+  var unreadable = !r.checks || !r.checks.lines;
+  html += '<p class="fine">' + dtShape(r) + '</p>';
+  if (unreadable) {
+    var blocks = []; try { blocks = r.raw ? JSON.parse(r.raw) : []; } catch (e) { blocks = []; }
+    html += '<p class="err">The checker could not read any spoken lines in this draft, so its checks say 0. Here is everything that came back, as it came:</p>' +
+      '<pre class="dt-pre">' + (blocks.length ? blocks.map(function(b) { return esc('[' + b.type + ']\n' + (b.text || b.thinking || JSON.stringify(b))); }).join('\n\n') : esc(r.raw ? r.raw : '(nothing was saved besides the text above)')) + '</pre>';
+  }
+  return html;
+}
 function dtRender() {
   var out = '';
   ['R', 'M', 'T'].forEach(function(st) {
@@ -321,7 +338,7 @@ function dtRender() {
         var c = dt.cases.filter(function(k) { return k.story === st && k.letter === L && k.run === run; })[0]; if (!c) return;
         var r = dt.results[c.caseId] || { status: 'pending' };
         out += '<div class="dt-draft"><div class="dt-h"><b>Draft ' + L + ', run ' + run + '</b> <span class="fine">(' + esc(st) + ')</span></div>';
-        if (r.status === 'done') out += '<pre class="dt-pre">' + esc(r.draft) + '</pre>' + dtChecks(r);
+        if (r.status === 'done') out += dtDraft(r) + dtChecks(r);
         else if (r.status === 'error') out += '<p class="err">This draft failed: ' + esc(r.error) + '</p>';
         else out += '<p class="fine">Not done yet.</p>';
         out += '</div>';

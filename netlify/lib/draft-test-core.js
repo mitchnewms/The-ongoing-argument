@@ -356,7 +356,15 @@ async function callModel(setup, instruction, apiKey) {
     try { r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body: body }); }
     catch (e) { last = { error: 'could not reach the AI service: ' + e.message }; await new Promise(function(res) { setTimeout(res, 2000 * (attempt + 1)); }); continue; }
     const seconds = Math.round((Date.now() - t0) / 100) / 10;
-    if (r.ok) { const d = await r.json(); return { text: (d.content && d.content[0] && d.content[0].text) || '', usage: d.usage || {}, seconds: seconds }; }
+    if (r.ok) {
+      const d = await r.json();
+      // A newer model may send several blocks (for example a thinking block first, then the text). The draft is ALL the text blocks,
+      // not just the first block. The raw blocks are kept so nothing is ever hidden.
+      const blocks = Array.isArray(d.content) ? d.content : [];
+      const text = blocks.filter(function(b) { return b && b.type === 'text' && typeof b.text === 'string'; }).map(function(b) { return b.text; }).join('');
+      const raw = JSON.stringify(blocks.map(function(b) { const o = { type: b && b.type }; Object.keys(b || {}).forEach(function(k) { if (typeof b[k] === 'string' && k !== 'signature' && k !== 'type') o[k] = b[k].slice(0, 60000); }); return o; })).slice(0, 300000);
+      return { text: text, raw: raw, stopReason: d.stop_reason || '', usage: d.usage || {}, seconds: seconds };
+    }
     const errText = await r.text().catch(function() { return ''; });
     last = { error: 'the AI service said ' + r.status + ': ' + errText.slice(0, 300), status: r.status };
     if (r.status === 429 || r.status >= 500) { await new Promise(function(res) { setTimeout(res, 4000 * (attempt + 1)); }); continue; }
