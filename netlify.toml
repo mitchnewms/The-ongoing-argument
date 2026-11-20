@@ -13,6 +13,13 @@
 [functions."couple"]
   included_files = ["netlify/functions/ai-prompt.txt"]
 
+# TEMPORARY draft model test (admin only). Delete these two entries with the test.
+[functions."draft-test"]
+  included_files = ["netlify/functions/ai-prompt.txt"]
+
+[functions."draft-test-background"]
+  included_files = ["netlify/functions/ai-prompt.txt"]
+
 # Prevent browsers from serving stale cached HTML after a deploy.
 # index.html must always be re-fetched; only the file itself is affected.
 [[headers]]
