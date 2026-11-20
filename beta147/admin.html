@@ -21,6 +21,10 @@
   .btn { padding:12px 16px; background:#E06500; color:#fff; border:none; border-radius:3px; font-family:inherit; font-size:0.95rem; cursor:pointer; min-height:46px; margin:4px 8px 4px 0; }
   .btn.alt { background:#fff; color:#111; border:1px solid #CFC9BF; }
   .err { color:#B3261E; }
+.dt-pre { white-space: pre-wrap; background: #FBFAF7; border: 1px solid #E2DED8; border-radius: 6px; padding: 12px; font-family: ui-monospace, Menlo, monospace; font-size: 0.82rem; line-height: 1.45; }
+.dt-draft { border-top: 2px solid #E2DED8; margin-top: 18px; padding-top: 10px; }
+.dt-checks { margin: 8px 0 0 18px; padding: 0; font-size: 0.85rem; line-height: 1.5; }
+.dt-avg { border-collapse: collapse; } .dt-avg th, .dt-avg td { padding: 6px 12px; border-bottom: 1px solid #E2DED8; text-align: left; }
 </style>
 </head>
 <body>
@@ -94,6 +98,17 @@
       <div class="scroll"><table id="tt-table"></table></div>
     </div>
     <!-- END TEST TOOLS -->
+    <!-- DRAFT MODEL TEST. TEMPORARY. REMOVE with netlify/functions/draft-test.js, draft-test-background.js, netlify/lib/draft-test-core.js and the two netlify.toml entries -->
+    <div class="card" id="dt-card">
+      <h2>Draft model test (temporary)</h2>
+      <p class="fine">Writes 30 drafts (3 stories, 5 setups, 2 runs each) and shows them side by side with plain factual checks. The setups are labelled with letters. Tap "Reveal key" at the bottom only after you have judged. It uses the AI and costs real money (roughly a few dollars) and takes several minutes. It never touches any account.</p>
+      <button class="btn" id="dt-run" type="button">Run the draft test</button>
+      <button class="btn alt" id="dt-last" type="button">Load the last run</button>
+      <p id="dt-msg" role="status"></p>
+      <div id="dt-out"></div>
+      <details id="dt-keybox" style="margin-top:18px"><summary><b>Reveal key</b></summary><div id="dt-key" class="fine">Loading the key only when you open this.</div></details>
+    </div>
+    <!-- END DRAFT MODEL TEST -->
     <button class="btn alt" id="out" type="button">Sign out</button>
   </div>
 </div>
@@ -231,6 +246,114 @@ $('tt-scene').onclick = function() {
     .catch(function(e) { $('tt-msg').className = 'err'; $('tt-msg').textContent = e.message; });
 };
 // END TEST TOOLS
+
+// DRAFT MODEL TEST. TEMPORARY.
+var dt = { runId: '', cases: [], stories: {}, results: {}, launched: {}, timer: null, running: false };
+function dtApi(body) {
+  return fetch('/.netlify/functions/draft-test', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) })
+    .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'Something went wrong.'); return d; }); });
+}
+function dtLaunch(caseId) {
+  dt.launched[caseId] = true;
+  fetch('/.netlify/functions/draft-test-background', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ runId: dt.runId, caseId: caseId }) })
+    .then(function(r) { if (!(r.status >= 200 && r.status < 300)) { dt.launched[caseId] = 'failed'; } }).catch(function() { dt.launched[caseId] = 'failed'; });
+}
+function dtTick() {
+  if (!dt.runId) return Promise.resolve();
+  return dtApi({ action: 'results', runId: dt.runId }).then(function(d) {
+    dt.results = {}; d.results.forEach(function(x) { dt.results[x.caseId] = x; });
+    var inflight = 0; dt.cases.forEach(function(c) { var r = dt.results[c.caseId]; if (dt.launched[c.caseId] === true && (!r || r.status === 'pending')) inflight++; });
+    var waiting = dt.cases.filter(function(c) { var r = dt.results[c.caseId]; return (!r || r.status === 'pending') && dt.launched[c.caseId] !== true; });
+    if (dt.running) waiting.forEach(function(c) { if (inflight < 3) { dtLaunch(c.caseId); inflight++; } });
+    $('dt-msg').textContent = d.done + ' of ' + d.total + ' drafts done.' + (d.done < d.total && dt.running ? ' Working. You can leave this page open.' : '');
+    dtRender();
+    if (d.done >= d.total) { dtStop(); $('dt-msg').textContent = 'All ' + d.total + ' drafts are done.'; }
+  }).catch(function(e) { $('dt-msg').className = 'err'; $('dt-msg').textContent = e.message; });
+}
+function dtStop() { dt.running = false; if (dt.timer) { clearInterval(dt.timer); dt.timer = null; } $('dt-run').disabled = false; }
+function dtBegin(resume) { dt.running = true; $('dt-run').disabled = true; if (dt.timer) clearInterval(dt.timer); dtTick(); dt.timer = setInterval(dtTick, 4000); }
+$('dt-run').onclick = function() {
+  if (!confirm('This runs 30 real AI drafts and costs real money. Start?')) return;
+  $('dt-msg').className = ''; $('dt-msg').textContent = 'Starting…'; $('dt-out').innerHTML = ''; $('dt-key').textContent = 'Loading the key only when you open this.'; $('dt-keybox').open = false;
+  $('dt-run').disabled = true;
+  dtApi({ action: 'start' }).then(function(d) {
+    dt = { runId: d.runId, cases: d.cases, stories: d.stories, results: {}, launched: {}, timer: null, running: false };
+    try { localStorage.setItem('dtRun', JSON.stringify({ runId: d.runId, cases: d.cases, stories: d.stories })); } catch (e) {}
+    if (!d.masterLoaded) $('dt-msg').textContent = 'Warning: the master prompt did not load on the server. ';
+    dtRender(); dtBegin();
+  }).catch(function(e) { $('dt-msg').className = 'err'; $('dt-msg').textContent = e.message; $('dt-run').disabled = false; });
+};
+$('dt-last').onclick = function() {
+  var saved = null; try { saved = JSON.parse(localStorage.getItem('dtRun') || 'null'); } catch (e) {}
+  if (!saved) { $('dt-msg').className = 'err'; $('dt-msg').textContent = 'No earlier run is saved in this browser.'; return; }
+  dt = { runId: saved.runId, cases: saved.cases, stories: saved.stories, results: {}, launched: {}, timer: null, running: false };
+  $('dt-msg').className = ''; $('dt-msg').textContent = 'Loading…'; dtRender();
+  dtTick().then(function() {
+    // Opening an old run only shows it. If some drafts were never started (the page was closed), it offers to start them.
+    var never = dt.cases.filter(function(c) { var r = dt.results[c.caseId]; return !r || r.status === 'pending'; }).length;
+    if (never && confirm(never + ' drafts were not finished. Start them now? This uses the AI and costs money.')) dtBegin();
+  });
+};
+function dtLines(a) { return a && a.length ? a : []; }
+function dtChecks(x) {
+  var c = x.checks; if (!c) return '';
+  function own(o) { return esc(o.name) + ': ' + o.found + ' of ' + o.of + (o.missing && o.missing.length ? ' (not word for word: ' + o.missing.map(function(m) { return '“' + esc(m) + '”'; }).join(', ') + ')' : ''); }
+  function tone(t) { return esc(t.name) + ': ' + (t.ok === null ? 'not checked' : (t.ok ? 'yes' : 'no')) + ', ' + esc(t.why); }
+  var od = c.overdrive || {};
+  return '<ul class="dt-checks">' +
+    '<li><b>The person’s own lines, word for word:</b> ' + own(c.ownA) + '; ' + own(c.ownB) + '</li>' +
+    '<li><b>Tone moves from start to end energy:</b> ' + tone(c.toneA) + '; ' + tone(c.toneB) + '</li>' +
+    '<li><b>Overdrive moment' + (od.given ? ' (“' + esc(od.given) + '”)' : '') + ':</b> ' + esc(od.where || '') + (od.stageDirection ? '. Stage direction: “' + esc(od.stageDirection) + '”' : '') + '</li>' +
+    '<li><b>Not found in the story or answers (word match, a flag is a thing to look at):</b> ' + (c.notInStory && c.notInStory.length ? '<br>' + c.notInStory.map(esc).join('<br>') : 'none') + '</li>' +
+    '<li><b>Length:</b> ' + c.lines + ' spoken lines, ' + c.directions + ' stage directions</li>' +
+    '<li><b>Cost and time:</b> ' + usd(x.cost) + ', ' + x.seconds + ' seconds (tokens in ' + x.tokens.input + ', cached read ' + x.tokens.cacheRead + ', cached write ' + x.tokens.cacheWrite + ', out ' + x.tokens.output + ')</li></ul>';
+}
+function dtRender() {
+  var out = '';
+  ['R', 'M', 'T'].forEach(function(st) {
+    var info = dt.stories[st] || {};
+    out += '<h3 style="margin-top:26px">' + esc(info.title || st) + '</h3>';
+    if (info.error) out += '<p class="err">' + esc(info.error) + '</p>';
+    out += '<details><summary class="fine">The story and answers this story uses' + (info.source ? ' (' + esc(info.source) + ')' : '') + '</summary><p class="fine"><b>Story</b><br>' + esc(info.story || '') + '</p>' +
+      (info.answers ? '<pre class="dt-pre">' + esc(JSON.stringify(info.answers, null, 1)) + '</pre>' : '') + '</details>';
+    ['A', 'B', 'C', 'D', 'E'].forEach(function(L) {
+      [1, 2].forEach(function(run) {
+        var c = dt.cases.filter(function(k) { return k.story === st && k.letter === L && k.run === run; })[0]; if (!c) return;
+        var r = dt.results[c.caseId] || { status: 'pending' };
+        out += '<div class="dt-draft"><div class="dt-h"><b>Draft ' + L + ', run ' + run + '</b> <span class="fine">(' + esc(st) + ')</span></div>';
+        if (r.status === 'done') out += '<pre class="dt-pre">' + esc(r.draft) + '</pre>' + dtChecks(r);
+        else if (r.status === 'error') out += '<p class="err">This draft failed: ' + esc(r.error) + '</p>';
+        else out += '<p class="fine">Not done yet.</p>';
+        out += '</div>';
+      });
+    });
+  });
+  // Averages by letter, at the bottom
+  var rows = ['A', 'B', 'C', 'D', 'E'].map(function(L) {
+    var done = dt.cases.filter(function(k) { return k.letter === L && dt.results[k.caseId] && dt.results[k.caseId].status === 'done'; }).map(function(k) { return dt.results[k.caseId]; });
+    if (!done.length) return '<tr><td>' + L + '</td><td class="n">0</td><td class="n">none</td><td class="n">none</td></tr>';
+    var cost = done.reduce(function(a, x) { return a + x.cost; }, 0) / done.length, sec = done.reduce(function(a, x) { return a + x.seconds; }, 0) / done.length;
+    return '<tr><td>' + L + '</td><td class="n">' + done.length + '</td><td class="n">' + usd(cost) + '</td><td class="n">' + sec.toFixed(1) + ' s</td></tr>';
+  }).join('');
+  out += '<h3 style="margin-top:30px">Average cost and time, by letter</h3><table class="dt-avg"><tr><th>Setup</th><th class="n">Drafts done</th><th class="n">Average cost</th><th class="n">Average time</th></tr>' + rows + '</table>';
+  $('dt-out').innerHTML = out;
+}
+$('dt-keybox').addEventListener('toggle', function() {
+  if (!$('dt-keybox').open || !dt.runId) return;
+  dtApi({ action: 'key', runId: dt.runId }).then(function(d) {
+    var html = '<table class="dt-avg"><tr><th>Letter</th><th>Setup</th><th class="n">Drafts done</th><th class="n">Average cost</th><th class="n">Average time</th></tr>';
+    ['A', 'B', 'C', 'D', 'E'].forEach(function(L) {
+      var sid = d.key[L], su = d.setups[sid];
+      var done = dt.cases.filter(function(k) { return k.letter === L && dt.results[k.caseId] && dt.results[k.caseId].status === 'done'; }).map(function(k) { return dt.results[k.caseId]; });
+      var cost = done.length ? usd(done.reduce(function(a, x) { return a + x.cost; }, 0) / done.length) : 'none', sec = done.length ? (done.reduce(function(a, x) { return a + x.seconds; }, 0) / done.length).toFixed(1) + ' s' : 'none';
+      html += '<tr><td>' + L + '</td><td>' + esc(su.name) + '</td><td class="n">' + done.length + '</td><td class="n">' + cost + '</td><td class="n">' + sec + '</td></tr>';
+    });
+    html += '</table><p class="fine">Max tokens ' + d.maxTokens + ' for every run, no temperature sent (as on the live site). Prices used for the cost lines (dollars per million tokens): ' +
+      Object.keys(d.setups).map(function(k) { var r = d.setups[k].rate; return d.setups[k].model + ' in ' + r.input + ', out ' + r.output + (r.assumed ? ' (ASSUMED, not checked)' : ''); }).filter(function(v, i, a) { return a.indexOf(v) === i; }).join('; ') + '.</p>';
+    $('dt-key').innerHTML = html;
+  }).catch(function(e) { $('dt-key').textContent = e.message; });
+});
+// END DRAFT MODEL TEST
 
 $('go').onclick = signIn;
 $('pw').onkeydown = function(e) { if (e.key === 'Enter') signIn(); };
